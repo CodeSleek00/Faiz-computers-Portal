@@ -56,59 +56,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     body {
         background-color: #f5f7fa;
         color: #333;
-        line-height: 1.6;
-        padding: 20px;
+        line-height: 1.5;
+        padding: 15px;
     }
     
     h2 {
         color: #2c3e50;
         text-align: center;
-        margin-bottom: 30px;
+        margin: 0 0 15px 0;
         font-weight: 600;
+        font-size: 1.5rem;
     }
     
     form {
-        max-width: 800px;
+        max-width: 700px;
         margin: 0 auto;
         background: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     label {
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 5px;
         font-weight: 500;
         color: #2c3e50;
+        font-size: 0.9rem;
     }
     
     input[type="text"],
     input[type="password"],
     input[type="date"],
     input[type="file"],
-    textarea,
-    select {
+    textarea {
         width: 100%;
-        padding: 12px;
-        margin-bottom: 20px;
+        padding: 10px;
+        margin-bottom: 15px;
         border: 1px solid #ddd;
         border-radius: 4px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-    }
-    
-    input[type="text"]:focus,
-    input[type="password"]:focus,
-    input[type="date"]:focus,
-    textarea:focus,
-    select:focus {
-        border-color: #3498db;
-        outline: none;
+        font-size: 0.95rem;
     }
     
     textarea {
-        min-height: 100px;
+        min-height: 80px;
         resize: vertical;
     }
     
@@ -116,51 +107,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         background-color: #3498db;
         color: white;
         border: none;
-        padding: 14px 28px;
-        font-size: 16px;
+        padding: 12px;
+        font-size: 1rem;
         border-radius: 4px;
         cursor: pointer;
         width: 100%;
         font-weight: 500;
-        transition: background-color 0.3s;
-    }
-    
-    input[type="submit"]:hover {
-        background-color: #2980b9;
+        margin-top: 5px;
     }
     
     p {
         text-align: center;
-        margin: 20px 0;
-        padding: 10px;
+        margin: 10px 0;
+        padding: 8px;
         border-radius: 4px;
+        font-size: 0.9rem;
     }
     
     /* Responsive adjustments */
     @media (min-width: 600px) {
-        form {
-            padding: 40px;
-        }
-        
         .form-row {
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
         }
         
         .form-group {
-            flex: 1 0 calc(50% - 20px);
-            min-width: 0;
-        }
-    }
-    
-    @media (max-width: 599px) {
-        body {
-            padding: 10px;
-        }
-        
-        form {
-            padding: 20px;
+            flex: 1;
         }
     }
 </style>
