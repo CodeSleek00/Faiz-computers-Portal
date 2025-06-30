@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $course = $_POST['course'];
     $address = $_POST['address'];
     $phone_no = $_POST['phone_no'];
+    $aadhar_number = $_POST['aadhar_number'];
     $abc_id = $_POST['abc_id'];
     $birthday = $_POST['birthday'];
 
@@ -17,11 +18,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $target = "uploads/" . basename($photo);
     move_uploaded_file($_FILES['photo']['tmp_name'], $target);
 
-    $sql = "INSERT INTO my_student (first_name, last_name, fathers_name, mothers_name, course, address, phone_no, photo, abc_id, birthday)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO my_student 
+    (first_name, last_name, fathers_name, mothers_name, course, address, phone_no, aadhar_number, photo, abc_id, birthday)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssssss", $first_name, $last_name, $fathers_name, $mothers_name, $course, $address, $phone_no, $photo, $abc_id, $birthday);
+    $stmt->bind_param("sssssssssss", $first_name, $last_name, $fathers_name, $mothers_name, $course, $address, $phone_no, $aadhar_number, $photo, $abc_id, $birthday);
 
     if ($stmt->execute()) {
         echo "<p style='color:green;'>Student added successfully!</p>";
@@ -64,6 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label>Photo:</label><br>
         <input type="file" name="photo" required><br><br>
+
+        <label>Aadhar Number:</label><br>
+        <input type="text" name="aadhar_number" required><br><br>
 
         <label>ABC ID:</label><br>
         <input type="text" name="abc_id"><br><br>
