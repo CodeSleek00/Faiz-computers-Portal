@@ -12,18 +12,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $aadhar_number = $_POST['aadhar_number'];
     $abc_id = $_POST['abc_id'];
     $birthday = $_POST['birthday'];
+    $password_plain = $_POST['password'];
+    $password_hashed = password_hash($password_plain, PASSWORD_DEFAULT);
+
 
     // Photo upload (you can improve this later)
     $photo = $_FILES['photo']['name'];
     $target = "../uploads/" . basename($photo);
     move_uploaded_file($_FILES['photo']['tmp_name'], $target);
 
-        $sql = "INSERT INTO my_student 
-    (first_name, last_name, fathers_name, mothers_name, course, address, phone_no, aadhar_number, photo, abc_id, birthday)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+       $sql = "INSERT INTO my_student 
+        (first_name, last_name, fathers_name, mothers_name, course, address, phone_no, aadhar_number, photo, abc_id, birthday, password)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssssss", $first_name, $last_name, $fathers_name, $mothers_name, $course, $address, $phone_no, $aadhar_number, $photo, $abc_id, $birthday);
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssssssssssss", $first_name, $last_name, $fathers_name, $mothers_name, $course, $address, $phone_no, $aadhar_number, $photo, $abc_id, $birthday, $password_hashed);
 
     if ($stmt->execute()) {
         echo "<p style='color:green;'>Student added successfully!</p>";
@@ -75,6 +78,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label>Birthday:</label><br>
         <input type="date" name="birthday"><br><br>
+
+        <label>Password:</label><br>
+        <input type="password" name="password" required><br><br>
 
         <input type="submit" value="Add Student">
     </form>
