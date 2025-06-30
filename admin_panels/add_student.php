@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Photo upload (you can improve this later)
     $photo = $_FILES['photo']['name'];
-    $target = "uploads/" . basename($photo);
+    $target = "../uploads/" . basename($photo);
     move_uploaded_file($_FILES['photo']['tmp_name'], $target);
 
         $sql = "INSERT INTO my_student 
