@@ -3,6 +3,7 @@ include '../database_connection/db_connect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name']; 
     $fathers_name = $_POST['fathers_name'];
     $mothers_name = $_POST['mothers_name'];
     $course = $_POST['course'];
@@ -16,11 +17,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $target = "uploads/" . basename($photo);
     move_uploaded_file($_FILES['photo']['tmp_name'], $target);
 
-    $sql = "INSERT INTO my_student (first_name, fathers_name, mothers_name, course, address, phone_no, photo, abc_id, birthday)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO my_student (first_name, last_name, fathers_name, mothers_name, course, address, phone_no, photo, abc_id, birthday)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssss", $first_name, $fathers_name, $mothers_name, $course, $address, $phone_no, $photo, $abc_id, $birthday);
+    $stmt->bind_param("ssssssssss", $first_name, $last_name, $fathers_name, $mothers_name, $course, $address, $phone_no, $photo, $abc_id, $birthday);
 
     if ($stmt->execute()) {
         echo "<p style='color:green;'>Student added successfully!</p>";
@@ -42,6 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form action="" method="POST" enctype="multipart/form-data">
         <label>First Name:</label><br>
         <input type="text" name="first_name" required><br><br>
+
+        <label>Last Name:</label><br>
+        <input type="text" name="last_name" required><br><br>
 
         <label>Father's Name:</label><br>
         <input type="text" name="fathers_name" required><br><br>
