@@ -31,32 +31,32 @@ $result = $stmt->get_result();
 ?>
 
 <table>
-    <tr>
-        <th>ID</th>
-        <th>Photo</th>
-        <th>Name</th>
-        <th>Course</th>
-        <th>Phone</th>
-        <th>Aadhar</th>
-        <th>Actions</th>
-    </tr>
-    <?php if ($result->num_rows > 0): ?>
-        <?php while($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?= $row['student_id'] ?></td>
-                <td><img src="../uploads/<?= $row['photo'] ?>" alt="Student"></td>
-                <td><?= $row['first_name'] . ' ' . $row['last_name'] ?></td>
-                <td><?= $row['course'] ?></td>
-                <td><?= $row['phone_no'] ?></td>
-                <td><?= $row['aadhar_number'] ?></td>
-                <td class="actions">
-                    <a href="student_detail.php?id=<?= $row['student_id'] ?>">View</a>
-                    <a href="edit_student.php?id=<?= $row['student_id'] ?>">Edit</a>
-                    <a href="delete_student.php?id=<?= $row['student_id'] ?>" onclick="return confirm('Are you sure?')">Delete</a>
-                </td>
-            </tr>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <tr><td colspan="7">No matching students found.</td></tr>
-    <?php endif; ?>
+  <tr>
+    <th>ID</th>
+    <th>Photo</th>
+    <th>Name</th>
+    <th>Course</th>
+    <th>Phone</th>
+    <th>Aadhar</th>
+    <th>Actions</th>
+  </tr>
+  <?php if ($result->num_rows > 0): ?>
+    <?php while($row = $result->fetch_assoc()): ?>
+      <tr>
+        <td><?= $row['student_id'] ?></td>
+        <td><img src="../uploads/<?= $row['photo'] ?>" class="photo" alt="Student Photo"></td>
+        <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
+        <td><?= htmlspecialchars($row['course']) ?></td>
+        <td><?= htmlspecialchars($row['phone_no']) ?></td>
+        <td><?= htmlspecialchars($row['aadhar_number']) ?></td>
+        <td class="actions">
+          <a href="student_detail.php?id=<?= $row['student_id'] ?>" class="view">View</a>
+          <a href="edit_student.php?id=<?= $row['student_id'] ?>" class="edit">Edit</a>
+          <a href="delete_student.php?id=<?= $row['student_id'] ?>" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+      </tr>
+    <?php endwhile; ?>
+  <?php else: ?>
+    <tr><td colspan="7">No students found.</td></tr>
+  <?php endif; ?>
 </table>
