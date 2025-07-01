@@ -105,15 +105,10 @@ $row = $result->fetch_assoc();
     <h2><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></h2>
 
     <div class="info">
-      <p><strong>Father's Name:</strong> <?= htmlspecialchars($row['fathers_name']) ?></p>
-      <p><strong>Mother's Name:</strong> <?= htmlspecialchars($row['mothers_name']) ?></p>
       <p><strong>Course:</strong> <?= htmlspecialchars($row['course']) ?></p>
       <p><strong>Address:</strong> <?= htmlspecialchars($row['address']) ?></p>
       <p><strong>Phone:</strong> <?= htmlspecialchars($row['phone_no']) ?></p>
-      <p><strong>Aadhar Number:</strong> <?= htmlspecialchars($row['aadhar_number']) ?></p>
-      <p><strong>Birthday:</strong> <?= htmlspecialchars($row['birthday']) ?></p>
-      <p><strong>ABC ID:</strong> <?= htmlspecialchars($row['abc_id']) ?></p>
-    </div>
+      </div>
 
     <div style="text-align:center;">
       <a class="edit-link" href="edit_student.php?id=<?= $row['student_id'] ?>">✏️ Edit This Student</a>

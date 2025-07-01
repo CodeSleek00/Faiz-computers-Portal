@@ -149,12 +149,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label>Last Name:</label><br>
         <input type="text" name="last_name" value="<?= $row['last_name'] ?>" required><br><br>
 
-        <label>Father's Name:</label><br>
-        <input type="text" name="fathers_name" value="<?= $row['fathers_name'] ?>" required><br><br>
-
-        <label>Mother's Name:</label><br>
-        <input type="text" name="mothers_name" value="<?= $row['mothers_name'] ?>" required><br><br>
-
         <label>Course:</label><br>
         <input type="text" name="course" value="<?= $row['course'] ?>" required><br><br>
 
@@ -163,15 +157,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label>Phone No:</label><br>
         <input type="text" name="phone_no" value="<?= $row['phone_no'] ?>" required><br><br>
-
-        <label>Aadhar Number:</label><br>
-        <input type="text" name="aadhar_number" value="<?= $row['aadhar_number'] ?>" required><br><br>
-
-        <label>ABC ID:</label><br>
-        <input type="text" name="abc_id" value="<?= $row['abc_id'] ?>"><br><br>
-
-        <label>Birthday:</label><br>
-        <input type="date" name="birthday" value="<?= $row['birthday'] ?>"><br><br>
 
         <label>Change Photo (optional):</label><br>
         <input type="file" name="photo"><br>

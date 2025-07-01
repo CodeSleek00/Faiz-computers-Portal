@@ -167,11 +167,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group">
-                    <label>Father's Name:</label>
-                    <input type="text" name="fathers_name" required>
-                </div>
-
-                <div class="form-group">
                     <label>Course:</label>
                     <input type="text" name="course" required>
                 </div>
@@ -179,11 +174,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="form-group">
                     <label>Phone No:</label>
                     <input type="text" name="phone_no" required>
-                </div>
-
-                <div class="form-group">
-                    <label>ABC ID:</label>
-                    <input type="text" name="abc_id">
                 </div>
 
                 <div class="form-group">
@@ -199,24 +189,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group">
-                    <label>Mother's Name:</label>
-                    <input type="text" name="mothers_name" required>
-                </div>
-
-                <div class="form-group">
                     <label>Address:</label>
                     <textarea name="address" required></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label>Aadhar Number:</label>
-                    <input type="text" name="aadhar_number" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Birthday:</label>
-                    <input type="date" name="birthday">
-                </div>
 
                 <div class="form-group">
                     <label>Photo:</label>

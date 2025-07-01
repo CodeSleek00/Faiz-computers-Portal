@@ -37,7 +37,7 @@ $result = $stmt->get_result();
     <th>Name</th>
     <th>Course</th>
     <th>Phone</th>
-    <th>Aadhar</th>
+    <th>Address</th>
     <th>Actions</th>
   </tr>
   <?php if ($result->num_rows > 0): ?>
@@ -48,7 +48,7 @@ $result = $stmt->get_result();
         <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
         <td><?= htmlspecialchars($row['course']) ?></td>
         <td><?= htmlspecialchars($row['phone_no']) ?></td>
-        <td><?= htmlspecialchars($row['aadhar_number']) ?></td>
+        <td><?= htmlspecialchars($row['address']) ?></td>
         <td class="actions">
           <a href="student_detail.php?id=<?= $row['student_id'] ?>" class="view">View</a>
           <a href="edit_student.php?id=<?= $row['student_id'] ?>" class="edit">Edit</a>
