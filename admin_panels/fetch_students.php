@@ -10,7 +10,6 @@ $sql = "SELECT * FROM my_student WHERE
     (student_id LIKE ? OR 
      first_name LIKE ? OR 
      last_name LIKE ? OR 
-     aadhar_number LIKE ? OR 
      phone_no LIKE ? OR 
      course LIKE ?)";
 
