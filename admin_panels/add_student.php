@@ -4,14 +4,9 @@ include '../database_connection/db_connect.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name']; 
-    $fathers_name = $_POST['fathers_name'];
-    $mothers_name = $_POST['mothers_name'];
     $course = $_POST['course'];
     $address = $_POST['address'];
     $phone_no = $_POST['phone_no'];
-    $aadhar_number = $_POST['aadhar_number'];
-    $abc_id = $_POST['abc_id'];
-    $birthday = $_POST['birthday'];
     $password_plain = $_POST['password'];
     $password_hashed = password_hash($password_plain, PASSWORD_DEFAULT);
 
@@ -20,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     move_uploaded_file($_FILES['photo']['tmp_name'], $target);
 
     $sql = "INSERT INTO my_student 
-        (first_name, last_name, fathers_name, mothers_name, course, address, phone_no, aadhar_number, photo, abc_id, birthday, password)
+        (first_name, last_name, course, address, phone_no, photo, password)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
