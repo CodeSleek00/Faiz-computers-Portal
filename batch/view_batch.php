@@ -148,7 +148,7 @@ if ($batches->num_rows > 0) {
             </div>
             <div class="action-buttons">
                 <a class="edit-btn" href="edit_batch.php?id=<?= $batch['batch_id'] ?>">✏️ Edit</a>
-                <a class="view-btn" href="view_batch.php?id=<?= $batch['batch_id'] ?>">👁 View</a>
+                <a class="view-btn" href="view_batches.php?id=<?= $batch['batch_id'] ?>">👁 View</a>
                 <a class="delete-btn" href="delete_batch.php?id=<?= $batch['batch_id'] ?>" onclick="return confirm('Are you sure to delete this batch?')">🗑 Delete</a>
             </div>
         </div>
