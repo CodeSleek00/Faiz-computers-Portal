@@ -1,5 +1,5 @@
 <?php
-include 'db_connect.php';
+include '../database_connection/db_connect.php';
 $id = $_GET['id'];
 
 // Delete record

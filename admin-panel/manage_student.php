@@ -1,5 +1,5 @@
 <?php
-include 'db_connect.php';
+include '../database_connection/db_connect.php';
 
 // Fetch all students
 $result = $conn->query("SELECT * FROM students");
