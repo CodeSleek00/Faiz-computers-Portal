@@ -8,6 +8,7 @@ if (isset($_GET['search'])) {
     $sql = "SELECT * FROM students WHERE 
             name LIKE ? OR 
             contact_number LIKE ? OR 
+            course LIKE ? OR
             enrollment_id LIKE ?";
     $stmt = $conn->prepare($sql);
     $searchTerm = "%$search%";
@@ -205,7 +206,7 @@ if (isset($_GET['search'])) {
     
     <div class="controls">
         <form method="GET" action="">
-            <input type="text" name="search" placeholder="Search by name, contact or enrollment ID" value="<?= htmlspecialchars($search) ?>">
+            <input type="text" name="search" placeholder="Search by name, contact or enrollment ID , Course " value="<?= htmlspecialchars($search) ?>">
             <button type="submit">Search</button>
             <?php if (!empty($search)): ?>
                 <a href="?" class="btn reset-btn">Reset</a>
