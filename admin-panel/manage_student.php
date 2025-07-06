@@ -1,15 +1,51 @@
 <?php
 include '../database_connection/db_connect.php';
 
-// Fetch all students
-$result = $conn->query("SELECT * FROM students");
+// Search functionality
+$search = '';
+if (isset($_GET['search'])) {
+    $search = $_GET['search'];
+    $sql = "SELECT * FROM students WHERE 
+            name LIKE ? OR 
+            contact_number LIKE ? OR 
+            enrollment_id LIKE ?";
+    $stmt = $conn->prepare($sql);
+    $searchTerm = "%$search%";
+    $stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = $conn->query("SELECT * FROM students");
+}
+
+// Filter by month from enrollment ID
+$monthFilter = '';
+if (isset($_GET['month_filter']) && !empty($_GET['month_filter'])) {
+    $monthFilter = $_GET['month_filter'];
+    $monthPattern = substr($monthFilter, 0, 2); // Assuming month is first two digits
+    
+    if (isset($search) && !empty($search)) {
+        $sql .= " AND enrollment_id LIKE ?";
+        $monthTerm = "$monthPattern%";
+        $stmt = $conn->prepare($sql);
+        $searchTerm = "%$search%";
+        $stmt->bind_param("ssss", $searchTerm, $searchTerm, $searchTerm, $monthTerm);
+    } else {
+        $sql = "SELECT * FROM students WHERE enrollment_id LIKE ?";
+        $monthTerm = "$monthPattern%";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $monthTerm);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Manage Students</title>
-   <style>
+    <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
     
     body {
@@ -24,6 +60,47 @@ $result = $conn->query("SELECT * FROM students");
         font-weight: 600;
         color: #222;
         margin-bottom: 1.5rem;
+    }
+    
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .search-container {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .filter-container {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    input[type="text"], select {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    button {
+        padding: 0.5rem 1rem;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        transition: background-color 0.2s;
+    }
+    
+    button:hover {
+        background-color: #45a049;
     }
     
     table {
@@ -54,12 +131,18 @@ $result = $conn->query("SELECT * FROM students");
         background-color: #f9f9f9;
     }
     
-    img {
+    .student-photo {
         width: 40px;
         height: 40px;
         object-fit: cover;
         border-radius: 50%;
         border: 1px solid #eee;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .student-photo:hover {
+        transform: scale(1.1);
     }
     
     .btn {
@@ -99,10 +182,100 @@ $result = $conn->query("SELECT * FROM students");
     .actions-cell {
         white-space: nowrap;
     }
+    
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        position: relative;
+    }
+    
+    .modal-img {
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 4px;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: #aaa;
+        cursor: pointer;
+    }
+    
+    .close-modal:hover {
+        color: #333;
+    }
+    
+    .reset-btn {
+        background-color: #f44336;
+    }
+    
+    .reset-btn:hover {
+        background-color: #d32f2f;
+    }
 </style>
 </head>
 <body>
     <h2>All Students</h2>
+    
+    <div class="controls">
+        <div class="search-container">
+            <form method="GET" action="">
+                <input type="text" name="search" placeholder="Search by name, contact or enrollment ID" value="<?= htmlspecialchars($search) ?>">
+                <button type="submit">Search</button>
+                <?php if (!empty($search)): ?>
+                    <a href="?" class="btn reset-btn">Reset</a>
+                <?php endif; ?>
+            </form>
+        </div>
+        
+        <div class="filter-container">
+            <form method="GET" action="">
+                <select name="month_filter">
+                    <option value="">Filter by enrollment month</option>
+                    <?php 
+                    $months = [
+                        '01' => 'January', '02' => 'February', '03' => 'March', 
+                        '04' => 'April', '05' => 'May', '06' => 'June',
+                        '07' => 'July', '08' => 'August', '09' => 'September',
+                        '10' => 'October', '11' => 'November', '12' => 'December'
+                    ];
+                    
+                    foreach ($months as $num => $name) {
+                        $selected = ($monthFilter == $num) ? 'selected' : '';
+                        echo "<option value=\"$num\" $selected>$name</option>";
+                    }
+                    ?>
+                </select>
+                <button type="submit">Filter</button>
+                <?php if (!empty($monthFilter)): ?>
+                    <a href="?" class="btn reset-btn">Reset</a>
+                <?php endif; ?>
+            </form>
+        </div>
+    </div>
+    
     <table>
         <thead>
             <tr>
@@ -116,11 +289,16 @@ $result = $conn->query("SELECT * FROM students");
         <tbody>
         <?php while($row = $result->fetch_assoc()): ?>
             <tr>
-                <td><img src="../uploads/<?= $row['photo'] ?>" alt="photo"></td>
-                <td><?= $row['name'] ?></td>
-                <td><?= $row['contact_number'] ?></td>
-                <td><?= $row['enrollment_id'] ?></td>
                 <td>
+                    <img src="../uploads/<?= htmlspecialchars($row['photo']) ?>" 
+                         alt="Student photo" 
+                         class="student-photo"
+                         onclick="openModal('../uploads/<?= htmlspecialchars($row['photo']) ?>')">
+                </td>
+                <td><?= htmlspecialchars($row['name']) ?></td>
+                <td><?= htmlspecialchars($row['contact_number']) ?></td>
+                <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
+                <td class="actions-cell">
                     <a class="btn view-btn" href="view_student.php?id=<?= $row['student_id'] ?>">View</a>
                     <a class="btn edit-btn" href="edit_student.php?id=<?= $row['student_id'] ?>">Edit</a>
                     <a class="btn delete-btn" href="delete_student.php?id=<?= $row['student_id'] ?>" onclick="return confirm('Are you sure to delete this student?')">Delete</a>
@@ -129,5 +307,40 @@ $result = $conn->query("SELECT * FROM students");
         <?php endwhile; ?>
         </tbody>
     </table>
+    
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <img id="modalImage" class="modal-img" src="" alt="Preview">
+        </div>
+    </div>
+    
+    <script>
+        // Modal functions
+        function openModal(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside the image
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
