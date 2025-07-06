@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['name'];
     $contact = $_POST['contact'];
     $address = $_POST['address'];
+    $course = $_POST['course'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     // Photo upload
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $enrollment_id = generateEnrollmentID($conn);
 
     // Insert into database
-    $stmt = $conn->prepare("INSERT INTO students (photo, name, contact_number, address, enrollment_id, password) VALUES (?, ?, ?, ?, ?, ?)");
+   $stmt = $conn->prepare("INSERT INTO students (photo, name, contact_number, address, enrollment_id, password) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssss", $photo, $name, $contact, $address, $enrollment_id, $password);
     if ($stmt->execute()) {
         echo "<p style='color: green;'>✅ Student added successfully!<br>Enrollment ID: <strong>$enrollment_id</strong></p>";
@@ -175,6 +176,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <label>Address:</label>
             <textarea name="address" required></textarea>
+
+            <label>Course:</label>
+            <input type="text" name="course" required>
 
             <label>Password:</label>
             <input type="password" name="password" required>
