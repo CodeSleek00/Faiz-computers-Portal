@@ -3,7 +3,7 @@ include '../database_connection/db_connect.php';
 
 // Check if ID exists and is valid
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header("Location: manage_students.php?error=invalid_id");
+    header("Location: manage_student.php?error=invalid_id");
     exit();
 }
 
