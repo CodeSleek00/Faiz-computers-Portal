@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt2->execute();
     }
 
-    header("Location: view_batches.php");
+    header("Location: view_batch.php");
     exit;
 }
 
