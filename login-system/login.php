@@ -276,7 +276,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="decoration-circle circle-1"></div>
             <div class="decoration-circle circle-2"></div>
             
-            <img src="https://cdni.iconscout.com/illustration/premium/thumb/student-learning-4551670-3780751.png" alt="Student Learning" class="illustration">
+            <img src="login.webp" alt="Student Learning" class="illustration">
             
             <div class="left-content">
                 <h1>Welcome Back!</h1>
