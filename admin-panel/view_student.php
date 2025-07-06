@@ -1,14 +1,31 @@
 <?php
 include '../database_connection/db_connect.php';
-$id = $_GET['id'];
-$result = $conn->query("SELECT * FROM students WHERE student_id = $id");
+
+// Check if ID exists and is valid
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die("Invalid student ID");
+}
+
+$id = (int)$_GET['id'];
+
+// Prepare statement to prevent SQL injection
+$stmt = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Check if student exists
+if ($result->num_rows === 0) {
+    die("Student not found");
+}
+
 $row = $result->fetch_assoc();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-
     <title>View Student</title>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
@@ -105,15 +122,37 @@ $row = $result->fetch_assoc();
             margin-bottom: 0.3rem;
         }
     }
-</style>
+    </style>
 </head>
 <body>
-    <h2>Student Details</h2>
-    <img src="uploads/<?= $row['photo'] ?>" width="120"><br><br>
-    <strong>Name:</strong> <?= $row['name'] ?><br>
-    <strong>Contact:</strong> <?= $row['contact_number'] ?><br>
-    <strong>Address:</strong> <?= $row['address'] ?><br>
-    <strong>Enrollment ID:</strong> <?= $row['enrollment_id'] ?><br>
-    <a href="manage_students.php">⬅ Back</a>
+    <div class="container">
+        <h2>Student Details</h2>
+        
+        <?php if (!empty($row['photo'])): ?>
+            <img src="uploads/<?= htmlspecialchars($row['photo']) ?>" class="student-photo" alt="Student Photo">
+        <?php else: ?>
+            <div class="student-photo" style="background-color: #eee; display: flex; align-items: center; justify-content: center;">
+                No Photo
+            </div>
+        <?php endif; ?>
+        
+        <div class="detail-item">
+            <strong>Name:</strong> <?= htmlspecialchars($row['name']) ?>
+        </div>
+        
+        <div class="detail-item">
+            <strong>Contact:</strong> <?= htmlspecialchars($row['contact_number']) ?>
+        </div>
+        
+        <div class="detail-item">
+            <strong>Address:</strong> <?= htmlspecialchars($row['address']) ?>
+        </div>
+        
+        <div class="detail-item">
+            <strong>Enrollment ID:</strong> <?= htmlspecialchars($row['enrollment_id']) ?>
+        </div>
+        
+        <a href="manage_students.php" class="back-link">Back to Students</a>
+    </div>
 </body>
 </html>
