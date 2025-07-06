@@ -1,5 +1,5 @@
 <?php
-include 'db_connect.php';
+include '../database_connection/db_connect.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     echo "<p style='color:red;'>❌ Invalid student ID.</p>";
