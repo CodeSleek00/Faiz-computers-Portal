@@ -12,7 +12,7 @@ if (isset($_GET['search'])) {
             enrollment_id LIKE ?";
     $stmt = $conn->prepare($sql);
     $searchTerm = "%$search%";
-    $stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm , $searchTerm);
+    $stmt->bind_param("ssss", $searchTerm, $searchTerm, $searchTerm , $searchTerm);
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
