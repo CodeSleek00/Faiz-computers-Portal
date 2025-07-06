@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         echo "<p style='color:green;'>✅ Student updated successfully.</p>";
-        header("Location: manage_students.php");
+        header("Location: manage_student.php");
         exit;
     } else {
         echo "<p style='color:red;'>❌ Error: " . $stmt->error . "</p>";
