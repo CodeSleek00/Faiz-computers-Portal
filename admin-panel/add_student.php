@@ -43,8 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $enrollment_id = generateEnrollmentID($conn);
 
     // Insert into database
-   $stmt = $conn->prepare("INSERT INTO students (photo, name, contact_number, address, enrollment_id, password) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $photo, $name, $contact, $address, $enrollment_id, $password);
+   $stmt = $conn->prepare("INSERT INTO students (photo, name, contact_number, address, course, enrollment_id, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssss", $photo, $name, $contact, $address, $course, $enrollment_id, $password);
+
     if ($stmt->execute()) {
         echo "<p style='color: green;'>✅ Student added successfully!<br>Enrollment ID: <strong>$enrollment_id</strong></p>";
     } else {
