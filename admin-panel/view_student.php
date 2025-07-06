@@ -1,6 +1,6 @@
 <?php
 include '../database_connection/db_connect.php';
-$id = $_GET['id'];
+$id = $_GET['student_id'];
 $result = $conn->query("SELECT * FROM students WHERE student_id = $id");
 $row = $result->fetch_assoc();
 ?>
