@@ -270,6 +270,7 @@ if (isset($_GET['student_query'])) {
             text-decoration: none;
             border: none;
             flex: 1;
+            width: 10%;
         }
 
         .btn-primary {
@@ -344,7 +345,7 @@ if (isset($_GET['student_query'])) {
     <div class="container">
         <div class="header">
             <h1 class="page-title">Batches Management</h1>
-            <a href="add_batch.php" class="btn btn-primary">
+            <a href="create_batch.php" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add New Batch
             </a>
         </div>
