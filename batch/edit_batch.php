@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
     }
 
-    header("Location: view_batches.php");
+    header("Location: view_batch.php");
     exit;
 }
 ?>
@@ -213,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <button type="submit">Update Batch</button>
     </form>
 
-    <a class="back-link" href="view_batches.php">⬅ Back to Batch List</a>
+    <a class="back-link" href="view_batch.php">⬅ Back to Batch List</a>
 </div>
 
 </body>
