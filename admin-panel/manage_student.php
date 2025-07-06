@@ -17,28 +17,6 @@ if (isset($_GET['search'])) {
 } else {
     $result = $conn->query("SELECT * FROM students");
 }
-
-// Filter by month from enrollment ID
-$monthFilter = '';
-if (isset($_GET['month_filter']) && !empty($_GET['month_filter'])) {
-    $monthFilter = $_GET['month_filter'];
-    $monthPattern = substr($monthFilter, 0, 2); // Assuming month is first two digits
-    
-    if (isset($search) && !empty($search)) {
-        $sql .= " AND enrollment_id LIKE ?";
-        $monthTerm = "$monthPattern%";
-        $stmt = $conn->prepare($sql);
-        $searchTerm = "%$search%";
-        $stmt->bind_param("ssss", $searchTerm, $searchTerm, $searchTerm, $monthTerm);
-    } else {
-        $sql = "SELECT * FROM students WHERE enrollment_id LIKE ?";
-        $monthTerm = "$monthPattern%";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $monthTerm);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
-}
 ?>
 
 <!DOCTYPE html>
@@ -64,28 +42,17 @@ if (isset($_GET['month_filter']) && !empty($_GET['month_filter'])) {
     
     .controls {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    
-    .search-container {
-        display: flex;
         gap: 0.5rem;
     }
     
-    .filter-container {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-    
-    input[type="text"], select {
+    input[type="text"] {
         padding: 0.5rem 0.75rem;
         border: 1px solid #ddd;
         border-radius: 4px;
         font-family: 'Inter', sans-serif;
+        width: 300px;
     }
     
     button {
@@ -174,6 +141,11 @@ if (isset($_GET['month_filter']) && !empty($_GET['month_filter'])) {
         border: 1px solid #F44336;
     }
     
+    .reset-btn {
+        background-color: #f44336;
+        color: white;
+    }
+    
     .btn:hover {
         opacity: 0.8;
         transform: translateY(-1px);
@@ -226,54 +198,19 @@ if (isset($_GET['month_filter']) && !empty($_GET['month_filter'])) {
     .close-modal:hover {
         color: #333;
     }
-    
-    .reset-btn {
-        background-color: #f44336;
-    }
-    
-    .reset-btn:hover {
-        background-color: #d32f2f;
-    }
 </style>
 </head>
 <body>
     <h2>All Students</h2>
     
     <div class="controls">
-        <div class="search-container">
-            <form method="GET" action="">
-                <input type="text" name="search" placeholder="Search by name, contact or enrollment ID" value="<?= htmlspecialchars($search) ?>">
-                <button type="submit">Search</button>
-                <?php if (!empty($search)): ?>
-                    <a href="?" class="btn reset-btn">Reset</a>
-                <?php endif; ?>
-            </form>
-        </div>
-        
-        <div class="filter-container">
-            <form method="GET" action="">
-                <select name="month_filter">
-                    <option value="">Filter by enrollment month</option>
-                    <?php 
-                    $months = [
-                        '01' => 'January', '02' => 'February', '03' => 'March', 
-                        '04' => 'April', '05' => 'May', '06' => 'June',
-                        '07' => 'July', '08' => 'August', '09' => 'September',
-                        '10' => 'October', '11' => 'November', '12' => 'December'
-                    ];
-                    
-                    foreach ($months as $num => $name) {
-                        $selected = ($monthFilter == $num) ? 'selected' : '';
-                        echo "<option value=\"$num\" $selected>$name</option>";
-                    }
-                    ?>
-                </select>
-                <button type="submit">Filter</button>
-                <?php if (!empty($monthFilter)): ?>
-                    <a href="?" class="btn reset-btn">Reset</a>
-                <?php endif; ?>
-            </form>
-        </div>
+        <form method="GET" action="">
+            <input type="text" name="search" placeholder="Search by name, contact or enrollment ID" value="<?= htmlspecialchars($search) ?>">
+            <button type="submit">Search</button>
+            <?php if (!empty($search)): ?>
+                <a href="?" class="btn reset-btn">Reset</a>
+            <?php endif; ?>
+        </form>
     </div>
     
     <table>
