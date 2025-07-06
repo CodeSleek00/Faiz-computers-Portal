@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = $_POST['address'];
     $newPassword = $_POST['password'];
 
-    // Update query with or without password
+    // Password update if entered
     if (!empty($newPassword)) {
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $conn->prepare("UPDATE students SET name=?, contact_number=?, address=?, password=? WHERE student_id=?");
@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Fetch existing data
+// Fetch existing student
 $result = $conn->query("SELECT * FROM students WHERE student_id = $id");
 if (!$result || $result->num_rows == 0) {
     echo "<p style='color:red;'>❌ Student not found.</p>";
@@ -57,7 +57,7 @@ $row = $result->fetch_assoc();
             background: white;
             padding: 30px;
             border-radius: 12px;
-            max-width: 500px;
+            max-width: 600px;
             margin: auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
@@ -88,12 +88,25 @@ $row = $result->fetch_assoc();
             color: gray;
             margin-bottom: 20px;
         }
+        .student-photo {
+            display: block;
+            margin: auto;
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 3px solid #ccc;
+        }
     </style>
 </head>
 <body>
 
 <div class="form-container">
     <h2>Edit Student</h2>
+
+    <img class="student-photo" src="../uploads/<?= htmlspecialchars($row['photo']) ?>" alt="Student Photo">
+
     <form method="POST">
         <label>Name:</label>
         <input type="text" name="name" value="<?= htmlspecialchars($row['name']) ?>" required>
@@ -106,8 +119,7 @@ $row = $result->fetch_assoc();
 
         <label>Change Password (optional):</label>
         <input type="password" name="password" placeholder="Enter new password">
-
-        <div class="note">Leave password blank if you don't want to change it.</div>
+        <div class="note">Leave this blank if you don't want to change the password.</div>
 
         <button type="submit">Update Student</button>
     </form>
