@@ -11,6 +11,7 @@ $batches = $conn->query($query);
 
 // Student Batch Redirect
 $student_search_error = '';
+$active_tab = isset($_GET['student_query']) ? 'student' : 'batch'; // Determine active tab
 if (isset($_GET['student_query'])) {
     $student_query = $conn->real_escape_string(trim($_GET['student_query']));
     
@@ -124,11 +125,20 @@ if (isset($_GET['student_query'])) {
             color: var(--gray);
             border-bottom: 3px solid transparent;
             transition: var(--transition);
+            position: relative;
         }
 
         .tab.active {
             color: var(--primary);
             border-bottom: 3px solid var(--primary);
+        }
+
+        .search-container {
+            display: none;
+        }
+
+        .search-container.active {
+            display: block;
         }
 
         .search-box {
@@ -269,8 +279,6 @@ if (isset($_GET['student_query'])) {
             transition: var(--transition);
             text-decoration: none;
             border: none;
-            flex: 1;
-            width: 10%;
         }
 
         .btn-primary {
@@ -328,6 +336,15 @@ if (isset($_GET['student_query'])) {
             margin: 0 auto 1.5rem;
         }
 
+        .add-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -338,6 +355,14 @@ if (isset($_GET['student_query'])) {
             .batches-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .batch-actions {
+                flex-wrap: wrap;
+            }
+            
+            .batch-actions .btn {
+                flex: 1 0 100px;
+            }
         }
     </style>
 </head>
@@ -345,35 +370,43 @@ if (isset($_GET['student_query'])) {
     <div class="container">
         <div class="header">
             <h1 class="page-title">Batches Management</h1>
-            <a href="create_batch.php" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Batch
+            <a href="create_batch.php" class="btn btn-primary add-btn">
+                <i class="fas fa-plus"></i> Add Batch
             </a>
         </div>
 
         <div class="search-section">
             <div class="search-tabs">
-                <div class="tab active">Search Batches</div>
-                <div class="tab">Find Student</div>
+                <div class="tab <?= $active_tab === 'batch' ? 'active' : '' ?>" data-tab="batch">Search Batches</div>
+                <div class="tab <?= $active_tab === 'student' ? 'active' : '' ?>" data-tab="student">Find Student</div>
             </div>
 
-            <form method="GET" action="">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" name="search" placeholder="Search batches by name..." value="<?= htmlspecialchars($search) ?>">
-                </div>
-            </form>
+            <div class="search-container <?= $active_tab === 'batch' ? 'active' : '' ?>" id="batch-search">
+                <form method="GET" action="">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="search" placeholder="Search batches by name..." value="<?= htmlspecialchars($search) ?>">
+                    </div>
+                </form>
+            </div>
 
-            <form method="GET" action="" class="search-box">
-                <i class="fas fa-user-graduate"></i>
-                <input type="text" name="student_query" placeholder="Find student by name or enrollment ID...">
-            </form>
+            <div class="search-container <?= $active_tab === 'student' ? 'active' : '' ?>" id="student-search">
+                <form method="GET" action="">
+                    <div class="search-box">
+                        <i class="fas fa-user-graduate"></i>
+                        <input type="text" name="student_query" placeholder="Find student by name or enrollment ID..." 
+                               value="<?= isset($_GET['student_query']) ? htmlspecialchars($_GET['student_query']) : '' ?>">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="display: none;">Search</button>
+                </form>
 
-            <?php if (!empty($student_search_error)) { ?>
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?= $student_search_error ?>
-                </div>
-            <?php } ?>
+                <?php if (!empty($student_search_error)) { ?>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <?= $student_search_error ?>
+                    </div>
+                <?php } ?>
+            </div>
         </div>
 
         <?php if ($batches->num_rows > 0) { ?>
@@ -406,7 +439,7 @@ if (isset($_GET['student_query'])) {
                                     <i class="far fa-edit"></i> Edit
                                 </a>
                                 <a href="delete_batch.php?id=<?= $batch['batch_id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this batch?')">
-                                    <i class="far fa-trash-alt"></i>
+                                    <i class="far fa-trash-alt"></i> Delete
                                 </a>
                             </div>
                         </div>
@@ -418,22 +451,44 @@ if (isset($_GET['student_query'])) {
                 <i class="fas fa-box-open"></i>
                 <h3>No Batches Found</h3>
                 <p><?= !empty($search) ? "No batches match your search criteria." : "You haven't created any batches yet." ?></p>
-                <a href="add_batch.php" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Your First Batch
+                <a href="create_batch.php" class="btn btn-primary add-btn">
+                    <i class="fas fa-plus"></i> Create Batch
                 </a>
             </div>
         <?php } ?>
     </div>
 
     <script>
-        // Simple tab switching functionality
+        // Tab switching functionality
         const tabs = document.querySelectorAll('.tab');
+        const searchContainers = document.querySelectorAll('.search-container');
+        
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
+                // Update active tab
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
+                
+                // Show corresponding search container
+                const tabName = tab.getAttribute('data-tab');
+                searchContainers.forEach(container => {
+                    container.classList.remove('active');
+                    if (container.id === `${tabName}-search`) {
+                        container.classList.add('active');
+                    }
+                });
             });
         });
+        
+        // Auto-submit student search when pressing enter
+        const studentSearchInput = document.querySelector('#student-search input');
+        if (studentSearchInput) {
+            studentSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    this.form.submit();
+                }
+            });
+        }
     </script>
 </body>
 </html>
