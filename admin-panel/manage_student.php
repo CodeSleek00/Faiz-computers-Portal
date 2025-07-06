@@ -220,6 +220,7 @@ if (isset($_GET['search'])) {
                 <th>Name</th>
                 <th>Contact</th>
                 <th>Enrollment ID</th>
+                <th>Course</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -235,6 +236,7 @@ if (isset($_GET['search'])) {
                 <td><?= htmlspecialchars($row['name']) ?></td>
                 <td><?= htmlspecialchars($row['contact_number']) ?></td>
                 <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
+                <td><?= htmlspecialchars($row['course']) ?></td>
                 <td class="actions-cell">
                     <a class="btn view-btn" href="view_student.php?id=<?= $row['student_id'] ?>">View</a>
                     <a class="btn edit-btn" href="edit_student.php?id=<?= $row['student_id'] ?>">Edit</a>
