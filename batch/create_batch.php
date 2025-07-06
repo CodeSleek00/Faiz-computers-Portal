@@ -4,7 +4,7 @@ include '../database_connection/db_connect.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $batch_name = $_POST['batch_name'];
     $timing = $_POST['timing'];
-    $students = $_POST['students']; // Array of student IDs
+    $students = $_POST['students'];
 
     $stmt = $conn->prepare("INSERT INTO batches (batch_name, timing) VALUES (?, ?)");
     $stmt->bind_param("ss", $batch_name, $timing);
@@ -21,7 +21,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit;
 }
 
-// Fetch students & courses
 $students = $conn->query("SELECT * FROM students ORDER BY name ASC");
 $courses = $conn->query("SELECT DISTINCT course FROM students");
 ?>
@@ -34,68 +33,108 @@ $courses = $conn->query("SELECT DISTINCT course FROM students");
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: #f0f2f5;
-            padding: 40px;
+            background: #f2f4f8;
+            margin: 0;
+            padding: 40px 20px;
         }
+
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: auto;
             background: #fff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.08);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.06);
         }
+
         h2 {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #333;
         }
+
         label {
-            font-weight: 600;
-            margin-top: 10px;
             display: block;
+            font-weight: 600;
+            margin: 20px 0 8px;
         }
+
         input, select {
-            padding: 10px;
             width: 100%;
-            margin-bottom: 15px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             border: 1px solid #ccc;
+            font-size: 14px;
             font-family: 'Poppins', sans-serif;
         }
-        .filter-bar {
+
+        .filters {
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
-            margin-bottom: 20px;
+            margin: 25px 0 15px;
         }
+
+        .filters input,
+        .filters select {
+            flex: 1;
+            min-width: 200px;
+        }
+
         .student-list {
-            max-height: 300px;
+            max-height: 320px;
             overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            background: #fafafa;
         }
-        .student-row {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
+
+        .student-item {
             display: flex;
             align-items: center;
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
         }
-        .student-row:last-child {
+
+        .student-item:hover {
+            background: #f0f4ff;
+        }
+
+        .student-item:last-child {
             border-bottom: none;
         }
-        button {
-            background: #007bff;
-            color: white;
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 10px;
-            width: 100%;
+
+        .student-item input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
             cursor: pointer;
-            font-weight: 600;
         }
+
+        button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
         button:hover {
-            background: #0056b3;
+            background-color: #0056b3;
+        }
+
+        @media screen and (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
         }
     </style>
 
@@ -103,20 +142,20 @@ $courses = $conn->query("SELECT DISTINCT course FROM students");
         function filterStudents() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const course = document.getElementById('courseFilter').value.toLowerCase();
-            const rows = document.querySelectorAll('.student-row');
+            const items = document.querySelectorAll('.student-item');
 
-            rows.forEach(row => {
-                const name = row.dataset.name.toLowerCase();
-                const enroll = row.dataset.enroll.toLowerCase();
-                const courseVal = row.dataset.course.toLowerCase();
+            items.forEach(item => {
+                const name = item.dataset.name.toLowerCase();
+                const enroll = item.dataset.enroll.toLowerCase();
+                const courseVal = item.dataset.course.toLowerCase();
 
-                const matchNameOrEnroll = name.includes(search) || enroll.includes(search);
+                const matchText = name.includes(search) || enroll.includes(search);
                 const matchCourse = course === "" || courseVal === course;
 
-                if (matchNameOrEnroll && matchCourse) {
-                    row.style.display = 'flex';
+                if (matchText && matchCourse) {
+                    item.style.display = 'flex';
                 } else {
-                    row.style.display = 'none';
+                    item.style.display = 'none';
                 }
             });
         }
@@ -125,18 +164,18 @@ $courses = $conn->query("SELECT DISTINCT course FROM students");
 <body>
 
 <div class="container">
-    <h2>Create New Batch</h2>
+    <h2>Create New Student Batch</h2>
     <form method="POST">
         <label>Batch Name:</label>
         <input type="text" name="batch_name" required>
 
         <label>Timing:</label>
-        <input type="text" name="timing" required>
+        <input type="text" name="timing" placeholder="e.g. Mon-Fri 9:00 AM - 11:00 AM" required>
 
-        <div class="filter-bar">
-            <input type="text" id="searchInput" onkeyup="filterStudents()" placeholder="Search by name or enrollment ID">
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Search by name or enrollment ID" onkeyup="filterStudents()">
             <select id="courseFilter" onchange="filterStudents()">
-                <option value="">All Courses</option>
+                <option value="">Filter by course</option>
                 <?php while ($course = $courses->fetch_assoc()) { ?>
                     <option value="<?= htmlspecialchars($course['course']) ?>"><?= htmlspecialchars($course['course']) ?></option>
                 <?php } ?>
@@ -145,17 +184,16 @@ $courses = $conn->query("SELECT DISTINCT course FROM students");
 
         <div class="student-list">
             <?php while ($row = $students->fetch_assoc()) { ?>
-                <div class="student-row" 
+                <div class="student-item" 
                      data-name="<?= htmlspecialchars($row['name']) ?>" 
                      data-enroll="<?= htmlspecialchars($row['enrollment_id']) ?>" 
                      data-course="<?= htmlspecialchars($row['course']) ?>">
-                    <input type="checkbox" name="students[]" value="<?= $row['student_id'] ?>" style="margin-right: 10px;">
-                    <?= $row['name'] ?> (<?= $row['enrollment_id'] ?>) - <?= $row['course'] ?>
+                    <input type="checkbox" name="students[]" value="<?= $row['student_id'] ?>">
+                    <?= htmlspecialchars($row['name']) ?> (<?= htmlspecialchars($row['enrollment_id']) ?>) — <?= htmlspecialchars($row['course']) ?>
                 </div>
             <?php } ?>
         </div>
 
-        <br>
         <button type="submit">Create Batch</button>
     </form>
 </div>
