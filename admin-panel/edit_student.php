@@ -227,7 +227,7 @@ $stmt->close();
     <div class="container">
         <div class="header">
             <h2>Edit Student</h2>
-            <a href="manage_students.php" class="back-btn">
+            <a href="manage_student.php" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back to Students
             </a>
         </div>
@@ -248,7 +248,7 @@ $stmt->close();
         <?php endif; ?>
         
         <?php if (!empty($row['photo'])): ?>
-            <img src="uploads/<?= htmlspecialchars($row['photo']) ?>" class="photo-preview" alt="Student Photo">
+            <img src="../uploads/<?= htmlspecialchars($row['photo']) ?>" class="photo-preview" alt="Student Photo">
         <?php endif; ?>
         
         <form method="POST" id="studentForm">
