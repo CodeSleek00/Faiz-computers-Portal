@@ -1,604 +1,761 @@
+<!DOCTYPE html>
 <html lang="en">
- <head>
+<head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1" name="viewport"/>
-  <title>
-   Upskill Bootcamp Program
-  </title>
-  <script src="https://cdn.tailwindcss.com">
-  </script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Upskill Bootcamp Program - Advance Your Career</title>
+  <meta name="description" content="Join our intensive bootcamp programs to gain in-demand skills and accelerate your career. Learn from industry experts with hands-on projects.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-   body {
+    body {
       font-family: 'Inter', sans-serif;
+      scroll-behavior: smooth;
+    }
+    .hero-overlay {
+      background: linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+    }
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .category-icon:hover {
+      transform: scale(1.1);
+    }
+    .feature-card:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+    }
+    details[open] summary {
+      font-weight: 600;
+      color: #1e40af;
+    }
+    details summary {
+      list-style: none;
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    details summary:after {
+      content: '+';
+      float: right;
+      font-weight: bold;
+    }
+    details[open] summary:after {
+      content: '-';
     }
   </style>
- </head>
- <body class="bg-white text-black">
+</head>
+<body class="bg-white text-gray-800">
   <!-- Header -->
-  <header class="w-full border-b border-gray-200">
-   <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-    <div class="flex items-center space-x-2">
-     <span class="text-blue-700 font-extrabold text-2xl select-none">
-      upskill.
-     </span>
+  <header class="w-full border-b border-gray-200 sticky top-0 bg-white z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-2">
+        <a href="#" class="text-blue-700 font-extrabold text-2xl select-none hover:text-blue-800 transition">upskill.</a>
+      </div>
+      
+      <!-- Mobile menu button -->
+      <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-black">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      
+      <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
+        <a class="hover:text-blue-600 transition" href="#">Home</a>
+        <a class="hover:text-blue-600 transition" href="#">Courses</a>
+        <a class="text-blue-600 font-semibold" href="#">Bootcamps</a>
+        <a class="hover:text-blue-600 transition" href="#">Resources</a>
+        <a class="hover:text-blue-600 transition" href="#">Blog</a>
+        <a class="hover:text-blue-600 transition" href="#">Contact</a>
+      </nav>
+      
+      <div class="hidden md:flex space-x-3">
+        <button class="text-blue-700 border border-blue-700 rounded-full px-4 py-1.5 text-sm hover:bg-blue-50 transition font-medium">Login</button>
+        <button class="bg-blue-600 text-white rounded-full px-5 py-1.5 text-sm hover:bg-blue-700 transition font-medium">Register</button>
+      </div>
     </div>
-    <nav class="hidden md:flex space-x-8 text-sm font-normal text-gray-700">
-     <a class="hover:text-black" href="#">
-      Home
-     </a>
-     <a class="hover:text-black" href="#">
-      Course
-     </a>
-     <a class="hover:text-black" href="#">
-      Bootcamp
-     </a>
-     <a class="hover:text-black" href="#">
-      Page
-     </a>
-     <a class="hover:text-black" href="#">
-      Blog
-     </a>
-     <a class="hover:text-black" href="#">
-      Contact
-     </a>
-    </nav>
-    <div class="flex space-x-3">
-     <button class="text-blue-700 border border-blue-700 rounded-full px-4 py-1 text-sm hover:bg-blue-50 transition">
-      Login
-     </button>
-     <button class="bg-blue-600 text-white rounded-full px-5 py-1 text-sm hover:bg-blue-700 transition">
-      Register
-     </button>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200 px-4 py-3">
+      <nav class="flex flex-col space-y-3">
+        <a class="hover:text-blue-600 transition py-1" href="#">Home</a>
+        <a class="hover:text-blue-600 transition py-1" href="#">Courses</a>
+        <a class="text-blue-600 font-semibold py-1" href="#">Bootcamps</a>
+        <a class="hover:text-blue-600 transition py-1" href="#">Resources</a>
+        <a class="hover:text-blue-600 transition py-1" href="#">Blog</a>
+        <a class="hover:text-blue-600 transition py-1" href="#">Contact</a>
+        <div class="flex space-x-3 pt-2">
+          <button class="text-blue-700 border border-blue-700 rounded-full px-4 py-1.5 text-sm hover:bg-blue-50 transition w-full">Login</button>
+          <button class="bg-blue-600 text-white rounded-full px-4 py-1.5 text-sm hover:bg-blue-700 transition w-full">Register</button>
+        </div>
+      </nav>
     </div>
-   </div>
   </header>
+
   <!-- Hero Section -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-   <div class="relative rounded-md overflow-hidden">
-    <img alt="Man gesturing while talking on laptop at table outside building" class="w-full h-auto object-cover" height="280" src="https://storage.googleapis.com/a1aa/image/b05b3753-1783-4374-60ee-9e9659db10fa.jpg" width="1200"/>
-    <div class="absolute top-0 left-0 w-full h-full bg-white bg-opacity-70 flex items-center px-6 sm:px-12">
-     <div>
-      <p class="text-xs text-gray-600 mb-1">
-       Home &gt; Bootcamp
-      </p>
-      <h1 class="text-xl font-semibold text-black">
-       Bootcamp Program
-      </h1>
-     </div>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-6">
+    <div class="relative rounded-xl overflow-hidden">
+      <img alt="Diverse team collaborating on a project during a bootcamp" 
+           class="w-full h-64 sm:h-80 md:h-96 object-cover" 
+           src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"/>
+      <div class="absolute inset-0 hero-overlay flex items-center px-6 sm:px-12 md:px-16">
+        <div class="max-w-2xl">
+          <nav class="flex text-xs text-gray-600 mb-2" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1">
+              <li class="inline-flex items-center">
+                <a href="#" class="hover:text-blue-600 transition">Home</a>
+              </li>
+              <li>
+                <span class="mx-2">/</span>
+              </li>
+              <li class="inline-flex items-center" aria-current="page">
+                <span class="text-blue-600">Bootcamps</span>
+              </li>
+            </ol>
+          </nav>
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">Transform Your Career with Intensive Bootcamps</h1>
+          <p class="text-sm sm:text-base text-gray-600 mb-6">Join our immersive programs designed to take you from beginner to job-ready in 12-16 weeks. Learn in-demand skills with hands-on projects and career support.</p>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button class="bg-blue-600 text-white rounded-lg px-6 py-2.5 text-sm hover:bg-blue-700 transition font-medium flex items-center justify-center">
+              <i class="fas fa-play-circle mr-2"></i> Watch Demo
+            </button>
+            <button class="border border-gray-300 text-gray-700 rounded-lg px-6 py-2.5 text-sm hover:bg-gray-50 transition font-medium flex items-center justify-center">
+              <i class="fas fa-info-circle mr-2"></i> Learn More
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-   </div>
   </section>
-  <!-- Categories Icons -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-   <ul class="flex flex-wrap justify-center gap-x-6 gap-y-4 text-center text-xs text-gray-600 font-normal">
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Business category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/e994ec96-5c8c-414b-b52c-07719d5d86fc.jpg" width="40"/>
-     <span>
-      Business
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Development category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/54cc6960-a406-4c2f-47cd-02d8ff1df97f.jpg" width="40"/>
-     <span>
-      Development
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Language category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/c5f944aa-ef84-4923-97fa-cc5055809d6a.jpg" width="40"/>
-     <span>
-      Language
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Marketing category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/e59e0c12-6ffc-4a0e-68b9-66c08852dac5.jpg" width="40"/>
-     <span>
-      Marketing
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Finance category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/6c19fe7a-8e25-4795-7b12-ea791cfd5868.jpg" width="40"/>
-     <span>
-      Finance
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Design category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/0c8f13f4-edb1-46a3-cdbf-c9fda0f9cf65.jpg" width="40"/>
-     <span>
-      Design
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Photography category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/0171389b-3505-48f2-bfd4-4c58def1cd25.jpg" width="40"/>
-     <span>
-      Photography
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Office category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/f898cefc-5c8e-439d-3541-fc88086499f7.jpg" width="40"/>
-     <span>
-      Office
-     </span>
-    </li>
-    <li class="flex flex-col items-center w-16">
-     <img alt="Icon representing Science category" class="mb-1" height="40" src="https://storage.googleapis.com/a1aa/image/985a3932-7801-4f5c-c60f-1c49fe896cd8.jpg" width="40"/>
-     <span>
-      Science
-     </span>
-    </li>
-   </ul>
+
+  <!-- Stats Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 sm:mt-16">
+    <div class="bg-blue-50 rounded-xl p-6 sm:p-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center">
+        <div class="p-3">
+          <div class="text-2xl sm:text-3xl font-bold text-blue-700 mb-1">12K+</div>
+          <div class="text-xs sm:text-sm text-gray-600">Graduates</div>
+        </div>
+        <div class="p-3">
+          <div class="text-2xl sm:text-3xl font-bold text-blue-700 mb-1">94%</div>
+          <div class="text-xs sm:text-sm text-gray-600">Job Placement</div>
+        </div>
+        <div class="p-3">
+          <div class="text-2xl sm:text-3xl font-bold text-blue-700 mb-1">300+</div>
+          <div class="text-xs sm:text-sm text-gray-600">Hiring Partners</div>
+        </div>
+        <div class="p-3">
+          <div class="text-2xl sm:text-3xl font-bold text-blue-700 mb-1">4.9</div>
+          <div class="text-xs sm:text-sm text-gray-600">Average Rating</div>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <!-- Categories Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 sm:mt-16">
+    <div class="text-center mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Explore Our Bootcamp Categories</h2>
+      <p class="text-sm text-gray-600 max-w-2xl mx-auto">Choose from our industry-leading programs designed to launch your career in tech and beyond.</p>
+    </div>
+    
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6">
+      <a href="#" class="category-card bg-white rounded-lg p-4 sm:p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition flex flex-col items-center text-center group">
+        <div class="bg-blue-50 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition">
+          <img alt="Icon representing Business category" class="w-8 h-8" src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png"/>
+        </div>
+        <h3 class="font-medium text-sm text-gray-800 mb-1">Business</h3>
+        <p class="text-xs text-gray-500">12 Programs</p>
+      </a>
+      
+      <a href="#" class="category-card bg-white rounded-lg p-4 sm:p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition flex flex-col items-center text-center group">
+        <div class="bg-blue-50 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition">
+          <img alt="Icon representing Development category" class="w-8 h-8" src="https://cdn-icons-png.flaticon.com/512/1006/1006363.png"/>
+        </div>
+        <h3 class="font-medium text-sm text-gray-800 mb-1">Development</h3>
+        <p class="text-xs text-gray-500">18 Programs</p>
+      </a>
+      
+      <a href="#" class="category-card bg-white rounded-lg p-4 sm:p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition flex flex-col items-center text-center group">
+        <div class="bg-blue-50 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition">
+          <img alt="Icon representing Data Science category" class="w-8 h-8" src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png"/>
+        </div>
+        <h3 class="font-medium text-sm text-gray-800 mb-1">Data Science</h3>
+        <p class="text-xs text-gray-500">9 Programs</p>
+      </a>
+      
+      <a href="#" class="category-card bg-white rounded-lg p-4 sm:p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition flex flex-col items-center text-center group">
+        <div class="bg-blue-50 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition">
+          <img alt="Icon representing Design category" class="w-8 h-8" src="https://cdn-icons-png.flaticon.com/512/3242/3242257.png"/>
+        </div>
+        <h3 class="font-medium text-sm text-gray-800 mb-1">Design</h3>
+        <p class="text-xs text-gray-500">7 Programs</p>
+      </a>
+      
+      <a href="#" class="category-card bg-white rounded-lg p-4 sm:p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition flex flex-col items-center text-center group">
+        <div class="bg-blue-50 p-3 rounded-full mb-3 group-hover:bg-blue-100 transition">
+          <img alt="Icon representing Marketing category" class="w-8 h-8" src="https://cdn-icons-png.flaticon.com/512/1055/1055687.png"/>
+        </div>
+        <h3 class="font-medium text-sm text-gray-800 mb-1">Marketing</h3>
+        <p class="text-xs text-gray-500">5 Programs</p>
+      </a>
+    </div>
+    
+    <div class="text-center mt-8">
+      <button class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center justify-center mx-auto">
+        View all categories
+        <i class="fas fa-chevron-right ml-1 text-xs"></i>
+      </button>
+    </div>
+  </section>
+
   <!-- Advantages Section -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
-   <div class="md:w-1/2 space-y-6">
-    <h2 class="text-lg font-semibold">
-     The Advantages of the upskill Program.
-    </h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 text-xs text-gray-600">
-     <div class="flex items-start space-x-3">
-      <img alt="Checkmark icon" class="mt-1" height="20" src="https://storage.googleapis.com/a1aa/image/d05ab7fb-4dcd-47b6-2eb1-a963068663f9.jpg" width="20"/>
-      <div>
-       <p class="font-semibold text-black text-sm">
-        Relevant Skill set
-       </p>
-       <p>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit
-       </p>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+    <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+      <div class="lg:w-1/2 space-y-6">
+        <div>
+          <span class="text-blue-600 font-medium text-sm">WHY CHOOSE US</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mt-2">The Upskill Advantage</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-600">
+          <div class="flex items-start space-x-4">
+            <div class="bg-blue-100 p-2 rounded-full text-blue-600 mt-0.5">
+              <i class="fas fa-check-circle text-sm"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800 mb-1">Relevant Skill Set</h3>
+              <p class="text-xs sm:text-sm">Curriculum designed with input from industry leaders to teach exactly what employers need.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-4">
+            <div class="bg-blue-100 p-2 rounded-full text-blue-600 mt-0.5">
+              <i class="fas fa-check-circle text-sm"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800 mb-1">Growth Mindset</h3>
+              <p class="text-xs sm:text-sm">We don't just teach skills - we teach you how to keep learning throughout your career.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-4">
+            <div class="bg-blue-100 p-2 rounded-full text-blue-600 mt-0.5">
+              <i class="fas fa-check-circle text-sm"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800 mb-1">1-on-1 Mentoring</h3>
+              <p class="text-xs sm:text-sm">Weekly sessions with industry professionals to guide your learning and career path.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-4">
+            <div class="bg-blue-100 p-2 rounded-full text-blue-600 mt-0.5">
+              <i class="fas fa-check-circle text-sm"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800 mb-1">Hiring Partners</h3>
+              <p class="text-xs sm:text-sm">Direct connections to our network of 300+ companies looking to hire our graduates.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pt-2">
+          <button class="bg-blue-600 text-white rounded-lg px-6 py-2.5 text-sm hover:bg-blue-700 transition font-medium">
+            Learn More About Our Approach
+          </button>
+        </div>
       </div>
-     </div>
-     <div class="flex items-start space-x-3">
-      <img alt="Checkmark icon" class="mt-1" height="20" src="https://storage.googleapis.com/a1aa/image/d05ab7fb-4dcd-47b6-2eb1-a963068663f9.jpg" width="20"/>
-      <div>
-       <p class="font-semibold text-black text-sm">
-        Growth Mindset
-       </p>
-       <p>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit
-       </p>
+      
+      <div class="lg:w-1/2 flex justify-center relative">
+        <div class="relative w-full max-w-md">
+          <div class="absolute -bottom-4 -right-4 bg-blue-100 rounded-xl w-full h-full -z-10"></div>
+          <img alt="Diverse group of students collaborating in a modern classroom" 
+               class="w-full h-auto rounded-xl shadow-md" 
+               src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"/>
+          <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg w-3/4">
+            <div class="flex items-center space-x-2">
+              <div class="bg-yellow-400 p-2 rounded-full">
+                <i class="fas fa-medal text-white text-sm"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-sm">94% Job Placement</h4>
+                <p class="text-xs text-gray-600">Within 6 months of graduation</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-     </div>
-     <div class="flex items-start space-x-3">
-      <img alt="Checkmark icon" class="mt-1" height="20" src="https://storage.googleapis.com/a1aa/image/d05ab7fb-4dcd-47b6-2eb1-a963068663f9.jpg" width="20"/>
-      <div>
-       <p class="font-semibold text-black text-sm">
-        1-on-1 Mentoring
-       </p>
-       <p>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit
-       </p>
-      </div>
-     </div>
-     <div class="flex items-start space-x-3">
-      <img alt="Checkmark icon" class="mt-1" height="20" src="https://storage.googleapis.com/a1aa/image/d05ab7fb-4dcd-47b6-2eb1-a963068663f9.jpg" width="20"/>
-      <div>
-       <p class="font-semibold text-black text-sm">
-        Hiring Partners
-       </p>
-       <p>
-        Lorem ipsum dolor sit amet consectetur adipiscing elit
-       </p>
-      </div>
-     </div>
     </div>
-   </div>
-   <div class="md:w-1/2 flex justify-center">
-    <div class="relative bg-blue-100 rounded-lg p-4 w-64 sm:w-80 md:w-full max-w-md" style="clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%)">
-     <img alt="Woman smiling holding laptop with blue background shape" class="w-full h-auto rounded-lg" height="320" src="https://storage.googleapis.com/a1aa/image/413d9a79-8130-4bf0-23a5-dd8033afe8f8.jpg" width="320"/>
-    </div>
-   </div>
   </section>
-  <!-- Bootcamp Program Cards -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-blue-50 rounded-lg py-8">
-   <h3 class="text-center font-semibold mb-6">
-    Bootcamp Program
-   </h3>
-   <div class="flex flex-wrap justify-center gap-6">
-    <!-- Card 1 -->
-    <div class="bg-white rounded-lg shadow-sm w-64 flex flex-col overflow-hidden border border-gray-200">
-     <div class="relative">
-      <img alt="Hands drawing on tablet for Ultimate Drawing Course Adobe Illustrator CC Advanced Training" class="w-full h-36 object-cover" height="140" src="https://storage.googleapis.com/a1aa/image/6f8ed915-ea7e-4a9d-8b00-fa9eac3b893f.jpg" width="256"/>
-      <span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-semibold rounded px-2 py-0.5">
-       Beginner
-      </span>
-      <span class="absolute top-2 right-2 bg-yellow-600 text-white text-xs font-semibold rounded px-2 py-0.5">
-       Ai
-      </span>
-     </div>
-     <div class="p-3 flex flex-col flex-grow">
-      <p class="text-xs text-gray-700 mb-1 font-semibold">
-       Adobe Illustrator CC – Advanced Training Course
-      </p>
-      <p class="text-[10px] text-gray-400 mb-2">
-       By Onecontributor in Design
-      </p>
-      <div class="flex items-center space-x-1 mb-3">
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star-half-alt text-yellow-400 text-xs">
-       </i>
-       <span class="text-xs text-gray-500 ml-1">
-        4.8
-       </span>
-      </div>
-      <button class="text-xs border border-blue-200 text-blue-400 rounded px-3 py-1 mt-auto hover:bg-blue-50 transition">
-       Start Learning
-      </button>
-     </div>
+
+  <!-- Popular Bootcamps Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+    <div class="text-center mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Our Most Popular Bootcamps</h2>
+      <p class="text-sm text-gray-600 max-w-2xl mx-auto">Intensive programs designed to get you job-ready in months, not years.</p>
     </div>
-    <!-- Card 2 -->
-    <div class="bg-white rounded-lg shadow-sm w-64 flex flex-col overflow-hidden border border-gray-200">
-     <div class="relative">
-      <img alt="Woman smiling in pink shirt for Intermediate to Advanced Level English Grammar course" class="w-full h-36 object-cover" height="140" src="https://storage.googleapis.com/a1aa/image/7788f872-a128-4765-4a5c-581cce7df8f8.jpg" width="256"/>
-      <span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-semibold rounded px-2 py-0.5">
-       Beginner
-      </span>
-     </div>
-     <div class="p-3 flex flex-col flex-grow">
-      <p class="text-xs text-gray-700 mb-1 font-semibold">
-       Master Course: English Grammar, English Speaking
-      </p>
-      <p class="text-[10px] text-gray-400 mb-2">
-       By Onecontributor in Language
-      </p>
-      <div class="flex items-center space-x-1 mb-3">
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star-half-alt text-yellow-400 text-xs">
-       </i>
-       <span class="text-xs text-gray-500 ml-1">
-        4.7
-       </span>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Bootcamp Card 1 -->
+      <div class="course-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition duration-300">
+        <div class="relative">
+          <img alt="Full stack web development bootcamp" 
+               class="w-full h-48 object-cover" 
+               src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"/>
+          <div class="absolute top-3 left-3 flex flex-col space-y-2">
+            <span class="bg-blue-600 text-white text-xs font-semibold rounded px-2 py-1">BEGINNER FRIENDLY</span>
+            <span class="bg-yellow-500 text-white text-xs font-semibold rounded px-2 py-1">WEB DEV</span>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-bold text-gray-800">Full Stack Web Development</h3>
+            <span class="bg-blue-50 text-blue-600 text-xs font-medium px-2 py-1 rounded">12 WEEKS</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">Master front-end and back-end development with JavaScript, React, Node.js, and databases.</p>
+          
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="flex -space-x-1">
+                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/44.jpg" alt="Instructor 1">
+                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Instructor 2">
+              </div>
+              <span class="text-xs text-gray-500 ml-2">+2 instructors</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+              <span class="text-sm font-medium">4.9</span>
+              <span class="text-xs text-gray-500 ml-1">(1,243)</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div>
+              <span class="text-gray-500 line-through text-sm">$2,499</span>
+              <span class="text-blue-600 font-bold ml-2">$1,799</span>
+            </div>
+            <button class="bg-blue-600 text-white rounded-lg px-4 py-2 text-xs hover:bg-blue-700 transition font-medium">
+              Enroll Now
+            </button>
+          </div>
+        </div>
       </div>
-      <button class="text-xs border border-blue-200 text-blue-400 rounded px-3 py-1 mt-auto hover:bg-blue-50 transition">
-       Start Learning
-      </button>
-     </div>
-    </div>
-    <!-- Card 3 -->
-    <div class="bg-white rounded-lg shadow-sm w-64 flex flex-col overflow-hidden border border-gray-200">
-     <div class="relative">
-      <img alt="Man with glasses holding paper for Learn Web Development Course" class="w-full h-36 object-cover" height="140" src="https://storage.googleapis.com/a1aa/image/96a002a4-e876-4e75-f572-ee189d98d9dd.jpg" width="256"/>
-      <span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-semibold rounded px-2 py-0.5">
-       Beginner
-      </span>
-      <span class="absolute top-2 right-2 bg-yellow-600 text-black text-xs font-semibold rounded px-2 py-0.5">
-       JS
-      </span>
-     </div>
-     <div class="p-3 flex flex-col flex-grow">
-      <p class="text-xs text-gray-700 mb-1 font-semibold">
-       The Complete 2024 Web Development Bootcamp
-      </p>
-      <p class="text-[10px] text-gray-400 mb-2">
-       By Onecontributor in Development
-      </p>
-      <div class="flex items-center space-x-1 mb-3">
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <span class="text-xs text-gray-500 ml-1">
-        4.9
-       </span>
+      
+      <!-- Bootcamp Card 2 -->
+      <div class="course-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition duration-300">
+        <div class="relative">
+          <img alt="Data science and machine learning bootcamp" 
+               class="w-full h-48 object-cover" 
+               src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"/>
+          <div class="absolute top-3 left-3 flex flex-col space-y-2">
+            <span class="bg-blue-600 text-white text-xs font-semibold rounded px-2 py-1">INTERMEDIATE</span>
+            <span class="bg-purple-500 text-white text-xs font-semibold rounded px-2 py-1">DATA SCIENCE</span>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-bold text-gray-800">Data Science & Machine Learning</h3>
+            <span class="bg-blue-50 text-blue-600 text-xs font-medium px-2 py-1 rounded">16 WEEKS</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">Learn Python, statistical analysis, machine learning algorithms, and data visualization.</p>
+          
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="flex -space-x-1">
+                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/men/75.jpg" alt="Instructor 1">
+              </div>
+              <span class="text-xs text-gray-500 ml-2">Dr. Alan Turing</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+              <span class="text-sm font-medium">4.8</span>
+              <span class="text-xs text-gray-500 ml-1">(892)</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div>
+              <span class="text-gray-500 line-through text-sm">$2,999</span>
+              <span class="text-blue-600 font-bold ml-2">$2,399</span>
+            </div>
+            <button class="bg-blue-600 text-white rounded-lg px-4 py-2 text-xs hover:bg-blue-700 transition font-medium">
+              Enroll Now
+            </button>
+          </div>
+        </div>
       </div>
-      <button class="text-xs border border-blue-200 text-blue-400 rounded px-3 py-1 mt-auto hover:bg-blue-50 transition">
-       Start Learning
-      </button>
-     </div>
-    </div>
-    <!-- Card 4 -->
-    <div class="bg-white rounded-lg shadow-sm w-64 flex flex-col overflow-hidden border border-gray-200">
-     <div class="relative">
-      <img alt="Man in suit smiling for Corporate Finance Course" class="w-full h-36 object-cover" height="140" src="https://storage.googleapis.com/a1aa/image/69e1bfd9-f2ac-4bbd-d66b-2184ef5e91bf.jpg" width="256"/>
-      <span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-semibold rounded px-2 py-0.5">
-       Beginner
-      </span>
-      <span class="absolute top-2 right-2 bg-blue-400 text-white text-xs font-semibold rounded px-2 py-0.5">
-       Fi
-      </span>
-     </div>
-     <div class="p-3 flex flex-col flex-grow">
-      <p class="text-xs text-gray-700 mb-1 font-semibold">
-       The Corporate Finance Course
-      </p>
-      <p class="text-[10px] text-gray-400 mb-2">
-       By Onecontributor in Finance
-      </p>
-      <div class="flex items-center space-x-1 mb-3">
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star text-yellow-400 text-xs">
-       </i>
-       <i class="fas fa-star-half-alt text-yellow-400 text-xs">
-       </i>
-       <span class="text-xs text-gray-500 ml-1">
-        4.8
-       </span>
+      
+      <!-- Bootcamp Card 3 -->
+      <div class="course-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition duration-300">
+        <div class="relative">
+          <img alt="UX/UI design bootcamp" 
+               class="w-full h-48 object-cover" 
+               src="https://images.unsplash.com/photo-1541462608143-67571c6738dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"/>
+          <div class="absolute top-3 left-3 flex flex-col space-y-2">
+            <span class="bg-blue-600 text-white text-xs font-semibold rounded px-2 py-1">BEGINNER FRIENDLY</span>
+            <span class="bg-pink-500 text-white text-xs font-semibold rounded px-2 py-1">DESIGN</span>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-bold text-gray-800">UX/UI Design Intensive</h3>
+            <span class="bg-blue-50 text-blue-600 text-xs font-medium px-2 py-1 rounded">10 WEEKS</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">Master user research, wireframing, prototyping, and design systems with Figma and Adobe XD.</p>
+          
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="flex -space-x-1">
+                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/68.jpg" alt="Instructor 1">
+                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/12.jpg" alt="Instructor 2">
+              </div>
+              <span class="text-xs text-gray-500 ml-2">+2 instructors</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+              <span class="text-sm font-medium">4.7</span>
+              <span class="text-xs text-gray-500 ml-1">(756)</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div>
+              <span class="text-gray-500 line-through text-sm">$2,199</span>
+              <span class="text-blue-600 font-bold ml-2">$1,599</span>
+            </div>
+            <button class="bg-blue-600 text-white rounded-lg px-4 py-2 text-xs hover:bg-blue-700 transition font-medium">
+              Enroll Now
+            </button>
+          </div>
+        </div>
       </div>
-      <button class="text-xs border border-blue-200 text-blue-400 rounded px-3 py-1 mt-auto hover:bg-blue-50 transition">
-       Start Learning
-      </button>
-     </div>
     </div>
-   </div>
+    
+    <div class="text-center mt-10">
+      <button class="border border-blue-600 text-blue-600 rounded-lg px-6 py-2.5 text-sm hover:bg-blue-50 transition font-medium">
+        View All Bootcamp Programs
+      </button>
+    </div>
   </section>
+
   <!-- Features Section -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 grid grid-cols-1 sm:grid-cols-4 gap-6 text-center text-xs text-gray-600">
-   <div class="flex flex-col items-center space-y-2">
-    <img alt="Illustration of a person sending an envelope representing CV &amp; Resume Prep" class="w-20 h-20" height="80" src="https://storage.googleapis.com/a1aa/image/2fb83c1a-734b-4fbc-0853-b49f335eb597.jpg" width="80"/>
-    <h4 class="font-semibold text-black text-sm">
-     CV &amp; Resume Prep
-    </h4>
-    <p>
-     Lorem ipsum dolor sit amet consectetur adipiscing elit
-    </p>
-   </div>
-   <div class="flex flex-col items-center space-y-2">
-    <img alt="Illustration of a woman with headset and chat bubbles representing Interview Coaching" class="w-20 h-20" height="80" src="https://storage.googleapis.com/a1aa/image/085bf467-43a9-418c-b835-3ece5ea4605a.jpg" width="80"/>
-    <h4 class="font-semibold text-black text-sm">
-     Interview Coaching
-    </h4>
-    <p>
-     Lorem ipsum dolor sit amet consectetur adipiscing elit
-    </p>
-   </div>
-   <div class="flex flex-col items-center space-y-2">
-    <img alt="Illustration of two people working together representing Buddy System" class="w-20 h-20" height="80" src="https://storage.googleapis.com/a1aa/image/0a622db3-930d-46dc-83d2-9b627e03ab75.jpg" width="80"/>
-    <h4 class="font-semibold text-black text-sm">
-     Buddy System
-    </h4>
-    <p>
-     Lorem ipsum dolor sit amet consectetur adipiscing elit
-    </p>
-   </div>
-   <div class="flex flex-col items-center space-y-2">
-    <img alt="Illustration of a woman with money and checkmark icons representing Career Opportunity" class="w-20 h-20" height="80" src="https://storage.googleapis.com/a1aa/image/258c6bc5-7718-49e0-2d93-f71e2f7d238e.jpg" width="80"/>
-    <h4 class="font-semibold text-black text-sm">
-     Career Opportunity
-    </h4>
-    <p>
-     Lorem ipsum dolor sit amet consectetur adipiscing elit
-    </p>
-   </div>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 bg-blue-50 rounded-2xl py-12">
+    <div class="text-center mb-10">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Our Career Support System</h2>
+      <p class="text-sm text-gray-600 max-w-2xl mx-auto">We're with you every step of the way, from day one to your first day on the job.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="feature-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 transition duration-300">
+        <div class="bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+          <img alt="Icon representing CV & Resume Prep" class="w-6 h-6" src="https://cdn-icons-png.flaticon.com/512/942/942799.png"/>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">CV & Resume Prep</h3>
+        <p class="text-xs sm:text-sm text-gray-600">Our career coaches will help you craft a standout resume that gets noticed by hiring managers.</p>
+      </div>
+      
+      <div class="feature-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 transition duration-300">
+        <div class="bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+          <img alt="Icon representing Interview Coaching" class="w-6 h-6" src="https://cdn-icons-png.flaticon.com/512/3059/3059518.png"/>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">Interview Coaching</h3>
+        <p class="text-xs sm:text-sm text-gray-600">Mock interviews with detailed feedback to help you ace technical and behavioral interviews.</p>
+      </div>
+      
+      <div class="feature-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 transition duration-300">
+        <div class="bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+          <img alt="Icon representing Buddy System" class="w-6 h-6" src="https://cdn-icons-png.flaticon.com/512/4400/4400628.png"/>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">Buddy System</h3>
+        <p class="text-xs sm:text-sm text-gray-600">Pair with a fellow student for accountability and support throughout your learning journey.</p>
+      </div>
+      
+      <div class="feature-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 transition duration-300">
+        <div class="bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+          <img alt="Icon representing Career Opportunity" class="w-6 h-6" src="https://cdn-icons-png.flaticon.com/512/3281/3281289.png"/>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">Career Opportunity</h3>
+        <p class="text-xs sm:text-sm text-gray-600">Exclusive access to our job board and hiring events with partner companies.</p>
+      </div>
+    </div>
   </section>
+
+  <!-- Testimonials Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+    <div class="text-center mb-10">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Success Stories</h2>
+      <p class="text-sm text-gray-600 max-w-2xl mx-auto">Hear from our graduates who transformed their careers with our bootcamps.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center mb-4">
+          <img class="w-12 h-12 rounded-full mr-4" src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah Johnson"/>
+          <div>
+            <h4 class="font-bold text-gray-800">Sarah Johnson</h4>
+            <p class="text-xs text-gray-500">Web Developer at TechCorp</p>
+          </div>
+        </div>
+        <div class="flex mb-3">
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm"></i>
+        </div>
+        <p class="text-sm text-gray-600 italic mb-4">"The Full Stack Bootcamp gave me the skills and confidence to switch careers from marketing to tech. Within 2 months of graduating, I landed my dream job as a junior developer!"</p>
+        <div class="flex items-center text-xs text-gray-500">
+          <i class="fas fa-graduation-cap mr-2"></i>
+          <span>Graduated: March 2023</span>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center mb-4">
+          <img class="w-12 h-12 rounded-full mr-4" src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Chen"/>
+          <div>
+            <h4 class="font-bold text-gray-800">Michael Chen</h4>
+            <p class="text-xs text-gray-500">Data Scientist at DataWorks</p>
+          </div>
+        </div>
+        <div class="flex mb-3">
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+          <i class="fas fa-star text-yellow-400 text-sm"></i>
+        </div>
+        <p class="text-sm text-gray-600 italic mb-4">"As a biology major, I never thought I could break into tech. The Data Science Bootcamp's hands-on projects and career support made all the difference. I doubled my previous salary!"</p>
+        <div class="flex items-center text-xs text-gray-500">
+          <i class="fas fa-graduation-cap mr-2"></i>
+          <span>Graduated: November 2022</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="text-center mt-10">
+      <button class="border border-blue-600 text-blue-600 rounded-lg px-6 py-2.5 text-sm hover:bg-blue-50 transition font-medium">
+        Read More Success Stories
+      </button>
+    </div>
+  </section>
+
   <!-- FAQ Section -->
   <section class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-12">
-   <h3 class="text-center font-semibold mb-6">
-    Frequently Asked Questions
-   </h3>
-   <div class="space-y-2 text-xs text-gray-700">
-    <details class="border border-gray-200 rounded">
-     <summary class="cursor-pointer px-4 py-2 select-none">
-      Can I access course materials offline?
-     </summary>
-    </details>
-    <details class="border border-gray-200 rounded">
-     <summary class="cursor-pointer px-4 py-2 select-none">
-      Is there any prerequisite for courses?
-     </summary>
-    </details>
-    <details class="border border-gray-200 rounded">
-     <summary class="cursor-pointer px-4 py-2 select-none">
-      How long do I have access to a course?
-     </summary>
-    </details>
-    <details class="border border-gray-200 rounded">
-     <summary class="cursor-pointer px-4 py-2 select-none">
-      How can I make a payment for a course?
-     </summary>
-    </details>
-    <details class="border border-gray-200 rounded">
-     <summary class="cursor-pointer px-4 py-2 select-none">
-      How can I contact the course instructor?
-     </summary>
-    </details>
-   </div>
-   <p class="text-center font-bold text-xs mt-6">
-    www.DownloadNewThemes.com
-   </p>
+    <div class="text-center mb-10">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Frequently Asked Questions</h2>
+      <p class="text-sm text-gray-600 max-w-2xl mx-auto">Find answers to common questions about our bootcamp programs.</p>
+    </div>
+    
+    <div class="space-y-3 text-sm">
+      <details class="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition">
+        <summary class="cursor-pointer font-medium text-gray-800 flex justify-between items-center">
+          Can I access course materials offline?
+          <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform duration-200"></i>
+        </summary>
+        <div class="mt-3 text-gray-600">
+          <p>Yes! All our course materials are available for download so you can learn even without an internet connection. You'll have lifetime access to the materials after completing the bootcamp.</p>
+        </div>
+      </details>
+      
+      <details class="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition">
+        <summary class="cursor-pointer font-medium text-gray-800 flex justify-between items-center">
+          Is there any prerequisite for courses?
+          <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform duration-200"></i>
+        </summary>
+        <div class="mt-3 text-gray-600">
+          <p>Most of our beginner-friendly bootcamps require no prior experience. For intermediate/advanced programs, we recommend basic familiarity with the subject or completion of our prep courses.</p>
+        </div>
+      </details>
+      
+      <details class="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition">
+        <summary class="cursor-pointer font-medium text-gray-800 flex justify-between items-center">
+          How long do I have access to a course?
+          <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform duration-200"></i>
+        </summary>
+        <div class="mt-3 text-gray-600">
+          <p>You'll have lifetime access to all course materials, including future updates. Our career support services are available for 12 months after graduation.</p>
+        </div>
+      </details>
+      
+      <details class="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition">
+        <summary class="cursor-pointer font-medium text-gray-800 flex justify-between items-center">
+          How can I make a payment for a course?
+          <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform duration-200"></i>
+        </summary>
+        <div class="mt-3 text-gray-600">
+          <p>We accept all major credit cards, PayPal, and bank transfers. We also offer flexible payment plans with 0% interest - you can pay in 3-12 monthly installments.</p>
+        </div>
+      </details>
+      
+      <details class="border border-gray-200 rounded-lg p-4 hover:border-blue-200 transition">
+        <summary class="cursor-pointer font-medium text-gray-800 flex justify-between items-center">
+          How can I contact the course instructor?
+          <i class="fas fa-chevron-down text-xs text-gray-500 transition-transform duration-200"></i>
+        </summary>
+        <div class="mt-3 text-gray-600">
+          <p>Each bootcamp has a dedicated Slack channel where you can ask instructors questions. You'll also have weekly 1:1 office hours and can schedule additional time as needed.</p>
+        </div>
+      </details>
+    </div>
+    
+    <div class="text-center mt-10">
+      <button class="bg-blue-600 text-white rounded-lg px-6 py-2.5 text-sm hover:bg-blue-700 transition font-medium">
+        Have More Questions? Contact Us
+      </button>
+    </div>
   </section>
+
+  <!-- CTA Section -->
+  <section class="bg-blue-600 text-white py-12 mt-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-xl sm:text-2xl font-bold mb-4">Ready to Transform Your Career?</h2>
+      <p class="text-sm sm:text-base mb-6 max-w-2xl mx-auto">Join thousands of students who've accelerated their careers with our intensive bootcamp programs.</p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <button class="bg-white text-blue-600 rounded-lg px-6 py-2.5 text-sm hover:bg-gray-100 transition font-medium">
+          Browse All Bootcamps
+        </button>
+        <button class="border border-white text-white rounded-lg px-6 py-2.5 text-sm hover:bg-blue-700 transition font-medium">
+          Speak to an Advisor
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
-  <footer class="bg-white border-t border-gray-200 text-gray-600 text-xs">
-   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 sm:grid-cols-5 gap-8">
-    <div class="space-y-4">
-     <span class="text-blue-700 font-extrabold text-2xl select-none block">
-      upskill.
-     </span>
-     <div class="flex items-center space-x-2">
-      <i class="fas fa-comment-dollar text-yellow-400">
-      </i>
-      <div>
-       <p class="font-semibold text-black text-[10px]">
-        WhatsApp
-       </p>
-       <p class="text-[10px]">
-        0812 8899 9976
-       </p>
+  <footer class="bg-gray-50 text-gray-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div class="space-y-4">
+        <a href="#" class="text-blue-700 font-extrabold text-2xl select-none hover:text-blue-800 transition block">upskill.</a>
+        <p class="text-xs text-gray-500">Empowering careers through immersive education since 2018.</p>
+        
+        <div class="flex items-center space-x-4 pt-2">
+          <a href="#" aria-label="Facebook" class="text-gray-500 hover:text-blue-600 transition">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" aria-label="Twitter" class="text-gray-500 hover:text-blue-400 transition">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" aria-label="Instagram" class="text-gray-500 hover:text-pink-600 transition">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" aria-label="LinkedIn" class="text-gray-500 hover:text-blue-700 transition">
+            <i class="fab fa-linkedin-in"></i>
+          </a>
+          <a href="#" aria-label="YouTube" class="text-gray-500 hover:text-red-600 transition">
+            <i class="fab fa-youtube"></i>
+          </a>
+        </div>
       </div>
-     </div>
-     <div class="flex items-center space-x-2">
-      <i class="fas fa-envelope text-yellow-400">
-      </i>
+      
       <div>
-       <p class="font-semibold text-black text-[10px]">
-        Email
-       </p>
-       <p class="text-[10px]">
-        upskill@gmail.com
-       </p>
+        <h5 class="font-semibold text-gray-800 text-sm mb-4">Company</h5>
+        <ul class="space-y-2 text-xs">
+          <li><a class="hover:text-blue-600 transition" href="#">About Us</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Careers</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Press</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Blog</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Affiliates</a></li>
+        </ul>
       </div>
-     </div>
+      
+      <div>
+        <h5 class="font-semibold text-gray-800 text-sm mb-4">Resources</h5>
+        <ul class="space-y-2 text-xs">
+          <li><a class="hover:text-blue-600 transition" href="#">Help Center</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Scholarships</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Free Courses</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Career Guide</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Events</a></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h5 class="font-semibold text-gray-800 text-sm mb-4">Support</h5>
+        <ul class="space-y-2 text-xs">
+          <li><a class="hover:text-blue-600 transition" href="#">Contact Us</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">FAQ</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Privacy Policy</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Terms of Service</a></li>
+          <li><a class="hover:text-blue-600 transition" href="#">Refund Policy</a></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h5 class="font-semibold text-gray-800 text-sm mb-4">Contact</h5>
+        <ul class="space-y-3 text-xs">
+          <li class="flex items-start">
+            <i class="fas fa-map-marker-alt text-blue-600 mt-1 mr-3"></i>
+            <span>123 Education St, Tech City, TC 10101</span>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-phone-alt text-blue-600 mr-3"></i>
+            <a class="hover:text-blue-600 transition" href="tel:+18005551234">(800) 555-1234</a>
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-envelope text-blue-600 mr-3"></i>
+            <a class="hover:text-blue-600 transition" href="mailto:hello@upskill.com">hello@upskill.com</a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <div>
-     <h5 class="font-semibold mb-3 text-[11px]">
-      Company
-     </h5>
-     <ul class="space-y-1 text-[10px]">
-      <li>
-       <a class="hover:text-black" href="#">
-        About
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        What We Offer
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Our Course
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Careers
-       </a>
-      </li>
-     </ul>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-200 py-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+      <div class="mb-3 md:mb-0">
+        &copy; 2024 Upskill. All rights reserved.
+      </div>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-blue-600 transition">Privacy Policy</a>
+        <a href="#" class="hover:text-blue-600 transition">Terms of Service</a>
+        <a href="#" class="hover:text-blue-600 transition">Sitemap</a>
+      </div>
     </div>
-    <div>
-     <h5 class="font-semibold mb-3 text-[11px]">
-      Teaching
-     </h5>
-     <ul class="space-y-1 text-[10px]">
-      <li>
-       <a class="hover:text-black" href="#">
-        Become a Teacher
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Teacher Help Center
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Rules &amp; Requirements
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Leadership
-       </a>
-      </li>
-     </ul>
-    </div>
-    <div>
-     <h5 class="font-semibold mb-3 text-[11px]">
-      Community
-     </h5>
-     <ul class="space-y-1 text-[10px]">
-      <li>
-       <a class="hover:text-black" href="#">
-        Learners
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Partners
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Blogs &amp; News
-       </a>
-      </li>
-      <li>
-       <a class="hover:text-black" href="#">
-        Team Plans
-       </a>
-      </li>
-     </ul>
-    </div>
-    <div>
-     <h5 class="font-semibold mb-3 text-[11px]">
-      Connect with us
-     </h5>
-     <div class="flex space-x-3 mb-3">
-      <a aria-label="Facebook" class="text-blue-600 hover:text-blue-800" href="#">
-       <i class="fab fa-facebook-f">
-       </i>
-      </a>
-      <a aria-label="Twitter" class="text-blue-400 hover:text-blue-600" href="#">
-       <i class="fab fa-twitter">
-       </i>
-      </a>
-      <a aria-label="Instagram" class="text-pink-600 hover:text-pink-800" href="#">
-       <i class="fab fa-instagram">
-       </i>
-      </a>
-      <a aria-label="LinkedIn" class="text-blue-700 hover:text-blue-900" href="#">
-       <i class="fab fa-linkedin-in">
-       </i>
-      </a>
-     </div>
-     <div class="flex space-x-2">
-      <a aria-label="Google Play Store" href="#">
-       <img alt="Google Play Store download badge" class="h-7" height="30" src="https://storage.googleapis.com/a1aa/image/fc5ba904-5063-4487-304e-1b6cea4e751d.jpg" width="90"/>
-      </a>
-      <a aria-label="Apple App Store" href="#">
-       <img alt="Apple App Store download badge" class="h-7" height="30" src="https://storage.googleapis.com/a1aa/image/541783ff-9635-433b-3039-2c216e741a4b.jpg" width="90"/>
-      </a>
-     </div>
-    </div>
-   </div>
-   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-200 py-4 flex flex-col sm:flex-row justify-between text-[9px] text-gray-400">
-    <div class="mb-2 sm:mb-0 space-x-2 flex flex-wrap justify-center sm:justify-start">
-     <a class="hover:text-gray-600" href="#">
-      Privacy Practices
-     </a>
-     <span>
-      |
-     </span>
-     <a class="hover:text-gray-600" href="#">
-      Disclaimer
-     </a>
-     <span>
-      |
-     </span>
-     <a class="hover:text-gray-600" href="#">
-      Accessibility
-     </a>
-     <span>
-      |
-     </span>
-     <a class="hover:text-gray-600" href="#">
-      Terms of Use
-     </a>
-     <span>
-      |
-     </span>
-     <a class="hover:text-gray-600" href="#">
-      Sitemap
-     </a>
-    </div>
-    <div class="text-center sm:text-right">
-     Copyright © 2024 Upskill | Powered by Onecontributor
-    </div>
-   </div>
   </footer>
- </body>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // FAQ accordion animation
+    document.querySelectorAll('details').forEach(detail => {
+      detail.addEventListener('toggle', function() {
+        if (this.open) {
+          const summary = this.querySelector('summary');
+          const icon = summary.querySelector('i');
+          if (icon) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+          }
+        } else {
+          const summary = this.querySelector('summary');
+          const icon = summary.querySelector('i');
+          if (icon) {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+          }
+        }
+      });
+    });
+  </script>
+</body>
 </html>
