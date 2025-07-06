@@ -391,10 +391,7 @@ if (isset($_GET['student_query'])) {
                                     <i class="far fa-clock"></i>
                                     <span><?= htmlspecialchars($batch['timing']) ?></span>
                                 </div>
-                                <div class="info-item">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                    <span>Instructor: <?= htmlspecialchars($batch['instructor'] ?? 'Not assigned') ?></span>
-                                </div>
+                                
                                 <div class="info-item">
                                     <i class="fas fa-users"></i>
                                     <span>Capacity: <?= htmlspecialchars($batch['capacity'] ?? '20') ?> students</span>
