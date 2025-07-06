@@ -116,7 +116,7 @@ $result = $conn->query("SELECT * FROM students");
         <tbody>
         <?php while($row = $result->fetch_assoc()): ?>
             <tr>
-                <td><img src="uploads/<?= $row['photo'] ?>" alt="photo"></td>
+                <td><img src="../uploads/<?= $row['photo'] ?>" alt="photo"></td>
                 <td><?= $row['name'] ?></td>
                 <td><?= $row['contact_number'] ?></td>
                 <td><?= $row['enrollment_id'] ?></td>
