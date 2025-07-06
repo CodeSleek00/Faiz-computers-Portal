@@ -231,7 +231,7 @@ $students = $conn->query("
         <div class="empty">No students assigned to this batch yet.</div>
     <?php } ?>
 
-    <a class="back-link" href="view_batches.php">⬅ Back to All Batches</a>
+    <a class="back-link" href="view_batch.php">⬅ Back to All Batches</a>
 </div>
 
 <!-- Image Preview Popup -->
