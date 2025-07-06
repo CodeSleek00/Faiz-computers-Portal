@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("sssi", $name, $contact, $address, $id);
             
             if ($stmt->execute()) {
-                header("Location: manage_students.php?success=student_updated");
+                header("Location: manage_student.php?success=student_updated");
                 exit();
             } else {
                 $errors[] = "Error updating student: " . $conn->error;
