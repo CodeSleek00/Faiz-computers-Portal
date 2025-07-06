@@ -12,16 +12,19 @@ $id = intval($_GET['id']);
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $contact = $_POST['contact'];
+    $course = $_POST['course']; 
     $address = $_POST['address'];
     $newPassword = $_POST['password'];
 
     if (!empty($newPassword)) {
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("UPDATE students SET name=?, contact_number=?, address=?, password=? WHERE student_id=?");
-        $stmt->bind_param("ssssi", $name, $contact, $address, $hashedPassword, $id);
+        $stmt = $conn->prepare("UPDATE students SET name=?, contact_number=?, address=?, course=?, password=? WHERE student_id=?");
+        $stmt->bind_param("sssssi", $name, $contact, $address, $course, $hashedPassword, $id);
+
     } else {
-        $stmt = $conn->prepare("UPDATE students SET name=?, contact_number=?, address=? WHERE student_id=?");
-        $stmt->bind_param("sssi", $name, $contact, $address, $id);
+        $stmt = $conn->prepare("UPDATE students SET name=?, contact_number=?, address=?, course=? WHERE student_id=?");
+        $stmt->bind_param("ssssi", $name, $contact, $address, $course, $id);
+
     }
 
     if ($stmt->execute()) {
@@ -144,6 +147,9 @@ $row = $result->fetch_assoc();
 
         <label for="address">Address</label>
         <textarea id="address" name="address" rows="3" required><?= htmlspecialchars($row['address']) ?></textarea>
+    
+        <label for="course">Course</label>
+        <input type="text" id="course" name="course" value="<?= htmlspecialchars($row['course']) ?>" required>
 
         <label for="password">Change Password (optional)</label>
         <input type="password" id="password" name="password" placeholder="Enter new password">
