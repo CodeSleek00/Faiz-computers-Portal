@@ -1,7 +1,7 @@
 <?php
 // db_connect.php should contain your DB connection logic like:
 // $conn = new mysqli("localhost", "root", "", "your_database");
-include '../database-connection/db_connect.php';
+include '../database_connection/db_connect.php';
 
 // Function to generate unique enrollment ID
 function generateEnrollmentID($conn) {
