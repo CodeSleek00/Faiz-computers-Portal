@@ -129,7 +129,7 @@ $stmt->close();
         <h2>Student Details</h2>
         
         <?php if (!empty($row['photo'])): ?>
-            <img src="uploads/<?= htmlspecialchars($row['photo']) ?>" class="student-photo" alt="Student Photo">
+            <img src="../uploads/<?= htmlspecialchars($row['photo']) ?>" class="student-photo" alt="Student Photo">
         <?php else: ?>
             <div class="student-photo" style="background-color: #eee; display: flex; align-items: center; justify-content: center;">
                 No Photo
@@ -152,7 +152,7 @@ $stmt->close();
             <strong>Enrollment ID:</strong> <?= htmlspecialchars($row['enrollment_id']) ?>
         </div>
         
-        <a href="manage_students.php" class="back-link">Back to Students</a>
+        <a href="manage_student.php" class="back-link">Back to Students</a>
     </div>
 </body>
 </html>
