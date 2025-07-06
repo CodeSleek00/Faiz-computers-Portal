@@ -145,6 +145,10 @@ $stmt->close();
         </div>
         
         <div class="detail-item">
+            <strong>Courses:</strong> <?=htmlspecialchars($row['course']) ?>
+        </div>
+        
+        <div class="detail-item">
             <strong>Address:</strong> <?= htmlspecialchars($row['address']) ?>
         </div>
         
