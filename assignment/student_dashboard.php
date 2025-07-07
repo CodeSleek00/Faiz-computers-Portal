@@ -316,7 +316,7 @@ $assignments = $conn->query($assignment_sql);
         <img src="../uploads/<?= $student['photo'] ?>" alt="Student Photo" class="profile-img">
         <div class="profile-info">
             <h2>Hello, <?= htmlspecialchars($student['name']) ?> 👋</h2>
-            <p><?= $student['enrollment_id'] ?> • <?= $student['email'] ?></p>
+            <p><?= $student['enrollment_id'] ?> </p>
             <div class="stats">
                 <div class="stat-item">
                     <i class="fas fa-book"></i> Assignments
