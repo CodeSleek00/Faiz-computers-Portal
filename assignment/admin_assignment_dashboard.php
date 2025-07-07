@@ -308,7 +308,7 @@ $pending_submissions = $conn->query("SELECT COUNT(*) as total FROM assignment_su
                     <p class="action-desc">Review and grade student submissions</p>
                 </a>
 
-                <a href="view_batches.php" class="action-card">
+                <a href="../batch/view_batches.php" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-users"></i>
                     </div>
@@ -316,7 +316,7 @@ $pending_submissions = $conn->query("SELECT COUNT(*) as total FROM assignment_su
                     <p class="action-desc">Organize students into learning groups</p>
                 </a>
 
-                <a href="view_students.php" class="action-card">
+                <a href="../batch/view_students.php" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-user-graduate"></i>
                     </div>
