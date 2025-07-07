@@ -111,7 +111,7 @@ $pending_submissions = $conn->query("SELECT COUNT(*) as total FROM assignment_su
         <a href="admin_assignments.php" class="action-btn">➕ Create Assignment</a>
         <a href="view_submissions.php" class="action-btn">📂 View Submissions</a>
         <a href="../batch/view_batch.php" class="action-btn">👥 Manage Batches</a>
-        <a href="../admin-panel/manage_students.php" class="action-btn">🧑‍🎓 Manage Students</a>
+        <a href="../admin-panel/manage_student.php" class="action-btn">🧑‍🎓 Manage Students</a>
     </div>
 </div>
 
