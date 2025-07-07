@@ -275,9 +275,6 @@ $assignments = $conn->query($assignment_sql);
                                 </div>
                             <?php } ?>
                             
-                            <a href="view_submission.php?submission_id=<?= $a['submission_id'] ?>" class="btn btn-outline">
-                                <i class="fas fa-eye"></i> View Submission
-                            </a>
                         <?php } else { ?>
                             <div class="status not-submitted">
                                 <i class="fas fa-exclamation-circle"></i>
