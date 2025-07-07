@@ -291,9 +291,6 @@ if ($submitted->num_rows > 0) die("You have already submitted this assignment.")
         <div class="assignment-title"><?= htmlspecialchars($assignment['title']) ?></div>
         <div class="assignment-meta">
             <span><i class="far fa-star"></i> <?= $assignment['marks'] ?> Marks</span>
-            <?php if ($assignment['due_date']): ?>
-                <span><i class="far fa-calendar-alt"></i> Due: <?= date('M d, Y', strtotime($assignment['due_date'])) ?></span>
-            <?php endif; ?>
         </div>
         
         <?php if ($assignment['question_text']): ?>
