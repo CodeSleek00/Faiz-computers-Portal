@@ -8,160 +8,89 @@ $pending_submissions = $conn->query("SELECT COUNT(*) as total FROM assignment_su
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Assignment Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #6C63FF;
-            --secondary: #F0F2F5;
-            --text-dark: #2C3E50;
-            --text-light: #7F8C8D;
-            --card-bg: #fff;
-            --hover-bg: #554ef0;
-            --border-radius: 16px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--secondary);
-            color: var(--text-dark);
-            padding: 40px 20px;
+            font-family: 'Poppins', sans-serif;
+            background: #f4f7fa;
+            margin: 0;
+            padding: 40px;
         }
 
         .dashboard {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: auto;
         }
 
         h1 {
             text-align: center;
-            font-size: 32px;
             margin-bottom: 30px;
-            font-weight: 700;
-            color: var(--primary);
+            color: #333;
         }
 
         .cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 24px;
+            gap: 20px;
             margin-bottom: 40px;
         }
 
         .card {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            background: white;
+            padding: 30px 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
             text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
         }
 
         .card h2 {
-            font-size: 36px;
-            color: var(--primary);
+            font-size: 38px;
             margin-bottom: 10px;
+            color: #007bff;
         }
 
         .card p {
             font-size: 16px;
-            color: var(--text-light);
+            color: #666;
         }
 
         .actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 20px;
             justify-content: center;
         }
 
         .action-btn {
-            background: var(--primary);
-            color: #fff;
+            background: #007bff;
+            color: white;
             padding: 14px 20px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 16px;
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.3s ease;
-            box-shadow: var(--shadow);
+            display: inline-block;
+            text-align: center;
+            transition: 0.3s ease;
+            min-width: 220px;
         }
 
         .action-btn:hover {
-            background: var(--hover-bg);
+            background: #0056b3;
         }
 
-        .search-section {
-            margin: 40px auto;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        .search-section input {
-            width: 70%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            outline: none;
-        }
-
-        .search-section button {
-            padding: 12px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            margin-left: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .search-section button:hover {
-            background: var(--hover-bg);
-        }
-
-        @media screen and (max-width: 768px) {
-            .action-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .search-section input {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
-            .search-section button {
-                width: 100%;
-                margin: 0;
-            }
+        @media screen and (max-width: 600px) {
+            .action-btn { width: 100%; }
         }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <h1><i class="fas fa-chalkboard-teacher"></i> Assignment Control Center</h1>
+    <h1>📚 Assignment Control Center</h1>
 
     <div class="cards">
         <div class="card">
@@ -178,19 +107,12 @@ $pending_submissions = $conn->query("SELECT COUNT(*) as total FROM assignment_su
         </div>
     </div>
 
-    <div class="search-section">
-        <form action="search_assignments.php" method="GET">
-            <input type="text" name="query" placeholder="Search by title, student, or batch...">
-            <button type="submit"><i class="fas fa-search"></i> Search</button>
-        </form>
-    </div>
-
     <div class="actions">
-        <a href="admin_assignments.php" class="action-btn"><i class="fas fa-plus-circle"></i> Create Assignment</a>
-        <a href="assign_assignment.php" class="action-btn"><i class="fas fa-paper-plane"></i> Assign to Students</a>
-        <a href="view_submissions.php" class="action-btn"><i class="fas fa-folder-open"></i> View Submissions</a>
-        <a href="view_batches.php" class="action-btn"><i class="fas fa-users"></i> Manage Batches</a>
-        <a href="view_students.php" class="action-btn"><i class="fas fa-user-graduate"></i> Manage Students</a>
+        <a href="admin_assignments.php" class="action-btn">➕ Create Assignment</a>
+        <a href="assign_assignment.php" class="action-btn">📤 Assign to Students</a>
+        <a href="view_submissions.php" class="action-btn">📂 View Submissions</a>
+        <a href="view_batches.php" class="action-btn">👥 Manage Batches</a>
+        <a href="view_students.php" class="action-btn">🧑‍🎓 Manage Students</a>
     </div>
 </div>
 
