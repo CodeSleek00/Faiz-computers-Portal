@@ -33,29 +33,21 @@ $assignments = $conn->query($assignment_sql);
 <html>
 <head>
     <title>Student Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
             --primary: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary: #4cc9f0;
-            --success: #4bb543;
+            --primary-light: #eef2ff;
+            --success: #28a745;
             --warning: #ffc107;
-            --danger: #f44336;
+            --danger: #dc3545;
             --light: #f8f9fa;
             --dark: #212529;
             --gray: #6c757d;
-            --border-radius: 12px;
-            --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         body {
@@ -64,15 +56,15 @@ $assignments = $conn->query($assignment_sql);
             color: var(--dark);
             line-height: 1.6;
             padding: 20px;
+            margin: 0;
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 0 15px;
         }
 
-        /* Header Section */
+        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -85,132 +77,95 @@ $assignments = $conn->query($assignment_sql);
         }
 
         .profile-img {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
             border-radius: 50%;
-            border: 3px solid var(--primary);
+            border: 2px solid var(--primary-light);
         }
 
         .profile-info h2 {
             font-weight: 600;
             margin-bottom: 5px;
-            color: var(--primary);
+            color: var(--dark);
         }
 
         .profile-info p {
             color: var(--gray);
-            font-size: 15px;
-        }
-
-        .stats {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat-item {
-            background: var(--light);
-            padding: 8px 15px;
-            border-radius: 20px;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
-        /* Assignment Cards */
-        .assignment-grid {
+        /* Assignments */
+        .assignments {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: 1fr;
             gap: 20px;
-            margin-bottom: 30px;
         }
 
-        .card {
+        .assignment-card {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            padding: 18px 20px;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 18px;
-        }
-
-        .card-marks {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-
-        .card-body {
             padding: 20px;
         }
 
-        .question-text {
-            color: var(--dark);
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 15px;
-            font-size: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light);
         }
 
-        .question-image {
-            width: 100%;
-            border-radius: 8px;
+        .assignment-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .assignment-marks {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .assignment-body {
+            margin-bottom: 15px;
+        }
+
+        .assignment-question {
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .assignment-image {
+            max-width: 100%;
+            border-radius: var(--border-radius);
             margin-bottom: 15px;
             border: 1px solid #eee;
         }
 
-        .status-badge {
+        .status {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .submitted {
-            background: rgba(75, 181, 67, 0.1);
+            background: #e8f5e9;
             color: var(--success);
         }
 
         .not-submitted {
-            background: rgba(244, 67, 54, 0.1);
+            background: #ffebee;
             color: var(--danger);
         }
 
         .graded {
-            background: rgba(67, 97, 238, 0.1);
+            background: #e3f2fd;
             color: var(--primary);
-        }
-
-        .due-date {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: var(--gray);
-            font-size: 14px;
-            margin-bottom: 15px;
         }
 
         .btn {
@@ -218,14 +173,14 @@ $assignments = $conn->query($assignment_sql);
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 18px;
+            padding: 10px 15px;
             border-radius: var(--border-radius);
             font-weight: 500;
             text-decoration: none;
-            transition: var(--transition);
             cursor: pointer;
             border: none;
-            width: 100%;
+            font-size: 14px;
+            transition: all 0.2s;
         }
 
         .btn-primary {
@@ -234,76 +189,44 @@ $assignments = $conn->query($assignment_sql);
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: #3a56d4;
         }
 
         .btn-outline {
-            background: transparent;
+            background: white;
             color: var(--primary);
             border: 1px solid var(--primary);
         }
 
         .btn-outline:hover {
-            background: rgba(67, 97, 238, 0.1);
+            background: var(--primary-light);
         }
 
-        .no-data {
+        .no-assignments {
             text-align: center;
-            padding: 50px 20px;
+            padding: 40px 20px;
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
         }
 
-        .no-data i {
-            font-size: 50px;
-            color: var(--primary);
+        .no-assignments i {
+            font-size: 40px;
+            color: var(--gray);
             margin-bottom: 15px;
             opacity: 0.7;
         }
 
-        .no-data h3 {
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .no-data p {
-            color: var(--gray);
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
                 text-align: center;
             }
-
-            .stats {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .assignment-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-img {
-                width: 70px;
-                height: 70px;
-            }
-
-            .card-header {
+            
+            .assignment-header {
                 flex-direction: column;
-                align-items: flex-start;
                 gap: 10px;
-            }
-
-            .card-marks {
-                align-self: flex-start;
             }
         }
     </style>
@@ -311,63 +234,44 @@ $assignments = $conn->query($assignment_sql);
 <body>
 
 <div class="container">
-    <!-- Header Section -->
+    <!-- Header -->
     <div class="header">
         <img src="../uploads/<?= $student['photo'] ?>" alt="Student Photo" class="profile-img">
         <div class="profile-info">
-            <h2>Hello, <?= htmlspecialchars($student['name']) ?> 👋</h2>
+            <h2><?= htmlspecialchars($student['name']) ?></h2>
             <p><?= $student['enrollment_id'] ?> </p>
-            <div class="stats">
-                <div class="stat-item">
-                    <i class="fas fa-book"></i> Assignments
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-graduation-cap"></i> Student
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Assignments Section -->
+    <!-- Assignments -->
     <?php if ($assignments->num_rows > 0) { ?>
-        <div class="assignment-grid">
+        <div class="assignments">
             <?php while ($a = $assignments->fetch_assoc()) { ?>
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title"><?= htmlspecialchars($a['title']) ?></div>
-                        <div class="card-marks"><?= $a['marks'] ?> marks</div>
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title"><?= htmlspecialchars($a['title']) ?></div>
+                        <div class="assignment-marks"><?= $a['marks'] ?> marks</div>
                     </div>
-                    <div class="card-body">
-                        <?php if (!empty($a['due_date'])) { ?>
-                            <div class="due-date">
-                                <i class="far fa-calendar-alt"></i>
-                                Due: <?= date('d M Y', strtotime($a['due_date'])) ?>
-                            </div>
-                        <?php } ?>
-
+                    
+                    <div class="assignment-body">
                         <?php if (!empty($a['question_text'])) { ?>
-                            <div class="question-text"><?= nl2br(htmlspecialchars($a['question_text'])) ?></div>
+                            <div class="assignment-question"><?= nl2br(htmlspecialchars($a['question_text'])) ?></div>
                         <?php } ?>
 
                         <?php if (!empty($a['question_image'])) { ?>
-                            <img src="../uploads/assignments/<?= $a['question_image'] ?>" class="question-image">
+                            <img src="../uploads/assignments/<?= $a['question_image'] ?>" class="assignment-image">
                         <?php } ?>
 
                         <?php if (!empty($a['submission_id'])) { ?>
-                            <div class="status-badge submitted">
+                            <div class="status submitted">
                                 <i class="fas fa-check-circle"></i>
-                                Submitted on <?= date('d M Y', strtotime($a['submitted_at'])) ?>
+                                Submitted on <?= date('M d, Y', strtotime($a['submitted_at'])) ?>
                             </div>
                             
                             <?php if (!is_null($a['marks_awarded'])) { ?>
-                                <div class="status-badge graded">
+                                <div class="status graded">
                                     <i class="fas fa-star"></i>
-                                    Scored: <?= $a['marks_awarded'] ?> / <?= $a['marks'] ?>
-                                </div>
-                            <?php } else { ?>
-                                <div class="status-badge" style="background: rgba(255, 193, 7, 0.1); color: var(--warning);">
-                                    <i class="fas fa-hourglass-half"></i>
-                                    Waiting for grading
+                                    Grade: <?= $a['marks_awarded'] ?>/<?= $a['marks'] ?>
                                 </div>
                             <?php } ?>
                             
@@ -375,12 +279,12 @@ $assignments = $conn->query($assignment_sql);
                                 <i class="fas fa-eye"></i> View Submission
                             </a>
                         <?php } else { ?>
-                            <div class="status-badge not-submitted">
+                            <div class="status not-submitted">
                                 <i class="fas fa-exclamation-circle"></i>
                                 Not Submitted
                             </div>
                             <a href="submit_assignment.php?assignment_id=<?= $a['assignment_id'] ?>" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i> Submit Now
+                                <i class="fas fa-paper-plane"></i> Submit Assignment
                             </a>
                         <?php } ?>
                     </div>
@@ -388,10 +292,10 @@ $assignments = $conn->query($assignment_sql);
             <?php } ?>
         </div>
     <?php } else { ?>
-        <div class="no-data">
+        <div class="no-assignments">
             <i class="fas fa-book-open"></i>
-            <h3>No Assignments Yet</h3>
-            <p>You currently don't have any assignments. Check back later or contact your instructor if you believe this is an error.</p>
+            <h3>No Assignments Found</h3>
+            <p>You don't have any assignments at this time.</p>
         </div>
     <?php } ?>
 </div>
