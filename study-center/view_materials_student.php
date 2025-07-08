@@ -41,7 +41,7 @@ $data = $conn->query($query);
         <?php while ($row = $data->fetch_assoc()): ?>
             <div class="material">
                 <h4><?= htmlspecialchars($row['title']) ?></h4>
-                <a class="download" href="uploads/study_materials/<?= $row['file_name'] ?>" target="_blank">📥 Download PDF</a>
+               <a class="btn download" href="download.php?file=<?= urlencode($row['file_name']) ?>">Download</a>
             </div>
         <?php endwhile; ?>
     <?php else: ?>
