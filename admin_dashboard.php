@@ -6,7 +6,7 @@ $total_students = $conn->query("SELECT COUNT(*) AS c FROM students")->fetch_asso
 $total_batches = $conn->query("SELECT COUNT(*) AS c FROM batches")->fetch_assoc()['c'];
 $total_exams = $conn->query("SELECT COUNT(*) AS c FROM exams")->fetch_assoc()['c'];
 $total_assignments = $conn->query("SELECT COUNT(*) AS c FROM assignments")->fetch_assoc()['c'];
-$total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_material")->fetch_assoc()['c'];
+$total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fetch_assoc()['c'];
 ?>
 
 <!DOCTYPE html>
