@@ -1,5 +1,5 @@
 <?php
-include '../database_connection/db_connect.php';
+include 'database_connection/db_connect.php';
 
 // Total students
 $students = $conn->query("SELECT COUNT(*) AS total FROM students")->fetch_assoc()['total'];
