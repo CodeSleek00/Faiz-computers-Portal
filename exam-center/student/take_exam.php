@@ -49,7 +49,7 @@ $questions = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id
             <p><strong>Name:</strong> <?= $student['name'] ?> | <strong>Enroll:</strong> <?= $student['enrollment_id'] ?></p>
         </div>
         <div>
-            <img src="../uploads/<?= $student['photo'] ?>" width="80" style="border-radius: 50%">
+            <img src="../../uploads/<?= $student['photo'] ?>" width="80" style="border-radius: 50%">
             <p><strong>⏱️ <span id="timer"></span></strong></p>
         </div>
     </div>
