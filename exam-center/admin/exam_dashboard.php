@@ -1,64 +1,70 @@
 <?php
 include '../../database_connection/db_connect.php';
 
+// Fetch all exams
 $exams = $conn->query("SELECT * FROM exams ORDER BY created_at DESC");
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Exam Dashboard</title>
+    <title>Admin - Exam Dashboard</title>
     <style>
-        body { font-family: Arial; background: #f2f2f2; padding: 40px; }
+        body { font-family: Arial; padding: 40px; background: #f4f4f4; }
         .container {
             max-width: 1000px; margin: auto; background: white; padding: 30px;
-            border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+            border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td {
-            padding: 12px; border-bottom: 1px solid #ddd; text-align: left;
+            border: 1px solid #ccc; padding: 10px;
+            text-align: left;
         }
-        th { background-color: #f7f7f7; }
-        .btn {
-            padding: 6px 12px; border: none; border-radius: 6px;
-            color: white; text-decoration: none; margin-right: 10px;
+        th { background: #f0f0f0; }
+        a.btn {
+            padding: 6px 12px; border-radius: 6px; text-decoration: none; color: white;
         }
-        .delete { background: #dc3545; }
-        .view { background: #17a2b8; }
+        .declare { background: green; }
+        .clear { background: red; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>📋 Exam Dashboard</h2>
+    <h2>📋 All Exams</h2>
     <table>
-        <tr>
-            <th>Exam Name</th>
-            <th>Questions</th>
-            <th>Duration (min)</th>
-            <th>Created</th>
-            <th>Actions</th>
-        </tr>
-        <?php while ($row = $exams->fetch_assoc()) { ?>
-        <tr>
-            <td><?= $row['exam_name'] ?></td>
-            <td><?= $row['total_questions'] ?></td>
-            <td><?= $row['duration'] ?></td>
-            <td><?= date('d M Y, h:i A', strtotime($row['created_at'])) ?></td>
-            <td>
-                <a href="view_results_admin.php?exam_id=<?= $row['exam_id'] ?>" class="btn view">View Results</a>
-                <a href="delete_exam.php?exam_id=<?= $row['exam_id'] ?>" class="btn delete" onclick="return confirm('Delete this exam and all data?')">Delete</a>
-            </td>
-        </tr><td>
-    <?php if ($exam['result_declared']) { ?>
-        ✅ Declared
-        <a href="undeclare_result.php?exam_id=<?= $exam['exam_id'] ?>" onclick="return confirm('Remove result declaration?')">❌ Clear</a>
-    <?php } else { ?>
-        ❌ Not Declared
-        <a href="declare_result.php?exam_id=<?= $exam['exam_id'] ?>">✅ Declare Now</a>
-    <?php } ?>
-</td>
-
+        <thead>
+            <tr>
+                <th>Exam Name</th>
+                <th>Total Questions</th>
+                <th>Duration</th>
+                <th>Created</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php while ($exam = $exams->fetch_assoc()) { ?>
+            <tr>
+                <td><?= htmlspecialchars($exam['exam_name']) ?></td>
+                <td><?= $exam['total_questions'] ?></td>
+                <td><?= $exam['duration'] ?> min</td>
+                <td><?= date("d M Y", strtotime($exam['created_at'])) ?></td>
+                <td>
+                    <?php if ($exam['result_declared']) { ?>
+                        ✅ Declared
+                        <a href="undeclare_result.php?exam_id=<?= $exam['exam_id'] ?>" class="btn clear" onclick="return confirm('Remove result declaration?')">❌ Clear</a>
+                    <?php } else { ?>
+                        ❌ Not Declared
+                        <a href="declare_result.php?exam_id=<?= $exam['exam_id'] ?>" class="btn declare">✅ Declare Now</a>
+                    <?php } ?>
+                </td>
+                <td>
+                    <a href="view_results_admin.php?exam_id=<?= $exam['exam_id'] ?>">📊 View</a> |
+                    <a href="delete_exam.php?exam_id=<?= $exam['exam_id'] ?>" onclick="return confirm('Are you sure?')">🗑 Delete</a>
+                </td>
+            </tr>
         <?php } ?>
+        </tbody>
     </table>
 </div>
 </body>
