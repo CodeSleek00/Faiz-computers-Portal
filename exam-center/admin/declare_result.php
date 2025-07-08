@@ -1,11 +1,20 @@
 <?php
 include '../../database_connection/db_connect.php';
 
-$exam_id = $_GET['exam_id'];
-$show = $_GET['show'] === '1' ? 1 : 0;
+if (isset($_GET['exam_id'])) {
+    $exam_id = intval($_GET['exam_id']);
 
-$conn->query("UPDATE exams SET result_declared = $show WHERE exam_id = $exam_id");
+    // Update exam table
+    $stmt = $conn->prepare("UPDATE exams SET result_declared = 1 WHERE exam_id = ?");
+    $stmt->bind_param("i", $exam_id);
+    $stmt->execute();
 
-header("Location: exam_dashboard.php");
-exit;
+    if ($stmt->affected_rows > 0) {
+        header("Location: exam_dashboard.php?success=1");
+    } else {
+        echo "Failed to declare result. Maybe already declared.";
+    }
+} else {
+    echo "Exam ID not provided.";
+}
 ?>
