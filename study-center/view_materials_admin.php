@@ -9,7 +9,7 @@ if (isset($_GET['msg'])) {
 }
 
 // Fetch all materials
-$materials = $conn->query("SELECT * FROM study_material ORDER BY uploaded_at DESC");
+$materials = $conn->query("SELECT * FROM study_materials ORDER BY uploaded_at DESC");
 ?>
 
 <!DOCTYPE html>
