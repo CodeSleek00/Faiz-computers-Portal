@@ -10,7 +10,7 @@ $exams = $conn->query("SELECT COUNT(*) AS total FROM exams")->fetch_assoc()['tot
 // Total assignments
 $assignments = $conn->query("SELECT COUNT(*) AS total FROM assignments")->fetch_assoc()['total'];
 // Total study materials
-$materials = $conn->query("SELECT COUNT(*) AS total FROM study_material")->fetch_assoc()['total'];
+$materials = $conn->query("SELECT COUNT(*) AS total FROM study_materials")->fetch_assoc()['total'];
 ?>
 
 <!DOCTYPE html>
