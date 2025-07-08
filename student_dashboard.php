@@ -1,5 +1,5 @@
 <?php
-include '../database_connection/db_connect.php';
+include 'database_connection/db_connect.php';
 session_start();
 $eid = $_SESSION['enrollment_id'] ?? null;
 if (!$eid) { header("Location: login.php"); exit; }
