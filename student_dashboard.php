@@ -16,7 +16,7 @@ $asgn = $conn->query("SELECT * FROM assignments a
   LEFT JOIN assignment_submissions s ON a.assignment_id=s.assignment_id 
   AND s.student_id=$sid
 ");
-$mats = $conn->query("SELECT * FROM study_material");
+$mats = $conn->query("SELECT * FROM study_materials");
 ?>
 
 <!DOCTYPE html>
