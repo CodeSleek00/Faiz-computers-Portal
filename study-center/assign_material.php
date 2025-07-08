@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         move_uploaded_file($file['tmp_name'], '../uploads/study_materials/' . $filename);
 
         // Save to DB
-        $stmt = $conn->prepare("INSERT INTO study_material (title, file_name, uploaded_at) VALUES (?, ?, NOW())");
+        $stmt = $conn->prepare("INSERT INTO study_materials (title, file_name, uploaded_at) VALUES (?, ?, NOW())");
         $stmt->bind_param("ss", $title, $filename);
         $stmt->execute();
         $material_id = $stmt->insert_id;
