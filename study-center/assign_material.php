@@ -1,4 +1,3 @@
-
 <?php
 include '../database_connection/db_connect.php';
 
@@ -43,63 +42,252 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Upload Study Material</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f4f6fa; padding: 40px; }
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --text-color: #2b2d42;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
         .container {
-            max-width: 700px;
+            max-width: 800px;
             background: white;
-            margin: auto;
+            margin: 0 auto;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
-        h2 { text-align: center; margin-bottom: 25px; color: #333; }
-        label { display: block; margin-top: 15px; font-weight: 600; }
-        input, select, textarea {
-            width: 100%; padding: 10px; border: 1px solid #ccc;
-            border-radius: 8px; margin-top: 5px; font-family: 'Poppins', sans-serif;
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--text-color);
+            font-size: 1.8rem;
         }
-        select[multiple] { height: 150px; }
-        button {
-            margin-top: 20px;
-            padding: 12px;
-            background: #007bff;
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        input[type="text"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        select[multiple] {
+            min-height: 150px;
+            padding: 10px;
+        }
+        
+        optgroup {
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        option {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
             color: white;
             font-weight: 600;
             border: none;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
             width: 100%;
         }
-        button:hover { background: #0056b3; }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: var(--light-gray);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+        }
+        
+        .file-input-label span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+        }
+        
+        .file-input-icon {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            select[multiple] {
+                min-height: 120px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 15px;
+                box-shadow: none;
+                border-radius: 0;
+                flex: 1;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h2>Upload Study Material</h2>
     <form method="POST" enctype="multipart/form-data">
-        <label>Title:</label>
-        <input type="text" name="title" required>
-
-        <label>Upload PDF:</label>
-        <input type="file" name="pdf_file" accept="application/pdf" required>
-
-        <label>Assign To:</label>
-        <select name="targets[]" multiple required>
-            <optgroup label="Batches">
-                <?php while ($b = $batches->fetch_assoc()) { ?>
-                    <option value="batch_<?= $b['batch_id'] ?>">Batch: <?= $b['batch_name'] ?></option>
-                <?php } ?>
-            </optgroup>
-            <optgroup label="Students">
-                <?php while ($s = $students->fetch_assoc()) { ?>
-                    <option value="student_<?= $s['student_id'] ?>">Student: <?= $s['name'] ?> (<?= $s['enrollment_id'] ?>)</option>
-                <?php } ?>
-            </optgroup>
-        </select>
-
-        <button type="submit">Upload</button>
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="pdf_file">Upload PDF:</label>
+            <div class="file-input-wrapper">
+                <label class="file-input-label" for="pdf_file">
+                    <span id="file-name">Choose a PDF file</span>
+                    <span class="file-input-icon">📁</span>
+                </label>
+                <input type="file" id="pdf_file" name="pdf_file" accept="application/pdf" required onchange="updateFileName(this)">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="targets">Assign To:</label>
+            <select id="targets" name="targets[]" multiple required>
+                <optgroup label="Batches">
+                    <?php while ($b = $batches->fetch_assoc()) { ?>
+                        <option value="batch_<?= $b['batch_id'] ?>">Batch: <?= $b['batch_name'] ?></option>
+                    <?php } ?>
+                </optgroup>
+                <optgroup label="Students">
+                    <?php while ($s = $students->fetch_assoc()) { ?>
+                        <option value="student_<?= $s['student_id'] ?>">Student: <?= $s['name'] ?> (<?= $s['enrollment_id'] ?>)</option>
+                    <?php } ?>
+                </optgroup>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn">Upload Material</button>
     </form>
 </div>
+
+<script>
+    function updateFileName(input) {
+        const fileNameDisplay = document.getElementById('file-name');
+        if (input.files.length > 0) {
+            fileNameDisplay.textContent = input.files[0].name;
+        } else {
+            fileNameDisplay.textContent = 'Choose a PDF file';
+        }
+    }
+</script>
 </body>
 </html>
