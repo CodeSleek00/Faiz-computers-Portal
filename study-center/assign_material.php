@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        header("Location: view_material_admin.php?msg=uploaded");
+        header("Location: view_materials_admin.php?msg=uploaded");
         exit;
     }
 }
