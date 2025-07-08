@@ -10,98 +10,136 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Admin Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: #f4f7fc;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #1d2b64, #f8cdda);
+            min-height: 100vh;
+            padding: 0;
+            color: #f0f0f0;
         }
-        .header {
-            background: #0d6efd;
-            padding: 20px;
-            color: white;
+
+        header {
+            padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
         }
+
+        header h1 {
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #ccc;
+            font-size: 14px;
+        }
+
         .container {
             max-width: 1200px;
             margin: auto;
             padding: 30px 20px;
         }
+
         .cards {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            margin-bottom: 40px;
+            justify-content: space-between;
         }
+
         .card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
             flex: 1 1 calc(20% - 20px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             text-align: center;
+            transition: transform 0.3s ease;
         }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
         .card h3 {
-            font-size: 36px;
-            color: #0d6efd;
-            margin: 0;
+            font-size: 40px;
+            color: #fff;
+            margin-bottom: 5px;
         }
+
         .card p {
-            margin: 8px 0 0;
-            color: #777;
+            color: #ddd;
             font-size: 14px;
         }
-        .features {
+
+        .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+            gap: 30px;
+            margin: 50px 0;
         }
+
         .feature-box {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: 0.3s;
         }
+
+        .feature-box:hover {
+            transform: translateY(-6px);
+        }
+
         .feature-box h4 {
-            margin: 0 0 10px;
-            color: #333;
+            margin-bottom: 10px;
+            color: #fff;
         }
+
         .feature-box a {
-            display: inline-block;
             margin-top: 10px;
+            display: inline-block;
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
             background: #0d6efd;
             color: white;
-            text-decoration: none;
+            margin-right: 10px;
         }
+
         canvas {
-            background: white;
+            width: 100%;
+            margin-top: 50px;
+            background: rgba(255, 255, 255, 0.08);
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 14px;
         }
 
         @media (max-width: 768px) {
-            .card {
-                flex: 1 1 100%;
-            }
+            .card { flex: 1 1 100%; }
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>📊 Admin Dashboard</h1>
-    <p>Manage Exams, Assignments, Study Materials, and Students</p>
-</div>
+<header>
+    <h1>🚀 Admin Control Center</h1>
+    <p>Monitor & Manage Everything in One Place</p>
+</header>
 
 <div class="container">
 
@@ -128,54 +166,48 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         </div>
     </div>
 
-    <div class="features">
+    <div class="grid">
         <div class="feature-box">
-            <h4>📝 Exam Center</h4>
+            <h4>📘 Exam Center</h4>
             <a href="create_exam.php">Create Exam</a>
-            <a href="exam_dashboard.php">Manage Exams</a>
+            <a href="exam_dashboard.php">Manage</a>
         </div>
         <div class="feature-box">
-            <h4>📂 Assignment Center</h4>
-            <a href="../assignments/admin_assignments.php">Create Assignment</a>
-            <a href="../assignments/view_submissions.php">Submissions</a>
+            <h4>📒 Assignments</h4>
+            <a href="../assignments/admin_assignments.php">New Assignment</a>
+            <a href="../assignments/view_submissions.php">View Submissions</a>
         </div>
         <div class="feature-box">
             <h4>📚 Study Center</h4>
-            <a href="../study-center/upload_material.php">Upload Material</a>
-            <a href="../study-center/view_materials_admin.php">Manage Material</a>
+            <a href="../study-center/upload_material.php">Upload PDF</a>
+            <a href="../study-center/view_materials_admin.php">Manage</a>
         </div>
         <div class="feature-box">
-            <h4>🎯 Results & Review</h4>
-            <a href="declare_result.php">Declare Results</a>
-            <a href="view_results_admin.php">View Submissions</a>
+            <h4>📊 Results</h4>
+            <a href="declare_result.php">Declare</a>
+            <a href="view_results_admin.php">Review</a>
         </div>
     </div>
 
-    <h3 style="margin: 20px 0;">📈 Data Overview</h3>
-    <canvas id="summaryChart" height="130"></canvas>
+    <canvas id="summaryChart" height="100"></canvas>
 
 </div>
 
 <script>
     const ctx = document.getElementById('summaryChart').getContext('2d');
-    const summaryChart = new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['Students', 'Batches', 'Exams', 'Assignments', 'Materials'],
             datasets: [{
-                label: 'Overview Count',
+                label: 'Count Overview',
                 data: [<?= $total_students ?>, <?= $total_batches ?>, <?= $total_exams ?>, <?= $total_assignments ?>, <?= $total_materials ?>],
-                backgroundColor: [
-                    '#0d6efd', '#6610f2', '#198754', '#ffc107', '#dc3545'
-                ]
+                backgroundColor: ['#0d6efd', '#6610f2', '#198754', '#ffc107', '#dc3545'],
+                borderRadius: 8
             }]
         },
         options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: true }
-            },
+            plugins: { legend: { display: false } },
             scales: {
                 y: {
                     beginAtZero: true,
