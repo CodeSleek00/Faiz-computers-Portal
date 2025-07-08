@@ -1,95 +1,96 @@
 <?php
-include 'database_connection/db_connect.php';
+include '../database_connection/db_connect.php';
 
-// Total students
-$students = $conn->query("SELECT COUNT(*) AS total FROM students")->fetch_assoc()['total'];
-// Total batches
-$batches = $conn->query("SELECT COUNT(*) AS total FROM batches")->fetch_assoc()['total'];
-// Total exams
-$exams = $conn->query("SELECT COUNT(*) AS total FROM exams")->fetch_assoc()['total'];
-// Total assignments
-$assignments = $conn->query("SELECT COUNT(*) AS total FROM assignments")->fetch_assoc()['total'];
-// Total study materials
-$materials = $conn->query("SELECT COUNT(*) AS total FROM study_materials")->fetch_assoc()['total'];
+// Fetch counts
+$total_students = $conn->query("SELECT COUNT(*) AS c FROM students")->fetch_assoc()['c'];
+$total_batches = $conn->query("SELECT COUNT(*) AS c FROM batches")->fetch_assoc()['c'];
+$total_exams = $conn->query("SELECT COUNT(*) AS c FROM exams")->fetch_assoc()['c'];
+$total_assignments = $conn->query("SELECT COUNT(*) AS c FROM assignments")->fetch_assoc()['c'];
+$total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_material")->fetch_assoc()['c'];
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Admin Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
             margin: 0;
-            background: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fc;
         }
         .header {
-            background: #007bff;
-            color: white;
+            background: #0d6efd;
             padding: 20px;
+            color: white;
             text-align: center;
-        }
-        .header h1 {
-            margin: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .container {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px 20px;
         }
         .cards {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         .card {
-            flex: 1 1 calc(33% - 20px);
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            padding: 25px;
+            border-radius: 10px;
+            flex: 1 1 calc(20% - 20px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             text-align: center;
         }
-        .card h2 {
-            margin: 10px 0;
-            font-size: 26px;
-            color: #007bff;
+        .card h3 {
+            font-size: 36px;
+            color: #0d6efd;
+            margin: 0;
         }
         .card p {
-            color: #555;
+            margin: 8px 0 0;
+            color: #777;
+            font-size: 14px;
         }
-        .sections {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
-        .section {
-            flex: 1 1 calc(50% - 20px);
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        .feature-box {
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
         }
-        .section h3 {
-            margin-top: 0;
+        .feature-box h4 {
+            margin: 0 0 10px;
             color: #333;
         }
-        .btn {
+        .feature-box a {
             display: inline-block;
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            margin-top: 15px;
+            margin-top: 10px;
+            padding: 8px 16px;
             border-radius: 6px;
+            background: #0d6efd;
+            color: white;
             text-decoration: none;
         }
-        .btn:hover {
-            background: #0056b3;
+        canvas {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
+
         @media (max-width: 768px) {
-            .card, .section {
+            .card {
                 flex: 1 1 100%;
             }
         }
@@ -98,61 +99,92 @@ $materials = $conn->query("SELECT COUNT(*) AS total FROM study_materials")->fetc
 <body>
 
 <div class="header">
-    <h1>👨‍🏫 Admin Dashboard</h1>
+    <h1>📊 Admin Dashboard</h1>
+    <p>Manage Exams, Assignments, Study Materials, and Students</p>
 </div>
 
 <div class="container">
 
     <div class="cards">
         <div class="card">
-            <h2><?= $students ?></h2>
-            <p>Total Students</p>
+            <h3><?= $total_students ?></h3>
+            <p>Students</p>
         </div>
         <div class="card">
-            <h2><?= $batches ?></h2>
-            <p>Total Batches</p>
+            <h3><?= $total_batches ?></h3>
+            <p>Batches</p>
         </div>
         <div class="card">
-            <h2><?= $exams ?></h2>
-            <p>Total Exams</p>
+            <h3><?= $total_exams ?></h3>
+            <p>Exams</p>
         </div>
         <div class="card">
-            <h2><?= $assignments ?></h2>
-            <p>Total Assignments</p>
+            <h3><?= $total_assignments ?></h3>
+            <p>Assignments</p>
         </div>
         <div class="card">
-            <h2><?= $materials ?></h2>
+            <h3><?= $total_materials ?></h3>
             <p>Study Materials</p>
         </div>
     </div>
 
-    <div class="sections">
-        <div class="section">
-            <h3>📋 Exam Center</h3>
-            <a href="create_exam.php" class="btn">Create Exam</a>
-            <a href="exam_dashboard.php" class="btn">Manage Exams</a>
+    <div class="features">
+        <div class="feature-box">
+            <h4>📝 Exam Center</h4>
+            <a href="create_exam.php">Create Exam</a>
+            <a href="exam_dashboard.php">Manage Exams</a>
         </div>
-
-        <div class="section">
-            <h3>📝 Assignment Center</h3>
-            <a href="../assignments/admin_assignments.php" class="btn">Create Assignment</a>
-            <a href="../assignments/view_submissions.php" class="btn">View Submissions</a>
+        <div class="feature-box">
+            <h4>📂 Assignment Center</h4>
+            <a href="../assignments/admin_assignments.php">Create Assignment</a>
+            <a href="../assignments/view_submissions.php">Submissions</a>
         </div>
-
-        <div class="section">
-            <h3>📚 Study Center</h3>
-            <a href="../study-center/upload_material.php" class="btn">Upload Material</a>
-            <a href="../study-center/view_materials_admin.php" class="btn">View Materials</a>
+        <div class="feature-box">
+            <h4>📚 Study Center</h4>
+            <a href="../study-center/upload_material.php">Upload Material</a>
+            <a href="../study-center/view_materials_admin.php">Manage Material</a>
         </div>
-
-        <div class="section">
-            <h3>🎯 Results</h3>
-            <a href="view_results_admin.php" class="btn">View All Results</a>
-            <a href="declare_result.php" class="btn">Declare Results</a>
+        <div class="feature-box">
+            <h4>🎯 Results & Review</h4>
+            <a href="declare_result.php">Declare Results</a>
+            <a href="view_results_admin.php">View Submissions</a>
         </div>
     </div>
 
+    <h3 style="margin: 20px 0;">📈 Data Overview</h3>
+    <canvas id="summaryChart" height="130"></canvas>
+
 </div>
+
+<script>
+    const ctx = document.getElementById('summaryChart').getContext('2d');
+    const summaryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Students', 'Batches', 'Exams', 'Assignments', 'Materials'],
+            datasets: [{
+                label: 'Overview Count',
+                data: [<?= $total_students ?>, <?= $total_batches ?>, <?= $total_exams ?>, <?= $total_assignments ?>, <?= $total_materials ?>],
+                backgroundColor: [
+                    '#0d6efd', '#6610f2', '#198754', '#ffc107', '#dc3545'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
