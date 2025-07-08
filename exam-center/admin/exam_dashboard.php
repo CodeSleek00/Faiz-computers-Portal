@@ -48,7 +48,16 @@ $exams = $conn->query("SELECT * FROM exams ORDER BY created_at DESC");
                 <a href="view_results_admin.php?exam_id=<?= $row['exam_id'] ?>" class="btn view">View Results</a>
                 <a href="delete_exam.php?exam_id=<?= $row['exam_id'] ?>" class="btn delete" onclick="return confirm('Delete this exam and all data?')">Delete</a>
             </td>
-        </tr>
+        </tr><td>
+    <?php if ($exam['result_declared']) { ?>
+        ✅ Declared
+        <a href="undeclare_result.php?exam_id=<?= $exam['exam_id'] ?>" onclick="return confirm('Remove result declaration?')">❌ Clear</a>
+    <?php } else { ?>
+        ❌ Not Declared
+        <a href="declare_result.php?exam_id=<?= $exam['exam_id'] ?>">✅ Declare Now</a>
+    <?php } ?>
+</td>
+
         <?php } ?>
     </table>
 </div>
