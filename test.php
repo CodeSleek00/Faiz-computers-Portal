@@ -718,7 +718,7 @@ $assignment_stats = $conn->query("
             width: 60%;
         }
 
-        @media (max-width: 991px) {
+        @media (min-width: 991px) {
             .mobile-footer {
                 display:none;
             }
