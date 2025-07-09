@@ -106,7 +106,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
 <body>
     <div class="dashboard">
         <h1>Student Dashboard</h1>
-        <img class="profile-img" src="uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
+        <img class="profile-img" src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
         <h2 class="student-name"><?= htmlspecialchars($student['name']) ?></h2>
         <span class="student-id">ID: <?= htmlspecialchars($student['enrollment_id']) ?></span>
         
