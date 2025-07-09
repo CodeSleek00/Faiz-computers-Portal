@@ -737,7 +737,7 @@ $assignments = $conn->query("
                 <i class="fas fa-bars"></i>
             </button>
             <a href="#" class="navbar-brand">
-                <i class="fas fa-graduation-cap"></i>
+                
                 <span>Faiz Computer Institute</span>
             </a>
         </div>
