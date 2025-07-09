@@ -1,5 +1,5 @@
 <?php
-include '../database_connection/db_connect.php';
+include '../../database_connection/db_connect.php';
 
 $exam_id = intval($_GET['exam_id'] ?? 0);
 if ($exam_id > 0) {
