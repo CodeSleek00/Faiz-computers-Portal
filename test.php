@@ -843,7 +843,7 @@ $assignment_stats = $conn->query("
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="exam-center/student/exam_result_student.php" class="nav-link">
                     <i class="fas fa-chart-line"></i>
                     <span>Results</span>
                 </a>
