@@ -766,7 +766,7 @@ $assignments = $conn->query("
                     <i class="fas fa-tasks"></i>
                     <span>Assignments</span>
             </div>
-                
+    </div>
             
             <div class="nav-item">
                 <a href="study-center/view_materials_student.php" class="nav-link">
