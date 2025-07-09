@@ -718,26 +718,6 @@ $assignment_stats = $conn->query("
             width: 60%;
         }
 
-        /* Responsive Adjustments */
-        @media (min-width: 992px) {
-            .sidebar {
-              
-                
-            }
-            
-            .main-content {
-                margin-left: var(--sidebar-width);
-            }
-            
-            .mobile-footer {
-                display: none;
-            }
-            
-            .navbar-toggler {
-                display: none;
-            }
-        }
-
         @media (max-width: 991px) {
             .main-content {
                 padding: calc(var(--navbar-height) + 1rem) 1rem 1rem;
