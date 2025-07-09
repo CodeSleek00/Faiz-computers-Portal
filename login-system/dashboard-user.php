@@ -285,11 +285,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
             <i class="fas fa-arrow-left"></i>
         </button>
         
-        <div class="profile-card">
-            <div class="profile-header">
-               
-            </div>
-            
+            <br><br><br>     
             <img src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo" class="profile-pic">
             
             <div class="profile-body">
