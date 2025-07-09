@@ -31,6 +31,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
   --status-active: #e0f7fa;
   --status-text: #00796b;
   --tab-inactive: #f5f5f5;
+  --status1:rgb(225, 91, 91)
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -176,6 +177,20 @@ body {
   gap: 6px;
   width: fit-content;
 }
+.status1 {
+    background:var(--status1);
+    color: white;
+    padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+
+}
+
 
 .status::before {
   content: "";
@@ -327,6 +342,10 @@ body {
                 <div>
                     <label>Status</label><br>
                     <span class="status">Active</span>
+                </div>
+                <div>
+                    <span class="status1"><a href="logout.php">Logout</a></span>
+
                 </div>
             </div>
         </div>
