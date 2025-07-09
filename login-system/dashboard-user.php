@@ -151,7 +151,6 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
     <div class="container">
         <div class="header">
             <h2>Profile</h2>
-            <button class="edit-btn" onclick="window.location.href='../admin-panel/edit_student.php'">Edit Profile</button>
         </div>
 
         <div class="profile-content">
@@ -169,14 +168,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                     <label>Course</label><br>
                     <?= htmlspecialchars($student['course']) ?>
                 </div>
-                <div>
-                    <label>Gender</label><br>
-                    <?= htmlspecialchars($student['gender'] ?? '-') ?>
-                </div>
-                <div>
-                    <label>Date of Birth</label><br>
-                    <?= htmlspecialchars($student['dob'] ?? '-') ?>
-                </div>
+                
                 <div>
                     <label>Contact Number</label><br>
                     <?= htmlspecialchars($student['contact_number']) ?>
