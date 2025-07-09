@@ -931,7 +931,6 @@ $assignments = $conn->query("
 
             // Set active page
             function setActivePage(event) {
-                event.preventDefault();
                 const page = this.getAttribute('data-page');
                 
                 // Update active states
