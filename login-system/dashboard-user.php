@@ -113,6 +113,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
         <p class="info"><i class="fas fa-book"></i>Course: <?= htmlspecialchars($student['course']) ?></p>
         <p class="info"><i class="fas fa-map-marker-alt"></i>Address: <?= htmlspecialchars($student['address']) ?></p>
         <p class="info"><i class="fas fa-phone-alt"></i>Contact: <?= htmlspecialchars($student['contact_number']) ?></p>
+        <p class="info"><a href="logout.php">Logout</a>
     </div>
 </body>
 </html>
