@@ -151,12 +151,12 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
     <div class="container">
         <div class="header">
             <h2>Profile</h2>
-            <button class="edit-btn" onclick="window.location.href='edit_profile.php'">Edit Profile</button>
+            <button class="edit-btn" onclick="window.location.href='../admin-panel/edit_student.php'">Edit Profile</button>
         </div>
 
         <div class="profile-content">
             <div class="profile-photo">
-                <img src="uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
+                <img src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
                 <h3><?= htmlspecialchars($student['name']) ?></h3>
             </div>
 
@@ -192,13 +192,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
             </div>
         </div>
 
-        <div class="tabs">
-            <div class="tab active">Personal</div>
-            <div class="tab">Classes</div>
-            <div class="tab">Documents</div>
-            <div class="tab">Media</div>
-        </div>
-    </div>
+       
 
 </body>
 </html>
