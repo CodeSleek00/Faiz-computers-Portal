@@ -1064,14 +1064,6 @@ $assignment_stats = $conn->query("
             });
             
             // Responsive adjustments
-            function handleResize() {
-                if (window.innerWidth >= 992) {
-                    sidebar.classList.add('active');
-                    overlay.classList.remove('active');
-                } else {
-                    sidebar.classList.remove('active');
-                }
-            }
             
             // Initialize on load
             handleResize();
