@@ -111,6 +111,9 @@ $assignments = $conn->query("
             align-items: center;
             gap: 1.5rem;
         }
+        li {
+            list-style-type: none;
+        }
 
         .navbar-brand {
             display: flex;
@@ -786,30 +789,24 @@ $assignments = $conn->query("
             <div class="nav-item">
                 <a href="#" class="nav-link" data-page="grades">
                     <i class="fas fa-chart-line"></i>
-                    <span>Grades</span>
+                    <span>Results</span>
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="#" class="nav-link" data-page="notifications">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
+                    <i class="fa-solid fa-pencil"></i>
+                    <span>Exam Center </span>
                 </a>
             </div>
             
             <div class="nav-item">
                 <a href="#" class="nav-link" data-page="messages">
-                    <i class="fas fa-envelope"></i>
-                    <span>Messages</span>
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
                 </a>
             </div>
             
-            <div class="nav-item">
-                <a href="#" class="nav-link" data-page="calendar">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Calendar</span>
-                </a>
-            </div>
         </div>
         
         <div class="sidebar-footer">
@@ -880,8 +877,8 @@ $assignments = $conn->query("
             <span>Study</span>
         </a>
         <a href="#" class="footer-item" data-page="messages">
-            <i class="fas fa-envelope"></i>
-            <span>Messages</span>
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
         </a>
     </footer>
 
