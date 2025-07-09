@@ -762,9 +762,9 @@ $assignments = $conn->query("
             </div>
             
            <div class="nav-item">
-                <a href="study-center/view_materials_student.php" class="nav-link">
-                    <i class="fas fa-book-open"></i>
-                    <span>Study Center</span>
+                <a href="assignment/student_dashboard.php" class="nav-link">
+                    <i class="fas fa-tasks"></i>
+                    <span>Assignment</span>
                 </a>    
             </div>
             
