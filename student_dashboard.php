@@ -1,5 +1,5 @@
 <?php
-include '../../database_connection/db_connect.php';
+include 'database_connection/db_connect.php';
 session_start();
 
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
