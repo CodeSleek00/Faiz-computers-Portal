@@ -297,7 +297,7 @@ $assignment_stats = $conn->query("
         }
 
         .sidebar-footer {
-            padding: 1rem 1.5rem;
+            padding: 1rem 1rem;
             border-top: 1px solid var(--light-gray);
         }
 
