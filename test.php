@@ -717,23 +717,6 @@ $assignment_stats = $conn->query("
         .footer-item.active::after {
             width: 60%;
         }
-
-        @media (max-width: 991px) {
-            .main-content {
-                padding: calc(var(--navbar-height) + 1rem) 1rem 1rem;
-            }
-            
-            .welcome-section {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-            }
-            
-            .user-profile-img {
-                margin-top: 1rem;
-            }
-        }
-
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
