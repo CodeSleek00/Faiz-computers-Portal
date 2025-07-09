@@ -288,7 +288,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
         <div class="profile-card">
             <div class="profile-header">
                 <h1>Student Profile</h1>
-                <p>Manage your academic information</p>
+               
             </div>
             
             <img src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo" class="profile-pic">
