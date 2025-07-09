@@ -22,7 +22,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
 </head>
 <body>
         
-       
+                <h1>Student Details</h1>
                 <img class="profile-img" src="uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
                 <h2 class="student-name"><?= htmlspecialchars($student['name']) ?></h2>
                 <span class="student-id">ID: <?= htmlspecialchars($student['enrollment_id']) ?></span>
