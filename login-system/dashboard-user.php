@@ -287,7 +287,6 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
         
         <div class="profile-card">
             <div class="profile-header">
-                <h1>Student Profile</h1>
                
             </div>
             
