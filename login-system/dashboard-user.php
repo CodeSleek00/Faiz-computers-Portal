@@ -257,8 +257,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
     <div class="container">
         <div class="profile-card">
             <div class="profile-header">
-                <h1>Student Profile</h1>
-                <p>Manage your academic information</p>
+                <h1>Student Profile</h1><br>
             </div>
             
             <img src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo" class="profile-pic">
@@ -296,10 +295,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                             <span class="info-label">Contact Number</span>
                             <span class="info-value"><?= htmlspecialchars($student['contact_number']) ?></span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Email Address</span>
-                            <span class="info-value"><?= htmlspecialchars($student['email'] ?? 'Not provided') ?></span>
-                        </div>
+                       
                         <div class="info-item">
                             <span class="info-label">Address</span>
                             <span class="info-value"><?= htmlspecialchars($student['address']) ?></span>
@@ -308,9 +304,6 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="edit_profile.php" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Edit Profile
-                    </a>
                     <a href="logout.php" class="btn btn-danger">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
