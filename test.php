@@ -945,7 +945,7 @@ $assignment_stats = $conn->query("
                         <p class="assignment-details"><?= htmlspecialchars(substr($assignment['question_text'], 0, 100)) ?>...</p>
                         
                         <div class="assignment-meta">
-                            <span><i class="far fa-calendar-alt"></i> Due: <?= date('M d, Y', strtotime($assignment['due_date'])) ?></span>
+                           
                             <?php if ($assignment['submission_id']): ?>
                                 <span class="assignment-status status-submitted">Submitted</span>
                             <?php else: ?>
