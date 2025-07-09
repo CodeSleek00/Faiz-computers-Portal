@@ -97,7 +97,7 @@ $assignments = $conn->query("
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 2rem;
+            padding: 0 1rem;
             z-index: 1000;
             transition: var(--transition);
         }
