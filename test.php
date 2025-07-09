@@ -717,6 +717,14 @@ $assignment_stats = $conn->query("
         .footer-item.active::after {
             width: 60%;
         }
+
+        @media (max-width: 991px) {
+            .mobile-footer {
+                display:none;
+            }
+        }
+            
+
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
