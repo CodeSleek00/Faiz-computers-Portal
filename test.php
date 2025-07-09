@@ -69,7 +69,7 @@ $assignment_stats = $conn->query("
             --white: #ffffff;
             --sidebar-width: 280px;
             --navbar-height: 70px;
-            --footer-height: 60px;
+            --footer-height: 70px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --border-radius: 12px;
             --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -97,11 +97,11 @@ $assignment_stats = $conn->query("
             margin-bottom: 0.75rem;
         }
 
-        h1 { font-size: 2rem; }
-        h2 { font-size: 1.75rem; }
-        h3 { font-size: 1.5rem; }
-        h4 { font-size: 1.25rem; }
-        p { margin-bottom: 1rem; font-size: 0.95rem; }
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.75rem; }
+        h4 { font-size: 1.5rem; }
+        p { margin-bottom: 1rem; }
 
         /* Layout */
         .app-container {
@@ -121,7 +121,7 @@ $assignment_stats = $conn->query("
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1.5rem;
+            padding: 0 2rem;
             z-index: 1000;
             transition: var(--transition);
         }
@@ -133,17 +133,17 @@ $assignment_stats = $conn->query("
         .navbar-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .navbar-brand {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             text-decoration: none;
             color: var(--primary);
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             letter-spacing: -0.5px;
         }
 
@@ -158,10 +158,10 @@ $assignment_stats = $conn->query("
             background: none;
             border: none;
             color: var(--medium-gray);
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             cursor: pointer;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -177,29 +177,28 @@ $assignment_stats = $conn->query("
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             cursor: pointer;
         }
 
         .user-info {
             text-align: right;
-            display: none;
         }
 
         .user-name {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--dark);
         }
 
         .user-role {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--medium-gray);
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
@@ -228,7 +227,7 @@ $assignment_stats = $conn->query("
         }
 
         .sidebar-header {
-            padding: 1.25rem;
+            padding: 1.5rem;
             border-bottom: 1px solid var(--light-gray);
             display: flex;
             align-items: center;
@@ -237,8 +236,8 @@ $assignment_stats = $conn->query("
         }
 
         .sidebar-user-avatar {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--white);
@@ -246,13 +245,13 @@ $assignment_stats = $conn->query("
         }
 
         .sidebar-user-info h4 {
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin-bottom: 0.25rem;
             color: var(--dark);
         }
 
         .sidebar-user-info p {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--medium-gray);
             margin-bottom: 0;
         }
@@ -270,12 +269,12 @@ $assignment_stats = $conn->query("
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.8rem 1.25rem;
+            gap: 1rem;
+            padding: 0.9rem 1.5rem;
             color: var(--dark-gray);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: var(--transition);
             position: relative;
         }
@@ -293,24 +292,24 @@ $assignment_stats = $conn->query("
         .nav-link i {
             width: 20px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: inherit;
         }
 
         .sidebar-footer {
-            padding: 1rem 1.25rem;
+            padding: 1rem 1.5rem;
             border-top: 1px solid var(--light-gray);
         }
 
         .logout-btn {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             background: none;
             border: none;
             color: var(--medium-gray);
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             cursor: pointer;
             padding: 0.5rem;
             border-radius: var(--border-radius);
@@ -345,7 +344,7 @@ $assignment_stats = $conn->query("
 
         /* Main Content */
         .main-content {
-            padding: calc(var(--navbar-height) + 1.5rem) 1.5rem 1.5rem;
+            padding: calc(var(--navbar-height) + 2rem) 2rem 2rem;
             transition: var(--transition);
             width: 100%;
             min-height: calc(100vh - var(--navbar-height) - var(--footer-height));
@@ -361,31 +360,27 @@ $assignment_stats = $conn->query("
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
             border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: var(--box-shadow);
-            flex-direction: column;
-            text-align: center;
-            gap: 1rem;
         }
 
         .welcome-text h2 {
-            font-size: 1.5rem;
+            font-size: 2rem;
             margin-bottom: 0.5rem;
         }
 
         .welcome-text p {
             opacity: 0.9;
             margin-bottom: 0;
-            font-size: 0.9rem;
         }
 
         .user-profile-img {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid rgba(255, 255, 255, 0.3);
@@ -394,15 +389,15 @@ $assignment_stats = $conn->query("
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 1.25rem;
+            padding: 1.5rem;
             box-shadow: var(--box-shadow);
             transition: var(--transition);
             border-left: 4px solid var(--primary);
@@ -411,7 +406,7 @@ $assignment_stats = $conn->query("
         }
 
         .stat-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
             box-shadow: var(--box-shadow-hover);
         }
 
@@ -432,7 +427,7 @@ $assignment_stats = $conn->query("
         }
 
         .stat-title {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--medium-gray);
             margin-bottom: 0.5rem;
             display: flex;
@@ -441,7 +436,7 @@ $assignment_stats = $conn->query("
         }
 
         .stat-value {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
@@ -463,37 +458,36 @@ $assignment_stats = $conn->query("
         }
 
         .stat-icon {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             margin-left: auto;
             opacity: 0.8;
         }
 
         /* Assignments Section */
         .section-title {
-            font-size: 1.25rem;
-            margin-bottom: 1.25rem;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
             color: var(--dark);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .section-title i {
             color: var(--primary);
-            font-size: 1.1rem;
         }
 
         .assignments-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .assignment-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 1.25rem;
+            padding: 1.5rem;
             box-shadow: var(--box-shadow);
             transition: var(--transition);
             border-top: 4px solid var(--primary);
@@ -502,39 +496,37 @@ $assignment_stats = $conn->query("
         }
 
         .assignment-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
             box-shadow: var(--box-shadow-hover);
         }
 
         .assignment-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
             color: var(--dark);
         }
 
         .assignment-details {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--medium-gray);
             margin-bottom: 1rem;
             flex-grow: 1;
-            line-height: 1.5;
         }
 
         .assignment-meta {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--medium-gray);
             margin-bottom: 1rem;
         }
 
         .assignment-status {
             display: inline-block;
-            padding: 0.3rem 0.7rem;
+            padding: 0.35rem 0.75rem;
             border-radius: 50px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 500;
         }
 
@@ -549,10 +541,10 @@ $assignment_stats = $conn->query("
         }
 
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border-radius: var(--border-radius);
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: var(--transition);
             border: none;
@@ -573,13 +565,23 @@ $assignment_stats = $conn->query("
             box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
         }
 
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
         /* Calendar Widget */
         .calendar-widget {
             background: white;
             border-radius: var(--border-radius);
-            padding: 1.25rem;
+            padding: 1.5rem;
             box-shadow: var(--box-shadow);
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .calendar-header {
@@ -590,7 +592,7 @@ $assignment_stats = $conn->query("
         }
 
         .calendar-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--dark);
         }
@@ -605,9 +607,9 @@ $assignment_stats = $conn->query("
             border: none;
             color: var(--medium-gray);
             cursor: pointer;
-            font-size: 0.9rem;
-            width: 28px;
-            height: 28px;
+            font-size: 1rem;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -627,7 +629,7 @@ $assignment_stats = $conn->query("
         }
 
         .calendar-day-header {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--medium-gray);
             text-align: center;
@@ -636,15 +638,11 @@ $assignment_stats = $conn->query("
 
         .calendar-day {
             text-align: center;
-            padding: 0.4rem;
+            padding: 0.5rem;
             border-radius: 50%;
             cursor: pointer;
             transition: var(--transition);
-            font-size: 0.8rem;
-            aspect-ratio: 1/1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 0.9rem;
         }
 
         .calendar-day:hover {
@@ -683,7 +681,7 @@ $assignment_stats = $conn->query("
             justify-content: center;
             text-decoration: none;
             color: var(--medium-gray);
-            font-size: 0.7rem;
+            font-size: 0.8rem;
             padding: 0.5rem;
             flex: 1;
             transition: var(--transition);
@@ -695,13 +693,13 @@ $assignment_stats = $conn->query("
         }
 
         .footer-item i {
-            font-size: 1.2rem;
-            margin-bottom: 0.2rem;
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
             transition: var(--transition);
         }
 
         .footer-item.active i {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
         }
 
         .footer-item::after {
@@ -711,32 +709,16 @@ $assignment_stats = $conn->query("
             left: 50%;
             transform: translateX(-50%);
             width: 0;
-            height: 2px;
+            height: 3px;
             background: linear-gradient(90deg, var(--primary), var(--primary-light));
             transition: var(--transition);
         }
 
         .footer-item.active::after {
-            width: 50%;
+            width: 60%;
         }
 
         /* Responsive Adjustments */
-        @media (min-width: 768px) {
-            .welcome-section {
-                flex-direction: row;
-                text-align: left;
-                padding: 1.75rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .user-info {
-                display: block;
-            }
-        }
-
         @media (min-width: 992px) {
             .sidebar {
                 transform: translateX(0);
@@ -744,7 +726,6 @@ $assignment_stats = $conn->query("
             
             .main-content {
                 margin-left: var(--sidebar-width);
-                padding: calc(var(--navbar-height) + 2rem) 2rem 2rem;
             }
             
             .mobile-footer {
@@ -754,39 +735,56 @@ $assignment_stats = $conn->query("
             .navbar-toggler {
                 display: none;
             }
-            
-            .welcome-section {
-                padding: 2rem;
+        }
+
+        @media (max-width: 991px) {
+            .main-content {
+                padding: calc(var(--navbar-height) + 1rem) 1rem 1rem;
             }
             
-            .welcome-text h2 {
-                font-size: 1.75rem;
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .user-profile-img {
+                margin-top: 1rem;
             }
         }
 
-        @media (min-width: 1200px) {
-            .main-content {
-                padding: calc(var(--navbar-height) + 2rem) 3rem 3rem;
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
             
-            .welcome-section {
-                padding: 2.5rem;
+            .assignments-grid {
+                grid-template-columns: 1fr;
             }
             
             .welcome-text h2 {
-                font-size: 2rem;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                padding: 0 1rem;
             }
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .animate-in {
-            animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
         }
 
         .delay-1 { animation-delay: 0.1s; }
@@ -810,13 +808,6 @@ $assignment_stats = $conn->query("
             </a>
         </div>
         
-        <div class="user-profile">
-            <div class="user-info">
-                <div class="user-name"><?= htmlspecialchars($student['name']) ?></div>
-                <div class="user-role">Student</div>
-            </div>
-            <img src="uploads/<?= $student['photo'] ?>" alt="User" class="user-avatar">
-        </div>
     </nav>
 
     <!-- Sidebar -->
@@ -852,7 +843,7 @@ $assignment_stats = $conn->query("
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="exam-center/student/exam_result_student.php" class="nav-link">
                     <i class="fas fa-chart-line"></i>
                     <span>Results</span>
                 </a>
@@ -947,7 +938,7 @@ $assignment_stats = $conn->query("
                         <p class="assignment-details"><?= htmlspecialchars(substr($assignment['question_text'], 0, 100)) ?>...</p>
                         
                         <div class="assignment-meta">
-                            <span><i class="far fa-calendar-alt"></i> Due: <?= date('M d, Y', strtotime($assignment['due_date'])) ?></span>
+                           
                             <?php if ($assignment['submission_id']): ?>
                                 <span class="assignment-status status-submitted">Submitted</span>
                             <?php else: ?>
@@ -1060,7 +1051,7 @@ $assignment_stats = $conn->query("
             document.querySelectorAll('.calendar-nav-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     // In a real app, this would update the calendar view
-                    console.log('Calendar navigation would be implemented here');
+                    alert('Calendar navigation would be implemented here');
                 });
             });
             
@@ -1068,7 +1059,7 @@ $assignment_stats = $conn->query("
             document.querySelectorAll('.calendar-day:not(.other-month)').forEach(day => {
                 day.addEventListener('click', function() {
                     // In a real app, this would show events for the selected day
-                    console.log('Day selected: ' + this.textContent);
+                    alert('Day selected: ' + this.textContent);
                 });
             });
             
@@ -1100,8 +1091,8 @@ $assignment_stats = $conn->query("
             
             animateElements.forEach(el => {
                 el.style.opacity = 0;
-                el.style.transform = 'translateY(15px)';
-                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                 observer.observe(el);
             });
         });
