@@ -761,16 +761,13 @@ $assignments = $conn->query("
                 </a>
             </div>
             
-            <div class="nav-item">
-                <div class="nav-link dropdown-toggle" data-target="assignments-menu">
-                    <i class="fas fa-tasks"></i>
-                    <span>Assignments</span>
-                </div>
-                <ul class="dropdown-menu" id="assignments-menu">
-                    <li><a href="assignment/student_dashboard.php" class="dropdown-item" data-page="my-assignments"><i class="fas fa-list"></i> My Assignments</a></li>
-                    
-                </ul>
+           <div class="nav-item">
+                <a href="study-center/view_materials_student.php" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Study Center</span>
+                </a>    
             </div>
+            
             
             <div class="nav-item">
                 <a href="study-center/view_materials_student.php" class="nav-link">
