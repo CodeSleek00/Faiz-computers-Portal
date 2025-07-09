@@ -175,7 +175,7 @@ $assignments = $conn->query("
                 <p>Enrollment: <?= $student['enrollment_id'] ?> | Course: <?= $student['course'] ?></p>
             </div>
             <div class="profile-pic">
-                <img src="../../uploads/<?= $student['photo'] ?>" width="60" style="border-radius: 50%;">
+                <img src="uploads/<?= $student['photo'] ?>" width="60" style="border-radius: 50%;">
             </div>
         </div>
 
