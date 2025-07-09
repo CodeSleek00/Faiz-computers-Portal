@@ -4,7 +4,7 @@ include '../database_connection/db_connect.php';
 
 // If already logged in, redirect to dashboard
 if (isset($_SESSION['enrollment_id'])) {
-    header("Location: dashboard-user.php");
+    header("Location:../test.php");
     exit;
 }
 
