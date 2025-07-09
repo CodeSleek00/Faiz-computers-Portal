@@ -755,7 +755,7 @@ $assignments = $conn->query("
         
         <div class="sidebar-menu">
             <div class="nav-item">
-                <a href="#" class="nav-link active" data-page="dashboard">
+                <a href="test.php" class="nav-link active" data-page="dashboard">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
@@ -767,23 +767,16 @@ $assignments = $conn->query("
                     <span>Assignments</span>
                 </div>
                 <ul class="dropdown-menu" id="assignments-menu">
-                    <li><a href="#" class="dropdown-item" data-page="my-assignments"><i class="fas fa-list"></i> My Assignments</a></li>
-                    <li><a href="#" class="dropdown-item" data-page="due-dates"><i class="fas fa-calendar"></i> Due Dates</a></li>
-                    <li><a href="#" class="dropdown-item" data-page="submit-work"><i class="fas fa-upload"></i> Submit Work</a></li>
+                    <li><a href="assignment/student_dashboard.php" class="dropdown-item" data-page="my-assignments"><i class="fas fa-list"></i> My Assignments</a></li>
+                    
                 </ul>
             </div>
             
             <div class="nav-item">
-                <div class="nav-link dropdown-toggle" data-target="study-center-menu">
+                <a href="study-center/view_materials_student.php" class="nav-link">
                     <i class="fas fa-book-open"></i>
                     <span>Study Center</span>
-                </div>
-                <ul class="dropdown-menu" id="study-center-menu">
-                    <li><a href="#" class="dropdown-item" data-page="courses"><i class="fas fa-book"></i> Courses</a></li>
-                    <li><a href="#" class="dropdown-item" data-page="lectures"><i class="fas fa-video"></i> Lectures</a></li>
-                    <li><a href="#" class="dropdown-item" data-page="materials"><i class="fas fa-file-pdf"></i> Materials</a></li>
-                    <li><a href="#" class="dropdown-item" data-page="tutoring"><i class="fas fa-chalkboard-teacher"></i> Tutoring</a></li>
-                </ul>
+                </a>    
             </div>
             
             <div class="nav-item">
@@ -794,14 +787,14 @@ $assignments = $conn->query("
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link" data-page="notifications">
+                <a href="exam-center/student/student_dashboard.php" class="nav-link" data-page="notifications">
                     <i class="fa-solid fa-pencil"></i>
                     <span>Exam Center </span>
                 </a>
             </div>
             
             <div class="nav-item">
-                <a href="#" class="nav-link" data-page="messages">
+                <a href="login-system/dashboard-user.php" class="nav-link" data-page="messages">
                     <i class="fas fa-user"></i>
                     <span>Profile</span>
                 </a>
@@ -810,9 +803,10 @@ $assignments = $conn->query("
         </div>
         
         <div class="sidebar-footer">
+            <a href="login-system/logout.php">
             <button class="logout-btn" id="logoutBtn">
                 <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+                <span>Logout</span></a>
             </button>
         </div>
     </aside>
@@ -864,19 +858,19 @@ $assignments = $conn->query("
     
     <!-- Mobile Footer -->
     <footer class="mobile-footer">
-        <a href="#" class="footer-item active" data-page="dashboard">
+        <a href="test.php" class="footer-item active" data-page="dashboard">
             <i class="fas fa-home"></i>
             <span>Home</span>
         </a>
-        <a href="#" class="footer-item" data-page="assignments">
+        <a href="assignment/student_dashboard.php" class="footer-item" data-page="assignments">
             <i class="fas fa-tasks"></i>
             <span>Assignments</span>
         </a>
-        <a href="#" class="footer-item" data-page="study">
+        <a href="study-center/view_materials_student.php" class="footer-item" data-page="study">
             <i class="fas fa-book"></i>
             <span>Study</span>
         </a>
-        <a href="#" class="footer-item" data-page="messages">
+        <a href="login-system/dashboard-user.php" class="footer-item" data-page="messages">
             <i class="fas fa-user"></i>
             <span>Profile</span>
         </a>
