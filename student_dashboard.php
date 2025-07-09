@@ -36,11 +36,12 @@ $has_exams = $exams->num_rows > 0;
 // Check if study materials assigned
 $materials = $conn->query("
     SELECT *
-    FROM study_materials
-    WHERE assigned_to = 'all'
-       OR student_id = $student_id
-       OR batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
+    FROM study_material
+    WHERE (student_id = $student_id OR batch_id IN (
+        SELECT batch_id FROM student_batches WHERE student_id = $student_id
+    )) OR (student_id IS NULL AND batch_id IS NULL)
 ");
+
 $has_notes = $materials->num_rows > 0;
 ?>
 
