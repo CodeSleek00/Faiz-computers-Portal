@@ -14,106 +14,191 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard | <?= htmlspecialchars($student['name']) ?></title>
+    <title>Student Profile | <?= htmlspecialchars($student['name']) ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: #f4f7ff;
-            color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            background: #f9fbff;
+            margin: 0;
+            padding: 20px;
         }
 
-        .dashboard {
+        .container {
             background: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 450px;
+            border-radius: 10px;
+            padding: 30px 40px;
+            max-width: 1000px;
+            margin: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
         }
 
-        .dashboard h1 {
-            font-size: 28px;
-            color: #4a4a4a;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
             margin-bottom: 20px;
-            font-weight: 600;
         }
 
-        .profile-img {
-            width: 120px;
-            height: 120px;
+        .header h2 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .edit-btn {
+            background: #00bcd4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background: #0097a7;
+        }
+
+        .profile-content {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .profile-photo {
+            flex: 1;
+            text-align: center;
+        }
+
+        .profile-photo img {
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 15px;
-            border: 4px solid #4c84ff;
+            border: 4px solid #00bcd4;
         }
 
-        .student-name {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .student-id {
-            font-size: 14px;
-            color: #777;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
-
-        .info {
+        .profile-info {
+            flex: 2;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 40px;
             font-size: 16px;
-            color: #444;
+        }
+
+        .profile-info label {
+            color: #999;
+            font-weight: 500;
+        }
+
+        .profile-info div {
+            color: #333;
             margin-bottom: 10px;
         }
 
-        .info i {
-            margin-right: 8px;
-            color: #4c84ff;
+        .status {
+            background: #e0f7fa;
+            color: #00796b;
+            padding: 5px 10px;
+            display: inline-block;
+            border-radius: 5px;
+            font-weight: 500;
         }
 
-        @media (max-width: 500px) {
-            .dashboard {
-                padding: 25px;
+        .tabs {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f1f1f1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .tab.active {
+            background: #00bcd4;
+            color: white;
+        }
+
+        @media(max-width: 768px) {
+            .profile-content {
+                flex-direction: column;
+                align-items: center;
             }
 
-            .dashboard h1 {
-                font-size: 22px;
-            }
-
-            .student-name {
-                font-size: 20px;
+            .profile-info {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <h1>Student Dashboard</h1>
-        <img class="profile-img" src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
-        <h2 class="student-name"><?= htmlspecialchars($student['name']) ?></h2>
-        <span class="student-id">ID: <?= htmlspecialchars($student['enrollment_id']) ?></span>
-        
-        <p class="info"><i class="fas fa-book"></i>Course: <?= htmlspecialchars($student['course']) ?></p>
-        <p class="info"><i class="fas fa-map-marker-alt"></i>Address: <?= htmlspecialchars($student['address']) ?></p>
-        <p class="info"><i class="fas fa-phone-alt"></i>Contact: <?= htmlspecialchars($student['contact_number']) ?></p>
-        <p class="info"><a href="logout.php">Logout</a>
+
+    <div class="container">
+        <div class="header">
+            <h2>Profile</h2>
+            <button class="edit-btn" onclick="window.location.href='edit_profile.php'">Edit Profile</button>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-photo">
+                <img src="uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo">
+                <h3><?= htmlspecialchars($student['name']) ?></h3>
+            </div>
+
+            <div class="profile-info">
+                <div>
+                    <label>Student ID</label><br>
+                    <?= htmlspecialchars($student['enrollment_id']) ?>
+                </div>
+                <div>
+                    <label>Course</label><br>
+                    <?= htmlspecialchars($student['course']) ?>
+                </div>
+                <div>
+                    <label>Gender</label><br>
+                    <?= htmlspecialchars($student['gender'] ?? '-') ?>
+                </div>
+                <div>
+                    <label>Date of Birth</label><br>
+                    <?= htmlspecialchars($student['dob'] ?? '-') ?>
+                </div>
+                <div>
+                    <label>Contact Number</label><br>
+                    <?= htmlspecialchars($student['contact_number']) ?>
+                </div>
+                <div>
+                    <label>Address</label><br>
+                    <?= htmlspecialchars($student['address']) ?>
+                </div>
+                <div>
+                    <label>Status</label><br>
+                    <span class="status">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active">Personal</div>
+            <div class="tab">Classes</div>
+            <div class="tab">Documents</div>
+            <div class="tab">Media</div>
+        </div>
     </div>
+
 </body>
 </html>
