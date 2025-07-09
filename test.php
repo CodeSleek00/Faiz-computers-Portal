@@ -721,7 +721,8 @@ $assignment_stats = $conn->query("
         /* Responsive Adjustments */
         @media (min-width: 992px) {
             .sidebar {
-                transform: translateX(0);
+              
+                
             }
             
             .main-content {
