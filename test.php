@@ -808,13 +808,6 @@ $assignment_stats = $conn->query("
             </a>
         </div>
         
-        <div class="user-profile">
-            <div class="user-info">
-                <div class="user-name"><?= htmlspecialchars($student['name']) ?></div>
-                <div class="user-role">Student</div>
-            </div>
-            <img src="uploads/<?= $student['photo'] ?>" alt="User" class="user-avatar">
-        </div>
     </nav>
 
     <!-- Sidebar -->
