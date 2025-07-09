@@ -3,7 +3,10 @@ include 'database_connection/db_connect.php';
 session_start();
 
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment_id) die("Login required.");
+if (!$enrollment_id) {
+    header("Location: login-system/login.php");
+    exit;
+}
 
 $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
 $student_id = $student['student_id'];
@@ -21,7 +24,6 @@ $assignments = $conn->query("
     LIMIT 3
 ");
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
