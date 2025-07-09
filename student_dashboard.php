@@ -2,7 +2,7 @@
 include 'database_connection/db_connect.php';
 session_start();
 $eid = $_SESSION['enrollment_id'] ?? null;
-if (!$eid) { header("Location: login.php"); exit; }
+if (!$eid) { header("Location: login-system/login.php"); exit; }
 $st = $conn->query("SELECT * FROM students WHERE enrollment_id='$eid'")->fetch_assoc();
 $sid = $st['student_id'];
 
