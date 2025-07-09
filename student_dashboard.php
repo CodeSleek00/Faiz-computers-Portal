@@ -1,80 +1,217 @@
 <?php
-include 'database_connection/db_connect.php';
+include '../../database_connection/db_connect.php';
 session_start();
-$eid = $_SESSION['enrollment_id'] ?? null;
-if (!$eid) { header("Location: login-system/login.php"); exit; }
-$st = $conn->query("SELECT * FROM students WHERE enrollment_id='$eid'")->fetch_assoc();
-$sid = $st['student_id'];
 
-$exams = $conn->query("SELECT e.*, 
-  (SELECT COUNT(*) FROM exam_submissions WHERE exam_id=e.exam_id AND student_id=$sid) as taken
-  FROM exams e 
-  JOIN exam_assignments ea ON e.exam_id=ea.exam_id
-  WHERE ea.student_id=$sid
+$enrollment_id = $_SESSION['enrollment_id'] ?? null;
+if (!$enrollment_id) die("Login required.");
+
+$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+$student_id = $student['student_id'];
+
+// Fetch assignments
+$assignments = $conn->query("
+    SELECT a.*, s.submission_id, s.marks_awarded
+    FROM assignments a
+    LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
+    LEFT JOIN assignment_submissions s ON s.assignment_id = a.assignment_id AND s.student_id = $student_id
+    WHERE t.student_id = $student_id
+       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
+    GROUP BY a.assignment_id
+    ORDER BY a.created_at DESC
+    LIMIT 3
 ");
-$asgn = $conn->query("SELECT * FROM assignments a 
-  LEFT JOIN assignment_submissions s ON a.assignment_id=s.assignment_id 
-  AND s.student_id=$sid
-");
-$mats = $conn->query("SELECT * FROM study_materials");
 ?>
 
 <!DOCTYPE html>
-<html><head>
-  <meta charset="utf-8"><title>Student Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body{font-family:'Poppins',sans-serif;background:#eef1f7;margin:0;padding:0}
-    .topbar{background:#fff;padding:15px 30px;box-shadow:0 4px 12px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center}
-    .container{padding:30px;}
-    .cards { display:flex; flex-wrap:wrap; gap:20px;}
-    .card{background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.05);flex:1;min-width:250px;position:relative;}
-    .card.ready{border-left:5px solid #28a745}
-    .card.pending{border-left:5px solid #f6c23e}
-    .card a{display:inline-block;margin-top:15px;color:#4e73df;text-decoration:none}
-    @media(max-width:800px){.cards{flex-direction:column}}
-    table{width:100%;background:#fff;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.05);margin-top:30px;border-collapse:collapse}
-    th,td{padding:15px;border-bottom:1px solid #eee;text-align:left}
-  </style>
-</head><body>
-  <div class="topbar">
-    <div>Hello, <?= htmlspecialchars($st['name']) ?></div>
-    <a href="logout.php">Logout</a>
-  </div>
-  <div class="container">
-    <h2>Dashboard</h2>
-    <div class="cards">
-      <?php while($e=$exams->fetch_assoc()): 
-        $cls = $e['taken']?'pending':'ready';
-      ?>
-      <div class="card <?=$cls?>">
-        <h3><?= htmlspecialchars($e['exam_name']) ?></h3>
-        <p>Duration: <?= $e['duration'] ?> mins</p>
-        <a href="<?= $e['taken']?'view_results_student.php?exam_id='.$e['exam_id']:'take_exam.php?exam_id='.$e['exam_id'] ?>">
-          <?= $e['taken']?'View Result':'Start Exam' ?>
-        </a>
-      </div>
-      <?php endwhile ?>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f7f9fc;
+            display: flex;
+            min-height: 100vh;
+        }
 
-      <?php while($a=$asgn->fetch_assoc()): 
-        $done = $a['submission_id']?'submitted':'pending'; ?>
-      <div class="card <?=$done?>">
-        <h3><?= htmlspecialchars($a['title']) ?></h3>
-        <p>Marks: <?= $a['marks'] ?></p>
-        <a href="<?= $done?'view_assignment.php?id='.$a['assignment_id']:'submit_assignment.php?id='.$a['assignment_id'] ?>">
-          <?= $done?'View Submission':'Submit Assignment' ?>
-        </a>
-      </div>
-      <?php endwhile ?>
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #0043a4;
+            color: white;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-      <?php while($m=$mats->fetch_assoc()): ?>
-      <div class="card ready">
-        <h3><?= htmlspecialchars($m['title']) ?></h3>
-        <a href="../study-center/download.php?file=<?= urlencode($m['file_name']) ?>">Download Material</a>
-      </div>
-      <?php endwhile ?>
+        .sidebar h2 { font-size: 24px; margin-bottom: 30px; }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin: 15px 0;
+            display: block;
+            font-weight: 500;
+        }
+        .sidebar a:hover { text-decoration: underline; }
+
+        /* Main */
+        .main {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .welcome {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+        }
+
+        .welcome .text h2 {
+            margin-bottom: 5px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .welcome .text p { color: #777; }
+
+        .card-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            flex: 1 1 250px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.06);
+        }
+
+        .card h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .card .status {
+            margin-top: 10px;
+            padding: 6px 12px;
+            display: inline-block;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .submitted { background: #d1ffe4; color: #0f9d58; }
+        .not-submitted { background: #ffe1e1; color: #c62828; }
+
+        .right-panel {
+            width: 280px;
+            padding: 40px 30px;
+            background: #f2f6fc;
+        }
+
+        .calendar, .task-list {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .calendar h4, .task-list h4 { margin-bottom: 10px; }
+
+        .task-list ul { padding-left: 20px; }
+        .task-list li {
+            font-size: 14px;
+            margin: 6px 0;
+        }
+
+        @media(max-width: 1024px) {
+            body { flex-direction: column; }
+            .sidebar, .right-panel { width: 100%; }
+            .main { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div>
+            <h2>E-School</h2>
+            <a href="#">🏠 Dashboard</a>
+            <a href="#">📘 Assignments</a>
+            <a href="#">📚 Study Material</a>
+            <a href="#">📝 Exams</a>
+            <a href="#">📊 Results</a>
+        </div>
+        <div>
+            <p>Semester 2 of 3</p>
+        </div>
     </div>
 
-    <!-- Optional Study Center table etc -->
-  </div>
-</body></html>
+    <div class="main">
+        <div class="welcome">
+            <div class="text">
+                <h2>Hello, <?= htmlspecialchars($student['name']) ?></h2>
+                <p>Enrollment: <?= $student['enrollment_id'] ?> | Course: <?= $student['course'] ?></p>
+            </div>
+            <div class="profile-pic">
+                <img src="../../uploads/<?= $student['photo'] ?>" width="60" style="border-radius: 50%;">
+            </div>
+        </div>
+
+        <div class="card-section">
+            <h3>Your Assignments</h3>
+            <div class="cards">
+                <?php while($a = $assignments->fetch_assoc()) { ?>
+                    <div class="card">
+                        <h4><?= htmlspecialchars($a['title']) ?></h4>
+                        <p><?= htmlspecialchars(substr($a['question_text'], 0, 50)) ?>...</p>
+                        <?php if ($a['submission_id']) { ?>
+                            <div class="status submitted">✅ Submitted</div>
+                        <?php } else { ?>
+                            <div class="status not-submitted">❌ Not Submitted</div>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="calendar">
+            <h4>📅 Calendar</h4>
+            <p><?= date('F j, Y') ?></p>
+        </div>
+        <div class="task-list">
+            <h4>📝 Your Tasks</h4>
+            <ul>
+                <li>Upload Assignment</li>
+                <li>Study for Quiz</li>
+                <li>Check Study Notes</li>
+                <li>Complete Practice Exam</li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>
