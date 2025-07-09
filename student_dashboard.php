@@ -8,41 +8,18 @@ if (!$enrollment_id) die("Login required.");
 $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
 $student_id = $student['student_id'];
 
-// Assignments (latest 3)
+// Fetch assignments
 $assignments = $conn->query("
-    SELECT a.*, s.submission_id
+    SELECT a.*, s.submission_id, s.marks_awarded
     FROM assignments a
     LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
     LEFT JOIN assignment_submissions s ON s.assignment_id = a.assignment_id AND s.student_id = $student_id
-    WHERE t.student_id = $student_id OR t.batch_id IN (
-        SELECT batch_id FROM student_batches WHERE student_id = $student_id
-    )
+    WHERE t.student_id = $student_id
+       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
     GROUP BY a.assignment_id
     ORDER BY a.created_at DESC
     LIMIT 3
 ");
-
-// Check if exams exist
-$exams = $conn->query("
-    SELECT e.*
-    FROM exams e
-    JOIN exam_assignments ea ON e.exam_id = ea.exam_id
-    WHERE ea.student_id = $student_id OR ea.batch_id IN (
-        SELECT batch_id FROM student_batches WHERE student_id = $student_id
-    )
-");
-$has_exams = $exams->num_rows > 0;
-
-// Check if study materials assigned
-$materials = $conn->query("
-    SELECT *
-    FROM study_material
-    WHERE (student_id = $student_id OR batch_id IN (
-        SELECT batch_id FROM student_batches WHERE student_id = $student_id
-    )) OR (student_id IS NULL AND batch_id IS NULL)
-");
-
-$has_notes = $materials->num_rows > 0;
 ?>
 
 <!DOCTYPE html>
@@ -54,20 +31,22 @@ $has_notes = $materials->num_rows > 0;
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
-            background: #f5f8fd;
+            background: #f7f9fc;
             display: flex;
             min-height: 100vh;
         }
 
+        /* Sidebar */
         .sidebar {
-            width: 230px;
+            width: 220px;
             background: #0043a4;
             color: white;
-            padding: 30px 20px;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
+
         .sidebar h2 { font-size: 24px; margin-bottom: 30px; }
         .sidebar a {
             color: white;
@@ -76,9 +55,12 @@ $has_notes = $materials->num_rows > 0;
             display: block;
             font-weight: 500;
         }
+        .sidebar a:hover { text-decoration: underline; }
+
+        /* Main */
         .main {
             flex: 1;
-            padding: 30px;
+            padding: 40px;
         }
 
         .welcome {
@@ -92,8 +74,13 @@ $has_notes = $materials->num_rows > 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.06);
         }
 
-        .text h2 { margin-bottom: 5px; font-size: 24px; color: #333; }
-        .text p { color: #777; }
+        .welcome .text h2 {
+            margin-bottom: 5px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .welcome .text p { color: #777; }
 
         .card-section h3 {
             margin-bottom: 15px;
@@ -114,49 +101,54 @@ $has_notes = $materials->num_rows > 0;
             box-shadow: 0 5px 10px rgba(0,0,0,0.06);
         }
 
-        .card h4 { font-size: 16px; margin-bottom: 10px; color: #333; }
-        .card p { font-size: 14px; color: #555; }
+        .card h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #555;
+        }
 
         .card .status {
             margin-top: 10px;
             padding: 6px 12px;
             display: inline-block;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .submitted { background: #d1ffe4; color: #0f9d58; }
         .not-submitted { background: #ffe1e1; color: #c62828; }
 
-        .smart-info {
-            display: flex;
-            gap: 20px;
-            margin: 30px 0;
-            flex-wrap: wrap;
+        .right-panel {
+            width: 280px;
+            padding: 40px 30px;
+            background: #f2f6fc;
         }
 
-        .info-box {
-            flex: 1;
+        .calendar, .task-list {
             background: white;
-            border-radius: 12px;
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        .info-box h4 { color: #333; margin-bottom: 10px; }
-        .info-box span {
-            font-size: 30px;
-            display: block;
-            margin-top: 10px;
-        }
+        .calendar h4, .task-list h4 { margin-bottom: 10px; }
 
-        .info-box .yes { color: #0f9d58; }
-        .info-box .no { color: #dc3545; }
+        .task-list ul { padding-left: 20px; }
+        .task-list li {
+            font-size: 14px;
+            margin: 6px 0;
+        }
 
         @media(max-width: 1024px) {
             body { flex-direction: column; }
-            .sidebar, .main { width: 100%; }
+            .sidebar, .right-panel { width: 100%; }
+            .main { padding: 20px; }
         }
     </style>
 </head>
@@ -164,10 +156,10 @@ $has_notes = $materials->num_rows > 0;
 
     <div class="sidebar">
         <div>
-            <h2>📚 E-School</h2>
+            <h2>E-School</h2>
             <a href="#">🏠 Dashboard</a>
             <a href="#">📘 Assignments</a>
-            <a href="#">📖 Study Center</a>
+            <a href="#">📚 Study Material</a>
             <a href="#">📝 Exams</a>
             <a href="#">📊 Results</a>
         </div>
@@ -179,39 +171,16 @@ $has_notes = $materials->num_rows > 0;
     <div class="main">
         <div class="welcome">
             <div class="text">
-                <h2>Welcome, <?= htmlspecialchars($student['name']) ?></h2>
+                <h2>Hello, <?= htmlspecialchars($student['name']) ?></h2>
                 <p>Enrollment: <?= $student['enrollment_id'] ?> | Course: <?= $student['course'] ?></p>
             </div>
-            <div class="profile">
-                <img src="uploads/<?= $student['photo'] ?>" width="60" style="border-radius: 50%;">
+            <div class="profile-pic">
+                <img src="../../uploads/<?= $student['photo'] ?>" width="60" style="border-radius: 50%;">
             </div>
         </div>
 
-        <!-- Smart Info Cards -->
-        <div class="smart-info">
-            <div class="info-box">
-                <h4>📘 Assignments</h4>
-                <span class="<?= $assignments->num_rows > 0 ? 'yes' : 'no' ?>">
-                    <?= $assignments->num_rows > 0 ? '✅ Available' : '❌ None' ?>
-                </span>
-            </div>
-            <div class="info-box">
-                <h4>📝 Exams</h4>
-                <span class="<?= $has_exams ? 'yes' : 'no' ?>">
-                    <?= $has_exams ? '✅ Assigned' : '❌ Not Assigned' ?>
-                </span>
-            </div>
-            <div class="info-box">
-                <h4>📚 Notes</h4>
-                <span class="<?= $has_notes ? 'yes' : 'no' ?>">
-                    <?= $has_notes ? '✅ Available' : '❌ None' ?>
-                </span>
-            </div>
-        </div>
-
-        <!-- Assignment Cards -->
         <div class="card-section">
-            <h3>Your Recent Assignments</h3>
+            <h3>Your Assignments</h3>
             <div class="cards">
                 <?php while($a = $assignments->fetch_assoc()) { ?>
                     <div class="card">
@@ -225,6 +194,22 @@ $has_notes = $materials->num_rows > 0;
                     </div>
                 <?php } ?>
             </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="calendar">
+            <h4>📅 Calendar</h4>
+            <p><?= date('F j, Y') ?></p>
+        </div>
+        <div class="task-list">
+            <h4>📝 Your Tasks</h4>
+            <ul>
+                <li>Upload Assignment</li>
+                <li>Study for Quiz</li>
+                <li>Check Study Notes</li>
+                <li>Complete Practice Exam</li>
+            </ul>
         </div>
     </div>
 
