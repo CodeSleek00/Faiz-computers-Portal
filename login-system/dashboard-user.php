@@ -52,6 +52,30 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--gray);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            background: var(--dark);
+            transform: translateX(-3px);
         }
 
         .profile-card {
@@ -60,6 +84,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
             box-shadow: var(--card-shadow);
             overflow: hidden;
             position: relative;
+            margin-top: 20px;
         }
 
         .profile-header {
@@ -255,9 +280,15 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
 </head>
 <body>
     <div class="container">
+        <!-- Back Button -->
+        <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
         <div class="profile-card">
             <div class="profile-header">
-                <h1>Student Profile</h1><br>
+                <h1>Student Profile</h1>
+                <p>Manage your academic information</p>
             </div>
             
             <img src="../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Profile Photo" class="profile-pic">
@@ -295,7 +326,10 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                             <span class="info-label">Contact Number</span>
                             <span class="info-value"><?= htmlspecialchars($student['contact_number']) ?></span>
                         </div>
-                       
+                        <div class="info-item">
+                            <span class="info-label">Email Address</span>
+                            <span class="info-value"><?= htmlspecialchars($student['email'] ?? 'Not provided') ?></span>
+                        </div>
                         <div class="info-item">
                             <span class="info-label">Address</span>
                             <span class="info-value"><?= htmlspecialchars($student['address']) ?></span>
@@ -304,6 +338,9 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                 </div>
                 
                 <div class="action-buttons">
+                    <a href="edit_profile.php" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
                     <a href="logout.php" class="btn btn-danger">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
@@ -311,5 +348,12 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
             </div>
         </div>
     </div>
+
+    <script>
+        // Optional: Add smooth back button behavior
+        document.querySelector('.back-btn').addEventListener('click', function() {
+            window.history.back();
+        });
+    </script>
 </body>
 </html>
