@@ -29,7 +29,6 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                 <p>Course<?= htmlspecialchars($student['course']) ?></p>
                 <p>Address<?= htmlspecialchars($student['address']) ?></p>
                 <p>Contact Number<?= htmlspecialchars($student['contact_number']) ?></p>
-                <p>Email<?= htmlspecialchars($student['email'] ?? 'Not provided') ?></p>
            
 </body>
 </html>
