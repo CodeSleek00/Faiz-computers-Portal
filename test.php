@@ -88,7 +88,6 @@ $assignment_stats = $conn->query("
             color: var(--dark);
             line-height: 1.6;
             overflow-x: hidden;
-            padding-bottom: var(--footer-height);
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -113,7 +112,7 @@ $assignment_stats = $conn->query("
         .navbar {
             position: fixed;
             top: 0;
-            left: 0;
+            left: var(--sidebar-width);
             right: 0;
             height: var(--navbar-height);
             background-color: var(--white);
@@ -124,6 +123,7 @@ $assignment_stats = $conn->query("
             padding: 0 2rem;
             z-index: 1000;
             transition: var(--transition);
+            width: calc(100% - var(--sidebar-width));
         }
 
         .navbar.scrolled {
@@ -152,26 +152,6 @@ $assignment_stats = $conn->query("
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .navbar-toggler {
-            background: none;
-            border: none;
-            color: var(--medium-gray);
-            font-size: 1.4rem;
-            cursor: pointer;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .navbar-toggler:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
         }
 
         .user-profile {
@@ -208,22 +188,16 @@ $assignment_stats = $conn->query("
         /* Sidebar */
         .sidebar {
             position: fixed;
-            top: var(--navbar-height);
+            top: 0;
             left: 0;
             width: var(--sidebar-width);
-            height: calc(100vh - var(--navbar-height));
+            height: 100vh;
             background-color: var(--white);
-            transition: var(--transition);
             z-index: 999;
             display: flex;
             flex-direction: column;
             border-right: 1px solid var(--light-gray);
             box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
-            transform: translateX(-100%);
-        }
-
-        .sidebar.active {
-            transform: translateX(0);
         }
 
         .sidebar-header {
@@ -233,6 +207,7 @@ $assignment_stats = $conn->query("
             align-items: center;
             gap: 1rem;
             background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(76, 201, 240, 0.1));
+            height: var(--navbar-height);
         }
 
         .sidebar-user-avatar {
@@ -322,36 +297,12 @@ $assignment_stats = $conn->query("
             background-color: rgba(239, 35, 60, 0.05);
         }
 
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-            backdrop-filter: blur(3px);
-        }
-
-        .overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
         /* Main Content */
         .main-content {
-            padding: calc(var(--navbar-height) + 2rem) 2rem 2rem;
+            padding: calc(var(--navbar-height) + 2rem) 3rem 2rem;
             transition: var(--transition);
-            width: 100%;
-            min-height: calc(100vh - var(--navbar-height) - var(--footer-height));
-            margin-left: 0;
-        }
-
-        .sidebar.active + .main-content {
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
             margin-left: var(--sidebar-width);
         }
 
@@ -389,8 +340,8 @@ $assignment_stats = $conn->query("
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
@@ -479,8 +430,8 @@ $assignment_stats = $conn->query("
 
         .assignments-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
@@ -582,6 +533,8 @@ $assignment_stats = $conn->query("
             padding: 1.5rem;
             box-shadow: var(--box-shadow);
             margin-bottom: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .calendar-header {
@@ -659,124 +612,6 @@ $assignment_stats = $conn->query("
             color: var(--light-gray);
         }
 
-        /* Mobile Footer */
-        .mobile-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: var(--footer-height);
-            background-color: var(--white);
-            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 990;
-        }
-
-        .footer-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: var(--medium-gray);
-            font-size: 0.8rem;
-            padding: 0.5rem;
-            flex: 1;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .footer-item.active {
-            color: var(--primary);
-        }
-
-        .footer-item i {
-            font-size: 1.4rem;
-            margin-bottom: 0.25rem;
-            transition: var(--transition);
-        }
-
-        .footer-item.active i {
-            transform: translateY(-5px);
-        }
-
-        .footer-item::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            transition: var(--transition);
-        }
-
-        .footer-item.active::after {
-            width: 60%;
-        }
-
-        /* Responsive Adjustments */
-        @media (min-width: 992px) {
-            .sidebar {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: var(--sidebar-width);
-            }
-            
-            .mobile-footer {
-                display: none;
-            }
-            
-            .navbar-toggler {
-                display: none;
-            }
-        }
-
-        @media (max-width: 991px) {
-            .main-content {
-                padding: calc(var(--navbar-height) + 1rem) 1rem 1rem;
-            }
-            
-            .welcome-section {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-            }
-            
-            .user-profile-img {
-                margin-top: 1rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .assignments-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .welcome-text h2 {
-                font-size: 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .navbar {
-                padding: 0 1rem;
-            }
-        }
-
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -794,20 +629,21 @@ $assignment_stats = $conn->query("
     </style>
 </head>
 <body>
-    <!-- Overlay -->
-    <div class="overlay" id="overlay"></div>
-
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <div class="navbar-left">
-            <button class="navbar-toggler" id="navbarToggler">
-                <i class="fas fa-bars"></i>
-            </button>
             <a href="#" class="navbar-brand">
                 <span>Faiz Computer Institute</span>
             </a>
         </div>
         
+        <div class="user-profile">
+            <div class="user-info">
+                <div class="user-name"><?= htmlspecialchars($student['name']) ?></div>
+                <div class="user-role">Student</div>
+            </div>
+            <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="user-avatar">
+        </div>
     </nav>
 
     <!-- Sidebar -->
@@ -938,7 +774,6 @@ $assignment_stats = $conn->query("
                         <p class="assignment-details"><?= htmlspecialchars(substr($assignment['question_text'], 0, 100)) ?>...</p>
                         
                         <div class="assignment-meta">
-                           
                             <?php if ($assignment['submission_id']): ?>
                                 <span class="assignment-status status-submitted">Submitted</span>
                             <?php else: ?>
@@ -994,50 +829,8 @@ $assignment_stats = $conn->query("
         </section>
     </main>
 
-    <!-- Mobile Footer -->
-    <footer class="mobile-footer">
-        <a href="test.php" class="footer-item active">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="assignment/student_dashboard.php" class="footer-item">
-            <i class="fas fa-tasks"></i>
-            <span>Assignments</span>
-        </a>
-        <a href="study-center/view_materials_student.php" class="footer-item">
-            <i class="fas fa-book"></i>
-            <span>Study</span>
-        </a>
-        <a href="login-system/dashboard-user.php" class="footer-item">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-        </a>
-    </footer>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const navbarToggler = document.getElementById('navbarToggler');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            const mainContent = document.getElementById('mainContent');
-            
-            // Toggle sidebar
-            function toggleSidebar() {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            }
-            
-            // Close sidebar when clicking on overlay
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            }
-            
-            // Event listeners
-            navbarToggler.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', closeSidebar);
-            
             // Add scroll effect to navbar
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 10) {
@@ -1047,10 +840,10 @@ $assignment_stats = $conn->query("
                 }
             });
             
-            // Initialize calendar navigation (placeholder functionality)
+            // Initialize calendar navigation
             document.querySelectorAll('.calendar-nav-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // In a real app, this would update the calendar view
+                    // Calendar navigation functionality
                     alert('Calendar navigation would be implemented here');
                 });
             });
@@ -1058,28 +851,12 @@ $assignment_stats = $conn->query("
             // Add click effect to calendar days
             document.querySelectorAll('.calendar-day:not(.other-month)').forEach(day => {
                 day.addEventListener('click', function() {
-                    // In a real app, this would show events for the selected day
                     alert('Day selected: ' + this.textContent);
                 });
             });
             
-            // Responsive adjustments
-            function handleResize() {
-                if (window.innerWidth >= 992) {
-                    sidebar.classList.add('active');
-                    overlay.classList.remove('active');
-                } else {
-                    sidebar.classList.remove('active');
-                }
-            }
-            
-            // Initialize on load
-            handleResize();
-            window.addEventListener('resize', handleResize);
-            
-            // Add animation to elements as they come into view
+            // Keep animations
             const animateElements = document.querySelectorAll('.animate-in');
-            
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
