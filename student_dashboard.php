@@ -36,7 +36,7 @@ $has_exams = $exams->num_rows > 0;
 // Check if study materials assigned
 $materials = $conn->query("
     SELECT *
-    FROM study_materialS
+    FROM study_materials
     WHERE assigned_to = 'all'
        OR student_id = $student_id
        OR batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
