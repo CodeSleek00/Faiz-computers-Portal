@@ -89,6 +89,7 @@ $assignment_stats = $conn->query("
             line-height: 1.6;
             overflow-x: hidden;
             padding-bottom: var(--footer-height);
+            height:100%
         }
 
         h1, h2, h3, h4, h5, h6 {
