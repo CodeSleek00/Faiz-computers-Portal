@@ -321,10 +321,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
                             <span class="info-label">Contact Number</span>
                             <span class="info-value"><?= htmlspecialchars($student['contact_number']) ?></span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Email Address</span>
-                            <span class="info-value"><?= htmlspecialchars($student['email'] ?? 'Not provided') ?></span>
-                        </div>
+                        
                         <div class="info-item">
                             <span class="info-label">Address</span>
                             <span class="info-value"><?= htmlspecialchars($student['address']) ?></span>
