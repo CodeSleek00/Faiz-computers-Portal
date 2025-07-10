@@ -169,7 +169,7 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
     <div class="grid">
         <div class="feature-box">
             <h4>📘 Exam Center</h4>
-            <a href="create_exam.php">Create Exam</a>
+            <a href="exam-center/admin/exam_dashboard.php">Create Exam</a>
             <a href="exam_dashboard.php">Manage</a>
         </div>
         <div class="feature-box">
@@ -186,6 +186,25 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
             <h4>📊 Results</h4>
             <a href="declare_result.php">Declare</a>
             <a href="view_results_admin.php">Review</a>
+        </div>
+        <div class="feature-box">
+            <h4> Admin </h4>
+            <a href="declare_result.php">Manage Student</a>
+            <a href="view_results_admin.php">edit_student</a>
+            <a href="">view Student</a>
+            <a href="">Add Student</a>
+        </div>
+        <div class="feature-box">
+            <h4>Batch</h4>
+            <a href="declare_result.php">Create Batch</a>
+            <a href="view_results_admin.php">Edit Batch</a>
+            <a href="view_results_admin.php">view Batch</a>
+            <a href="view_results_admin.php">View Batches</a>
+        </div>
+        <div class="feature-box">
+            <h4>Study Center</h4>
+            <a href="declare_result.php">View Materials Student</a>
+            <a href="view_results_admin.php">study Material Data</a>
         </div>
     </div>
 
