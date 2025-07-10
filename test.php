@@ -865,7 +865,7 @@ $assignment_stats = $conn->query("
                     <i class="fas fa-book"></i>
                     <span>Enrolled Courses</span>
                 </div>
-                <div class="stat-value"><?= $course_stats['course'] ?></div>
+                <div class="stat-value"><?= $course_stats['total_courses'] ?></div>
                 <i class="fas fa-graduation-cap stat-icon"></i>
             </div>
             
