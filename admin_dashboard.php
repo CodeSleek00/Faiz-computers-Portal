@@ -179,7 +179,7 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         </div>
         <div class="feature-box">
             <h4>📚 Study Center</h4>
-            <a href="study-center/view_materials_admin.php">Upload PDF</a>
+            <a href="study-center/assign_material.php">Upload PDF</a>
             <a href="study-center/view_materials_admin.php">Manage</a>
         </div>
         <div class="feature-box">
