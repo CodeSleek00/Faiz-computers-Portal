@@ -30,42 +30,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Question</title>
+    <title>Add Exam Question</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial; background: #f4f4f4; padding: 40px; }
-        .form-box {
-            max-width: 700px; margin: auto; background: #fff; padding: 30px;
-            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        :root {
+            --primary: #4f46e5;
+            --success: #28a745;
+            --light-bg: #f3f4f6;
+            --white: #ffffff;
+            --gray: #6b7280;
+            --radius: 10px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; }
-        button { background: #28a745; color: white; padding: 12px; border: none; width: 100%; border-radius: 6px; }
-        button:hover { background: #218838; }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-bg);
+            margin: 0;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .form-box {
+            background: var(--white);
+            max-width: 750px;
+            margin: auto;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: var(--radius);
+            font-size: 15px;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        button {
+            background: var(--success);
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            font-weight: 600;
+            font-size: 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px;
+            }
+
+            .form-box {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
+
 <div class="form-box">
-    <h2>Question <?= $q_num ?> of <?= $total ?></h2>
+    <h2>🧾 Question <?= $q_num ?> of <?= $total ?></h2>
     <form method="POST">
-        <label>Question:</label>
-        <textarea name="question" required></textarea>
-        
-        <label>Option A:</label>
-        <input type="text" name="option_a" required>
+        <label for="question">Question:</label>
+        <textarea name="question" id="question" required></textarea>
 
-        <label>Option B:</label>
-        <input type="text" name="option_b" required>
+        <label for="option_a">Option A:</label>
+        <input type="text" name="option_a" id="option_a" required>
 
-        <label>Option C:</label>
-        <input type="text" name="option_c" required>
+        <label for="option_b">Option B:</label>
+        <input type="text" name="option_b" id="option_b" required>
 
-        <label>Option D:</label>
-        <input type="text" name="option_d" required>
+        <label for="option_c">Option C:</label>
+        <input type="text" name="option_c" id="option_c" required>
 
-        <label>Correct Option (a/b/c/d):</label>
-        <input type="text" name="correct_option" pattern="[abcd]" required>
+        <label for="option_d">Option D:</label>
+        <input type="text" name="option_d" id="option_d" required>
 
-        <button type="submit">Save & Next</button>
+        <label for="correct_option">Correct Option (a / b / c / d):</label>
+        <input type="text" name="correct_option" id="correct_option" pattern="[abcd]" required>
+
+        <button type="submit">💾 Save & Next</button>
     </form>
 </div>
+
 </body>
 </html>
