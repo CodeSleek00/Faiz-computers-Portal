@@ -137,7 +137,7 @@ $data = $conn->query($query);
 
     <!-- Header -->
     <div class="header">
-        <a href="student_dashboard.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+        <a href="../student_dashboard.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
         <h2>Hi, <?= htmlspecialchars($student_name) ?> 👋</h2>
         <p style="color: var(--gray); font-size: 14px;">Here are your assigned study materials:</p>
     </div>
