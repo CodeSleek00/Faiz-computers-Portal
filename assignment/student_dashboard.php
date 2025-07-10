@@ -205,7 +205,7 @@ $assignments = $conn->query($assignment_sql);
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <a href="user.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+        <a href="../student_dashboard.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
         <div class="greeting">Hi, <?= htmlspecialchars($student['name']) ?> 👋</div>
         <div class="enroll-id">Enrollment ID: <?= $student['enrollment_id'] ?></div>
     </div>
