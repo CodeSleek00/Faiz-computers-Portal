@@ -169,8 +169,8 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
     <div class="grid">
         <div class="feature-box">
             <h4>📘 Exam Center</h4>
-            <a href="exam-center/admin/exam_dashboard.php">Create Exam</a>
-            <a href="exam_dashboard.php">Manage</a>
+            <a href="exam-center/admin/create_exam.php">Create Exam</a>
+            <a href="exam-center/admin/exam_dashboard.php">Manage</a>
         </div>
         <div class="feature-box">
             <h4>📒 Assignments</h4>
