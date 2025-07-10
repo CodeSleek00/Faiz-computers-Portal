@@ -193,10 +193,10 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         </div>
         <div class="feature-box">
             <h4>Batch</h4>
-            <a href="declare_result.php">Create Batch</a>
-            <a href="view_results_admin.php">Edit Batch</a>
-            <a href="view_results_admin.php">view Batch</a>
-            <a href="view_results_admin.php">View Batches</a>
+            <a href="batch/create_batch.php">Create Batch</a>
+            <a href="batch/edit_batch.php">Edit Batch</a>
+            <a href="batch/view_batches.php">view Batches</a>
+            <a href="batch/view_batch.php">View Batch</a>
         </div>
         <div class="feature-box">
             <h4>Study Center</h4>
