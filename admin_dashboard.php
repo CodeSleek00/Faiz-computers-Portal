@@ -184,8 +184,8 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         </div>
         <div class="feature-box">
             <h4>📊 Results</h4>
-            <a href="declare_result.php">Declare</a>
-            <a href="view_results_admin.php">Review</a>
+            <a href="exam-center/admin/declare_result.php">Declare</a>
+            <a href="exam-center/admin/view_results_admin.php">Review</a>
         </div>
         <div class="feature-box">
             <h4> Admin </h4>
