@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Add Student</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -56,13 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         body {
             margin: 0;
             background: #f5f7fa;
-            padding: 30px 15px;
+            padding: 20px;
             display: flex;
             justify-content: center;
         }
         .card {
             background: white;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             padding: 30px 25px;
             border-radius: 12px;
@@ -73,16 +74,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #333;
             margin-bottom: 25px;
         }
+        form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
         label {
-            display: block;
-            margin-bottom: 6px;
             font-weight: 500;
+            margin-bottom: 6px;
             color: #333;
         }
-        input, textarea, select {
+        input, textarea {
             width: 100%;
             padding: 12px;
-            margin-bottom: 18px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 15px;
@@ -106,14 +110,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background: #2f4fe4;
         }
 
-        /* Image Preview */
-        .image-preview-container {
-            margin-bottom: 20px;
-            text-align: center;
+        /* Grid for larger screens */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
+
         .image-preview-box {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            max-width: 180px;
+            height: 180px;
             margin: 0 auto 10px;
             border-radius: 10px;
             border: 2px dashed #ccc;
@@ -131,9 +138,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .image-placeholder {
             font-size: 13px;
             color: #999;
+            text-align: center;
+            padding: 10px;
         }
 
-        /* Password visibility toggle */
         .password-wrapper {
             position: relative;
         }
@@ -146,11 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 14px;
             color: #888;
         }
-        .toggle-password:hover {
-            color: #000;
-        }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .card {
                 padding: 20px 15px;
             }
@@ -161,30 +166,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="card">
         <h2>Add New Student</h2>
         <form action="add_student.php" method="POST" enctype="multipart/form-data">
-            <div class="image-preview-container">
+            <div>
+                <label for="photo">Photo</label>
                 <div class="image-preview-box">
                     <img id="imagePreview">
-                    <span class="image-placeholder" id="imagePlaceholder">Image Preview</span>
+                    <div class="image-placeholder" id="imagePlaceholder">Image Preview</div>
                 </div>
                 <input type="file" name="photo" accept="image/*" required onchange="previewImage(event)">
             </div>
 
-            <label>Name</label>
-            <input type="text" name="name" required>
-
-            <label>Contact Number</label>
-            <input type="text" name="contact" required>
-
-            <label>Address</label>
-            <textarea name="address" rows="3" required></textarea>
-
-            <label>Course</label>
-            <input type="text" name="course" required>
-
-            <label>Password</label>
-            <div class="password-wrapper">
-                <input type="password" name="password" id="passwordField" required>
-                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+            <div class="form-grid">
+                <div>
+                    <label for="name">Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div>
+                    <label for="contact">Contact Number</label>
+                    <input type="text" name="contact" required>
+                </div>
+                <div>
+                    <label for="address">Address</label>
+                    <textarea name="address" rows="3" required></textarea>
+                </div>
+                <div>
+                    <label for="course">Course</label>
+                    <input type="text" name="course" required>
+                </div>
+                <div class="password-wrapper">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="passwordField" required>
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
             </div>
 
             <button type="submit">Add Student</button>
