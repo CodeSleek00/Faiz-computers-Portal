@@ -1,10 +1,8 @@
 <?php
 include '../database_connection/db_connect.php';
 
-// Fetch all assignments
 $assignment_result = $conn->query("SELECT * FROM assignments ORDER BY created_at DESC");
 
-// Check if filtering by assignment
 $filter_assignment = $_GET['assignment_id'] ?? null;
 $filter_condition = "";
 
@@ -13,7 +11,6 @@ if (!empty($filter_assignment)) {
     $filter_condition = "WHERE s.assignment_id = $filter_assignment";
 }
 
-// Fetch all submissions with student and assignment info
 $submission_query = "
     SELECT s.*, st.name AS student_name, st.enrollment_id, a.title AS assignment_title
     FROM assignment_submissions s
@@ -26,27 +23,127 @@ $submissions = $conn->query($submission_query);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>All Submissions</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Assignment Submissions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f0f3f8; padding: 40px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 5px 18px rgba(0,0,0,0.06); }
-        h2 { text-align: center; margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table th, table td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        table th { background: #f9fbfd; font-weight: 600; }
-        a.grade-link {
-            background: #007bff; color: white;
-            padding: 6px 10px; border-radius: 6px;
-            text-decoration: none; font-size: 14px;
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
         }
+
+        body {
+            background: #f2f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
         .filter-form {
             margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
         }
+
+        .filter-form label {
+            font-weight: 500;
+        }
+
         .filter-form select {
-            padding: 10px; border-radius: 8px; font-size: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #f7f9fc;
+            font-weight: 600;
+            color: #444;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .grade-link {
+            background: #007bff;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .grade-link:hover {
+            background: #0056b3;
+        }
+
+        a[href*="uploads/submissions"] {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            table th, table td {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-form select {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -56,8 +153,8 @@ $submissions = $conn->query($submission_query);
     <h2>All Assignment Submissions</h2>
 
     <form method="GET" class="filter-form">
-        <label>Filter by Assignment:</label>
-        <select name="assignment_id" onchange="this.form.submit()">
+        <label for="assignment_id">Filter by Assignment:</label>
+        <select name="assignment_id" id="assignment_id" onchange="this.form.submit()">
             <option value="">-- All Assignments --</option>
             <?php while ($a = $assignment_result->fetch_assoc()) { ?>
                 <option value="<?= $a['assignment_id'] ?>" <?= ($a['assignment_id'] == $filter_assignment) ? 'selected' : '' ?>>
@@ -72,11 +169,11 @@ $submissions = $conn->query($submission_query);
             <tr>
                 <th>Assignment</th>
                 <th>Student</th>
-                <th>Enrollment ID</th>
-                <th>Submitted Text</th>
+                <th>Enrollment</th>
+                <th>Text</th>
                 <th>File</th>
                 <th>Marks</th>
-                <th>Submitted At</th>
+                <th>Submitted</th>
                 <th>Action</th>
             </tr>
         </thead>
