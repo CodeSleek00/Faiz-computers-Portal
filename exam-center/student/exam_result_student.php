@@ -137,7 +137,7 @@ $results = $conn->query($sql);
     <!-- Header -->
     <div class="header">
         <h2>Hi, <?= htmlspecialchars($student['name']) ?> 👋 | Your Exam Results</h2>
-        <a class="back-btn" href="../student_dashboard.php"><i class="fas fa-arrow-left"></i> Back</a>
+        <a class="back-btn" href="../../test.php"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
 
     <!-- Exam Results -->
