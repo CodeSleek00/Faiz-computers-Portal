@@ -28,46 +28,18 @@ if (isset($_GET['search'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #fafafa;
-            padding: 2rem;
-            margin: 0;
-            color: #333;
-            line-height: 1.5;
-        }
-
-        h2 {
-            font-weight: 600;
-            color: #222;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #fafafa; padding: 2rem; margin: 0; color: #333; line-height: 1.5; }
+        h2 { font-weight: 600; color: #222; margin-bottom: 1.5rem; text-align: center; }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 1.5rem; }
 
         input[type="text"] {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            width: 300px;
-            font-size: 15px;
+            padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px;
+            width: 300px; font-size: 15px;
         }
 
         button {
             padding: 0.5rem 1rem;
-            background-color: #4CAF50;
-            color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -75,8 +47,9 @@ if (isset($_GET['search'])) {
             transition: 0.2s;
         }
 
-        button:hover {
-            background-color: #45a049;
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
         }
 
         .reset-btn {
@@ -89,9 +62,8 @@ if (isset($_GET['search'])) {
             display: inline-block;
         }
 
-        .reset-btn:hover {
-            background-color: #d32f2f;
-        }
+        .reset-btn:hover { background-color: #d32f2f; }
+        button:hover { opacity: 0.9; }
 
         table {
             width: 100%;
@@ -117,13 +89,10 @@ if (isset($_GET['search'])) {
             color: #555;
         }
 
-        tr:hover {
-            background-color: #f9f9f9;
-        }
+        tr:hover { background-color: #f9f9f9; }
 
         .student-photo {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             object-fit: cover;
             border-radius: 50%;
             border: 1px solid #eee;
@@ -131,9 +100,7 @@ if (isset($_GET['search'])) {
             transition: transform 0.2s;
         }
 
-        .student-photo:hover {
-            transform: scale(1.1);
-        }
+        .student-photo:hover { transform: scale(1.1); }
 
         .btn {
             display: inline-block;
@@ -146,42 +113,19 @@ if (isset($_GET['search'])) {
             transition: 0.2s ease;
         }
 
-        .view-btn {
-            background-color: transparent;
-            color: #4CAF50;
-            border: 1px solid #4CAF50;
-        }
+        .view-btn { background-color: transparent; color: #4CAF50; border: 1px solid #4CAF50; }
+        .edit-btn { background-color: transparent; color: #FF9800; border: 1px solid #FF9800; }
+        .delete-btn { background-color: transparent; color: #F44336; border: 1px solid #F44336; }
+        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
 
-        .edit-btn {
-            background-color: transparent;
-            color: #FF9800;
-            border: 1px solid #FF9800;
-        }
+        .actions-cell { white-space: nowrap; }
 
-        .delete-btn {
-            background-color: transparent;
-            color: #F44336;
-            border: 1px solid #F44336;
-        }
-
-        .btn:hover {
-            opacity: 0.85;
-            transform: translateY(-1px);
-        }
-
-        .actions-cell {
-            white-space: nowrap;
-        }
-
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.7);
             align-items: center;
             justify-content: center;
@@ -197,60 +141,28 @@ if (isset($_GET['search'])) {
             position: relative;
         }
 
-        .modal-img {
-            max-width: 100%;
-            max-height: 70vh;
-            border-radius: 4px;
-        }
-
+        .modal-img { max-width: 100%; max-height: 70vh; border-radius: 4px; }
         .close-modal {
             position: absolute;
-            top: 10px;
-            right: 20px;
+            top: 10px; right: 20px;
             font-size: 28px;
             font-weight: bold;
             color: #aaa;
             cursor: pointer;
         }
 
-        .close-modal:hover {
-            color: #333;
-        }
+        .close-modal:hover { color: #333; }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            input[type="text"],
-            button,
-            .reset-btn {
-                width: 100%;
-                margin: 0;
-            }
-
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-
-            th, td {
-                padding: 0.75rem 1rem;
-                font-size: 14px;
-            }
+            .controls { flex-direction: column; align-items: stretch; }
+            input[type="text"], button, .reset-btn { width: 100%; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+            th, td { padding: 0.75rem 1rem; font-size: 14px; }
         }
 
         @media (max-width: 500px) {
-            .modal-content {
-                padding: 15px;
-            }
-
-            .modal-img {
-                max-height: 60vh;
-            }
+            .modal-content { padding: 15px; }
+            .modal-img { max-height: 60vh; }
         }
     </style>
 </head>
@@ -258,12 +170,19 @@ if (isset($_GET['search'])) {
     <h2>All Students</h2>
 
     <div class="controls">
-        <form method="GET" action="" style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; justify-content: center;">
+        <!-- Search Form -->
+        <form method="GET" action="" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
             <input type="text" name="search" placeholder="Search by name, contact, course or ID" value="<?= htmlspecialchars($search) ?>">
             <button type="submit">Search</button>
             <?php if (!empty($search)): ?>
                 <a href="?" class="reset-btn">Reset</a>
             <?php endif; ?>
+        </form>
+
+        <!-- Excel Export Form -->
+        <form method="GET" action="export_students_excel.php">
+            <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+            <button type="submit" style="background-color: #2196F3; color: white;">Download Excel</button>
         </form>
     </div>
 
