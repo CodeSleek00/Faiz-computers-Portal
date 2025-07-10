@@ -155,7 +155,7 @@ $assigned = $conn->query("
     <!-- Header -->
     <div class="header">
         <h2>Hi, <?= htmlspecialchars($student['name']) ?> 👋</h2>
-        <a class="back-btn" href="../student_dashboard.php"><i class="fas fa-arrow-left"></i> Back</a>
+        <a class="back-btn" href="../../test.php"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
 
     <h3>Your Assigned Exams</h3>
