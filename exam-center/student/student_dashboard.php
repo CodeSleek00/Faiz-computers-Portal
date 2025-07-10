@@ -22,49 +22,170 @@ $assigned = $conn->query("
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Exams</title>
+    <title>My Exams</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { font-family: Arial; padding: 40px; background: #f4f7f9; }
+        :root {
+            --primary: #4f46e5;
+            --light: #f3f4f6;
+            --white: #ffffff;
+            --gray: #6b7280;
+            --success: #16a34a;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--light);
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
+
         .container {
-            max-width: 950px; margin: auto; background: white; padding: 30px;
-            border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            max-width: 950px;
+            margin: auto;
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
         }
-        h2 { text-align: center; }
-        .exam {
-            padding: 20px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 10px;
-            background: #fafafa;
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
         }
+
+        .header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--primary);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn i {
+            font-size: 14px;
+        }
+
+        .exam-card {
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .exam-card:hover {
+            background: #eef2ff;
+        }
+
+        .exam-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .exam-info {
+            color: var(--gray);
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
         .start-btn {
-            background: #007bff; color: white; padding: 10px 20px;
-            border-radius: 8px; text-decoration: none;
+            display: inline-block;
+            background: var(--primary);
+            color: var(--white);
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
         }
-        .taken {
-            color: green; font-weight: bold;
+
+        .start-btn:hover {
+            background: #4338ca;
+        }
+
+        .taken-msg {
+            color: var(--success);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 15px;
+        }
+
+        .taken-msg i {
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .exam-title {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>👨‍🎓 Welcome, <?= htmlspecialchars($student['name']) ?>!</h2>
+    <!-- Header -->
+    <div class="header">
+        <h2>Hi, <?= htmlspecialchars($student['name']) ?> 👋</h2>
+        <a class="back-btn" href="../student_dashboard.php"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
     <h3>Your Assigned Exams</h3>
 
-    <?php while ($exam = $assigned->fetch_assoc()) {
-        // Check if student already submitted
-        $check = $conn->query("SELECT 1 FROM exam_submissions WHERE exam_id = {$exam['exam_id']} AND student_id = $student_id");
-        $already_submitted = $check->num_rows > 0;
+    <?php if ($assigned->num_rows > 0): ?>
+        <?php while ($exam = $assigned->fetch_assoc()):
+            $check = $conn->query("SELECT 1 FROM exam_submissions WHERE exam_id = {$exam['exam_id']} AND student_id = $student_id");
+            $already_submitted = $check->num_rows > 0;
         ?>
-        <div class="exam">
-            <strong><?= htmlspecialchars($exam['exam_name']) ?></strong><br>
-            Questions: <?= $exam['total_questions'] ?> |
-            Duration: <?= $exam['duration'] ?> mins
-            <br><br>
-            <?php if ($already_submitted): ?>
-                <span class="taken">✅ You have already submitted this exam.</span>
-            <?php else: ?>
-                <a href="take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="start-btn">Start Exam</a>
-            <?php endif; ?>
-        </div>
-    <?php } ?>
+            <div class="exam-card">
+                <div class="exam-title"><?= htmlspecialchars($exam['exam_name']) ?></div>
+                <div class="exam-info">
+                    Questions: <?= $exam['total_questions'] ?> | Duration: <?= $exam['duration'] ?> mins
+                </div>
+
+                <?php if ($already_submitted): ?>
+                    <div class="taken-msg">
+                        <i class="fas fa-check-circle"></i> You have already submitted this exam.
+                    </div>
+                <?php else: ?>
+                    <a href="take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="start-btn">
+                        <i class="fas fa-pen"></i> Start Exam
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <p>No exams have been assigned yet.</p>
+    <?php endif; ?>
 </div>
+
 </body>
 </html>
