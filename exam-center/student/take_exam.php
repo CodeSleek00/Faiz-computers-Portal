@@ -257,7 +257,7 @@ $total = count($question_array);
                 <?php foreach (['a', 'b', 'c', 'd'] as $opt): ?>
                     <div class="option">
                         <label>
-                            <input type="radio" name="answers[<?= $q['question_id'] ?>]" value="<?= $opt ?>" required>
+                            <input type="radio" name="answers[<?= $q['question_id'] ?>]" value="<?= $opt ?>">
                             <?= strtoupper($opt) ?>. <?= htmlspecialchars($q["option_$opt"]) ?>
                         </label>
                     </div>
