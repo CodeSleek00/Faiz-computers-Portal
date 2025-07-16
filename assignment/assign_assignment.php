@@ -11,6 +11,8 @@ $students = $conn->query("SELECT * FROM students ORDER BY name ASC");
 <html>
 <head>
     <title>Assign Assignment</title>
+    <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; background: #f2f4f8; padding: 40px; }

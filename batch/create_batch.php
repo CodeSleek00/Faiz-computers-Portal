@@ -29,6 +29,8 @@ $courses = $conn->query("SELECT DISTINCT course FROM students");
 <html>
 <head>
     <title>Create Batch</title>
+    <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>

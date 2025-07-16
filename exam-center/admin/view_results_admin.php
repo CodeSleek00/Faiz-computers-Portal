@@ -17,6 +17,8 @@ $results = $conn->query("
 <html>
 <head>
     <title>View Results</title>
+    <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <style>
         body { font-family: Arial; background: #eef1f5; padding: 40px; }
         .container {
