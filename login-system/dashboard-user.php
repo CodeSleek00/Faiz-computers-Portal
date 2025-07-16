@@ -283,7 +283,7 @@ $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollme
 <body>
     <div class="container">
         <!-- Back Button -->
-        <button class="back-btn" onclick="window.history.back()">
+        <button class="back-btn" a href="../test.php">
             <i class="fas fa-arrow-left"></i>
         </button>
         
