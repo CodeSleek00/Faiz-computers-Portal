@@ -174,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <img id="imagePreview">
                     <div class="image-placeholder" id="imagePlaceholder">Image Preview</div>
                 </div>
-                <input type="file" name="photo" accept="image/*" required onchange="previewImage(event)">
+                <input type="file" name="photo" accept="image/*" onchange="previewImage(event)">
             </div>
 
             <div class="form-grid">
