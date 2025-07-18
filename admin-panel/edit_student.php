@@ -171,7 +171,7 @@ $row = $result->fetch_assoc();
 <div class="form-container">
     <h2>Edit Student</h2>
 
-    <img class="student-photo" src="../uploads/<?= htmlspecialchars($row['photo']) ?>" alt="Student Photo">
+    <img class="student-photo" src="../uploads/<?= htmlspecialchars($row['photo']) ?>" alt="Student Photo" required>
 
     <form method="POST">
         <label for="name">Full Name</label>
