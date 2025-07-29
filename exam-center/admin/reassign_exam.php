@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    echo "<script>alert('Exam reassigned successfully'); location.href='admin_exam_dashboard.php';</script>";
+    echo "<script>alert('Exam reassigned successfully'); location.href='exam_dashboard.php';</script>";
     exit;
 }
 ?>
