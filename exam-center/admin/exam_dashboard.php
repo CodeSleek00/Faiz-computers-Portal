@@ -181,6 +181,7 @@ $exams = $conn->query("SELECT * FROM exams ORDER BY created_at DESC");
                 <td data-label="Actions">
                     <a class="btn view" href="view_results_admin.php?exam_id=<?= $exam['exam_id'] ?>">📊 View</a><br>
                     <a class="btn delete" href="delete_exam.php?exam_id=<?= $exam['exam_id'] ?>" onclick="return confirm('Are you sure?')">🗑 Delete</a>
+                    <a class="btn" href="reassign_exam.php?exam_id=<?= $exam['exam_id'] ?>" style="background:#ffc107; color:#000;">♻ Re-Assign</a>
                 </td>
             </tr>
         <?php } ?>
