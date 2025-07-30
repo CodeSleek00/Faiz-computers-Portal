@@ -10,7 +10,7 @@ $student_id = $student['student_id'];
 $exam_id = $_GET['exam_id'];
 
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();
-$questions = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id ORDER BY question_id ASC");
+$questions = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id ORDER BY RAND()"); // SHUFFLED QUESTIONS
 
 $question_array = [];
 while ($q = $questions->fetch_assoc()) {
