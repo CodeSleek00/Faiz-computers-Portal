@@ -1,19 +1,10 @@
 <?php
-session_start();
 require '../../database_connection/db_connect.php';
 
-// Check if user is logged in (add your own authentication logic)
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php");
-    exit;
-}
-
 // Validate and sanitize exam_id
-$exam_id = filter_input(INPUT_GET, 'exam_id', FILTER_VALIDATE_INT);
-if (!$exam_id) {
-    $_SESSION['error'] = "Invalid exam ID";
-    header("Location: exam_dashboard.php");
-    exit;
+$exam_id = isset($_GET['exam_id']) ? intval($_GET['exam_id']) : 0;
+if ($exam_id <= 0) {
+    die("Invalid exam ID");
 }
 
 // Check database connection
@@ -26,79 +17,46 @@ $students = $conn->query("SELECT * FROM students ORDER BY name ASC");
 $batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // CSRF protection
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        $_SESSION['error'] = "Invalid CSRF token";
-        header("Location: re_assign_exam.php?exam_id=" . $exam_id);
-        exit;
-    }
-
     $type = $_POST['assign_type'] ?? '';
-    $success = true;
     $assignments_made = 0;
 
     try {
-        $conn->begin_transaction();
+        // First remove all existing assignments for this exam
+        $conn->query("DELETE FROM exam_assignments WHERE exam_id = $exam_id");
 
         if ($type == 'student' && !empty($_POST['student_ids'])) {
-            $stmt = $conn->prepare("INSERT IGNORE INTO exam_assignments (exam_id, student_id) VALUES (?, ?)");
+            $stmt = $conn->prepare("INSERT INTO exam_assignments (exam_id, student_id) VALUES (?, ?)");
             foreach ($_POST['student_ids'] as $student_id) {
-                $student_id = filter_var($student_id, FILTER_VALIDATE_INT);
-                if ($student_id) {
+                $student_id = intval($student_id);
+                if ($student_id > 0) {
                     $stmt->bind_param("ii", $exam_id, $student_id);
                     $stmt->execute();
-                    $assignments_made += $stmt->affected_rows;
+                    $assignments_made++;
                 }
             }
         } 
         elseif ($type == 'batch' && !empty($_POST['batch_ids'])) {
-            $stmt = $conn->prepare("INSERT IGNORE INTO exam_assignments (exam_id, batch_id) VALUES (?, ?)");
+            $stmt = $conn->prepare("INSERT INTO exam_assignments (exam_id, batch_id) VALUES (?, ?)");
             foreach ($_POST['batch_ids'] as $batch_id) {
-                $batch_id = filter_var($batch_id, FILTER_VALIDATE_INT);
-                if ($batch_id) {
+                $batch_id = intval($batch_id);
+                if ($batch_id > 0) {
                     $stmt->bind_param("ii", $exam_id, $batch_id);
                     $stmt->execute();
-                    $assignments_made += $stmt->affected_rows;
+                    $assignments_made++;
                 }
             }
         } 
         elseif ($type == 'all') {
-            $all_students = $conn->query("SELECT student_id FROM students");
-            $stmt = $conn->prepare("INSERT IGNORE INTO exam_assignments (exam_id, student_id) VALUES (?, ?)");
-            while ($s = $all_students->fetch_assoc()) {
-                $sid = filter_var($s['student_id'], FILTER_VALIDATE_INT);
-                if ($sid) {
-                    $stmt->bind_param("ii", $exam_id, $sid);
-                    $stmt->execute();
-                    $assignments_made += $stmt->affected_rows;
-                }
-            }
-        } 
-        else {
-            $success = false;
-            $_SESSION['error'] = "Invalid assignment type or no selection made";
+            $result = $conn->query("INSERT INTO exam_assignments (exam_id, student_id) 
+                                  SELECT $exam_id, student_id FROM students");
+            $assignments_made = $conn->affected_rows;
         }
 
-        if ($success) {
-            $conn->commit();
-            $_SESSION['success'] = "Successfully made $assignments_made new assignment(s)";
-            header("Location: exam_dashboard.php");
-            exit;
-        } else {
-            $conn->rollback();
-            header("Location: re_assign_exam.php?exam_id=" . $exam_id);
-            exit;
-        }
+        $message = "Successfully reassigned exam to $assignments_made recipients";
     } catch (Exception $e) {
-        $conn->rollback();
-        $_SESSION['error'] = "Database error: " . $e->getMessage();
-        header("Location: re_assign_exam.php?exam_id=" . $exam_id);
-        exit;
+        $message = "Error: " . $e->getMessage();
     }
 }
-
-// Generate CSRF token
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 ?>
 
 <!DOCTYPE html>
@@ -169,20 +127,18 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         #studentList div:hover, #batchList div:hover {
             background: #e0e7ff;
         }
-        .alert {
+        .message {
             padding: 10px 15px;
             border-radius: 6px;
             margin-bottom: 20px;
-        }
-        .alert-error {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #fca5a5;
-        }
-        .alert-success {
             background: #dcfce7;
             color: #166534;
             border: 1px solid #86efac;
+        }
+        .error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
         }
         .select-all {
             margin-bottom: 10px;
@@ -194,21 +150,13 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     <div class="form-box">
         <h2>Re-Assign Exam</h2>
         
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-error">
-                <?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+        <?php if (!empty($message)): ?>
+            <div class="<?= strpos($message, 'Error') !== false ? 'error' : 'message' ?>">
+                <?= htmlspecialchars($message) ?>
             </div>
         <?php endif; ?>
 
         <form method="POST">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-            
             <label>Select Assignment Type:</label>
             <select name="assign_type" id="assignType" onchange="toggleSection(this.value)" required>
                 <option value="">--Select--</option>
@@ -270,7 +218,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         function filterList(searchInputId, listContainerId) {
             const input = document.getElementById(searchInputId).value.toLowerCase();
             const items = document.getElementById(listContainerId).getElementsByTagName('div');
-
+            
             for (let i = 0; i < items.length; i++) {
                 const text = items[i].textContent.toLowerCase();
                 items[i].style.display = text.includes(input) ? '' : 'none';
@@ -282,13 +230,13 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             const checkboxes = container.querySelectorAll('input[type="checkbox"]');
             
             checkboxes.forEach(checkbox => {
-                if (checkbox.id !== 'selectAllStudents' && checkbox.id !== 'selectAllBatches') {
+                if (!checkbox.id.includes('selectAll')) {
                     checkbox.checked = checked;
                 }
             });
         }
 
-        // Initialize the form based on any previously selected type
+        // Initialize form based on any previously selected type
         document.addEventListener('DOMContentLoaded', function() {
             const assignType = document.getElementById('assignType');
             if (assignType.value) {
