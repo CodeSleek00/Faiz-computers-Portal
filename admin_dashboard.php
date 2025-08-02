@@ -415,13 +415,7 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         <div class="main-content">
             <div class="header">
                 <h1>Dashboard Overview</h1>
-                <div class="user-profile">
-                    <img src="assets/images/user-avatar.jpg" alt="Admin User">
-                    <div class="user-info">
-                        <h5>Admin User</h5>
-                        <p>Super Admin</p>
-                    </div>
-                </div>
+                
             </div>
             
             <!-- Stats Cards -->
