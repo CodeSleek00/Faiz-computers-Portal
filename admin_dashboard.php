@@ -399,15 +399,6 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
                     <span>Batches</span>
                 </a>
                 
-                <p class="menu-title">Settings</p>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
             </div>
         </div>
         
