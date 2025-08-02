@@ -367,7 +367,7 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h3><i class="fas fa-graduation-cap"></i> LMS Admin</h3>
+                <h3><i class="fas fa-graduation-cap"></i> FAIZ'S</h3>
             </div>
             
             <div class="sidebar-menu">
