@@ -15,8 +15,8 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Learning Management System</title>
-    <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="apple-touch-icon" href="assets/images/favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -48,8 +48,76 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         }
         
         .dashboard {
-            display: flex;
+            display: none; /* Initially hidden until password is entered */
             min-height: 100vh;
+        }
+        
+        /* Password Modal Styles */
+        #passwordModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        #passwordModal > div {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 350px;
+            max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        #passwordModal h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+        
+        #passwordModal label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        #adminPassword {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        #submitPassword {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        
+        #submitPassword:hover {
+            background: var(--secondary);
+        }
+        
+        #errorMsg {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 15px;
+            display: none;
         }
         
         /* Sidebar Styles */
@@ -363,6 +431,19 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
     </style>
 </head>
 <body>
+    <!-- Password Protection Modal -->
+    <div id="passwordModal">
+        <div>
+            <h2><i class="fas fa-lock"></i> Admin Login</h2>
+            <div>
+                <label for="adminPassword">Enter Password</label>
+                <input type="password" id="adminPassword" placeholder="Enter admin password">
+                <button id="submitPassword"><i class="fas fa-sign-in-alt"></i> Submit</button>
+                <p id="errorMsg">Incorrect password. Please try again.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -398,7 +479,6 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
                     <i class="fas fa-layer-group"></i>
                     <span>Batches</span>
                 </a>
-                
             </div>
         </div>
         
@@ -406,7 +486,6 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         <div class="main-content">
             <div class="header">
                 <h1>Dashboard Overview</h1>
-                
             </div>
             
             <!-- Stats Cards -->
@@ -567,75 +646,131 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
     </div>
     
     <script>
-        // Chart.js Implementation
-        const ctx = document.getElementById('summaryChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Students', 'Batches', 'Exams', 'Assignments', 'Materials'],
-                datasets: [{
-                    label: 'Count Overview',
-                    data: [<?= $total_students ?>, <?= $total_batches ?>, <?= $total_exams ?>, <?= $total_assignments ?>, <?= $total_materials ?>],
-                    backgroundColor: [
-                        'rgba(67, 97, 238, 0.7)',
-                        'rgba(76, 201, 160, 0.7)',
-                        'rgba(248, 150, 30, 0.7)',
-                        'rgba(247, 37, 133, 0.7)',
-                        'rgba(63, 55, 201, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(67, 97, 238, 1)',
-                        'rgba(76, 201, 160, 1)',
-                        'rgba(248, 150, 30, 1)',
-                        'rgba(247, 37, 133, 1)',
-                        'rgba(63, 55, 201, 1)'
-                    ],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleFont: {
-                            size: 14,
-                            weight: 'bold'
-                        },
-                        bodyFont: {
-                            size: 12
-                        },
-                        padding: 12,
-                        cornerRadius: 6
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        },
-                        grid: {
-                            color: 'rgba(0,0,0,0.05)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
+        // Password Protection
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordModal = document.getElementById('passwordModal');
+            const adminPassword = document.getElementById('adminPassword');
+            const submitBtn = document.getElementById('submitPassword');
+            const errorMsg = document.getElementById('errorMsg');
+            const dashboard = document.querySelector('.dashboard');
+            
+            // Set your password here (in a real application, this should be server-side)
+            const correctPassword = "admin123"; // Change this to your desired password
+            
+            // Hide the main content initially
+            dashboard.style.display = 'none';
+            errorMsg.style.display = 'none';
+            
+            // Focus on password field when modal appears
+            adminPassword.focus();
+            
+            submitBtn.addEventListener('click', function() {
+                checkPassword();
+            });
+            
+            // Allow pressing Enter to submit
+            adminPassword.addEventListener('keyup', function(e) {
+                if(e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+            
+            function checkPassword() {
+                if(adminPassword.value === correctPassword) {
+                    passwordModal.style.display = 'none';
+                    dashboard.style.display = 'flex';
+                    
+                    // Store session (for page refreshes)
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                    
+                    // Initialize chart after successful login
+                    initChart();
+                } else {
+                    errorMsg.style.display = 'block';
+                    adminPassword.value = '';
+                    adminPassword.focus();
                 }
             }
+            
+            // Check if already authenticated in this session
+            if(sessionStorage.getItem('adminAuthenticated') === 'true') {
+                passwordModal.style.display = 'none';
+                dashboard.style.display = 'flex';
+                initChart();
+            }
+            
+            // Chart.js Implementation
+            function initChart() {
+                const ctx = document.getElementById('summaryChart').getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Students', 'Batches', 'Exams', 'Assignments', 'Materials'],
+                        datasets: [{
+                            label: 'Count Overview',
+                            data: [<?= $total_students ?>, <?= $total_batches ?>, <?= $total_exams ?>, <?= $total_assignments ?>, <?= $total_materials ?>],
+                            backgroundColor: [
+                                'rgba(67, 97, 238, 0.7)',
+                                'rgba(76, 201, 160, 0.7)',
+                                'rgba(248, 150, 30, 0.7)',
+                                'rgba(247, 37, 133, 0.7)',
+                                'rgba(63, 55, 201, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(67, 97, 238, 1)',
+                                'rgba(76, 201, 160, 1)',
+                                'rgba(248, 150, 30, 1)',
+                                'rgba(247, 37, 133, 1)',
+                                'rgba(63, 55, 201, 1)'
+                            ],
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                padding: 12,
+                                cornerRadius: 6
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                },
+                                grid: {
+                                    color: 'rgba(0,0,0,0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Mobile sidebar toggle (you can add a button for this)
+            function toggleSidebar() {
+                document.querySelector('.sidebar').classList.toggle('active');
+            }
         });
-        
-        // Mobile sidebar toggle (you can add a button for this)
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        }
     </script>
 </body>
 </html>
