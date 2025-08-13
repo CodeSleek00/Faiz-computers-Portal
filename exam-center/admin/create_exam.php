@@ -1,18 +1,17 @@
 <?php
+// create_exam.php
 include '../../database_connection/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $exam_name = $_POST['exam_name'];
-    $total_questions = $_POST['total_questions'];
     $duration = $_POST['duration'];
     $marks = $_POST['marks'];
 
-    $stmt = $conn->prepare("INSERT INTO exams (exam_name, total_questions, duration, marks_per_question) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("siii", $exam_name, $total_questions, $duration, $marks);
+    $stmt = $conn->prepare("INSERT INTO exams (exam_name, duration, marks_per_question) VALUES (?, ?, ?)");
+    $stmt->bind_param("sii", $exam_name, $duration, $marks);
     $stmt->execute();
 
-    $exam_id = $stmt->insert_id;
-    header("Location: add_question.php?exam_id=$exam_id&total=$total_questions");
+    header("Location: exam_dashboard.php");
     exit;
 }
 ?>
@@ -115,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h2>📝 Create New Exam</h2>
     <form method="POST">
         <input type="text" name="exam_name" placeholder="Enter Exam Name" required>
-        <input type="number" name="total_questions" placeholder="Total Questions" required>
+       
         <input type="number" name="marks" placeholder="Marks per Question" required>
         <input type="number" name="duration" placeholder="Duration (in minutes)" required>
         <button type="submit">➕ Add Questions</button>
