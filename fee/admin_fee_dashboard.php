@@ -90,7 +90,6 @@ $result = $conn->query($sql);
     
     .btn-primary:hover {
       background-color: #dce4ffff;
-      border: 1px solid var(--primary-blue);
     }
     
     .password-modal {
