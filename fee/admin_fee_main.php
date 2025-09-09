@@ -120,6 +120,8 @@ function print_val($arr, $key) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
 <title>Submit Fee - <?php echo htmlspecialchars($student['name']); ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>

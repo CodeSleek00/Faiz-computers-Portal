@@ -75,6 +75,8 @@ $labels = [
 <head>
 <meta charset="UTF-8">
 <title>Fee Receipt</title>
+ <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <style>
   body { background: #f8f9fa; }
