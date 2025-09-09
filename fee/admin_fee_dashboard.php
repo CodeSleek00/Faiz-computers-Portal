@@ -6,7 +6,7 @@ if (!$conn) {
     die("Database connection not found");
 }
 
-// Students aur unki fees fetch karna (photo bhi lekar aayenge)
+// Students aur unki fees fetch karna
 $sql = "SELECT sf.id, sf.student_id, s.name AS student_name, s.course, s.photo,
                sf.total_fee, 
                (sf.internal1 + sf.internal2 + sf.semester1 + sf.semester2 + 
@@ -15,7 +15,8 @@ $sql = "SELECT sf.id, sf.student_id, s.name AS student_name, s.course, s.photo,
                 sf.month_sep + sf.month_oct + sf.month_nov + sf.month_dec
                ) AS paid_fee
         FROM student_fees sf
-        JOIN students s ON sf.student_id = s.student_id";
+        JOIN students s ON sf.student_id = s.student_id
+        ORDER BY sf.student_id ASC";
 
 $result = $conn->query($sql);
 ?>
@@ -29,8 +30,8 @@ $result = $conn->query($sql);
     .student-photo {
       width: 50px;
       height: 50px;
-      border-radius: 50%;
       object-fit: cover;
+      border-radius: 50%;
     }
   </style>
 </head>
@@ -38,7 +39,7 @@ $result = $conn->query($sql);
 <div class="container my-5">
   <h2 class="mb-4">Student Fee Dashboard</h2>
   <table class="table table-bordered table-hover bg-white align-middle">
-    <thead class="table-dark">
+    <thead class="table-dark text-center">
       <tr>
         <th>Photo</th>
         <th>Student ID</th>
@@ -53,11 +54,12 @@ $result = $conn->query($sql);
       <?php if ($result->num_rows > 0): ?>
         <?php while ($row = $result->fetch_assoc()): ?>
           <tr>
-            <td>
-              <?php if (!empty($row['photo'])): ?>
-                <img src="<?php echo htmlspecialchars($row['photo']); ?>" alt="Photo" class="student-photo">
+            <td class="text-center">
+              <?php if (!empty($row['photo']) && file_exists("../photo_upload/" . $row['photo'])): ?>
+                <img src="../photo_upload/<?php echo htmlspecialchars($row['photo']); ?>" 
+                     alt="Photo" class="student-photo">
               <?php else: ?>
-                <span class="text-muted">No Photo</span>
+                <img src="https://via.placeholder.com/50" alt="No Photo" class="student-photo">
               <?php endif; ?>
             </td>
             <td><?php echo htmlspecialchars($row['student_id']); ?></td>
@@ -65,7 +67,7 @@ $result = $conn->query($sql);
             <td><?php echo htmlspecialchars($row['course']); ?></td>
             <td>₹<?php echo number_format($row['total_fee'], 2); ?></td>
             <td>₹<?php echo number_format($row['paid_fee'], 2); ?></td>
-            <td>
+            <td class="text-center">
               <a href="show_fee.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary">Show Fee</a>
               <a href="complete_course.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger"
                  onclick="return confirm('Are you sure you want to mark this course as completed and delete fee record?')">
