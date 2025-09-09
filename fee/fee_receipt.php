@@ -64,7 +64,8 @@ $payment_date = $fee['payment_date'] ?? date('Y-m-d');
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <style>
   body { background: #f8f9fa; }
-  .receipt { max-width: 600px; margin: 40px auto; padding: 20px; background: #fff; border: 1px solid #ddd; }
+  .receipt { max-width: 700px; margin: 40px auto; padding: 20px; background: #fff; border: 1px solid #ddd; }
+  .student-photo { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; border: 2px solid #ccc; }
   @media print {
       .no-print { display: none; }
       body { background: #fff; }
@@ -73,14 +74,40 @@ $payment_date = $fee['payment_date'] ?? date('Y-m-d');
 </head>
 <body>
 <div class="receipt">
-  <h3 class="text-center">Fee Receipt</h3>
+  <h3 class="text-center mb-3">Fee Receipt</h3>
   <hr>
-  <p><strong>Student:</strong> <?php echo htmlspecialchars($student['name']); ?> (<?php echo $student['student_id']; ?>)</p>
-  <p><strong>Fee Type:</strong> <?php echo htmlspecialchars($fee_type); ?></p>
-  <p><strong>Amount Paid:</strong> ₹<?php echo number_format($fee_amount, 2); ?></p>
-  <p><strong>Payment Date:</strong> <?php echo htmlspecialchars($payment_date); ?></p>
-  <hr>
-  <p class="text-center">Thank you for your payment!</p>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <p><strong>Student:</strong> <?php echo htmlspecialchars($student['name']); ?></p>
+      <p><strong>Enrollment:</strong> <?php echo htmlspecialchars($student['student_id']); ?></p>
+      <p><strong>Course:</strong> <?php echo htmlspecialchars($student['course']); ?></p>
+    </div>
+    <div>
+      <?php if(!empty($student['photo']) && file_exists("../uploads/".$student['photo'])): ?>
+        <img src="../uploads/<?php echo htmlspecialchars($student['photo']); ?>" class="student-photo" alt="Photo">
+      <?php else: ?>
+        <img src="https://via.placeholder.com/90" class="student-photo" alt="No Photo">
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <table class="table table-bordered">
+    <tr>
+      <th>Fee Type</th>
+      <td><?php echo htmlspecialchars($fee_type); ?></td>
+    </tr>
+    <tr>
+      <th>Amount Paid</th>
+      <td>₹<?php echo number_format($fee_amount, 2); ?></td>
+    </tr>
+    <tr>
+      <th>Payment Date</th>
+      <td><?php echo htmlspecialchars($payment_date); ?></td>
+    </tr>
+  </table>
+
+  <p class="text-center mt-3">Thank you for your payment!</p>
 
   <div class="text-center mt-3 no-print">
       <button class="btn btn-primary" onclick="window.print()">🖨 Print Receipt</button>
