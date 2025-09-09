@@ -3,13 +3,14 @@
 include '../database_connection/db_connect.php';
 if (!$conn) die("Database connection not found");
 
-// months define
+// define months early to avoid undefined warnings
 $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 
+// GET student_id
 $student_id = $_GET['student_id'] ?? '';
 if (!$student_id) die("No student selected.");
 
-// fetch student
+// fetch student safely
 $student_q = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
 $student_q->bind_param("i", $student_id);
 $student_q->execute();
@@ -17,36 +18,42 @@ $student_res = $student_q->get_result();
 $student = $student_res->fetch_assoc();
 if (!$student) die("Student not found.");
 
-// fetch existing fee record
+// fetch existing fee record if any
 $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
 $fee_q->bind_param("i", $student_id);
 $fee_q->execute();
 $fee_res = $fee_q->get_result();
-$fee = $fee_res->fetch_assoc();
+$fee = $fee_res->fetch_assoc(); // may be null
 
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $total_fee = $_POST['total_fee'] ?? 0;
-    $admission_fee = $_POST['admission_fee'] ?? 0;
-    $internal1 = $_POST['internal1'] ?? 0;
-    $internal2 = $_POST['internal2'] ?? 0;
-    $semester1 = $_POST['semester1'] ?? 0;
-    $semester2 = $_POST['semester2'] ?? 0;
+    // sanitize numeric inputs
+    $total_fee = isset($_POST['total_fee']) && $_POST['total_fee'] !== '' ? (float)$_POST['total_fee'] : 0;
+    $admission_fee = isset($_POST['admission_fee']) && $_POST['admission_fee'] !== '' ? (float)$_POST['admission_fee'] : 0;
+    $internal1 = isset($_POST['internal1']) && $_POST['internal1'] !== '' ? (float)$_POST['internal1'] : 0;
+    $internal2 = isset($_POST['internal2']) && $_POST['internal2'] !== '' ? (float)$_POST['internal2'] : 0;
+    $semester1 = isset($_POST['semester1']) && $_POST['semester1'] !== '' ? (float)$_POST['semester1'] : 0;
+    $semester2 = isset($_POST['semester2']) && $_POST['semester2'] !== '' ? (float)$_POST['semester2'] : 0;
     $payment_date = !empty($_POST['payment_date']) ? $_POST['payment_date'] : date('Y-m-d');
 
-    // months data
     $month_values = [];
+    $extra_filled = false;
     foreach ($months as $m) {
-        $month_values[$m] = $_POST['month_'.$m] ?? 0;
+        $val = isset($_POST['month_'.$m]) && $_POST['month_'.$m] !== '' ? (float)$_POST['month_'.$m] : 0;
+        $month_values[$m] = $val;
+        if ($val > 0) $extra_filled = true;
     }
+    if ($admission_fee > 0 || $internal1 > 0 || $internal2 > 0 || $semester1 > 0 || $semester2 > 0) $extra_filled = true;
 
     if ($fee) {
-        // update
+        // UPDATE existing record
         $sql = "UPDATE student_fees SET total_fee=?, admission_fee=?, internal1=?, internal2=?, semester1=?, semester2=?,
-            month_jan=?, month_feb=?, month_mar=?, month_apr=?, month_may=?, month_jun=?, month_jul=?, month_aug=?,
-            month_sep=?, month_oct=?, month_nov=?, month_dec=?, payment_date=? WHERE student_id=?";
+                month_jan=?, month_feb=?, month_mar=?, month_apr=?, month_may=?, month_jun=?, month_jul=?, month_aug=?,
+                month_sep=?, month_oct=?, month_nov=?, month_dec=?, payment_date=?, last_updated=NOW()
+                WHERE student_id=?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ddddddddddddddds i",
+        $stmt->bind_param(
+            "ddddddddddddddddddsi",
             $total_fee, $admission_fee, $internal1, $internal2, $semester1, $semester2,
             $month_values['jan'],$month_values['feb'],$month_values['mar'],$month_values['apr'],
             $month_values['may'],$month_values['jun'],$month_values['jul'],$month_values['aug'],
@@ -57,14 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         $msg = "Fee updated successfully!";
     } else {
-        // insert
+        // INSERT new record
         $sql = "INSERT INTO student_fees (student_id, student_name, total_fee, admission_fee, internal1, internal2, semester1, semester2,
-            month_jan, month_feb, month_mar, month_apr, month_may, month_jun, month_jul, month_aug,
-            month_sep, month_oct, month_nov, month_dec, payment_date)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                month_jan, month_feb, month_mar, month_apr, month_may, month_jun, month_jul, month_aug,
+                month_sep, month_oct, month_nov, month_dec, payment_date)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("isddddddddddddddds",
-            $student_id, $student['name'], $total_fee, $admission_fee, $internal1, $internal2, $semester1, $semester2,
+        $stmt->bind_param(
+            "isddddddddddddddddds",
+            $student_id, $student['name'],
+            $total_fee, $admission_fee, $internal1, $internal2, $semester1, $semester2,
             $month_values['jan'],$month_values['feb'],$month_values['mar'],$month_values['apr'],
             $month_values['may'],$month_values['jun'],$month_values['jul'],$month_values['aug'],
             $month_values['sep'],$month_values['oct'],$month_values['nov'],$month_values['dec'],
@@ -75,13 +84,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $msg = "Fee submitted successfully!";
     }
 
-    header("Location: fee_receipt.php?student_id=" . urlencode($student_id) . "&date=" . urlencode($payment_date));
-    exit;
+    // refresh $fee
+    $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
+    $fee_q->bind_param("i", $student_id);
+    $fee_q->execute();
+    $fee_res = $fee_q->get_result();
+    $fee = $fee_res->fetch_assoc();
+
+    if ($extra_filled) {
+        header("Location: fee_receipt.php?student_id=" . urlencode($student_id));
+        exit;
+    }
 }
 
-// helper function
+// helper for printing value
 function print_val($arr, $key) {
-    return isset($arr[$key]) && $arr[$key] > 0 ? $arr[$key] : '';
+    if (!isset($arr[$key]) || $arr[$key] === null) return '';
+    $v = (float)$arr[$key];
+    return $v > 0 ? $v : '';
 }
 ?>
 <!DOCTYPE html>
@@ -117,24 +137,45 @@ function print_val($arr, $key) {
         <tr><th>Fee Type</th><th>Amount (₹)</th></tr>
       </thead>
       <tbody>
-        <tr><td>Admission Fee</td><td><input type="number" step="0.01" name="admission_fee" class="form-control" value="<?php echo print_val($fee,'admission_fee'); ?>"></td></tr>
-        <tr><td>Internal 1</td><td><input type="number" step="0.01" name="internal1" class="form-control" value="<?php echo print_val($fee,'internal1'); ?>"></td></tr>
-        <tr><td>Internal 2</td><td><input type="number" step="0.01" name="internal2" class="form-control" value="<?php echo print_val($fee,'internal2'); ?>"></td></tr>
-        <tr><td>Semester 1</td><td><input type="number" step="0.01" name="semester1" class="form-control" value="<?php echo print_val($fee,'semester1'); ?>"></td></tr>
-        <tr><td>Semester 2</td><td><input type="number" step="0.01" name="semester2" class="form-control" value="<?php echo print_val($fee,'semester2'); ?>"></td></tr>
+        <tr>
+          <td>Admission Fee</td>
+          <td><input type="number" step="0.01" name="admission_fee" class="form-control" value="<?php echo print_val($fee,'admission_fee'); ?>"></td>
+        </tr>
+        <tr>
+          <td>Internal 1</td>
+          <td><input type="number" step="0.01" name="internal1" class="form-control" value="<?php echo print_val($fee,'internal1'); ?>"></td>
+        </tr>
+        <tr>
+          <td>Internal 2</td>
+          <td><input type="number" step="0.01" name="internal2" class="form-control" value="<?php echo print_val($fee,'internal2'); ?>"></td>
+        </tr>
+        <tr>
+          <td>Semester 1</td>
+          <td><input type="number" step="0.01" name="semester1" class="form-control" value="<?php echo print_val($fee,'semester1'); ?>"></td>
+        </tr>
+        <tr>
+          <td>Semester 2</td>
+          <td><input type="number" step="0.01" name="semester2" class="form-control" value="<?php echo print_val($fee,'semester2'); ?>"></td>
+        </tr>
       </tbody>
     </table>
 
     <h5 class="mb-3">Monthly Fees</h5>
     <table class="table table-bordered mb-3">
-      <thead class="table-light"><tr>
-        <?php foreach($months as $m): ?><th><?php echo ucfirst($m); ?></th><?php endforeach; ?>
-      </tr></thead>
-      <tbody><tr>
-        <?php foreach($months as $m): ?>
-          <td><input type="number" step="0.01" name="month_<?php echo $m; ?>" class="form-control" value="<?php echo print_val($fee,'month_'.$m); ?>"></td>
-        <?php endforeach; ?>
-      </tr></tbody>
+      <thead class="table-light">
+        <tr>
+          <?php foreach($months as $m): ?>
+            <th><?php echo ucfirst($m); ?></th>
+          <?php endforeach; ?>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <?php foreach($months as $m): ?>
+            <td><input type="number" step="0.01" name="month_<?php echo $m; ?>" class="form-control" value="<?php echo print_val($fee,'month_'.$m); ?>"></td>
+          <?php endforeach; ?>
+        </tr>
+      </tbody>
     </table>
 
     <div class="mb-3">
