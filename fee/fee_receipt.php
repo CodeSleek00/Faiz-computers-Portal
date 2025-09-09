@@ -65,10 +65,6 @@ $payment_date = $fee['payment_date'] ?? date('Y-m-d');
 <style>
   body { background: #f8f9fa; }
   .receipt { max-width: 600px; margin: 40px auto; padding: 20px; background: #fff; border: 1px solid #ddd; }
-  @media print {
-      .no-print { display: none; }
-      body { background: #fff; }
-  }
 </style>
 </head>
 <body>
@@ -81,10 +77,6 @@ $payment_date = $fee['payment_date'] ?? date('Y-m-d');
   <p><strong>Payment Date:</strong> <?php echo htmlspecialchars($payment_date); ?></p>
   <hr>
   <p class="text-center">Thank you for your payment!</p>
-
-  <div class="text-center mt-3 no-print">
-      <button class="btn btn-primary" onclick="window.print()">🖨 Print Receipt</button>
-  </div>
 </div>
 </body>
 </html>
