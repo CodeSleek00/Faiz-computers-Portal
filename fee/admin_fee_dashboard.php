@@ -126,7 +126,7 @@ $result = $conn->query($sql);
 </head>
 <body>
   <!-- Password Modal -->
-  <div class="modal fade password-modal" id="passwordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade password-modal" id="passwordModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -146,7 +146,8 @@ $result = $conn->query($sql);
     </div>
   </div>
 
-  <div class="container my-4 container-main">
+  <!-- Main Container -->
+  <div class="container my-4 container-main" id="mainContainer" style="display: none;">
     <div class="header-section">
       <div class="row align-items-center">
         <div class="col-md-8">
@@ -176,11 +177,11 @@ $result = $conn->query($sql);
             <?php
             $total_collected = 0;
             if ($result->num_rows > 0) {
-              $result->data_seek(0); // Reset pointer
+              $result->data_seek(0); 
               while($row = $result->fetch_assoc()) {
                 $total_collected += $row['paid_fee'];
               }
-              $result->data_seek(0); // Reset pointer again for main display
+              $result->data_seek(0);
             }
             echo '₹' . number_format($total_collected, 2);
             ?>
@@ -194,11 +195,11 @@ $result = $conn->query($sql);
             <?php
             $total_pending = 0;
             if ($result->num_rows > 0) {
-              $result->data_seek(0); // Reset pointer
+              $result->data_seek(0); 
               while($row = $result->fetch_assoc()) {
                 $total_pending += ($row['total_fee'] - $row['paid_fee']);
               }
-              $result->data_seek(0); // Reset pointer again for main display
+              $result->data_seek(0);
             }
             echo '₹' . number_format($total_pending, 2);
             ?>
@@ -207,7 +208,7 @@ $result = $conn->query($sql);
       </div>
     </div>
 
-    <!-- Search by Student ID or Name -->
+    <!-- Search Box -->
     <div class="search-box mb-4">
       <form method="get">
         <div class="row g-2">
@@ -225,6 +226,7 @@ $result = $conn->query($sql);
       </form>
     </div>
 
+    <!-- Students Table -->
     <div class="table-responsive">
       <table class="table table-bordered table-hover bg-white align-middle">
         <thead class="table-light text-center">
@@ -244,12 +246,11 @@ $result = $conn->query($sql);
           $has_result = false;
           if ($result->num_rows > 0):
             while ($row = $result->fetch_assoc()):
-              // Search filter
               if (isset($_GET['search']) && $_GET['search'] !== '') {
                   $search = strtolower($_GET['search']);
                   if (strpos(strtolower($row['student_id']), $search) === false &&
                       strpos(strtolower($row['student_name']), $search) === false) {
-                      continue; // Skip non-matching
+                      continue;
                   }
               }
               $has_result = true;
@@ -299,40 +300,50 @@ $result = $conn->query($sql);
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Password protection system
-      const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
-      const correctPassword = "admin123"; // Change this to your desired password
-      
-      // Check if already authenticated
-      if (!sessionStorage.getItem('authenticated')) {
-        passwordModal.show();
+      const passwordModalEl = document.getElementById('passwordModal');
+      const passwordModal = new bootstrap.Modal(passwordModalEl);
+      const mainContainer = document.getElementById('mainContainer');
+      const correctPassword = "admin123";
+
+      function unlockPage() {
+        mainContainer.style.display = 'block';
+        passwordModal.hide();
+        sessionStorage.setItem('authenticated', 'true');
       }
-      
-      // Submit password handler
+
+      if (!sessionStorage.getItem('authenticated')) {
+        mainContainer.style.display = 'none';
+        passwordModal.show();
+      } else {
+        mainContainer.style.display = 'block';
+      }
+
       document.getElementById('submitPassword').addEventListener('click', function() {
         const inputPassword = document.getElementById('passwordInput').value;
         const errorElement = document.getElementById('passwordError');
-        
+
         if (inputPassword === correctPassword) {
-          sessionStorage.setItem('authenticated', 'true');
-          passwordModal.hide();
+          unlockPage();
         } else {
           errorElement.classList.remove('d-none');
           document.getElementById('passwordInput').value = '';
         }
       });
-      
-      // Lock dashboard functionality
+
       document.getElementById('lockButton').addEventListener('click', function() {
         sessionStorage.removeItem('authenticated');
+        mainContainer.style.display = 'none';
         passwordModal.show();
       });
-      
-      // Allow Enter key to submit password
+
       document.getElementById('passwordInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           document.getElementById('submitPassword').click();
         }
+      });
+
+      document.getElementById('passwordInput').addEventListener('input', function() {
+        document.getElementById('passwordError').classList.add('d-none');
       });
     });
   </script>
