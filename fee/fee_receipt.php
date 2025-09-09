@@ -74,6 +74,7 @@ $payment_date = $fee['payment_date'] ?? date('Y-m-d');
 </head>
 <body>
 <div class="receipt">
+  <h1>FAIZ COMPUTER INSTITUTE</h1>
   <h3 class="text-center mb-3">Fee Receipt</h3>
   <hr>
 
