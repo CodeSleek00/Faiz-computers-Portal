@@ -1,46 +1,124 @@
 <?php
 // admin_fee_dashboard.php
-// Requires: db_connect.php which provides $pdo (PDO) connection
-// Place this file in your admin folder and include db_connect.php at top
+// Robust version: works with either PDO ($pdo) or MySQLi ($conn or $mysqli).
+// Make sure your project has a db_connect.php that defines either $pdo (PDO) OR $conn/$mysqli (mysqli).
 
-include '../database_connection/db_connect.php';
-// Basic protections (optional): you may add session/auth checks here
+// Try including db_connect from a few likely places (no warnings).
+$tried = [];
+$paths = [
+    __DIR__ . '/db_connect.php',
+    __DIR__ . '/../db_connect.php',
+    __DIR__ . '/../../db_connect.php',
+    __DIR__ . '/../db/db_connect.php',
+    __DIR__ . '/../../../db/db_connect.php',
+    __DIR__ . '/config/db_connect.php',
+    'db_connect.php'
+];
+foreach ($paths as $p) {
+    if (file_exists($p)) { @include_once $p; break; }
+}
+// Also attempt a silent include of common name (in case above didn't match)
+@include_once 'db_connect.php';
 
-// Handle POST actions: update total_fee, mark complete
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] === 'update_total') {
-        $student_id = intval($_POST['student_id']);
-        $total_fee = floatval($_POST['total_fee']);
-        $stmt = $pdo->prepare("UPDATE student_fees SET total_fee = ? WHERE student_id = ?");
-        $stmt->execute([$total_fee, $student_id]);
-        header('Location: admin_fee_dashboard.php'); exit;
-    }
+// Detect connection type
+$use_pdo = (isset($pdo) && $pdo instanceof PDO);
+$use_mysqli = (isset($conn) && $conn instanceof mysqli) || (isset($mysqli) && $mysqli instanceof mysqli);
 
-    if (isset($_POST['action']) && $_POST['action'] === 'mark_complete') {
-        $student_id = intval($_POST['student_id']);
-        // Delete fee row and optionally mark student status completed
-        $pdo->beginTransaction();
-        try {
-            $pdo->prepare("DELETE FROM student_fees WHERE student_id = ?")->execute([$student_id]);
-            // If you have a students.status column and want to set it:
-            // $pdo->prepare("UPDATE students SET status='completed' WHERE student_id=?")->execute([$student_id]);
-            $pdo->commit();
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            $error = $e->getMessage();
-        }
-        header('Location: admin_fee_dashboard.php'); exit;
+if (!$use_pdo && isset($mysqli) && $mysqli instanceof mysqli) {
+    // normalize
+    $conn = $mysqli;
+    $use_mysqli = true;
+}
+if (!$use_pdo && isset($conn) && $conn instanceof mysqli) {
+    $use_mysqli = true;
+}
+
+// If still nothing, show clear message and stop
+if (!$use_pdo && !$use_mysqli) {
+    echo "<h3>Database connection not found</h3>";
+    echo "<p>Please ensure <code>db_connect.php</code> exists and defines either <code>\$pdo</code> (PDO) or <code>\$conn</code>/<code>\$mysqli</code> (mysqli).</p>";
+    exit;
+}
+
+// Helper functions to fetch data in a unified way
+function db_fetch_all($sql) {
+    global $use_pdo, $use_mysqli, $pdo, $conn;
+    if ($use_pdo) {
+        $stmt = $pdo->query($sql);
+        return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+    } else {
+        $res = $conn->query($sql);
+        if (!$res) return [];
+        $out = [];
+        while ($row = $res->fetch_assoc()) $out[] = $row;
+        return $out;
     }
 }
 
-// Fetch all students with fees (active and completed depending on your needs)
+function db_prepare_execute($sql, $params = []) {
+    global $use_pdo, $use_mysqli, $pdo, $conn;
+    if ($use_pdo) {
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute($params);
+    } else {
+        // For MySQLi, we'll bind dynamically (limited but works for numeric/string types)
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) return false;
+        if (!empty($params)) {
+            $types = '';
+            $bindValues = [];
+            foreach ($params as $p) {
+                if (is_int($p)) $types .= 'i';
+                elseif (is_float($p) || is_double($p)) $types .= 'd';
+                else $types .= 's';
+                $bindValues[] = $p;
+            }
+            // bind_param requires variables by reference
+            $refs = array();
+            foreach ($bindValues as $k => $v) $refs[$k] = &$bindValues[$k];
+            array_unshift($refs, $types);
+            call_user_func_array([$stmt, 'bind_param'], $refs);
+        }
+        $res = $stmt->execute();
+        $stmt->close();
+        return $res;
+    }
+}
+
+// POST handling (must be before any HTML output)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // update total_fee
+    if (isset($_POST['action']) && $_POST['action'] === 'update_total') {
+        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : 0;
+        $total_fee = isset($_POST['total_fee']) ? $_POST['total_fee'] : 0;
+        // use prepared update
+        $sql = "UPDATE student_fees SET total_fee = ? WHERE student_id = ?";
+        db_prepare_execute($sql, [$total_fee, $student_id]);
+        header('Location: ' . basename(__FILE__));
+        exit;
+    }
+
+    // mark complete => delete fee entry (and optional student status update)
+    if (isset($_POST['action']) && $_POST['action'] === 'mark_complete') {
+        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : 0;
+        // delete from student_fees
+        db_prepare_execute("DELETE FROM student_fees WHERE student_id = ?", [$student_id]);
+        // optional: update students table status if column exists (safe attempt)
+        // try-catch for PDO or check return for mysqli is suppressed here
+        // Redirect back
+        header('Location: ' . basename(__FILE__));
+        exit;
+    }
+}
+
+// Fetch rows
 $sql = "SELECT s.student_id AS sid, s.name AS student_name, s.course AS course, f.*
         FROM students s
         LEFT JOIN student_fees f ON f.student_id = s.student_id
         ORDER BY s.name ASC";
-$rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+$rows = db_fetch_all($sql);
 
-// Helper to calculate sums per row
+// helper sums
 function calc_sums($row) {
     $months = ['month_jan','month_feb','month_mar','month_apr','month_may','month_jun','month_jul','month_aug','month_sep','month_oct','month_nov','month_dec'];
     $monthlySum = 0.0;
@@ -51,6 +129,7 @@ function calc_sums($row) {
     $grand = $monthlySum + $examSum;
     return ['monthly'=>$monthlySum,'exam'=>$examSum,'grand'=>$grand, 'months'=>$months];
 }
+
 ?>
 <!doctype html>
 <html>
@@ -97,36 +176,38 @@ function calc_sums($row) {
         $sums = calc_sums($r);
         $paid = number_format($sums['grand'],2);
         $total_fee_val = isset($r['total_fee']) ? floatval($r['total_fee']) : 0.0;
+        // student id for forms (keep as-is)
+        $sid = isset($r['sid']) ? $r['sid'] : '';
     ?>
       <tr>
         <td><?= htmlspecialchars($r['student_name'] ?? '—') ?></td>
-        <td><?= htmlspecialchars($r['sid'] ?? '—') ?></td>
+        <td><?= htmlspecialchars($sid) ?></td>
         <td><?= htmlspecialchars($r['course'] ?? '—') ?></td>
         <td>
-          <form class="inline-form" method="post" action="admin_fee_dashboard.php">
+          <form class="inline-form" method="post" action="<?= htmlspecialchars(basename(__FILE__)) ?>">
             <input type="hidden" name="action" value="update_total">
-            <input type="hidden" name="student_id" value="<?= intval($r['sid']) ?>">
+            <input type="hidden" name="student_id" value="<?= htmlspecialchars($sid) ?>">
             <input type="number" name="total_fee" step="0.01" value="<?= number_format($total_fee_val,2,'.','') ?>">
             <button class="btn" type="submit">Save</button>
           </form>
         </td>
         <td>₹ <?= $paid ?></td>
-        <td><button class="btn gray" onclick="openModal('modal_<?= htmlspecialchars($r['sid']) ?>')">Show Fee</button></td>
+        <td><button class="btn gray" onclick="openModal('modal_<?= htmlspecialchars($sid) ?>')">Show Fee</button></td>
         <td>
-          <form method="post" action="admin_fee_dashboard.php" onsubmit="return confirm('Mark course complete? This will remove fee entries for this student. Are you sure?');" style="display:inline-block">
+          <form method="post" action="<?= htmlspecialchars(basename(__FILE__)) ?>" onsubmit="return confirm('Mark course complete? This will remove fee entries for this student. Are you sure?');" style="display:inline-block">
             <input type="hidden" name="action" value="mark_complete">
-            <input type="hidden" name="student_id" value="<?= intval($r['sid']) ?>">
+            <input type="hidden" name="student_id" value="<?= htmlspecialchars($sid) ?>">
             <button class="btn red" type="submit">Complete Course</button>
           </form>
         </td>
       </tr>
 
       <!-- Modal content for this student -->
-      <div id="modal_<?= htmlspecialchars($r['sid']) ?>" class="modal">
+      <div id="modal_<?= htmlspecialchars($sid) ?>" class="modal">
         <div class="card">
           <div style="overflow:hidden">
-            <strong>Fee details — <?= htmlspecialchars($r['student_name'] ?? '') ?> (<?= htmlspecialchars($r['sid']) ?>)</strong>
-            <span class="close right" onclick="closeModal('modal_<?= htmlspecialchars($r['sid']) ?>')">✖</span>
+            <strong>Fee details — <?= htmlspecialchars($r['student_name'] ?? '') ?> (<?= htmlspecialchars($sid) ?>)</strong>
+            <span class="close right" onclick="closeModal('modal_<?= htmlspecialchars($sid) ?>')">✖</span>
           </div>
           <div style="margin-top:8px">
             <table style="width:100%">
@@ -144,7 +225,7 @@ function calc_sums($row) {
             </table>
 
             <div style="margin-top:12px">
-              <a href="receipt.php?student_id=<?= intval($r['sid']) ?>" target="_blank" class="btn">Open Receipt</a>
+              <a href="receipt.php?student_id=<?= urlencode($sid) ?>" target="_blank" class="btn">Open Receipt</a>
             </div>
           </div>
         </div>
