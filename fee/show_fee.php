@@ -38,7 +38,7 @@ if (!$fee) {
     </div>
     <div class="card-body">
       <div class="d-flex mb-4">
-        <img src="../photo/<?php echo htmlspecialchars($fee['photo']); ?>" alt="Student Photo" 
+        <img src="../uploads/<?php echo htmlspecialchars($fee['photo']); ?>" alt="Student Photo" 
              class="rounded me-3" style="width:100px;height:100px;object-fit:cover;">
         <div>
           <p><strong>Name:</strong> <?php echo htmlspecialchars($fee['student_name']); ?></p>
