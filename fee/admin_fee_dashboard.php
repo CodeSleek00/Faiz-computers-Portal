@@ -219,7 +219,7 @@ $result = $conn->query($sql);
             <button type="submit" class="btn btn-primary w-100">Search</button>
           </div>
           <div class="col-md-6 text-md-end">
-            <a href="../admin_dashboard.php" class="btn btn-outline-primary">Add New Student Fee</a>
+            <a href="../admin_dashboard.php" class="btn btn-outline-primary">Main Dashboard</a>
           </div>
         </div>
       </form>
