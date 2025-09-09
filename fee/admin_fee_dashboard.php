@@ -1,6 +1,6 @@
 <?php
 // admin_fee_dashboard.php
-include '../db/db_connect.php'; // ye file $conn define karegi
+include '../database_connectioon/db_connect.php'; // ye file $conn define karegi
 
 if (!$conn) {
     die("Database connection not found");
