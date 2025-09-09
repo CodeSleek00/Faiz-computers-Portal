@@ -99,6 +99,7 @@ $result = $conn->query($sql);
             <td class="text-center">
               <a href="fee_submission.php?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-success btn-space">Submit Fee</a>
               <a href="show_fee.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary btn-space">Show Fee</a>
+              <a href="admin_fee_main.php?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-success">Submit Fee</a>
               <a href="complete_course.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger btn-space"
                  onclick="return confirm('Are you sure you want to mark this course as completed and delete fee record?')">
                  Complete Course
