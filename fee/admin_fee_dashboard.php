@@ -84,12 +84,12 @@ $result = $conn->query($sql);
     }
     
     .btn-primary {
-       background-color: #dce4ffff;
-      border: 1px solid var(--primary-blue)
+      background-color: var(--primary-blue);
+      border: none;
     }
     
     .btn-primary:hover {
-      background-color: var(--primary-blue);
+      background-color: #dce4ffff;
       border: 1px solid var(--primary-blue);
     }
     
