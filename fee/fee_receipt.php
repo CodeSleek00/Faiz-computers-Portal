@@ -1,5 +1,5 @@
 <?php
-include '../database_connection/db_connect.php';
+include '../database_connection/db_connect.php';// mysqli connection file
 session_start();
 
 $student_id = $_GET['student_id'] ?? 0;
@@ -7,9 +7,10 @@ $latest     = $_GET['latest'] ?? '';
 
 // Fetch student + fee record
 $student = $conn->query("SELECT * FROM students WHERE student_id = $student_id")->fetch_assoc();
-$fee     = $conn->query("SELECT * FROM fee WHERE student_id = $student_id")->fetch_assoc();
+$fee     = $conn->query("SELECT * FROM student_fees WHERE student_id = $student_id")->fetch_assoc();
 
 $fields_map = [
+    'admission_fee' => 'Admission Fee',
     'internal1' => 'Internal 1',
     'internal2' => 'Internal 2',
     'semester1' => 'Semester 1',
