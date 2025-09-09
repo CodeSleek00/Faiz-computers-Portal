@@ -30,7 +30,6 @@ $result = $conn->query($sql);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
     :root {
       --primary-white: #ffffff;
@@ -84,38 +83,14 @@ $result = $conn->query($sql);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
-    /* Outline button styles */
-    .btn-outline-primary {
-      color: var(--primary-blue);
-      border-color: var(--primary-blue);
-      background-color: transparent;
+    .btn-primary {
+       background-color: #dce4ffff;
+      border: 1px solid var(--primary-blue)
     }
     
-    .btn-outline-primary:hover {
+    .btn-primary:hover {
       background-color: var(--primary-blue);
-      color: white;
-    }
-    
-    .btn-outline-success {
-      color: #198754;
-      border-color: #198754;
-      background-color: transparent;
-    }
-    
-    .btn-outline-success:hover {
-      background-color: #198754;
-      color: white;
-    }
-    
-    .btn-outline-danger {
-      color: #dc3545;
-      border-color: #dc3545;
-      background-color: transparent;
-    }
-    
-    .btn-outline-danger:hover {
-      background-color: #dc3545;
-      color: white;
+      border: 1px solid var(--primary-blue);
     }
     
     .password-modal {
@@ -166,7 +141,7 @@ $result = $conn->query($sql);
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-primary" id="submitPassword">Submit</button>
+          <button type="button" class="btn btn-primary" id="submitPassword">Submit</button>
         </div>
       </div>
     </div>
@@ -242,7 +217,7 @@ $result = $conn->query($sql);
                   value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
           </div>
           <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+            <button type="submit" class="btn btn-primary w-100">Search</button>
           </div>
           <div class="col-md-6 text-md-end">
             <a href="../admin_dashboard.php" class="btn btn-outline-primary">Main Dashboard</a>
@@ -300,9 +275,9 @@ $result = $conn->query($sql);
                 </td>
                 <td class="text-center">
                   <div class="d-flex flex-wrap gap-1 justify-content-center">
-                    <a href="show_fee.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-primary btn-space">Show Fee</a>
-                    <a href="admin_fee_main.php?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-outline-success">Submit Fee</a>
-                    <a href="complete_course.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-danger btn-space"
+                    <a href="show_fee.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary btn-space">Show Fee</a>
+                    <a href="admin_fee_main.php?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-success">Submit Fee</a>
+                    <a href="complete_course.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger btn-space"
                       onclick="return confirm('Are you sure you want to mark this course as completed and delete fee record?')">
                       Complete Course
                     </a>
