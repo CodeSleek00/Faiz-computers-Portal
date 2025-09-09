@@ -56,7 +56,7 @@ $result = $conn->query($sql);
           <tr>
             <td class="text-center">
               <?php if (!empty($row['photo']) && file_exists("../photo_upload/" . $row['photo'])): ?>
-                <img src="../photo_upload/<?php echo htmlspecialchars($row['photo']); ?>" 
+                <img src="../uploads/<?php echo htmlspecialchars($row['photo']); ?>" 
                      alt="Photo" class="student-photo">
               <?php else: ?>
                 <img src="https://via.placeholder.com/50" alt="No Photo" class="student-photo">
