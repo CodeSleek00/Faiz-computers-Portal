@@ -124,7 +124,7 @@ $labels = [
 
   <div class="text-center mt-3 no-print">
       <button class="btn btn-primary" onclick="window.print()">🖨 Print Receipt</button>
-      <a class="btn btn-secondary" href="admin_fee_dashboard.php ?>">Back</a>
+      <a class="btn btn-secondary" href="admin_fee_dashboard.php">Back</a>
   </div>
 </div>
 </body>
