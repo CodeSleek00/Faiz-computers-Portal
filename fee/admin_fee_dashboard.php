@@ -84,12 +84,13 @@ $result = $conn->query($sql);
     }
     
     .btn-primary {
-      background-color: var(--primary-blue);
-      border: none;
+       background-color: #dce4ffff;
+      border: 1px solid var(--primary-blue)
     }
     
     .btn-primary:hover {
-      background-color: #1e40af;
+      background-color: var(--primary-blue);
+      border: 1px solid var(--primary-blue);
     }
     
     .password-modal {
