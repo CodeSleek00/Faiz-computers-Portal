@@ -479,6 +479,10 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
                     <i class="fas fa-layer-group"></i>
                     <span>Batches</span>
                 </a>
+                <a href="fee/admin_fee_dashboard.php" class="menu-item">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Fee</span>
+                </a>
             </div>
         </div>
         
