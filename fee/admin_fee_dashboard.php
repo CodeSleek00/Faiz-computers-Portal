@@ -89,7 +89,7 @@ $result = $conn->query($sql);
     }
     
     .btn-primary:hover {
-      background-color: #dce4ffff;
+      background-color: #c2cdefff;
     }
     
     .password-modal {
