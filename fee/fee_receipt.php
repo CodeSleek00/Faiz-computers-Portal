@@ -14,11 +14,33 @@ if (!$student) die("Student not found.");
 $fee = $conn->query("SELECT * FROM student_fees WHERE student_id='$student_id'")->fetch_assoc();
 if (!$fee) die("No fee record found for this student.");
 
-// Calculate total paid (all exam + month fees)
-$total_paid = $fee['internal1'] + $fee['internal2'] + $fee['semester1'] + $fee['semester2'];
+// Check if redirected from submit form (use POST if available)
+$submitted = $_POST ?? null;
+
+// Initialize total_paid
+$total_paid = 0;
 $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+// Create array for display
+$display_fees = [];
+
+$exam_fields = ['internal1'=>'Internal 1','internal2'=>'Internal 2','semester1'=>'Semester 1','semester2'=>'Semester 2'];
+
+// Use POST values if exist, else 0
+foreach($exam_fields as $key=>$label){
+    $val = $submitted[$key] ?? $fee[$key];
+    if($val>0){
+        $display_fees[$label] = $val;
+        $total_paid += $val;
+    }
+}
+
 foreach($months as $m){
-    $total_paid += $fee['month_'.$m];
+    $val = $submitted['month_'.$m] ?? $fee['month_'.$m];
+    if($val>0){
+        $display_fees[ucfirst($m).' Fee'] = $val;
+        $total_paid += $val;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -29,11 +51,11 @@ foreach($months as $m){
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <style>
   body { background: #f8f9fa; }
-  .receipt { max-width: 600px; margin: auto; background: #fff; padding: 20px; border: 1px solid #ccc; }
+  .receipt { max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
   .receipt img { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; }
   h2, h4 { margin: 0; }
   table { width: 100%; margin-top: 15px; }
-  th, td { padding: 5px; text-align: left; }
+  th, td { padding: 8px; text-align: left; }
   .text-right { text-align: right; }
   .total { font-weight: bold; font-size: 1.2em; }
   @media print {
@@ -67,33 +89,15 @@ foreach($months as $m){
       </tr>
     </thead>
     <tbody>
+      <?php foreach($display_fees as $type=>$amount): ?>
       <tr>
-        <td>Internal 1</td>
-        <td><?php echo number_format($fee['internal1'],2); ?></td>
+        <td><?php echo $type; ?></td>
+        <td><?php echo $amount>0?$amount:''; ?></td>
       </tr>
-      <tr>
-        <td>Internal 2</td>
-        <td><?php echo number_format($fee['internal2'],2); ?></td>
-      </tr>
-      <tr>
-        <td>Semester 1</td>
-        <td><?php echo number_format($fee['semester1'],2); ?></td>
-      </tr>
-      <tr>
-        <td>Semester 2</td>
-        <td><?php echo number_format($fee['semester2'],2); ?></td>
-      </tr>
-      <?php foreach($months as $m):
-        if($fee['month_'.$m]>0):
-      ?>
-      <tr>
-        <td><?php echo ucfirst($m); ?> Fee</td>
-        <td><?php echo number_format($fee['month_'.$m],2); ?></td>
-      </tr>
-      <?php endif; endforeach; ?>
+      <?php endforeach; ?>
       <tr class="table-success total">
         <td>Total Paid</td>
-        <td>₹<?php echo number_format($total_paid,2); ?></td>
+        <td>₹<?php echo $total_paid>0?$total_paid:''; ?></td>
       </tr>
     </tbody>
   </table>
