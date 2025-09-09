@@ -1,5 +1,5 @@
 <?php
-include '../db/db_connect.php';
+include '../database_connection/db_connect.php';
 session_start();
 
 $student_id = $_GET['student_id'] ?? 0;
