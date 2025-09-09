@@ -124,7 +124,7 @@ function print_val($arr, $key) {
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
     body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
-    .card { max-width: 1000px; margin: 40px auto; padding: 25px; border-radius: 15px; }
+    .card {  margin: 40px auto; padding: 25px; border-radius: 15px; }
     h3 { font-weight: 600; }
     input[type=number] { max-width: 120px; }
     table th, table td { vertical-align: middle; text-align: center; }
