@@ -10,38 +10,35 @@ if (!$student_id) die("No student selected.");
 $student = $conn->query("SELECT * FROM students WHERE student_id='$student_id'")->fetch_assoc();
 if (!$student) die("Student not found.");
 
-// Student fee info
-$fee = $conn->query("SELECT * FROM student_fees WHERE student_id='$student_id'")->fetch_assoc();
-if (!$fee) die("No fee record found for this student.");
-
-// Check if redirected from submit form (use POST if available)
+// Use POST data if available
 $submitted = $_POST ?? null;
+if (!$submitted) die("No fee submission data found.");
 
-// Initialize total_paid
+// Calculate total and prepare display array
 $total_paid = 0;
-$months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-
-// Create array for display
 $display_fees = [];
 
 $exam_fields = ['internal1'=>'Internal 1','internal2'=>'Internal 2','semester1'=>'Semester 1','semester2'=>'Semester 2'];
+$months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 
-// Use POST values if exist, else 0
+// Exam fees
 foreach($exam_fields as $key=>$label){
-    $val = $submitted[$key] ?? $fee[$key];
+    $val = floatval($submitted[$key] ?? 0);
     if($val>0){
         $display_fees[$label] = $val;
         $total_paid += $val;
     }
 }
 
+// Monthly fees
 foreach($months as $m){
-    $val = $submitted['month_'.$m] ?? $fee['month_'.$m];
+    $val = floatval($submitted['month_'.$m] ?? 0);
     if($val>0){
         $display_fees[ucfirst($m).' Fee'] = $val;
         $total_paid += $val;
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
