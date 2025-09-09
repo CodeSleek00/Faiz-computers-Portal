@@ -17,34 +17,35 @@ if (!$student) die("Student not found.");
 // try to get recent payment from session
 $recent = $_SESSION['recent_payment'] ?? null;
 
-// if recent exists and student matches, use it
 $display_changes = [];
 $payment_date = date('Y-m-d');
+
 if ($recent && isset($recent['student_id']) && $recent['student_id'] === $student_id && !empty($recent['changes'])) {
+    // use only the recently paid fields
     $display_changes = $recent['changes'];
     $payment_date = $recent['date'] ?? $payment_date;
-    // after reading, clear it so it doesn't show again accidentally
-    unset($_SESSION['recent_payment']);
+    unset($_SESSION['recent_payment']); // clear after reading
 } else {
-    // fallback: if no session info, try to infer from DB (last non-zero field)
+    // fallback: if no recent session info, fetch latest non-zero fee from DB
     $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
     $fee_q->bind_param("s", $student_id);
     $fee_q->execute();
     $fee = $fee_q->get_result()->fetch_assoc();
     if ($fee) {
-        // find last non-zero fields (we'll display any non-zero fields, but usually this is fallback)
-        $months = [
-            'jan' => 'January','feb'=>'February','mar'=>'March','apr'=>'April','may'=>'May','jun'=>'June',
-            'jul'=>'July','aug'=>'August','sep'=>'September','oct'=>'October','nov'=>'November','dec'=>'December'
-        ];
-        if (!empty($fee['admission_fee'])) $display_changes['admission_fee'] = (float)$fee['admission_fee'];
-        if (!empty($fee['internal1'])) $display_changes['internal1'] = (float)$fee['internal1'];
-        if (!empty($fee['internal2'])) $display_changes['internal2'] = (float)$fee['internal2'];
-        if (!empty($fee['semester1'])) $display_changes['semester1'] = (float)$fee['semester1'];
-        if (!empty($fee['semester2'])) $display_changes['semester2'] = (float)$fee['semester2'];
-        foreach ($months as $m => $m_name) {
-            if (!empty($fee['month_'.$m])) $display_changes['month_'.$m] = (float)$fee['month_'.$m];
+        $all_fields = ['admission_fee','internal1','internal2','semester1','semester2'];
+        foreach ($all_fields as $f) {
+            if (!empty($fee[$f])) $display_changes[$f] = (float)$fee[$f];
         }
+
+        // check for last non-zero month only
+        $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        foreach ($months as $m) {
+            if (!empty($fee['month_'.$m])) {
+                $display_changes['month_'.$m] = (float)$fee['month_'.$m];
+                break; // stop at the first/latest found month
+            }
+        }
+
         $payment_date = $fee['payment_date'] ?? $payment_date;
     }
 }
@@ -75,8 +76,8 @@ $labels = [
 <head>
 <meta charset="UTF-8">
 <title>Fee Receipt</title>
- <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+<link rel="icon" type="image/png" href="image.png">
+<link rel="apple-touch-icon" href="image.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 <style>
   body { background: #f8f9fa; }
@@ -107,7 +108,9 @@ $labels = [
 
   <?php if (!empty($display_changes)): ?>
     <table class="table table-bordered">
-      <thead><tr><th>Fee Type</th><th>Amount (₹)</th><th>Date</th></tr></thead>
+      <thead>
+        <tr><th>Fee Type</th><th>Amount (₹)</th><th>Date</th></tr>
+      </thead>
       <tbody>
         <?php foreach ($display_changes as $field => $amt): ?>
           <tr>
