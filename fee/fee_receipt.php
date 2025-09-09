@@ -22,7 +22,6 @@ if (!$fee) die("No fee record found");
 $fee_type = "Unknown Fee";
 $fee_amount = 0.00;
 
-// check priority (admission > internal > semester > monthly)
 if ($fee['admission_fee'] > 0) {
     $fee_type = "Admission Fee";
     $fee_amount = $fee['admission_fee'];
@@ -39,11 +38,16 @@ if ($fee['admission_fee'] > 0) {
     $fee_type = "Semester 2 Fee";
     $fee_amount = $fee['semester2'];
 } else {
-    // check monthly
-    $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-    foreach ($months as $m) {
+    // check monthly fees
+    $months = [
+        'jan' => 'January', 'feb' => 'February', 'mar' => 'March',
+        'apr' => 'April', 'may' => 'May', 'jun' => 'June',
+        'jul' => 'July', 'aug' => 'August', 'sep' => 'September',
+        'oct' => 'October', 'nov' => 'November', 'dec' => 'December'
+    ];
+    foreach ($months as $m => $m_name) {
         if ($fee['month_'.$m] > 0) {
-            $fee_type = ucfirst($m) . " Fee";
+            $fee_type = "Monthly Fee ($m_name)";
             $fee_amount = $fee['month_'.$m];
             break;
         }
