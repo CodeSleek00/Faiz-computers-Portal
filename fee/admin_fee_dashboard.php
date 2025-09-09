@@ -303,7 +303,7 @@ $result = $conn->query($sql);
       const passwordModalEl = document.getElementById('passwordModal');
       const passwordModal = new bootstrap.Modal(passwordModalEl);
       const mainContainer = document.getElementById('mainContainer');
-      const correctPassword = "admin123";
+      const correctPassword = "faiz";
 
       function unlockPage() {
         mainContainer.style.display = 'block';
