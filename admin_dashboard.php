@@ -624,6 +624,19 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
                             <a href="batch/view_batch.php" class="action-link">View Batches</a>
                         </div>
                     </div>
+
+                      <div class="action-card">
+                        <div class="action-card-header">
+                            <div class="action-icon">
+                              <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <h4>Fee Management</h4>
+                        </div>
+                        <div class="action-links">
+                            <a href="fee/admin_fee_dashboard.php" class="action-link">Fee Submissions</a>
+        
+                        </div>
+                    </div>
                     
                     <div class="action-card">
                         <div class="action-card-header">
