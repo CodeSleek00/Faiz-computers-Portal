@@ -6,8 +6,8 @@ if (!$conn) {
     die("Database connection not found");
 }
 
-// Students aur unki fees fetch karna
-$sql = "SELECT sf.id, sf.student_id, s.name AS student_name, s.course, 
+// Students aur unki fees fetch karna (photo bhi lekar aayenge)
+$sql = "SELECT sf.id, sf.student_id, s.name AS student_name, s.course, s.photo,
                sf.total_fee, 
                (sf.internal1 + sf.internal2 + sf.semester1 + sf.semester2 + 
                 sf.month_jan + sf.month_feb + sf.month_mar + sf.month_apr + 
@@ -25,13 +25,22 @@ $result = $conn->query($sql);
   <meta charset="UTF-8">
   <title>Admin Fee Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    .student-photo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body class="bg-light">
 <div class="container my-5">
   <h2 class="mb-4">Student Fee Dashboard</h2>
-  <table class="table table-bordered table-hover bg-white">
+  <table class="table table-bordered table-hover bg-white align-middle">
     <thead class="table-dark">
       <tr>
+        <th>Photo</th>
         <th>Student ID</th>
         <th>Name</th>
         <th>Course</th>
@@ -44,6 +53,13 @@ $result = $conn->query($sql);
       <?php if ($result->num_rows > 0): ?>
         <?php while ($row = $result->fetch_assoc()): ?>
           <tr>
+            <td>
+              <?php if (!empty($row['photo'])): ?>
+                <img src="<?php echo htmlspecialchars($row['photo']); ?>" alt="Photo" class="student-photo">
+              <?php else: ?>
+                <span class="text-muted">No Photo</span>
+              <?php endif; ?>
+            </td>
             <td><?php echo htmlspecialchars($row['student_id']); ?></td>
             <td><?php echo htmlspecialchars($row['student_name']); ?></td>
             <td><?php echo htmlspecialchars($row['course']); ?></td>
@@ -59,7 +75,7 @@ $result = $conn->query($sql);
           </tr>
         <?php endwhile; ?>
       <?php else: ?>
-        <tr><td colspan="6" class="text-center">No records found</td></tr>
+        <tr><td colspan="7" class="text-center">No records found</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
