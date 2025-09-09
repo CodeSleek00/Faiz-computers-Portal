@@ -21,42 +21,35 @@ $display_changes = [];
 $payment_date = date('Y-m-d');
 
 if ($recent && isset($recent['student_id']) && $recent['student_id'] === $student_id && !empty($recent['changes'])) {
-    // use only the recently paid fields
     $display_changes = $recent['changes'];
     $payment_date = $recent['date'] ?? $payment_date;
     unset($_SESSION['recent_payment']); // clear after reading
+
+    // **filter only monthly fees**
+    $display_changes = array_filter($display_changes, function($key){
+        return str_starts_with($key, 'month_');
+    }, ARRAY_FILTER_USE_KEY);
+
 } else {
-    // fallback: if no recent session info, fetch latest non-zero fee from DB
+    // fallback: last non-zero month only
     $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
     $fee_q->bind_param("s", $student_id);
     $fee_q->execute();
     $fee = $fee_q->get_result()->fetch_assoc();
     if ($fee) {
-        $all_fields = ['admission_fee','internal1','internal2','semester1','semester2'];
-        foreach ($all_fields as $f) {
-            if (!empty($fee[$f])) $display_changes[$f] = (float)$fee[$f];
-        }
-
-        // check for last non-zero month only
         $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
         foreach ($months as $m) {
             if (!empty($fee['month_'.$m])) {
                 $display_changes['month_'.$m] = (float)$fee['month_'.$m];
-                break; // stop at the first/latest found month
+                break; // only the latest month
             }
         }
-
         $payment_date = $fee['payment_date'] ?? $payment_date;
     }
 }
 
 // map labels for fields
 $labels = [
-    'admission_fee' => 'Admission Fee',
-    'internal1' => 'Internal Exam 1',
-    'internal2' => 'Internal Exam 2',
-    'semester1' => 'Semester 1',
-    'semester2' => 'Semester 2',
     'month_jan' => 'Monthly Fee (January)',
     'month_feb' => 'Monthly Fee (February)',
     'month_mar' => 'Monthly Fee (March)',
@@ -122,7 +115,7 @@ $labels = [
       </tbody>
     </table>
   <?php else: ?>
-    <div class="alert alert-info">No recent payment found to show on receipt.</div>
+    <div class="alert alert-info">No recent monthly payment found to show on receipt.</div>
   <?php endif; ?>
 
   <p class="text-center mt-3">Thank you for your payment!</p>
