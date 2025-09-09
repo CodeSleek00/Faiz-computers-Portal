@@ -85,13 +85,13 @@ $labels = [
 </head>
 <body>
 <div class="receipt">
+  <h3 class="text-center mb-3">FAIZ COMPUTER INSTITUTE</h3>
   <h3 class="text-center mb-3">Fee Receipt</h3>
   <hr>
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <p><strong>Student:</strong> <?php echo htmlspecialchars($student['name']); ?></p>
-      <p><strong>Enrollment:</strong> <?php echo htmlspecialchars($student['student_id']); ?></p>
       <p><strong>Course:</strong> <?php echo htmlspecialchars($student['course']); ?></p>
     </div>
     <div>
