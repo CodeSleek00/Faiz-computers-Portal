@@ -6,7 +6,7 @@ $student_id = $_GET['student_id'] ?? 0;
 $latest     = $_GET['latest'] ?? '';
 
 // Fetch student + fee record
-$student = $conn->query("SELECT * FROM students WHERE id = $student_id")->fetch_assoc();
+$student = $conn->query("SELECT * FROM students WHERE student_id = $student_id")->fetch_assoc();
 $fee     = $conn->query("SELECT * FROM fee WHERE student_id = $student_id")->fetch_assoc();
 
 $fields_map = [
@@ -46,7 +46,8 @@ $latest_label  = $fields_map[$latest] ?? 'Unknown Fee';
 
     <div class="mb-3">
       <strong>Student:</strong> <?php echo htmlspecialchars($student['name']); ?><br>
-      <strong>Enrollment ID:</strong> <?php echo htmlspecialchars($student['enrollment_id']); ?>
+      <strong>Enrollment ID:</strong> <?php echo htmlspecialchars($student['enrollment_id']); ?><br>
+      <strong>Course:</strong> <?php echo htmlspecialchars($student['course']); ?>
     </div>
 
     <table class="table table-bordered">
