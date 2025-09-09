@@ -27,7 +27,6 @@ $result = $conn->query($sql);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Fee Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -42,12 +41,6 @@ $result = $conn->query($sql);
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
       color: #1f2937;
-      transition: filter 0.3s ease;
-    }
-    
-    body.blurred {
-      filter: blur(5px);
-      overflow: hidden;
     }
     
     .container-main {
@@ -56,7 +49,6 @@ $result = $conn->query($sql);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       padding: 2rem;
       margin-top: 2rem;
-      transition: filter 0.3s ease;
     }
     
     .header-section {
@@ -97,7 +89,7 @@ $result = $conn->query($sql);
     }
     
     .btn-primary:hover {
-      background-color: #1e40af;
+      background-color: #dce4ffff;
     }
     
     .password-modal {
@@ -114,20 +106,6 @@ $result = $conn->query($sql);
       padding: 1rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       border-left: 4px solid var(--primary-blue);
-    }
-    
-    .lock-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1060;
-      display: none;
     }
     
     @media (max-width: 768px) {
@@ -147,15 +125,8 @@ $result = $conn->query($sql);
   </style>
 </head>
 <body>
-  <!-- Lock Overlay (for blur effect) -->
-  <div class="lock-overlay" id="lockOverlay">
-    <div class="spinner-border text-light" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-
   <!-- Password Modal -->
-  <div class="modal fade password-modal" id="passwordModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal fade password-modal" id="passwordModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -175,7 +146,7 @@ $result = $conn->query($sql);
     </div>
   </div>
 
-  <div class="container my-4 container-main" id="mainContent">
+  <div class="container my-4 container-main">
     <div class="header-section">
       <div class="row align-items-center">
         <div class="col-md-8">
@@ -330,29 +301,11 @@ $result = $conn->query($sql);
     document.addEventListener('DOMContentLoaded', function() {
       // Password protection system
       const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
-      const lockOverlay = document.getElementById('lockOverlay');
-      const mainContent = document.getElementById('mainContent');
-      const body = document.body;
       const correctPassword = "admin123"; // Change this to your desired password
-      
-      // Function to lock the dashboard
-      function lockDashboard() {
-        body.classList.add('blurred');
-        lockOverlay.style.display = 'flex';
-        sessionStorage.removeItem('authenticated');
-        passwordModal.show();
-      }
-      
-      // Function to unlock the dashboard
-      function unlockDashboard() {
-        body.classList.remove('blurred');
-        lockOverlay.style.display = 'none';
-        sessionStorage.setItem('authenticated', 'true');
-      }
       
       // Check if already authenticated
       if (!sessionStorage.getItem('authenticated')) {
-        lockDashboard();
+        passwordModal.show();
       }
       
       // Submit password handler
@@ -361,7 +314,7 @@ $result = $conn->query($sql);
         const errorElement = document.getElementById('passwordError');
         
         if (inputPassword === correctPassword) {
-          unlockDashboard();
+          sessionStorage.setItem('authenticated', 'true');
           passwordModal.hide();
         } else {
           errorElement.classList.remove('d-none');
@@ -371,21 +324,14 @@ $result = $conn->query($sql);
       
       // Lock dashboard functionality
       document.getElementById('lockButton').addEventListener('click', function() {
-        lockDashboard();
+        sessionStorage.removeItem('authenticated');
+        passwordModal.show();
       });
       
       // Allow Enter key to submit password
       document.getElementById('passwordInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           document.getElementById('submitPassword').click();
-        }
-      });
-      
-      // Handle modal hidden event
-      document.getElementById('passwordModal').addEventListener('hidden.bs.modal', function () {
-        // If not authenticated, show modal again
-        if (!sessionStorage.getItem('authenticated')) {
-          passwordModal.show();
         }
       });
     });
