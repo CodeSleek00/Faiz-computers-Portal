@@ -1,6 +1,7 @@
 <?php
 // admin_fee_main.php
-include '../db/db_connect.php'; // mysqli connection
+include '../database_connection/db_connect.php'; // ye file $conn define karegi
+
 
 if (!$conn) {
     die("Database connection not found");
