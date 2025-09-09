@@ -55,7 +55,7 @@ $result = $conn->query($sql);
         <?php while ($row = $result->fetch_assoc()): ?>
           <tr>
             <td class="text-center">
-              <?php if (!empty($row['photo']) && file_exists("../photo_upload/" . $row['photo'])): ?>
+              <?php if (!empty($row['photo']) && file_exists("../uploads/" . $row['photo'])): ?>
                 <img src="../uploads/<?php echo htmlspecialchars($row['photo']); ?>" 
                      alt="Photo" class="student-photo">
               <?php else: ?>
