@@ -14,8 +14,8 @@ $student_q->execute();
 $student = $student_q->get_result()->fetch_assoc();
 if (!$student) die("Student not found.");
 
-// --- NEW LOGIC: always fetch latest payment ---
-$fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ? ORDER BY updated_at DESC LIMIT 1");
+// fetch student fees
+$fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
 $fee_q->bind_param("s", $student_id);
 $fee_q->execute();
 $fee = $fee_q->get_result()->fetch_assoc();
@@ -23,16 +23,8 @@ $fee = $fee_q->get_result()->fetch_assoc();
 $display_changes = [];
 $payment_date = date('Y-m-d');
 
-if ($fee) {
-    // Assuming you have a `last_paid_field` and `last_paid_amount` stored on update
-    if (!empty($fee['last_paid_field']) && !empty($fee['last_paid_amount'])) {
-        $display_changes[$fee['last_paid_field']] = (float)$fee['last_paid_amount'];
-        $payment_date = $fee['payment_date'] ?? $payment_date;
-    }
-}
-
-// map labels
-$labels = [
+// fee fields in order of entry (important for deciding "latest")
+$fee_fields = [
     'admission_fee' => 'Admission Fee',
     'internal1' => 'Internal Exam 1',
     'internal2' => 'Internal Exam 2',
@@ -51,8 +43,31 @@ $labels = [
     'month_nov' => 'Monthly Fee (November)',
     'month_dec' => 'Monthly Fee (December)'
 ];
+
+// detect the latest paid field
+if ($fee) {
+    $latest_field = null;
+    $latest_time = 0;
+
+    foreach ($fee_fields as $field => $label) {
+        if (!empty($fee[$field])) {
+            // use UNIX timestamp from payment_date if available, else fallback to row update time
+            $field_time = !empty($fee['payment_date']) ? strtotime($fee['payment_date']) : time();
+
+            if ($field_time >= $latest_time) {
+                $latest_time = $field_time;
+                $latest_field = $field;
+            }
+        }
+    }
+
+    if ($latest_field) {
+        $display_changes[$latest_field] = (float)$fee[$latest_field];
+        $payment_date = $fee['payment_date'] ?? $payment_date;
+    }
+}
 ?>
-  
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
