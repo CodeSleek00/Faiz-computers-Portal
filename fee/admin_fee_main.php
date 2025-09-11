@@ -4,6 +4,7 @@ session_start();
 include '../database_connection/db_connect.php';
 if (!$conn) die("Database connection not found");
 
+// months
 $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 
 // helper to bind dynamic params
@@ -11,108 +12,111 @@ function mysqli_bind_params_dynamic($stmt, $types, &$params) {
     $bind_names = [];
     $bind_names[] = $types;
     for ($i = 0; $i < count($params); $i++) {
-        $bind_names[] = &$params[$i];
+        $bind_name = 'bind' . $i;
+        $$bind_name = $params[$i];
+        $bind_names[] = &$$bind_name;
     }
-    return call_user_func_array([$stmt, 'bind_param'], $bind_names);
+    call_user_func_array([$stmt, 'bind_param'], $bind_names);
 }
 
-// get student_id
-$student_id = $_GET['student_id'] ?? '';
-if (!$student_id) die("No student selected.");
-
-$student_q = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
-$student_q->bind_param("s", $student_id);
-$student_q->execute();
-$student = $student_q->get_result()->fetch_assoc();
-if (!$student) die("Student not found.");
-
-$fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
-$fee_q->bind_param("s", $student_id);
-$fee_q->execute();
-$old_fee = $fee_q->get_result()->fetch_assoc(); // may be null
-
-$msg = '';
+// handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $submitted = [];
-    $submitted['total_fee'] = isset($_POST['total_fee']) && $_POST['total_fee'] !== '' ? (float)$_POST['total_fee'] : 0;
-    $submitted['admission_fee'] = isset($_POST['admission_fee']) && $_POST['admission_fee'] !== '' ? (float)$_POST['admission_fee'] : 0;
-    $submitted['internal1'] = isset($_POST['internal1']) && $_POST['internal1'] !== '' ? (float)$_POST['internal1'] : 0;
-    $submitted['internal2'] = isset($_POST['internal2']) && $_POST['internal2'] !== '' ? (float)$_POST['internal2'] : 0;
-    $submitted['semester1'] = isset($_POST['semester1']) && $_POST['semester1'] !== '' ? (float)$_POST['semester1'] : 0;
-    $submitted['semester2'] = isset($_POST['semester2']) && $_POST['semester2'] !== '' ? (float)$_POST['semester2'] : 0;
-    $submitted['payment_date'] = !empty($_POST['payment_date']) ? $_POST['payment_date'] : date('Y-m-d');
-
+    $student_id = $_POST['student_id'];
+    $admission_fee = $_POST['admission_fee'] ?? 0;
+    $internal1 = $_POST['internal1'] ?? 0;
+    $internal2 = $_POST['internal2'] ?? 0;
+    $semester1 = $_POST['semester1'] ?? 0;
+    $semester2 = $_POST['semester2'] ?? 0;
+    $months_fee = [];
     foreach ($months as $m) {
-        $k = 'month_'.$m;
-        $submitted[$k] = isset($_POST[$k]) && $_POST[$k] !== '' ? (float)$_POST[$k] : 0;
+        $months_fee[$m] = $_POST['month_'.$m] ?? 0;
     }
+    $total_fee = $_POST['total_fee'] ?? 0;
+    $payment_date = $_POST['payment_date'] ?? date('Y-m-d');
+
+    // check if student fees record exists
+    $check = $conn->prepare("SELECT id FROM student_fees WHERE student_id = ?");
+    $check->bind_param("s", $student_id);
+    $check->execute();
+    $result = $check->get_result();
+    $old_fee = $result->fetch_assoc();
+    $check->close();
 
     if ($old_fee) {
-        $sql = "UPDATE student_fees SET total_fee=?, admission_fee=?, internal1=?, internal2=?, semester1=?, semester2=?,
-                month_jan=?, month_feb=?, month_mar=?, month_apr=?, month_may=?, month_jun=?, month_jul=?, month_aug=?,
-                month_sep=?, month_oct=?, month_nov=?, month_dec=?, payment_date=?, last_updated=NOW()
-                WHERE student_id=?";
+        // update record
+        $sql = "UPDATE student_fees SET admission_fee=?, internal1=?, internal2=?, semester1=?, semester2=?, ";
+        foreach ($months as $m) {
+            $sql .= "month_$m=?, ";
+        }
+        $sql .= "total_fee=?, payment_date=? WHERE student_id=?";
         $stmt = $conn->prepare($sql);
 
+        $types = "iiiiiiiii" . str_repeat("i", count($months)) . "is";
         $params = [
-            $submitted['total_fee'],
-            $submitted['admission_fee'],
-            $submitted['internal1'],
-            $submitted['internal2'],
-            $submitted['semester1'],
-            $submitted['semester2'],
-            $submitted['month_jan'],$submitted['month_feb'],$submitted['month_mar'],$submitted['month_apr'],
-            $submitted['month_may'],$submitted['month_jun'],$submitted['month_jul'],$submitted['month_aug'],
-            $submitted['month_sep'],$submitted['month_oct'],$submitted['month_nov'],$submitted['month_dec'],
-            $submitted['payment_date'],
-            $student_id
+            $admission_fee, $internal1, $internal2,
+            $semester1, $semester2
         ];
-        $types = str_repeat('d', 18) . 'ss';
-        mysqli_bind_params_dynamic($stmt, $types, $params);
+        foreach ($months as $m) {
+            $params[] = $months_fee[$m];
+        }
+        $params[] = $total_fee;
+        $params[] = $payment_date;
+        $params[] = $student_id;
+
+        mysqli_bind_params_dynamic($stmt, str_repeat("d", count($params)), $params);
         $stmt->execute();
         $stmt->close();
         $msg = "Fee updated successfully!";
     } else {
-        $sql = "INSERT INTO student_fees (student_id, student_name, total_fee, admission_fee, internal1, internal2, semester1, semester2,
-                month_jan, month_feb, month_mar, month_apr, month_may, month_jun, month_jul, month_aug,
-                month_sep, month_oct, month_nov, month_dec, payment_date)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        // insert new record
+        $cols = "student_id, admission_fee, internal1, internal2, semester1, semester2, ";
+        foreach ($months as $m) $cols .= "month_$m, ";
+        $cols .= "total_fee, payment_date";
+
+        $placeholders = rtrim(str_repeat("?,", 6 + count($months))," ,") . ",?";
+        $sql = "INSERT INTO student_fees ($cols) VALUES ($placeholders)";
         $stmt = $conn->prepare($sql);
 
         $params = [
-            $student_id,
-            $student['name'],
-            $submitted['total_fee'],
-            $submitted['admission_fee'],
-            $submitted['internal1'],
-            $submitted['internal2'],
-            $submitted['semester1'],
-            $submitted['semester2'],
-            $submitted['month_jan'],$submitted['month_feb'],$submitted['month_mar'],$submitted['month_apr'],
-            $submitted['month_may'],$submitted['month_jun'],$submitted['month_jul'],$submitted['month_aug'],
-            $submitted['month_sep'],$submitted['month_oct'],$submitted['month_nov'],$submitted['month_dec'],
-            $submitted['payment_date']
+            $student_id, $admission_fee, $internal1, $internal2,
+            $semester1, $semester2
         ];
-        $types = 'ss' . str_repeat('d', 18) . 's';
-        mysqli_bind_params_dynamic($stmt, $types, $params);
+        foreach ($months as $m) {
+            $params[] = $months_fee[$m];
+        }
+        $params[] = $total_fee;
+        $params[] = $payment_date;
+
+        mysqli_bind_params_dynamic($stmt, str_repeat("d", count($params)), $params);
         $stmt->execute();
         $stmt->close();
         $msg = "Fee submitted successfully!";
     }
 
-    $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
-    $fee_q->bind_param("s", $student_id);
-    $fee_q->execute();
-    $new_fee = $fee_q->get_result()->fetch_assoc();
+    // ✅ Save individual payments into fee_payments table
+    $submitted = [
+        'admission_fee' => $admission_fee,
+        'internal1' => $internal1,
+        'internal2' => $internal2,
+        'semester1' => $semester1,
+        'semester2' => $semester2
+    ];
+    foreach ($months as $m) {
+        $submitted["month_$m"] = $months_fee[$m];
+    }
 
+    foreach ($submitted as $field => $amount) {
+        if ($amount > 0) {
+            $insert = $conn->prepare("INSERT INTO fee_payments (student_id, fee_type, amount, payment_date) VALUES (?,?,?,?)");
+            $insert->bind_param("ssds", $student_id, $field, $amount, $payment_date);
+            $insert->execute();
+            $insert->close();
+        }
+    }
+
+    // redirect to receipt
     header("Location: fee_receipt.php?student_id=" . urlencode($student_id));
     exit;
-}
-
-function print_val($arr, $key) {
-    if (!isset($arr[$key]) || $arr[$key] === null) return '';
-    $v = (float)$arr[$key];
-    return $v > 0 ? $v : '';
 }
 ?>
 <!DOCTYPE html>

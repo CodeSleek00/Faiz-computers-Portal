@@ -7,24 +7,22 @@ if (!$conn) die("Database connection not found");
 $student_id = $_GET['student_id'] ?? '';
 if (!$student_id) die("No student selected.");
 
-// fetch student info
+// fetch student (for photo etc.)
 $student_q = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
 $student_q->bind_param("s", $student_id);
 $student_q->execute();
 $student = $student_q->get_result()->fetch_assoc();
 if (!$student) die("Student not found.");
 
-// fetch student fees
-$fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
-$fee_q->bind_param("s", $student_id);
-$fee_q->execute();
-$fee = $fee_q->get_result()->fetch_assoc();
+// get latest payment from fee_payments
+$payment_q = $conn->prepare("SELECT * FROM fee_payments WHERE student_id = ? ORDER BY payment_date DESC, id DESC LIMIT 1");
+$payment_q->bind_param("s", $student_id);
+$payment_q->execute();
+$payment = $payment_q->get_result()->fetch_assoc();
+$payment_q->close();
 
-$display_changes = [];
-$payment_date = date('Y-m-d');
-
-// fee fields in order of entry (important for deciding "latest")
-$fee_fields = [
+// map labels
+$labels = [
     'admission_fee' => 'Admission Fee',
     'internal1' => 'Internal Exam 1',
     'internal2' => 'Internal Exam 2',
@@ -43,31 +41,7 @@ $fee_fields = [
     'month_nov' => 'Monthly Fee (November)',
     'month_dec' => 'Monthly Fee (December)'
 ];
-
-// detect the latest paid field
-if ($fee) {
-    $latest_field = null;
-    $latest_time = 0;
-
-    foreach ($fee_fields as $field => $label) {
-        if (!empty($fee[$field])) {
-            // use UNIX timestamp from payment_date if available, else fallback to row update time
-            $field_time = !empty($fee['payment_date']) ? strtotime($fee['payment_date']) : time();
-
-            if ($field_time >= $latest_time) {
-                $latest_time = $field_time;
-                $latest_field = $field;
-            }
-        }
-    }
-
-    if ($latest_field) {
-        $display_changes[$latest_field] = (float)$fee[$latest_field];
-        $payment_date = $fee['payment_date'] ?? $payment_date;
-    }
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,21 +75,19 @@ if ($fee) {
     </div>
   </div>
 
-  <?php if (!empty($display_changes)): ?>
+  <?php if ($payment): ?>
     <table class="table table-bordered">
       <thead><tr><th>Fee Type</th><th>Amount (₹)</th><th>Date</th></tr></thead>
       <tbody>
-        <?php foreach ($display_changes as $field => $amt): ?>
-          <tr>
-            <td><?php echo $labels[$field] ?? $field; ?></td>
-            <td><?php echo number_format((float)$amt, 2); ?></td>
-            <td><?php echo htmlspecialchars($payment_date); ?></td>
-          </tr>
-        <?php endforeach; ?>
+        <tr>
+          <td><?php echo $labels[$payment['fee_type']] ?? $payment['fee_type']; ?></td>
+          <td><?php echo number_format((float)$payment['amount'], 2); ?></td>
+          <td><?php echo htmlspecialchars($payment['payment_date']); ?></td>
+        </tr>
       </tbody>
     </table>
   <?php else: ?>
-    <div class="alert alert-info">No recent payment found to show on receipt.</div>
+    <div class="alert alert-info">No payment found for this student.</div>
   <?php endif; ?>
 
   <p class="text-center mt-3">Thank you for your payment!</p>
