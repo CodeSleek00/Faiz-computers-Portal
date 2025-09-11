@@ -7,49 +7,31 @@ if (!$conn) die("Database connection not found");
 $student_id = $_GET['student_id'] ?? '';
 if (!$student_id) die("No student selected.");
 
-// fetch student (for photo etc.)
+// fetch student info
 $student_q = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
 $student_q->bind_param("s", $student_id);
 $student_q->execute();
 $student = $student_q->get_result()->fetch_assoc();
 if (!$student) die("Student not found.");
 
-// try to get recent payment from session
-$recent = $_SESSION['recent_payment'] ?? null;
+// --- NEW LOGIC: always fetch latest payment ---
+$fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ? ORDER BY updated_at DESC LIMIT 1");
+$fee_q->bind_param("s", $student_id);
+$fee_q->execute();
+$fee = $fee_q->get_result()->fetch_assoc();
 
-// if recent exists and student matches, use it
 $display_changes = [];
 $payment_date = date('Y-m-d');
-if ($recent && isset($recent['student_id']) && $recent['student_id'] === $student_id && !empty($recent['changes'])) {
-    $display_changes = $recent['changes'];
-    $payment_date = $recent['date'] ?? $payment_date;
-    // after reading, clear it so it doesn't show again accidentally
-    unset($_SESSION['recent_payment']);
-} else {
-    // fallback: if no session info, try to infer from DB (last non-zero field)
-    $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
-    $fee_q->bind_param("s", $student_id);
-    $fee_q->execute();
-    $fee = $fee_q->get_result()->fetch_assoc();
-    if ($fee) {
-        // find last non-zero fields (we'll display any non-zero fields, but usually this is fallback)
-        $months = [
-            'jan' => 'January','feb'=>'February','mar'=>'March','apr'=>'April','may'=>'May','jun'=>'June',
-            'jul'=>'July','aug'=>'August','sep'=>'September','oct'=>'October','nov'=>'November','dec'=>'December'
-        ];
-        if (!empty($fee['admission_fee'])) $display_changes['admission_fee'] = (float)$fee['admission_fee'];
-        if (!empty($fee['internal1'])) $display_changes['internal1'] = (float)$fee['internal1'];
-        if (!empty($fee['internal2'])) $display_changes['internal2'] = (float)$fee['internal2'];
-        if (!empty($fee['semester1'])) $display_changes['semester1'] = (float)$fee['semester1'];
-        if (!empty($fee['semester2'])) $display_changes['semester2'] = (float)$fee['semester2'];
-        foreach ($months as $m => $m_name) {
-            if (!empty($fee['month_'.$m])) $display_changes['month_'.$m] = (float)$fee['month_'.$m];
-        }
+
+if ($fee) {
+    // Assuming you have a `last_paid_field` and `last_paid_amount` stored on update
+    if (!empty($fee['last_paid_field']) && !empty($fee['last_paid_amount'])) {
+        $display_changes[$fee['last_paid_field']] = (float)$fee['last_paid_amount'];
         $payment_date = $fee['payment_date'] ?? $payment_date;
     }
 }
 
-// map labels for fields
+// map labels
 $labels = [
     'admission_fee' => 'Admission Fee',
     'internal1' => 'Internal Exam 1',
@@ -70,6 +52,7 @@ $labels = [
     'month_dec' => 'Monthly Fee (December)'
 ];
 ?>
+  
 <!DOCTYPE html>
 <html lang="en">
 <head>
