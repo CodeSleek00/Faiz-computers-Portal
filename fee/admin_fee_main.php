@@ -4,12 +4,6 @@ session_start();
 include '../database_connection/db_connect.php';
 if (!$conn) die("Database connection not found");
 
-// --- Initialize variables to prevent warnings ---
-$student = null;
-$old_fee = null;
-$new_fee = null;
-$msg = '';
-
 $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 
 // helper to bind dynamic params
@@ -24,25 +18,20 @@ function mysqli_bind_params_dynamic($stmt, $types, &$params) {
 
 // get student_id
 $student_id = $_GET['student_id'] ?? '';
-if (!$student_id) {
-    echo "<div class='alert alert-danger'>No student selected.</div>";
-    exit;
-}
+if (!$student_id) die("No student selected.");
 
 $student_q = $conn->prepare("SELECT * FROM students WHERE student_id = ?");
-$student_q->bind_param("i", $student_id);
+$student_q->bind_param("s", $student_id);
 $student_q->execute();
 $student = $student_q->get_result()->fetch_assoc();
-if (!$student) {
-    echo "<div class='alert alert-danger'>Student not found.</div>";
-    exit;
-}
+if (!$student) die("Student not found.");
 
 $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
-$fee_q->bind_param("i", $student_id);
+$fee_q->bind_param("s", $student_id);
 $fee_q->execute();
 $old_fee = $fee_q->get_result()->fetch_assoc(); // may be null
 
+$msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $submitted = [];
     $submitted['total_fee'] = isset($_POST['total_fee']) && $_POST['total_fee'] !== '' ? (float)$_POST['total_fee'] : 0;
@@ -78,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $submitted['payment_date'],
             $student_id
         ];
-        $types = str_repeat('d', 18) . 'si';
+        $types = str_repeat('d', 18) . 'ss';
         mysqli_bind_params_dynamic($stmt, $types, $params);
         $stmt->execute();
         $stmt->close();
@@ -104,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $submitted['month_sep'],$submitted['month_oct'],$submitted['month_nov'],$submitted['month_dec'],
             $submitted['payment_date']
         ];
-        $types = 'isd' . str_repeat('d', 17) . 's';
+        $types = 'ss' . str_repeat('d', 18) . 's';
         mysqli_bind_params_dynamic($stmt, $types, $params);
         $stmt->execute();
         $stmt->close();
@@ -112,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $fee_q = $conn->prepare("SELECT * FROM student_fees WHERE student_id = ?");
-    $fee_q->bind_param("i", $student_id);
+    $fee_q->bind_param("s", $student_id);
     $fee_q->execute();
     $new_fee = $fee_q->get_result()->fetch_assoc();
 
@@ -131,8 +120,8 @@ function print_val($arr, $key) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="image.png">
-<link rel="apple-touch-icon" href="image.png">
+ <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
 <title>Submit Fee - <?php echo htmlspecialchars($student['name']); ?></title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
@@ -169,8 +158,7 @@ function print_val($arr, $key) {
     <form method="post">
         <div class="mb-4">
             <label class="form-label fw-semibold">Total Fee</label>
-            <input type="number" step="0.01" name="total_fee" class="form-control" 
-                value="<?php echo print_val($new_fee ?? $old_fee ?? [],'total_fee'); ?>" required>
+            <input type="number" step="0.01" name="total_fee" class="form-control" value="<?php echo print_val($new_fee ?? $old_fee ?? [],'total_fee'); ?>" required>
         </div>
 
         <div class="table-responsive mb-4">
@@ -184,8 +172,7 @@ function print_val($arr, $key) {
                     foreach($fee_types as $key => $label): ?>
                         <tr>
                             <td><?php echo $label; ?></td>
-                            <td><input type="number" step="0.01" name="<?php echo $key; ?>" class="form-control" 
-                                value="<?php echo print_val($new_fee ?? $old_fee ?? [],$key); ?>"></td>
+                            <td><input type="number" step="0.01" name="<?php echo $key; ?>" class="form-control" value="<?php echo print_val($new_fee ?? $old_fee ?? [],$key); ?>"></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -205,8 +192,7 @@ function print_val($arr, $key) {
                 <tbody>
                     <tr>
                         <?php foreach($months as $m): ?>
-                            <td><input type="number" step="0.01" name="month_<?php echo $m; ?>" class="form-control" 
-                                value="<?php echo print_val($new_fee ?? $old_fee ?? [],'month_'.$m); ?>"></td>
+                            <td><input type="number" step="0.01" name="month_<?php echo $m; ?>" class="form-control" value="<?php echo print_val($new_fee ?? $old_fee ?? [],'month_'.$m); ?>"></td>
                         <?php endforeach; ?>
                     </tr>
                 </tbody>
@@ -215,8 +201,7 @@ function print_val($arr, $key) {
 
         <div class="mb-4">
             <label class="form-label fw-semibold">Payment Date</label>
-            <input type="date" name="payment_date" class="form-control" 
-                value="<?php echo htmlspecialchars(($new_fee['payment_date'] ?? $old_fee['payment_date'] ?? date('Y-m-d'))); ?>">
+            <input type="date" name="payment_date" class="form-control" value="<?php echo htmlspecialchars(($new_fee['payment_date'] ?? $old_fee['payment_date'] ?? date('Y-m-d'))); ?>">
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
