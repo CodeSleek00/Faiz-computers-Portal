@@ -4,9 +4,9 @@ session_start();
 include '../database_connection/db_connect.php';
 if (!$conn) die("Database connection not found");
 
-// Student list nikalna
+// Student list fetch
 $students = [];
-$sql = "SELECT id, name, enrollment_id FROM students ORDER BY name ASC";
+$sql = "SELECT student_id, name, enrollment_id FROM students ORDER BY name ASC";
 $res = mysqli_query($conn, $sql);
 while ($row = mysqli_fetch_assoc($res)) {
     $students[] = $row;
@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Admin - Fee Submission</title>
     <style>
         body { font-family: Arial, sans-serif; background:#f5f6fa; padding:20px; }
@@ -64,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <select name="student_id" required>
             <option value="">-- Select Student --</option>
             <?php foreach ($students as $stu) { ?>
-                <option value="<?= $stu['id'] ?>">
+                <option value="<?= $stu['student_id'] ?>">
                     <?= htmlspecialchars($stu['name']) ?> (<?= $stu['enrollment_id'] ?>)
                 </option>
             <?php } ?>
