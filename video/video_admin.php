@@ -4,7 +4,7 @@ include 'db_connect.php';
 
 
 // fetch batches and students for assignment
-$batches = $pdo->query('SELECT batch_id,batch_name FROM batches')->fetchAll();
+$batches = $pdo->query('SELECT batch_id FROM batches')->fetchAll();
 $students = $pdo->query('SELECT student_id, name FROM students')->fetchAll();
 ?>
 <!doctype html>
@@ -47,7 +47,7 @@ $students = $pdo->query('SELECT student_id, name FROM students')->fetchAll();
 <select name="batch_id">
 <option value="">-- All / None --</option>
 <?php foreach($batches as $b): ?>
-<option value="<?=htmlspecialchars($b['batch_id'])?>"></option>
+<option value="<?=htmlspecialchars($b['batch_id'])?>"><?=htmlspecialchars($b['batch_name'])?></option>
 <?php endforeach; ?>
 </select>
 </label>
