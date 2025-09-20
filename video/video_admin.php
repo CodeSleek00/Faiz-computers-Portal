@@ -58,7 +58,7 @@ $students = $pdo->query('SELECT student_id, name FROM students')->fetchAll();
 <label>Individual Students (hold ctrl to select multiple)
 <select name="student_ids[]" multiple size="5">
 <?php foreach($students as $s): ?>
-<option value="<?=htmlspecialchars($s['id'])?>"><?=htmlspecialchars($s['name'])?></option>
+<option value="<?=htmlspecialchars($s['student_id'])?>"><?=htmlspecialchars($s['name'])?></option>
 <?php endforeach; ?>
 </select>
 </label>
