@@ -5,7 +5,7 @@ include 'db_connect.php';
 
 // fetch batches and students for assignment
 $batches = $pdo->query('SELECT batch_id FROM batches')->fetchAll();
-$students = $pdo->query('SELECT id, name FROM students')->fetchAll();
+$students = $pdo->query('SELECT student_id, name FROM students')->fetchAll();
 ?>
 <!doctype html>
 <html>
