@@ -47,7 +47,7 @@ $students = $pdo->query('SELECT student_id, name FROM students')->fetchAll();
 <select name="batch_id">
 <option value="">-- All / None --</option>
 <?php foreach($batches as $b): ?>
-<option value="<?=htmlspecialchars($b['id'])?>"><?=htmlspecialchars($b['name'])?></option>
+<option value="<?=htmlspecialchars($b['batch_id'])?>"><?=htmlspecialchars($b['batch_name'])?></option>
 <?php endforeach; ?>
 </select>
 </label>
