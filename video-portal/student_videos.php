@@ -75,7 +75,7 @@ $result = $stmt->get_result();
                         Your browser does not support video playback.
                     </video>
                     <br>
-                    <a class="download-btn" href="uploads/videos/<?= htmlspecialchars($row['filename']) ?>" download>⬇ Download</a>
+                    <a class="download-btn" href="../uploads/videos/<?= htmlspecialchars($row['filename']) ?>" download>⬇ Download</a>
                 </div>
             <?php } ?>
         <?php } else { ?>
