@@ -340,9 +340,7 @@ $result = $stmt->get_result();
                 <div class="video-grid">
                     <?php while($row = $result->fetch_assoc()) { ?>
                         <div class="video-card">
-                            <div class="video-thumbnail">
-                                <span>▶</span>
-                            </div>
+                           
                             <div class="video-content">
                                 <div class="video-title"><?= htmlspecialchars($row['title']) ?></div>
                                 <div class="video-description"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
