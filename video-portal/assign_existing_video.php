@@ -8,7 +8,7 @@ $batches = $conn->query("SELECT batch_id, batch_name FROM batches");
 $students = $conn->query("SELECT student_id, name FROM students");
 
 // Fetch files already in uploads/videos/
-$existing_videos = array_diff(scandir(directory: "..uploads/videos/"), array('.', '..'));
+$existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.', '..'));
 ?>
 
 <!DOCTYPE html>
