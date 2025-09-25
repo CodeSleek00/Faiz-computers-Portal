@@ -382,7 +382,7 @@ $result = $stmt->get_result();
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <span class="logo-icon">🎬</span>
+                    <span class="logo-icon"><i class="fa-solid fa-video"></i></span>
                     <span>Video Library</span>
                 </div>
                 <button class="back-btn" onclick="history.back()">
