@@ -263,7 +263,7 @@ $video = $result->fetch_assoc();
             </div>
             
             <div class="video-content">
-                <h2 class="section-title">Description</h2>
+                
                 <div class="video-description"><?= htmlspecialchars($video['description']) ?></div>
                 
                 <div class="action-buttons">
