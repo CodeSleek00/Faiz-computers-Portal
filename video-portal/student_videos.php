@@ -37,18 +37,20 @@ $result = $stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Videos</title>
     <link rel="icon" type="image/png" href="image.png">
-    <link rel="apple-touch-icon" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #2563eb;
+            --primary-blue: #1e40af;
             --light-blue: #3b82f6;
+            --accent-blue: #60a5fa;
             --white: #ffffff;
             --light-gray: #f8fafc;
             --medium-gray: #e2e8f0;
             --dark-gray: #64748b;
             --text-dark: #1e293b;
-            --border-radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
         }
 
         * {
@@ -59,10 +61,9 @@ $result = $stmt->get_result();
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--white);
+            background-color: var(--light-gray);
             color: var(--text-dark);
-            line-height: 1.5;
-            padding: 0;
+            line-height: 1.6;
         }
 
         .container {
@@ -71,15 +72,15 @@ $result = $stmt->get_result();
             padding: 0 20px;
         }
 
-        /* Header */
+        /* Header Styles */
         header {
-            background: var(--white);
-            border-bottom: 1px solid var(--medium-gray);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            color: white;
             padding: 20px 0;
+            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
-            backdrop-filter: blur(10px);
         }
 
         .header-content {
@@ -92,30 +93,32 @@ $result = $stmt->get_result();
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: 600;
-            font-size: 1.3rem;
-            color: var(--primary-blue);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
         }
 
         .back-btn {
-            background: none;
-            border: 1px solid var(--medium-gray);
-            color: var(--dark-gray);
-            padding: 8px 16px;
-            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
             font-family: 'Inter', sans-serif;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
 
         .back-btn:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         /* Main Content */
@@ -124,89 +127,103 @@ $result = $stmt->get_result();
         }
 
         .page-title {
-            font-weight: 600;
-            font-size: 1.8rem;
+            text-align: center;
             margin-bottom: 30px;
-            color: var(--text-dark);
+            color: var(--primary-blue);
+            font-weight: 600;
+            font-size: 2rem;
         }
 
-        /* Search */
+        /* Search Section */
         .search-section {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
             margin-bottom: 30px;
+            box-shadow: var(--shadow);
         }
 
         .search-form {
             display: flex;
             gap: 10px;
-            max-width: 500px;
         }
 
         .search-input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 12px 20px;
             border: 1px solid var(--medium-gray);
-            border-radius: var(--border-radius);
+            border-radius: 50px;
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-            transition: border-color 0.2s;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: var(--primary-blue);
+            border-color: var(--light-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
         .search-btn {
             background-color: var(--primary-blue);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
+            padding: 12px 25px;
+            border-radius: 50px;
             font-family: 'Inter', sans-serif;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
         }
 
         .search-btn:hover {
             background-color: var(--light-blue);
+            transform: translateY(-2px);
         }
 
         /* Video Grid */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
         }
 
         .video-card {
-            background: var(--white);
-            border: 1px solid var(--medium-gray);
-            border-radius: var(--border-radius);
+            background-color: var(--white);
+            border-radius: var(--radius);
             overflow: hidden;
-            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .video-card:hover {
-            border-color: var(--primary-blue);
-            transform: translateY(-2px);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
         .video-thumbnail {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            display: block;
+            height: 180px;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--accent-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
         }
 
         .video-content {
-            padding: 16px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .video-title {
             font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
             color: var(--text-dark);
             line-height: 1.4;
         }
@@ -214,28 +231,27 @@ $result = $stmt->get_result();
         .video-description {
             color: var(--dark-gray);
             font-size: 0.9rem;
-            margin-bottom: 16px;
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            margin-bottom: 15px;
+            flex: 1;
             overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 
         .view-btn {
             background-color: var(--primary-blue);
             color: white;
             text-decoration: none;
-            padding: 8px 16px;
+            padding: 10px 15px;
             border-radius: 6px;
-            font-size: 0.9rem;
+            text-align: center;
             font-weight: 500;
-            transition: background-color 0.2s;
-            display: inline-flex;
+            transition: all 0.3s ease;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            width: 100%;
             justify-content: center;
+            gap: 8px;
         }
 
         .view-btn:hover {
@@ -250,22 +266,21 @@ $result = $stmt->get_result();
         }
 
         .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: var(--medium-gray);
         }
 
         .empty-state p {
-            font-size: 1rem;
-            margin-bottom: 8px;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
         }
 
-        /* Responsive */
+        /* Responsive Design */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 gap: 15px;
-                text-align: center;
             }
             
             .search-form {
@@ -277,8 +292,7 @@ $result = $stmt->get_result();
             }
             
             .page-title {
-                font-size: 1.5rem;
-                text-align: center;
+                font-size: 1.6rem;
             }
         }
 
@@ -287,20 +301,13 @@ $result = $stmt->get_result();
                 padding: 0 15px;
             }
             
-            .main-content {
-                padding: 30px 0;
+            .search-section {
+                padding: 20px;
             }
             
             .video-thumbnail {
-                height: 140px;
+                height: 150px;
             }
-        }
-
-        /* Video count */
-        .video-count {
-            color: var(--dark-gray);
-            font-size: 0.9rem;
-            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -309,52 +316,46 @@ $result = $stmt->get_result();
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <span>📹</span>
-                    <span>My Videos</span>
+                    <span class="logo-icon">🎥</span>
+                    <span>Video Library</span>
                 </div>
-                <a href="javascript:history.back()" class="back-btn">
+                <button class="back-btn" onclick="history.back()">
                     <span>←</span> Back
-                </a>
+                </button>
             </div>
         </div>
     </header>
 
     <div class="container">
         <div class="main-content">
-            <h1 class="page-title">My Videos</h1>
+            <h1 class="page-title">My Assigned Videos</h1>
             
             <div class="search-section">
                 <form method="get" class="search-form">
-                    <input type="text" name="search" placeholder="Search videos..." 
+                    <input type="text" name="search" placeholder="Search videos by title or description..." 
                            value="<?= htmlspecialchars($search) ?>" class="search-input">
                     <button type="submit" class="search-btn">Search</button>
                 </form>
-                <?php if ($result->num_rows > 0): ?>
-                    <div class="video-count"><?= $result->num_rows ?> video(s) found</div>
-                <?php endif; ?>
             </div>
 
             <?php if ($result->num_rows > 0) { ?>
                 <div class="video-grid">
                     <?php while($row = $result->fetch_assoc()) { ?>
                         <div class="video-card">
-                            <img src="../uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
-                                 alt="Thumbnail" class="video-thumbnail">
-                            <div class="video-content">
-                                <div class="video-title"><?= htmlspecialchars($row['title']) ?></div>
-                                <div class="video-description"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
-                                <a class="view-btn" href="view_video.php?id=<?= $row['id'] ?>">
-                                    <span>▶</span> Watch Video
-                                </a>
-                            </div>
+                           
+                           <img src="../uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
+         alt="Thumbnail" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px;">
+    <div class="title"><?= htmlspecialchars($row['title']) ?></div>
+    <div class="desc"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
+    <a class="view-btn" href="view_video.php?id=<?= $row['id'] ?>">▶ Watch Video</a>
                         </div>
                     <?php } ?>
                 </div>
             <?php } else { ?>
                 <div class="empty-state">
                     <div class="empty-icon">📹</div>
-                    <p>No videos found</p>
-                    <p><?= $search ? 'Try adjusting your search' : 'Check back later for new content' ?></p>
+                    <p>No videos found.</p>
+                    <p>Try adjusting your search or check back later for new content.</p>
                 </div>
             <?php } ?>
         </div>
