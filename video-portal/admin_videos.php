@@ -81,7 +81,7 @@ $students = $conn->query("SELECT student_id, name FROM students");
             <select name="student_id" id="studentDropdown">
                 <option value="">-- Select Student --</option>
                 <?php while($s = $students->fetch_assoc()) { ?>
-                    <option value="<?= $s['id'] ?>"><?= $s['name'] ?> (ID: <?= $s['id'] ?>)</option>
+                    <option value="<?= $s['student_id'] ?>"><?= $s['name'] ?> (ID: <?= $s['student_id'] ?>)</option>
                 <?php } ?>
             </select>
         </div>
