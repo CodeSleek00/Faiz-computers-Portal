@@ -26,6 +26,8 @@ $video = $result->fetch_assoc();
 <html>
 <head>
     <title>Watch Video</title>
+    <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <style>
         body { font-family: Arial, sans-serif; background:#f7f7f7; margin:0; padding:0; }
         .container { width:90%; max-width:800px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }

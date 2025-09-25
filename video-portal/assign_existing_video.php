@@ -15,6 +15,8 @@ $existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.
 <html>
 <head>
     <title>Assign Existing Video</title>
+    <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         .form-box { border: 1px solid #ccc; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; }

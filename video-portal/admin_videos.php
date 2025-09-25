@@ -12,6 +12,8 @@ $students = $conn->query("SELECT student_id, name FROM students");
 <html>
 <head>
     <title>Admin - Video Portal</title>
+    <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         .video-box { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
