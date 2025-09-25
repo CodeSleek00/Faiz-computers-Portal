@@ -252,12 +252,7 @@ $video = $result->fetch_assoc();
         <?php if ($video) { ?>
             <div class="video-header">
                 <h1 class="video-title"><?= htmlspecialchars($video['title']) ?></h1>
-                <div class="video-meta">
-                    <span>Assigned to: <?= htmlspecialchars($video['assigned_to']) ?></span>
-                    <?php if ($video['created_at']) { ?>
-                        <span>Added: <?= date('M j, Y', strtotime($video['created_at'])) ?></span>
-                    <?php } ?>
-                </div>
+               
             </div>
             
             <div class="video-player-container">
