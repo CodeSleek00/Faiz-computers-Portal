@@ -162,25 +162,5 @@ $students = $conn->query("SELECT student_id, name FROM students");
     </div>
 </div>
 
-<script>
-function openReassignModal(id){
-    document.getElementById('video_id').value = id;
-    document.getElementById('reassignModal').style.display = 'flex';
-}
-function closeReassignModal(){
-    document.getElementById('reassignModal').style.display = 'none';
-}
-function toggleFields(){
-    let assign = document.getElementById('assigned_to_select').value;
-    document.getElementById('batch_select').style.display = (assign=='batch')?'block':'none';
-    document.getElementById('student_select').style.display = (assign=='student')?'block':'none';
-}
-window.onclick = function(event) {
-    if (event.target == document.getElementById('reassignModal')) {
-        closeReassignModal();
-    }
-}
-</script>
-
 </body>
 </html>
