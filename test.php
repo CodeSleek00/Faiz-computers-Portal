@@ -832,7 +832,7 @@ $assignment_stats = $conn->query("
             </div>
 
              <div class="nav-item">
-                <a href="video-portal/admin_videos.php" class="nav-link">
+                <a href="video-portal/student_videos.php" class="nav-link">
                     <i class="fa-solid fa-pencil"></i>
                     <span>Online Classes</span>
                 </a>
