@@ -42,7 +42,7 @@ $video = $result->fetch_assoc();
         <?php if ($video) { ?>
             <h2><?= htmlspecialchars($video['title']) ?></h2>
             <div class="desc"><?= nl2br(htmlspecialchars($video['description'])) ?></div>
-            <video controls poster="uploads/thumbnails/<?= htmlspecialchars($video['thumbnail']) ?>"></video>>
+            <video controls>
                 <source src="../uploads/videos/<?= htmlspecialchars($video['filename']) ?>" type="video/mp4">
                 Your browser does not support video playback.
             </video>
