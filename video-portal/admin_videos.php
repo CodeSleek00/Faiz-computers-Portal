@@ -69,7 +69,7 @@ $students = $conn->query("SELECT student_id, name FROM students");
             <select name="batch_id" id="batchDropdown">
                 <option value="">-- Select Batch --</option>
                 <?php while($b = $batches->fetch_assoc()) { ?>
-                    <option value="<?= $b['id'] ?>"><?= $b['batch_name'] ?></option>
+                    <option value="<?= $b['batch_id'] ?>"><?= $b['batch_name'] ?></option>
                 <?php } ?>
             </select>
         </div>
