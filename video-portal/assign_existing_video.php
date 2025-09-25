@@ -64,7 +64,7 @@ $existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.
                 <select name="batch_id">
                     <option value="">-- Select Batch --</option>
                     <?php while($b = $batches->fetch_assoc()) { ?>
-                        <option value="<?= $b['id'] ?>"><?= $b['batch_name'] ?></option>
+                        <option value="<?= $b['batch_id'] ?>"><?= $b['batch_name'] ?></option>
                     <?php } ?>
                 </select>
             </div>
@@ -75,7 +75,7 @@ $existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.
                 <select name="student_id">
                     <option value="">-- Select Student --</option>
                     <?php while($s = $students->fetch_assoc()) { ?>
-                        <option value="<?= $s['id'] ?>"><?= $s['name'] ?> (ID: <?= $s['id'] ?>)</option>
+                        <option value="<?= $s['student_id'] ?>"><?= $s['name'] ?> (ID: <?= $s['student_id'] ?>)</option>
                     <?php } ?>
                 </select>
             </div>
