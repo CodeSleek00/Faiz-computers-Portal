@@ -9,10 +9,6 @@ $total_batches = $conn->query("SELECT COUNT(*) as total FROM batches")->fetch_as
 // Fetch all videos
 $videos = $conn->query("SELECT * FROM videos ORDER BY uploaded_at DESC");
 
-// Fetch batches and students for reassign modal
-$batches = $conn->query("SELECT batch_id, batch_name FROM batches");
-$students = $conn->query("SELECT student_id, name FROM students");
-?>
 
 <!DOCTYPE html>
 <html lang="en">
