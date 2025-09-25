@@ -641,6 +641,19 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
         
                         </div>
                     </div>
+                     <div class="action-card">
+                        <div class="action-card-header">
+                            <div class="action-icon">
+                             <i class="fa-solid fa-video"></i>
+                            </div>
+                            <h4>Online Class Management</h4>
+                        </div>
+                        <div class="action-links">
+                              <a href="video-portal/admin_video_dashboard.php">Video Upload</a>
+                              <a href="video-portal/assign_existing_video.php">Assign Video</a>
+        
+                        </div>
+                    </div>
                     
                     <div class="action-card">
                         <div class="action-card-header">
