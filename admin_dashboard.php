@@ -483,6 +483,10 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
                     <i class="fa-solid fa-receipt"></i>
                     <span>Fee</span>
                 </a>
+                <a href="video-portal/admin_videos.php" class="menu-item">
+                   <i class="fa-solid fa-video"></i>
+                    <span>Video Upload</span>
+                </a>
             </div>
         </div>
         
