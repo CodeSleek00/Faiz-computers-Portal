@@ -37,20 +37,22 @@ $result = $stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Videos</title>
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #1e40af;
-            --light-blue: #3b82f6;
-            --accent-blue: #60a5fa;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #f8fafc;
             --white: #ffffff;
-            --light-gray: #f8fafc;
-            --medium-gray: #e2e8f0;
-            --dark-gray: #64748b;
-            --text-dark: #1e293b;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --radius: 12px;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --radius-lg: 12px;
         }
 
         * {
@@ -61,9 +63,10 @@ $result = $stmt->get_result();
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--light-gray);
-            color: var(--text-dark);
-            line-height: 1.6;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
         }
 
         .container {
@@ -72,15 +75,15 @@ $result = $stmt->get_result();
             padding: 0 20px;
         }
 
-        /* Header Styles */
+        /* Header */
         header {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: var(--shadow);
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(8px);
         }
 
         .header-content {
@@ -92,33 +95,35 @@ $result = $stmt->get_result();
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 1.5rem;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--primary);
         }
 
         .logo-icon {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
 
         .back-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: var(--radius);
             font-family: 'Inter', sans-serif;
             font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            gap: 6px;
+            transition: all 0.2s ease;
         }
 
         .back-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         /* Main Content */
@@ -127,90 +132,130 @@ $result = $stmt->get_result();
         }
 
         .page-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-blue);
+            font-size: 1.875rem;
             font-weight: 600;
-            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            font-size: 1rem;
         }
 
         /* Search Section */
         .search-section {
-            background-color: var(--white);
+            background: var(--white);
             border-radius: var(--radius);
-            padding: 25px;
-            margin-bottom: 30px;
+            padding: 24px;
+            margin-bottom: 32px;
             box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
 
         .search-form {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .search-input {
             flex: 1;
-            padding: 12px 20px;
-            border: 1px solid var(--medium-gray);
-            border-radius: 50px;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: var(--light-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .search-btn {
-            background-color: var(--primary-blue);
-            color: white;
+            background: var(--primary);
+            color: var(--white);
             border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
+            padding: 12px 24px;
+            border-radius: var(--radius);
             font-family: 'Inter', sans-serif;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .search-btn:hover {
-            background-color: var(--light-blue);
-            transform: translateY(-2px);
+            background: var(--primary-dark);
         }
 
         /* Video Grid */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            gap: 24px;
         }
 
         .video-card {
-            background-color: var(--white);
-            border-radius: var(--radius);
+            background: var(--white);
+            border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         .video-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
 
-        .video-thumbnail {
+        .thumbnail-container {
+            position: relative;
             height: 180px;
-            background: linear-gradient(135deg, var(--light-blue) 0%, var(--accent-blue) 100%);
+            overflow: hidden;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover .thumbnail {
+            transform: scale(1.05);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-card:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .play-icon {
             color: white;
             font-size: 3rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .video-content {
@@ -222,65 +267,78 @@ $result = $stmt->get_result();
 
         .video-title {
             font-weight: 600;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: var(--text-dark);
+            font-size: 1.125rem;
+            margin-bottom: 8px;
+            color: var(--text);
             line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .video-description {
-            color: var(--dark-gray);
-            font-size: 0.9rem;
-            margin-bottom: 15px;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 16px;
             flex: 1;
-            overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .view-btn {
-            background-color: var(--primary-blue);
-            color: white;
+            background: var(--primary);
+            color: var(--white);
             text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
             text-align: center;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            margin-top: auto;
         }
 
         .view-btn:hover {
-            background-color: var(--light-blue);
+            background: var(--primary-dark);
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: var(--dark-gray);
+            color: var(--text-light);
         }
 
         .empty-icon {
             font-size: 4rem;
-            margin-bottom: 20px;
-            color: var(--medium-gray);
+            margin-bottom: 16px;
+            color: var(--border);
         }
 
-        .empty-state p {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .empty-message {
+            font-size: 1rem;
+            margin-bottom: 24px;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
-                gap: 15px;
+                gap: 16px;
+                text-align: center;
             }
             
             .search-form {
@@ -292,21 +350,29 @@ $result = $stmt->get_result();
             }
             
             .page-title {
-                font-size: 1.6rem;
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 24px 0;
             }
         }
 
         @media (max-width: 480px) {
             .container {
-                padding: 0 15px;
+                padding: 0 16px;
             }
             
             .search-section {
                 padding: 20px;
             }
             
-            .video-thumbnail {
-                height: 150px;
+            .thumbnail-container {
+                height: 160px;
+            }
+            
+            .video-content {
+                padding: 16px;
             }
         }
     </style>
@@ -316,7 +382,7 @@ $result = $stmt->get_result();
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <span class="logo-icon">🎥</span>
+                    <span class="logo-icon">🎬</span>
                     <span>Video Library</span>
                 </div>
                 <button class="back-btn" onclick="history.back()">
@@ -328,7 +394,8 @@ $result = $stmt->get_result();
 
     <div class="container">
         <div class="main-content">
-            <h1 class="page-title">My Assigned Videos</h1>
+            <h1 class="page-title">My Videos</h1>
+            <p class="page-subtitle">Browse your assigned video content</p>
             
             <div class="search-section">
                 <form method="get" class="search-form">
@@ -342,20 +409,40 @@ $result = $stmt->get_result();
                 <div class="video-grid">
                     <?php while($row = $result->fetch_assoc()) { ?>
                         <div class="video-card">
-                           
-                           <img src="../uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
-         alt="Thumbnail" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px;">
-    <div class="title"><?= htmlspecialchars($row['title']) ?></div>
-    <div class="desc"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
-    <a class="view-btn" href="view_video.php?id=<?= $row['id'] ?>">▶ Watch Video</a>
+                            <div class="thumbnail-container">
+                                <?php if (!empty($row['thumbnail'])) { ?>
+                                    <img src="../uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
+                                         alt="Thumbnail" class="thumbnail">
+                                <?php } else { ?>
+                                    <div style="width:100%; height:100%; background:linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); 
+                                                display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
+                                        🎥
+                                    </div>
+                                <?php } ?>
+                                <div class="play-overlay">
+                                    <span class="play-icon">▶</span>
+                                </div>
+                            </div>
+                            <div class="video-content">
+                                <h3 class="video-title"><?= htmlspecialchars($row['title']) ?></h3>
+                                <p class="video-description"><?= htmlspecialchars($row['description']) ?></p>
+                                <a class="view-btn" href="view_video.php?id=<?= $row['id'] ?>">
+                                    <span>▶</span> Watch Video
+                                </a>
+                            </div>
                         </div>
                     <?php } ?>
                 </div>
             <?php } else { ?>
                 <div class="empty-state">
                     <div class="empty-icon">📹</div>
-                    <p>No videos found.</p>
-                    <p>Try adjusting your search or check back later for new content.</p>
+                    <h2 class="empty-title">No videos found</h2>
+                    <p class="empty-message"><?php echo $search !== "" ? "Try adjusting your search terms" : "Check back later for new content" ?></p>
+                    <?php if ($search !== "") { ?>
+                        <a href="?" class="view-btn" style="display:inline-flex; width:auto; padding:10px 20px;">
+                            Clear Search
+                        </a>
+                    <?php } ?>
                 </div>
             <?php } ?>
         </div>
