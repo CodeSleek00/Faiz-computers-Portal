@@ -73,8 +73,9 @@ $videos = $conn->query("SELECT * FROM videos ORDER BY uploaded_at DESC");
 
     <!-- Actions -->
     <div class="actions">
-        <button onclick="window.location.href='admin_video_dashboard.php'">➕ Add New Video</button>
-      <button onclick="window.location.href='reassign_video.php'">Reassign</button> 
+        
+    <a href="admin_videos.php">Add New Video</a>
+    <a href="reassign_video.php">Reassign</a>
     </div>
 
     <!-- Videos Table -->
