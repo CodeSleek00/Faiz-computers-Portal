@@ -74,7 +74,7 @@ $students = $conn->query("SELECT student_id, name FROM students");
     <!-- Actions -->
     <div class="actions">
         <button onclick="window.location.href='upload_video_page.php'">➕ Add New Video</button>
-        <a href="reassign_video.php">Reassign</a>
+      <button> <a href="reassign_video.php">Reassign</a></button> 
     </div>
 
     <!-- Videos Table -->
