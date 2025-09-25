@@ -355,7 +355,30 @@ $students = $conn->query("SELECT student_id, name FROM students");
         </div>
     </form>
 </div>
-
+<h2>Uploaded Videos</h2>
+    <div class="video-list">
+        <?php
+        $result = $conn->query("SELECT * FROM videos ORDER BY uploaded_at DESC");
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                echo "<div class='video-card'>
+                    <h3>{$row['title']}</h3>
+                    <p>{$row['description']}</p>
+                    <video width='100%' controls>
+                        <source src='../uploads/videos/{$row['filename']}' type='video/mp4'>
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class='video-actions'>
+                        <a href='../uploads/videos/{$row['filename']}' download>Download</a>
+                        <a href='delete_video.php?id={$row['id']}'>Delete</a>
+                    </div>
+                </div>";
+            }
+        } else {
+            echo "<p>No videos uploaded yet.</p>";
+        }
+        ?>
+    </div>
 <script>
     function toggleFields() {
         let assignType = document.getElementById("assigned_to").value;
