@@ -8,15 +8,13 @@ $batches = $conn->query("SELECT batch_id, batch_name FROM batches");
 $students = $conn->query("SELECT student_id, name FROM students");
 
 // Fetch files already in uploads/videos/
-$existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.', '..'));
+$existing_videos = array_diff(scandir("../uploads/videos/"), array('.', '..'));
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Assign Existing Video</title>
-    <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         .form-box { border: 1px solid #ccc; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; }
@@ -41,7 +39,7 @@ $existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.
 <body>
     <h2>Assign Existing Video</h2>
     <div class="form-box">
-        <form action="reassign_video.php" method="post">
+        <form action="reassign_video.php" method="post" enctype="multipart/form-data">
             <label>Choose Video from Server:</label>
             <select name="filename" required>
                 <option value="">-- Select Existing Video --</option>
@@ -52,6 +50,10 @@ $existing_videos = array_diff(scandir(directory: "../uploads/videos/"), array('.
 
             <input type="text" name="title" placeholder="Video Title (optional)">
             <textarea name="description" placeholder="Video Description (optional)"></textarea>
+
+            <!-- Thumbnail Upload -->
+            <label>Upload Thumbnail (optional):</label>
+            <input type="file" name="thumbnail" accept="image/*">
 
             <label>Assign To:</label>
             <select name="assigned_to" id="assigned_to" onchange="toggleFields()" required>
