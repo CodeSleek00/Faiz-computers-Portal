@@ -271,94 +271,167 @@ $students = $conn->query("SELECT student_id, name FROM students");
     <h1>Admin Video Portal</h1>
     
     <div class="form-container">
-        <h2>Upload New Video</h2>
-        <form action="upload_video.php" method="post" enctype="multipart/form-data">
-            <div class="form-group full-width">
-                <label for="title">Video Title</label>
-                <input type="text" name="title" placeholder="Enter video title" required>
-            </div>
-            
-            <div class="form-group full-width">
-                <label for="description">Video Description</label>
-                <textarea name="description" placeholder="Enter video description"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="video">Video File</label>
-                <input type="file" name="video" accept="video/*" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="thumbnail">Thumbnail Image</label>
-                <input type="file" name="thumbnail" accept="image/*" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="assigned_to">Assign To</label>
-                <select name="assigned_to" id="assigned_to" onchange="toggleFields()" required>
-                    <option value="all">All Students</option>
-                    <option value="batch">Specific Batch</option>
-                    <option value="student">Specific Student</option>
+    <h2>Upload New Video</h2>
+    <form action="upload_video.php" method="post" enctype="multipart/form-data">
+        <div class="form-group full-width">
+            <label for="title">Video Title</label>
+            <input type="text" name="title" placeholder="Enter video title" required>
+        </div>
+
+        <div class="form-group full-width">
+            <label for="description">Video Description</label>
+            <textarea name="description" placeholder="Enter video description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="video">Video File</label>
+            <input type="file" name="video" accept="video/*" required>
+        </div>
+
+        <div class="form-group">
+            <label for="thumbnail">Thumbnail Image</label>
+            <input type="file" name="thumbnail" accept="image/*" required>
+        </div>
+
+        <div class="form-group">
+            <label for="assigned_to">Assign To</label>
+            <select name="assigned_to" id="assigned_to" onchange="toggleFields()" required>
+                <option value="all">All Students</option>
+                <option value="batch">Specific Batch</option>
+                <option value="student">Specific Student</option>
+            </select>
+        </div>
+
+        <!-- Batch Dropdown with Search -->
+        <div id="batch_select" class="form-group hidden">
+            <label>Select Batch</label>
+            <input type="text" id="batchSearch" class="search-box" onkeyup="filterOptions('batchSearch','batchDropdown')" placeholder="Search batch...">
+            <div class="dropdown-container">
+                <select name="batch_id" id="batchDropdown">
+                    <option value="">-- Select Batch --</option>
+                    <?php while($b = $batches->fetch_assoc()) { ?>
+                        <option value="<?= $b['batch_id'] ?>"><?= $b['batch_name'] ?></option>
+                    <?php } ?>
                 </select>
             </div>
+        </div>
 
-            <!-- Batch Dropdown with Search -->
-            <div id="batch_select" class="form-group hidden">
-                <label>Select Batch</label>
-                <input type="text" id="batchSearch" class="search-box" onkeyup="filterOptions('batchSearch','batchDropdown')" placeholder="Search batch...">
-                <div class="dropdown-container">
-                    <select name="batch_id" id="batchDropdown">
-                        <option value="">-- Select Batch --</option>
-                        <?php while($b = $batches->fetch_assoc()) { ?>
-                            <option value="<?= $b['batch_id'] ?>"><?= $b['batch_name'] ?></option>
-                        <?php } ?>
-                    </select>
-                </div>
+        <!-- Student Dropdown with Search -->
+        <div id="student_select" class="form-group hidden">
+            <label>Select Student</label>
+            <input type="text" id="studentSearch" class="search-box" onkeyup="filterOptions('studentSearch','studentDropdown')" placeholder="Search student...">
+            <div class="dropdown-container">
+                <select name="student_id" id="studentDropdown">
+                    <option value="">-- Select Student --</option>
+                    <?php while($s = $students->fetch_assoc()) { ?>
+                        <option value="<?= $s['student_id'] ?>"><?= $s['name'] ?> (ID: <?= $s['student_id'] ?>)</option>
+                    <?php } ?>
+                </select>
             </div>
+        </div>
 
-            <!-- Student Dropdown with Search -->
-            <div id="student_select" class="form-group hidden">
-                <label>Select Student</label>
-                <input type="text" id="studentSearch" class="search-box" onkeyup="filterOptions('studentSearch','studentDropdown')" placeholder="Search student...">
-                <div class="dropdown-container">
-                    <select name="student_id" id="studentDropdown">
-                        <option value="">-- Select Student --</option>
-                        <?php while($s = $students->fetch_assoc()) { ?>
-                            <option value="<?= $s['student_id'] ?>"><?= $s['name'] ?> (ID: <?= $s['student_id'] ?>)</option>
-                        <?php } ?>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-group full-width">
-                <button type="submit">Upload Video</button>
-            </div>
-        </form>
-    </div>
+        <!-- Video Preview -->
+        <div class="form-group full-width">
+            <label>Video Preview</label>
+            <video id="videoPreview" width="100%" controls class="hidden"></video>
+        </div>
 
-    <h2>Uploaded Videos</h2>
-    <div class="video-list">
-        <?php
-        $result = $conn->query("SELECT * FROM videos ORDER BY uploaded_at DESC");
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                echo "<div class='video-card'>
-                    <h3>{$row['title']}</h3>
-                    <p>{$row['description']}</p>
-                    <video width='100%' controls>
-                        <source src='../uploads/videos/{$row['filename']}' type='video/mp4'>
-                        Your browser does not support the video tag.
-                    </video>
-                    <div class='video-actions'>
-                        <a href='../uploads/videos/{$row['filename']}' download>Download</a>
-                        <a href='delete_video.php?id={$row['id']}'>Delete</a>
-                    </div>
-                </div>";
-            }
-        } else {
-            echo "<p>No videos uploaded yet.</p>";
+        <!-- Thumbnail Preview -->
+        <div class="form-group full-width">
+            <label>Thumbnail Preview</label>
+            <img id="thumbPreview" src="" alt="Thumbnail Preview" style="max-width: 200px; display:none; border-radius:6px;">
+        </div>
+
+        <!-- Upload Progress -->
+        <div class="form-group full-width">
+            <label>Upload Progress</label>
+            <div style="background:#e2e8f0; border-radius:4px; height:20px;">
+                <div id="progressBar" style="width:0%; height:100%; background-color:#2563eb; border-radius:4px;"></div>
+            </div>
+        </div>
+
+        <div class="form-group full-width">
+            <button type="submit">Upload Video</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function toggleFields() {
+        let assignType = document.getElementById("assigned_to").value;
+        document.getElementById("batch_select").classList.add("hidden");
+        document.getElementById("student_select").classList.add("hidden");
+
+        if(assignType === "batch") {
+            document.getElementById("batch_select").classList.remove("hidden");
+        } else if(assignType === "student") {
+            document.getElementById("student_select").classList.remove("hidden");
         }
-        ?>
-    </div>
-</body>
-</html>
+    }
+
+    function filterOptions(inputId, selectId) {
+        let input = document.getElementById(inputId).value.toLowerCase();
+        let select = document.getElementById(selectId);
+        let options = select.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+            let txt = options[i].textContent.toLowerCase();
+            if (txt.indexOf(input) > -1 || options[i].value === "") {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    }
+
+    // Video preview
+    document.querySelector('input[name="video"]').addEventListener('change', function(e){
+        const file = e.target.files[0];
+        const videoPreview = document.getElementById('videoPreview');
+        if(file){
+            videoPreview.src = URL.createObjectURL(file);
+            videoPreview.classList.remove('hidden');
+        }
+    });
+
+    // Thumbnail preview
+    document.querySelector('input[name="thumbnail"]').addEventListener('change', function(e){
+        const file = e.target.files[0];
+        const thumbPreview = document.getElementById('thumbPreview');
+        if(file){
+            thumbPreview.src = URL.createObjectURL(file);
+            thumbPreview.style.display = 'block';
+        }
+    });
+
+    // AJAX upload with progress
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('POST', form.action, true);
+
+        xhr.upload.onprogress = function(event){
+            if(event.lengthComputable){
+                const percent = Math.round((event.loaded / event.total) * 100);
+                document.getElementById('progressBar').style.width = percent + '%';
+            }
+        };
+
+        xhr.onload = function(){
+            if(xhr.status === 200){
+                alert('Upload complete!');
+                location.reload(); // reload to show uploaded video
+            } else {
+                alert('Upload failed.');
+            }
+        };
+
+        xhr.send(formData);
+    });
+
+    document.addEventListener('DOMContentLoaded', toggleFields);
+</script>
