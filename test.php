@@ -830,6 +830,13 @@ $assignment_stats = $conn->query("
                     <span>Exam Center</span>
                 </a>
             </div>
+
+             <div class="nav-item">
+                <a href="video-portal/admin_videos.php" class="nav-link">
+                    <i class="fa-solid fa-pencil"></i>
+                    <span>Online Classes</span>
+                </a>
+            </div>
             
             <div class="nav-item">
                 <a href="login-system/dashboard-user.php" class="nav-link">
