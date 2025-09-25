@@ -75,7 +75,7 @@ $videos = $conn->query("SELECT * FROM videos ORDER BY uploaded_at DESC");
     <div class="actions">
         
     <a href="admin_videos.php">Add New Video</a>
-    <a href="reassign_video.php">Reassign</a>
+    <a href="assign_existing_video.php">Reassign</a>
     </div>
 
     <!-- Videos Table -->
