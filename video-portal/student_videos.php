@@ -341,13 +341,11 @@ $result = $stmt->get_result();
                     <?php while($row = $result->fetch_assoc()) { ?>
                         <div class="video-card">
                            
-                            <div class="video-content">
-                                <div class="video-title"><?= htmlspecialchars($row['title']) ?></div>
-                                <div class="video-description"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
-                                <a class="view-btn" href="view_video.php?id=<?= $row['id'] ?>">
-                                    <span>▶</span> Watch Video
-                                </a>
-                            </div>
+                           <img src="uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
+         alt="Thumbnail" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px;">
+    <div class="title"><?= htmlspecialchars($row['title']) ?></div>
+    <div class="desc"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
+    <a class="view-btn" href="view_video.php?id=<?= $row['id'] ?>">▶ Watch Video</a>
                         </div>
                     <?php } ?>
                 </div>

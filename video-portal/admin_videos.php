@@ -55,6 +55,7 @@ $students = $conn->query("SELECT student_id, name FROM students");
         <input type="text" name="title" placeholder="Video Title" required>
         <textarea name="description" placeholder="Video Description"></textarea>
         <input type="file" name="video" accept="video/*" required>
+         <input type="file" name="thumbnail" accept="image/*" required>
 
         <select name="assigned_to" id="assigned_to" onchange="toggleFields()" required>
             <option value="all">All Students</option>
