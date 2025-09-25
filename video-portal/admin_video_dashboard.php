@@ -19,6 +19,8 @@ $students = $conn->query("SELECT student_id, name FROM students");
 <head>
 <meta charset="UTF-8">
 <title>Admin Video Dashboard</title>
+ <link rel="icon" type="image/png" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
 <style>
     body { font-family: Arial,sans-serif; margin:0; padding:0; background:#f7f7f7; }
     header { background:#2563eb; color:#fff; padding:20px; }
