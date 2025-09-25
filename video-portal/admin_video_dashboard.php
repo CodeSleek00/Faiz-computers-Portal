@@ -10,6 +10,8 @@ $total_batches = $conn->query("SELECT COUNT(*) as total FROM batches")->fetch_as
 $videos = $conn->query("SELECT * FROM videos ORDER BY uploaded_at DESC");
 
 
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
