@@ -265,7 +265,7 @@ $existing_videos = array_diff(scandir("../uploads/videos/"), array('.', '..'));
 </head>
 <body>
     <div class="container">
-        <a href="admin.php" class="back-btn">Back to Admin Portal</a>
+        <a href="admin_videos.php" class="back-btn">Back to Admin Portal</a>
         
         <h1>Assign Existing Video</h1>
         
