@@ -74,6 +74,7 @@ $students = $conn->query("SELECT student_id, name FROM students");
     <!-- Actions -->
     <div class="actions">
         <button onclick="window.location.href='upload_video_page.php'">➕ Add New Video</button>
+        <a href="reassign_video.php">Reassign</a>
     </div>
 
     <!-- Videos Table -->
@@ -106,7 +107,7 @@ $students = $conn->query("SELECT student_id, name FROM students");
             <td>
                 <a href="../uploads/videos/<?= htmlspecialchars($v['filename']) ?>" download><button class="action-btn download">Download</button></a>
                 <a href="delete_video.php?id=<?= $v['id'] ?>" onclick="return confirm('Are you sure?')"><button class="action-btn delete">Delete</button></a>
-                <button class="action-btn reassign" onclick="openReassignModal(<?= $v['id'] ?>)">Reassign</button>
+                
             </td>
         </tr>
         <?php } ?>
