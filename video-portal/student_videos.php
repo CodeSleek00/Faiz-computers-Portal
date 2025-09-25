@@ -341,7 +341,7 @@ $result = $stmt->get_result();
                     <?php while($row = $result->fetch_assoc()) { ?>
                         <div class="video-card">
                            
-                           <img src="uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
+                           <img src="../uploads/thumbnails/<?= htmlspecialchars($row['thumbnail']) ?>" 
          alt="Thumbnail" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px;">
     <div class="title"><?= htmlspecialchars($row['title']) ?></div>
     <div class="desc"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
