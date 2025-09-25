@@ -71,7 +71,7 @@ $result = $stmt->get_result();
                     <div class="title"><?= htmlspecialchars($row['title']) ?></div>
                     <div class="desc"><?= nl2br(htmlspecialchars($row['description'])) ?></div>
                     <video controls>
-                        <source src="uploads/videos/<?= htmlspecialchars($row['filename']) ?>" type="video/mp4">
+                        <source src="../uploads/videos/<?= htmlspecialchars($row['filename']) ?>" type="video/mp4">
                         Your browser does not support video playback.
                     </video>
                     <br>
