@@ -23,10 +23,23 @@ if (!empty($_FILES['thumbnail']['name'])) {
     move_uploaded_file($thumbFile['tmp_name'], $thumbPath);
 }
 
-// Insert into videos table
-$stmt = $conn->prepare("INSERT INTO videos (title, description, filename, thumbnail, assigned_to, batch_id, student_id, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
-$stmt->bind_param("sssssis", $title, $description, $filename, $thumbName, $assigned_to, $batch_id, $student_id);
-$stmt->execute();
+if ($assigned_to === "student" && $student_id) {
+    // ✅ Assign video to single student
+    $stmt = $conn->prepare("INSERT INTO videos (title, description, filename, thumbnail, assigned_to, batch_id, student_id, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+    $stmt->bind_param("sssssis", $title, $description, $filename, $thumbName, $assigned_to, $batch_id, $student_id);
+    $stmt->execute();
+
+} elseif ($assigned_to === "batch" && $batch_id) {
+    // ✅ Assign video to all students in that batch
+    $students = $conn->query("SELECT student_id FROM student_enrolled WHERE batch_id = '$batch_id'");
+    
+    while ($row = $students->fetch_assoc()) {
+        $studentId = $row['student_id'];
+        $stmt = $conn->prepare("INSERT INTO videos (title, description, filename, thumbnail, assigned_to, batch_id, student_id, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->bind_param("sssssis", $title, $description, $filename, $thumbName, $assigned_to, $batch_id, $studentId);
+        $stmt->execute();
+    }
+}
 
 header("Location: assign_existing_video.php?success=1");
 exit;
