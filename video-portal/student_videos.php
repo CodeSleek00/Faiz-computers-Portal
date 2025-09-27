@@ -11,10 +11,10 @@ $search = isset($_GET['search']) ? trim($_GET['search']) : "";
 
 // Base query
 $query = "
-   SELECT * FROM videos 
-WHERE assigned_to = 'all' 
-   OR student_id = ?
-
+    SELECT * FROM videos 
+    WHERE assigned_to = 'all' 
+       OR (assigned_to = 'batch' AND batch_id = ?) 
+       OR (assigned_to = 'student' AND student_id = ?)
 ";
 if ($search !== "") {
     $query .= " AND (title LIKE ? OR description LIKE ?)";
