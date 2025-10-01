@@ -1,108 +1,44 @@
 <?php
-include '../database_connection/db_connect.php';
-if (!$conn) die("Database connection not found");
+include 'db_connect.php';
 
-// GET student_id
-$student_id = $_GET['student_id'] ?? '';
-if (!$student_id) die("No student selected.");
-
-// Student info
-$student = $conn->query("SELECT * FROM students WHERE student_id='$student_id'")->fetch_assoc();
-if (!$student) die("Student not found.");
-
-// Use POST data if available
-$submitted = $_POST ?? null;
-if (!$submitted) die("No fee submission data found.");
-
-// Calculate total and prepare display array
-$total_paid = 0;
-$display_fees = [];
-
-$exam_fields = ['internal1'=>'Internal 1','internal2'=>'Internal 2','semester1'=>'Semester 1','semester2'=>'Semester 2'];
-$months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-
-// Exam fees
-foreach($exam_fields as $key=>$label){
-    $val = floatval($submitted[$key] ?? 0);
-    if($val>0){
-        $display_fees[$label] = $val;
-        $total_paid += $val;
-    }
-}
-
-// Monthly fees
-foreach($months as $m){
-    $val = floatval($submitted['month_'.$m] ?? 0);
-    if($val>0){
-        $display_fees[ucfirst($m).' Fee'] = $val;
-        $total_paid += $val;
-    }
-}
-
+$fee_id = $_GET['fee_id'];
+$fee = $conn->query("SELECT sf.*, s.name, s.enrollment_id, s.course, s.contact, s.photo 
+    FROM student_fees sf 
+    JOIN students s ON sf.student_id=s.student_id 
+    WHERE sf.fee_id=$fee_id")->fetch_assoc();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Fee Receipt - <?php echo htmlspecialchars($student['name']); ?></title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-<style>
-  body { background: #f8f9fa; }
-  .receipt { max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  .receipt img { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; }
-  h2, h4 { margin: 0; }
-  table { width: 100%; margin-top: 15px; }
-  th, td { padding: 8px; text-align: left; }
-  .text-right { text-align: right; }
-  .total { font-weight: bold; font-size: 1.2em; }
-  @media print {
-    .no-print { display: none; }
-    body { background: #fff; }
-  }
-</style>
+    <title>Fee Receipt</title>
+    <style>
+        body { font-family: Arial; margin:30px; }
+        .receipt { border:1px solid #000; padding:20px; width:500px; margin:auto; }
+        .header { text-align:center; }
+        .photo { float:right; }
+        .actions { margin-top:20px; text-align:center; }
+        button { padding:8px 12px; }
+        a { margin-left:10px; padding:8px 12px; background:green; color:white; text-decoration:none; }
+    </style>
 </head>
 <body>
 <div class="receipt">
-  <div class="d-flex align-items-center mb-3">
+    <div class="header">
+        <h2>Fee Receipt</h2>
+    </div>
     <div>
-      <?php if(!empty($student['photo']) && file_exists("../uploads/".$student['photo'])): ?>
-        <img src="../uploads/<?php echo htmlspecialchars($student['photo']); ?>" alt="Photo">
-      <?php else: ?>
-        <img src="https://via.placeholder.com/80" alt="No Photo">
-      <?php endif; ?>
+        <img src="photo/<?php echo $fee['photo']; ?>" width="80" class="photo">
+        <p><b>Enrollment:</b> <?php echo $fee['enrollment_id']; ?></p>
+        <p><b>Name:</b> <?php echo $fee['name']; ?></p>
+        <p><b>Course:</b> <?php echo $fee['course']; ?></p>
+        <p><b>Month:</b> <?php echo $fee['month']; ?></p>
+        <p><b>Amount:</b> ₹<?php echo $fee['amount']; ?></p>
+        <p><b>Date:</b> <?php echo $fee['created_at']; ?></p>
     </div>
-    <div class="ms-3">
-      <h2><?php echo htmlspecialchars($student['name']); ?></h2>
-      <h4>Enrollment ID: <?php echo htmlspecialchars($student['student_id']); ?></h4>
-      <p>Course: <?php echo htmlspecialchars($student['course']); ?></p>
+    <div class="actions">
+        <button onclick="window.print()">Print</button>
+        <a href="https://wa.me/91<?php echo $fee['contact']; ?>?text=Hello%20<?php echo urlencode($fee['name']); ?>,%20Your%20fee%20of%20₹<?php echo $fee['amount']; ?>%20for%20<?php echo $fee['month']; ?>%20has%20been%20received.%20Thank%20you." target="_blank">Share on WhatsApp</a>
     </div>
-  </div>
-
-  <table class="table table-bordered">
-    <thead>
-      <tr class="table-dark">
-        <th>Type</th>
-        <th>Amount (₹)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach($display_fees as $type=>$amount): ?>
-      <tr>
-        <td><?php echo $type; ?></td>
-        <td><?php echo $amount>0?$amount:''; ?></td>
-      </tr>
-      <?php endforeach; ?>
-      <tr class="table-success total">
-        <td>Total Paid</td>
-        <td>₹<?php echo $total_paid>0?$total_paid:''; ?></td>
-      </tr>
-    </tbody>
-  </table>
-  
-  <div class="mt-3 no-print">
-    <button onclick="window.print()" class="btn btn-primary">Print Receipt</button>
-    <a href="admin_fee_main.php?student_id=<?php echo $student_id; ?>" class="btn btn-secondary">Back</a>
-  </div>
 </div>
 </body>
 </html>
