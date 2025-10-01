@@ -5,10 +5,7 @@ if (!$conn) die("Database connection not found");
 
 // GET me student_id
 $student_id = $_GET['student_id'] ?? '';
-
-if (!$student_id) {
-    die("No student selected.");
-}
+if (!$student_id) die("No student selected.");
 
 // Student info fetch
 $student = $conn->query("SELECT * FROM students WHERE student_id='$student_id'")->fetch_assoc();
@@ -18,6 +15,8 @@ $fee = $conn->query("SELECT * FROM student_fees WHERE student_id='$student_id'")
 
 // Handle form submission
 $msg = '';
+$redirect_receipt = false;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $total_fee = $_POST['total_fee'];
     $internal1 = $_POST['internal1'] ?? 0;
@@ -27,9 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
     $month_values = [];
+    $extra_filled = false;
+
     foreach($months as $m){
         $month_values[$m] = $_POST['month_'.$m] ?? 0;
+        if($month_values[$m] > 0) $extra_filled = true;
     }
+    if($internal1>0 || $internal2>0 || $semester1>0 || $semester2>0) $extra_filled = true;
 
     if ($fee) {
         // Update existing
@@ -61,6 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
         $stmt->execute();
         $msg = "Fee submitted successfully!";
+    }
+
+    // If any field other than total_fee filled → redirect to receipt
+    if($extra_filled){
+        header("Location: fee_receipt.php?student_id=".$student_id);
+        exit;
     }
 
     // Refresh fee record
@@ -107,7 +116,7 @@ foreach($months as $m): ?>
 <?php endforeach; ?>
 </div>
 
-<button type="submit" class="btn btn-success">Submit Fee</button>
+<button type="submit" class="btn btn-success">Submit & Generate Receipt</button>
 <a href="admin_fee_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
 </form>
 </div>
