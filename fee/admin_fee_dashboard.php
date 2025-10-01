@@ -39,7 +39,7 @@ $result = $conn->query("SELECT * FROM students ORDER BY enrollment_id ASC");
         $paid = $feeRow['paid'] ?? 0;
         ?>
         <tr>
-            <td><img src="uploads/<?php echo $row['photo']; ?>" width="60"></td>
+            <td><img src="../uploads/<?php echo $row['photo']; ?>" width="60"></td>
             <td><?php echo $row['enrollment_id']; ?></td>
             <td><?php echo $row['name']; ?></td>
             <td><?php echo $row['course']; ?></td>
