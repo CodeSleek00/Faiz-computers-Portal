@@ -5,8 +5,14 @@ if (!$conn) die("Database connection not found");
 $msg = $_GET['msg'] ?? '';
 
 // Fetch all students
-$students = $conn->query("SELECT s.*, sf.* FROM students s 
-LEFT JOIN student_fees sf ON s.student_id=sf.student_id ORDER BY s.student_id ASC");
+$students = $conn->query("
+    SELECT s.student_id, s.name, s.course, s.contact, sf.total_fee, sf.payment_date, sf.course_complete
+    FROM students s
+    LEFT JOIN student_fees sf ON s.student_id = sf.student_id
+    WHERE sf.course_complete = 0 OR sf.course_complete IS NULL
+    ORDER BY s.student_id DESC
+");
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
