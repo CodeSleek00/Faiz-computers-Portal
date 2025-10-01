@@ -1,44 +1,63 @@
 <?php
-include 'db_connect.php';
+include '../database_connection/db_connect.php';
+if (!$conn) die("Database connection not found");
 
-$fee_id = $_GET['fee_id'];
-$fee = $conn->query("SELECT sf.*, s.name, s.enrollment_id, s.course, s.contact, s.photo 
-    FROM student_fees sf 
-    JOIN students s ON sf.student_id=s.student_id 
-    WHERE sf.fee_id=$fee_id")->fetch_assoc();
+$student_id = $_GET['student_id'] ?? '';
+if(!$student_id) die("Student not selected");
+
+$student = $conn->query("SELECT * FROM students WHERE student_id=$student_id")->fetch_assoc();
+if(!$student) die("Student not found");
+
+$fee = $conn->query("SELECT * FROM student_fees WHERE student_id=$student_id ORDER BY created_at DESC LIMIT 1")->fetch_assoc();
+if(!$fee) die("No fee records found");
+
+$months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+$total_paid = $fee['admission_fee']+$fee['internal1']+$fee['internal2']+$fee['semester1']+$fee['semester2'];
+foreach($months as $m) $total_paid += $fee['month_'.$m];
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fee Receipt</title>
-    <style>
-        body { font-family: Arial; margin:30px; }
-        .receipt { border:1px solid #000; padding:20px; width:500px; margin:auto; }
-        .header { text-align:center; }
-        .photo { float:right; }
-        .actions { margin-top:20px; text-align:center; }
-        button { padding:8px 12px; }
-        a { margin-left:10px; padding:8px 12px; background:green; color:white; text-decoration:none; }
-    </style>
+<meta charset="UTF-8">
+<title>Fee Receipt - <?php echo $student['name']; ?></title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<style>
+body { background:#f0f2f5; }
+.card { max-width:800px; margin:40px auto; padding:20px; }
+img { width:80px; height:80px; object-fit:cover; border-radius:50%; float:right; }
+</style>
 </head>
 <body>
-<div class="receipt">
-    <div class="header">
-        <h2>Fee Receipt</h2>
-    </div>
-    <div>
-        <img src="photo/<?php echo $fee['photo']; ?>" width="80" class="photo">
-        <p><b>Enrollment:</b> <?php echo $fee['enrollment_id']; ?></p>
-        <p><b>Name:</b> <?php echo $fee['name']; ?></p>
-        <p><b>Course:</b> <?php echo $fee['course']; ?></p>
-        <p><b>Month:</b> <?php echo $fee['month']; ?></p>
-        <p><b>Amount:</b> ₹<?php echo $fee['amount']; ?></p>
-        <p><b>Date:</b> <?php echo $fee['created_at']; ?></p>
-    </div>
-    <div class="actions">
-        <button onclick="window.print()">Print</button>
-        <a href="https://wa.me/91<?php echo $fee['contact']; ?>?text=Hello%20<?php echo urlencode($fee['name']); ?>,%20Your%20fee%20of%20₹<?php echo $fee['amount']; ?>%20for%20<?php echo $fee['month']; ?>%20has%20been%20received.%20Thank%20you." target="_blank">Share on WhatsApp</a>
-    </div>
+<div class="card shadow-sm">
+<h3>Fee Receipt</h3>
+<img src="<?php echo (!empty($student['photo']) && file_exists("../uploads/".$student['photo'])) ? "../uploads/".$student['photo'] : 'https://via.placeholder.com/80'; ?>" alt="Student Photo">
+<p><strong>Student:</strong> <?php echo $student['name']; ?> (<?php echo $student['student_id']; ?>)<br>
+<strong>Course:</strong> <?php echo $student['course']; ?><br>
+<strong>Date:</strong> <?php echo $fee['payment_date']; ?></p>
+
+<table class="table table-bordered">
+<tr><th>Fee Type</th><th>Amount (₹)</th></tr>
+<tr><td>Total Fee</td><td><?php echo $fee['total_fee']; ?></td></tr>
+<tr><td>Admission Fee</td><td><?php echo $fee['admission_fee']; ?></td></tr>
+<tr><td>Internal 1</td><td><?php echo $fee['internal1']; ?></td></tr>
+<tr><td>Internal 2</td><td><?php echo $fee['internal2']; ?></td></tr>
+<tr><td>Semester 1</td><td><?php echo $fee['semester1']; ?></td></tr>
+<tr><td>Semester 2</td><td><?php echo $fee['semester2']; ?></td></tr>
+<tr><td colspan="2" class="table-active text-center">Monthly Fees</td></tr>
+<?php foreach($months as $m):
+if($fee['month_'.$m]>0): ?>
+<tr><td><?php echo ucfirst($m); ?></td><td><?php echo $fee['month_'.$m]; ?></td></tr>
+<?php endif; endforeach; ?>
+<tr class="table-success"><td><strong>Total Paid</strong></td><td><strong><?php echo $total_paid; ?></strong></td></tr>
+</table>
+
+<div class="d-flex gap-2">
+<button class="btn btn-primary" onclick="window.print()">Print</button>
+<a class="btn btn-success" href="https://wa.me/<?php echo $student['contact_number']; ?>?text=<?php echo urlencode('Hello '.$student['name'].', your fee receipt has been generated. Total Paid: ₹'.$total_paid); ?>" target="_blank">Share on WhatsApp</a>
+<a class="btn btn-secondary" href="admin_fee_dashboard.php">Back</a>
+</div>
+
 </div>
 </body>
 </html>
