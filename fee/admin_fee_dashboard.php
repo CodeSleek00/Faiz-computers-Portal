@@ -68,12 +68,16 @@ $result = $conn->query($sql);
             <td>₹<?php echo number_format($row['total_fee'], 2); ?></td>
             <td>₹<?php echo number_format($row['paid_fee'], 2); ?></td>
             <td class="text-center">
-              <a href="show_fee.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary">Show Fee</a>
-              <a href="complete_course.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger"
-                 onclick="return confirm('Are you sure you want to mark this course as completed and delete fee record?')">
-                 Complete Course
-              </a>
-            </td>
+  <a href="show_fee.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-primary">Show Fee</a>
+  <a href="complete_course.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger"
+     onclick="return confirm('Are you sure you want to mark this course as completed and delete fee record?')">
+     Complete Course
+  </a>
+  <a href="fee_submission.php?student_id=<?php echo $row['student_id']; ?>" class="btn btn-sm btn-success">
+    Submit Fee
+  </a>
+</td>
+
           </tr>
         <?php endwhile; ?>
       <?php else: ?>
