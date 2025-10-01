@@ -1,117 +1,115 @@
 <?php
-// admin_fee_main.php
-include '../database_connection/db_connect.php'; // mysqli connection
+include '../database_connection/db_connect.php';
 
-if (!$conn) {
-    die("Database connection not found");
+if (!$conn) die("Database connection not found");
+
+// GET me student_id
+$student_id = $_GET['student_id'] ?? '';
+
+if (!$student_id) {
+    die("No student selected.");
 }
 
-// Save total fee update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'], $_POST['total_fee'])) {
-    $student_id = (int) $_POST['student_id'];
-    $total_fee  = (float) $_POST['total_fee'];
+// Student info fetch
+$student = $conn->query("SELECT * FROM students WHERE student_id='$student_id'")->fetch_assoc();
 
-    // Update or insert fee record
-    $check = $conn->prepare("SELECT id FROM student_fees WHERE student_id = ?");
-    $check->bind_param("i", $student_id);
-    $check->execute();
-    $res = $check->get_result();
+// Existing fee record
+$fee = $conn->query("SELECT * FROM student_fees WHERE student_id='$student_id'")->fetch_assoc();
 
-    if ($res->num_rows > 0) {
-        $stmt = $conn->prepare("UPDATE student_fees SET total_fee = ? WHERE student_id = ?");
-        $stmt->bind_param("di", $total_fee, $student_id);
-        $stmt->execute();
-    } else {
-        $stmt = $conn->prepare("INSERT INTO student_fees (student_id, student_name, course, total_fee) 
-                                SELECT student_id, name, course, ? FROM students WHERE student_id = ?");
-        $stmt->bind_param("di", $total_fee, $student_id);
-        $stmt->execute();
+// Handle form submission
+$msg = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $total_fee = $_POST['total_fee'];
+    $internal1 = $_POST['internal1'] ?? 0;
+    $internal2 = $_POST['internal2'] ?? 0;
+    $semester1 = $_POST['semester1'] ?? 0;
+    $semester2 = $_POST['semester2'] ?? 0;
+
+    $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    $month_values = [];
+    foreach($months as $m){
+        $month_values[$m] = $_POST['month_'.$m] ?? 0;
     }
 
-    header("Location: admin_fee_main.php?msg=Total+fee+updated");
-    exit;
-}
+    if ($fee) {
+        // Update existing
+        $stmt = $conn->prepare("UPDATE student_fees SET total_fee=?, internal1=?, internal2=?, semester1=?, semester2=?,
+            month_jan=?, month_feb=?, month_mar=?, month_apr=?, month_may=?, month_jun=?, month_jul=?, month_aug=?,
+            month_sep=?, month_oct=?, month_nov=?, month_dec=?, last_updated=NOW() WHERE student_id=?");
 
-// Search filter
-$search = "";
-$where = "";
-if (!empty($_GET['q'])) {
-    $search = trim($_GET['q']);
-    $like = "%" . $conn->real_escape_string($search) . "%";
-    $where = "WHERE s.name LIKE '$like' OR s.course LIKE '$like' OR s.student_id LIKE '$like'";
-}
+        $stmt->bind_param("ddddddddddddddddds",
+            $total_fee, $internal1, $internal2, $semester1, $semester2,
+            $month_values['jan'],$month_values['feb'],$month_values['mar'],$month_values['apr'],
+            $month_values['may'],$month_values['jun'],$month_values['jul'],$month_values['aug'],
+            $month_values['sep'],$month_values['oct'],$month_values['nov'],$month_values['dec'],
+            $student_id
+        );
+        $stmt->execute();
+        $msg = "Fee updated successfully!";
+    } else {
+        // Insert new
+        $stmt = $conn->prepare("INSERT INTO student_fees (student_id, student_name, total_fee, internal1, internal2, semester1, semester2,
+            month_jan, month_feb, month_mar, month_apr, month_may, month_jun, month_jul, month_aug,
+            month_sep, month_oct, month_nov, month_dec)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-// Fetch students ordered by enrollment number (student_id)
-$query = "
-    SELECT s.student_id, s.name, s.course, 
-           IFNULL(sf.total_fee, 0) AS total_fee
-    FROM students s
-    LEFT JOIN student_fees sf ON s.student_id = sf.student_id
-    $where
-    ORDER BY s.student_id ASC
-";
-$result = $conn->query($query);
+        $stmt->bind_param("ssdddddddddddddddddd",
+            $student['student_id'], $student['name'], $total_fee, $internal1, $internal2, $semester1, $semester2,
+            $month_values['jan'],$month_values['feb'],$month_values['mar'],$month_values['apr'],
+            $month_values['may'],$month_values['jun'],$month_values['jul'],$month_values['aug'],
+            $month_values['sep'],$month_values['oct'],$month_values['nov'],$month_values['dec']
+        );
+        $stmt->execute();
+        $msg = "Fee submitted successfully!";
+    }
+
+    // Refresh fee record
+    $fee = $conn->query("SELECT * FROM student_fees WHERE student_id='$student_id'")->fetch_assoc();
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Set Student Fee - Admin</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        h2 { text-align: center; }
-        .msg { text-align: center; color: green; font-weight: bold; }
-        .search-box { text-align: center; margin-bottom: 20px; }
-        .search-box input { padding: 8px; width: 250px; }
-        .search-box button { padding: 8px 12px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        .search-box button:hover { background: #218838; }
-        table { border-collapse: collapse; width: 95%; margin: 20px auto; background: white; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        th { background: #333; color: white; }
-        form { margin: 0; }
-        input[type=number] { padding: 5px; width: 100px; }
-        button.save-btn { padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button.save-btn:hover { background: #0056b3; }
-    </style>
+<meta charset="UTF-8">
+<title>Submit Fee - <?php echo htmlspecialchars($student['name']); ?></title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<style> input[type=number]{ width:100px; } </style>
 </head>
-<body>
-    <h2>Set / Update Student Total Fee</h2>
+<body class="bg-light">
+<div class="container my-5">
+<h2>Submit Fee for <?php echo htmlspecialchars($student['name']); ?> (<?php echo $student['student_id']; ?>)</h2>
+<?php if($msg) echo "<div class='alert alert-success'>$msg</div>"; ?>
 
-    <?php if (isset($_GET['msg'])): ?>
-        <p class="msg"><?php echo htmlspecialchars($_GET['msg']); ?></p>
-    <?php endif; ?>
+<form method="post">
+<div class="mb-3">
+    <label>Total Fee</label>
+    <input type="number" step="0.01" name="total_fee" class="form-control" value="<?php echo $fee['total_fee']??0; ?>" required>
+</div>
 
-    <div class="search-box">
-        <form method="get" action="admin_fee_main.php">
-            <input type="text" name="q" placeholder="Search by Name, Enrollment No. or Course" value="<?php echo htmlspecialchars($search); ?>">
-            <button type="submit">Search</button>
-        </form>
+<h5>Exam Fees</h5>
+<div class="row mb-3">
+    <div class="col"><label>Internal 1</label><input type="number" step="0.01" name="internal1" class="form-control" value="<?php echo $fee['internal1']??0; ?>"></div>
+    <div class="col"><label>Internal 2</label><input type="number" step="0.01" name="internal2" class="form-control" value="<?php echo $fee['internal2']??0; ?>"></div>
+    <div class="col"><label>Semester 1</label><input type="number" step="0.01" name="semester1" class="form-control" value="<?php echo $fee['semester1']??0; ?>"></div>
+    <div class="col"><label>Semester 2</label><input type="number" step="0.01" name="semester2" class="form-control" value="<?php echo $fee['semester2']??0; ?>"></div>
+</div>
+
+<h5>Monthly Fees</h5>
+<div class="row mb-3">
+<?php 
+$months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+foreach($months as $m): ?>
+    <div class="col mb-2">
+        <label><?php echo ucfirst($m); ?></label>
+        <input type="number" step="0.01" name="month_<?php echo $m; ?>" class="form-control" value="<?php echo $fee['month_'.$m]??0; ?>">
     </div>
+<?php endforeach; ?>
+</div>
 
-    <table>
-        <tr>
-            <th>Enrollment No.</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Total Fee</th>
-            <th>Action</th>
-        </tr>
-        <?php while ($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['student_id']); ?></td>
-                <td><?php echo htmlspecialchars($row['name']); ?></td>
-                <td><?php echo htmlspecialchars($row['course']); ?></td>
-                <td>
-                    <form method="post" action="admin_fee_main.php">
-                        <input type="hidden" name="student_id" value="<?php echo $row['student_id']; ?>">
-                        <input type="number" step="0.01" name="total_fee" value="<?php echo $row['total_fee']; ?>">
-                </td>
-                <td>
-                        <button type="submit" class="save-btn">Save</button>
-                    </form>
-                </td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
+<button type="submit" class="btn btn-success">Submit Fee</button>
+<a href="admin_fee_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+</form>
+</div>
 </body>
 </html>
