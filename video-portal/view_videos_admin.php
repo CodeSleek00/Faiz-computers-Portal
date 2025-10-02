@@ -9,6 +9,8 @@ $videos = $conn->query("SELECT * FROM videos ORDER BY id DESC");
 <html>
 <head>
     <title>All Videos</title>
+     <link rel="icon" type="image/png" href="image.png">
+  <link rel="apple-touch-icon" href="image.png">
 </head>
 <body>
 <h2>All Videos & Assignments</h2>
