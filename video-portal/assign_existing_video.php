@@ -1,16 +1,59 @@
 <?php
+session_start();
 include 'db_connect.php';
 
-// Fetch all batches
-$batches = $conn->query("SELECT batch_id, batch_name FROM batches");
+// Get form data
+$video_file = $_POST['filename'] ?? '';
+$title = $_POST['title'] ?? '';
+$description = $_POST['description'] ?? '';
+$assigned_to = $_POST['assigned_to'] ?? 'all';
 
-// Fetch all students
-$students = $conn->query("SELECT student_id, name FROM students");
+// Handle optional thumbnail upload
+$thumbnail_path = null;
+if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] == 0){
+    $upload_dir = "../uploads/thumbnails/";
+    if(!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
-// Fetch files already in uploads/videos/
-$existing_videos = array_diff(scandir("../uploads/videos/"), array('.', '..'));
+    $thumbnail_name = time() . '_' . basename($_FILES['thumbnail']['name']);
+    $thumbnail_path = $upload_dir . $thumbnail_name;
+    move_uploaded_file($_FILES['thumbnail']['tmp_name'], $thumbnail_path);
+}
+
+// Function to assign video to a student
+function assign_video_to_student($conn, $video_file, $student_id, $title, $description, $thumbnail_path){
+    $stmt = $conn->prepare("INSERT INTO video_assignments (video_file, student_id, title, description, thumbnail) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sisss", $video_file, $student_id, $title, $description, $thumbnail_path);
+    $stmt->execute();
+}
+
+// Assign video based on selection
+if($assigned_to == 'all'){
+    // Assign to all students
+    $students = $conn->query("SELECT student_id FROM students");
+    while($s = $students->fetch_assoc()){
+        assign_video_to_student($conn, $video_file, $s['student_id'], $title, $description, $thumbnail_path);
+    }
+} elseif($assigned_to == 'batch'){
+    // Assign to a specific batch
+    $batch_id = $_POST['batch_id'] ?? 0;
+    if($batch_id){
+        $students = $conn->query("SELECT student_id FROM students WHERE batch_id = $batch_id");
+        while($s = $students->fetch_assoc()){
+            assign_video_to_student($conn, $video_file, $s['student_id'], $title, $description, $thumbnail_path);
+        }
+    }
+} elseif($assigned_to == 'student'){
+    // Assign to selected students (array from checkboxes)
+    if(isset($_POST['student_ids']) && is_array($_POST['student_ids'])){
+        foreach($_POST['student_ids'] as $student_id){
+            assign_video_to_student($conn, $video_file, $student_id, $title, $description, $thumbnail_path);
+        }
+    }
+}
+
+header("Location: admin_videos.php?success=1");
+exit;
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
