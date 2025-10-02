@@ -317,19 +317,42 @@ $existing_videos = array_diff(scandir("../uploads/videos/"), array('.', '..'));
                 </div>
 
                 <!-- Student Dropdown -->
-                <div id="student_select" class="form-group hidden">
-                    <label for="student_id">Select Student</label>
-                    <select name="student_id">
-                        <option value="">-- Select Student --</option>
-                        <?php while($s = $students->fetch_assoc()) { ?>
-                            <option value="<?= $s['student_id'] ?>"><?= $s['name'] ?> (ID: <?= $s['student_id'] ?>)</option>
-                        <?php } ?>
-                    </select>
-                </div>
+                <!-- Student Dropdown with Search -->
+<div id="student_select" class="form-group hidden">
+    <label for="student_search">Select Student</label>
+    <input type="text" id="student_search" placeholder="Search student by name or ID" onkeyup="filterStudents()">
+    <select name="student_id" id="student_dropdown" size="5">
+        <option value="">-- Select Student --</option>
+        <?php 
+        // Rewind the students result pointer to loop again
+        $students->data_seek(0);
+        while($s = $students->fetch_assoc()) { ?>
+            <option value="<?= $s['student_id'] ?>"><?= $s['name'] ?> (ID: <?= $s['student_id'] ?>)</option>
+        <?php } ?>
+    </select>
+</div>
+
 
                 <button type="submit">Assign Video</button>
             </form>
         </div>
     </div>
 </body>
+<script>
+    function filterStudents() {
+    const input = document.getElementById('student_search').value.toLowerCase();
+    const select = document.getElementById('student_dropdown');
+    const options = select.options;
+
+    for (let i = 0; i < options.length; i++) {
+        const text = options[i].text.toLowerCase();
+        if (text.includes(input) || options[i].value.includes(input)) {
+            options[i].style.display = '';
+        } else {
+            options[i].style.display = 'none';
+        }
+    }
+}
+
+</script>
 </html>
