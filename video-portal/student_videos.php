@@ -150,16 +150,25 @@ $videos = $conn->query($sql);
         
         .video-thumbnail {
             height: 160px;
-            background: var(--primary-light);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            padding: 15px;
         }
         
-        .video-thumbnail i {
-            font-size: 48px;
-            color: var(--primary);
+        .video-title-thumbnail {
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         
         .video-duration {
@@ -183,6 +192,11 @@ $videos = $conn->query($sql);
             color: var(--text-dark);
             font-size: 16px;
             line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 48px;
         }
         
         .video-meta {
@@ -273,7 +287,7 @@ $videos = $conn->query($sql);
                 <?php while($v = $videos->fetch_assoc()): ?>
                     <div class="video-card">
                         <div class="video-thumbnail">
-                            <i class="fas fa-play-circle"></i>
+                            <div class="video-title-thumbnail"><?= htmlspecialchars($v['title']) ?></div>
                             <span class="video-duration">25:30</span>
                         </div>
                         <div class="video-info">
