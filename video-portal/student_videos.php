@@ -288,14 +288,11 @@ $videos = $conn->query($sql);
                     <div class="video-card">
                         <div class="video-thumbnail">
                             <div class="video-title-thumbnail"><?= htmlspecialchars($v['title']) ?></div>
-                            <span class="video-duration">25:30</span>
+
                         </div>
                         <div class="video-info">
                             <h3 class="video-title"><?= htmlspecialchars($v['title']) ?></h3>
-                            <div class="video-meta">
-                                <span><i class="far fa-calendar-alt"></i> Added: 2 days ago</span>
-                                <span><i class="far fa-eye"></i> 145 views</span>
-                            </div>
+                        
                             <a href="play_video.php?id=<?= $v['id'] ?>" class="play-btn">
                                 <i class="fas fa-play"></i>
                                 Play Video
