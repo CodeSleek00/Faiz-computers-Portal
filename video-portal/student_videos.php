@@ -2,14 +2,15 @@
 session_start();
 include 'db_connect.php';
 
-// मान लो session से student_id और batch_id आ रहा है
-$student_id = $_SESSION['student_id'] ?? 1;
-$batch_id   = $_SESSION['batch_id'] ?? 1;
+// Session values
+$student_id = $_SESSION['student_id'] ?? 0;
+$batch_id   = $_SESSION['batch_id'] ?? 0;
 
-// Search filter
-$search = isset($_GET['search']) ? trim($_GET['search']) : "";
+if (!$student_id) {
+    die("Unauthorized access. Please login first.");
+}
 
-// Base query
+// Query directly (no prepared statement needed here)
 $query = "
     SELECT * FROM videos 
     WHERE assigned_to = 'all'
@@ -17,20 +18,9 @@ $query = "
        OR (assigned_to = 'student' AND student_id = '$student_id')
     ORDER BY id DESC
 ";
-if ($search !== "") {
-    $query .= " AND (title LIKE ? OR description LIKE ?)";
-}
-$stmt = $conn->prepare($query);
-
-if ($search !== "") {
-    $like = "%$search%";
-    $stmt->bind_param("iiss", $batch_id, $student_id, $like, $like);
-} else {
-    $stmt->bind_param("ii", $batch_id, $student_id);
-}
-$stmt->execute();
-$result = $stmt->get_result();
+$result = $conn->query($query);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
