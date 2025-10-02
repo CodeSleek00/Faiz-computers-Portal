@@ -426,10 +426,7 @@ $videos = $conn->query($sql);
 <body>
     <div class="container">
         <div class="header">
-            <a href="../test.php" class="back-btn">
-                <i class="fas fa-arrow-left"></i>
 
-            </a>
             <h1 class="page-title">My Learning Videos</h1>
         </div>
         
