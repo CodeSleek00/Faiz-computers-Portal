@@ -41,9 +41,17 @@ $videos = $conn->query($sql);
     <?php if ($videos->num_rows > 0): ?>
         <?php while($v = $videos->fetch_assoc()): ?>
             <div class="video-card">
-                <strong><?= htmlspecialchars($v['title']) ?></strong>
-                <a href="play_video.php?id=<?= $v['id'] ?>">Play Video</a>
-            </div>
+    <?php if($v['thumbnail'] && file_exists('../uploads/video_thumbnails/'.$v['thumbnail'])): ?>
+        <img src="../uploads/video_thumbnails/<?= $v['thumbnail'] ?>" alt="<?= htmlspecialchars($v['title']) ?>" style="width:100%; height:150px; object-fit:cover; border-radius:6px;">
+    <?php else: ?>
+        <div style="width:100%; height:150px; background:#ddd; display:flex; align-items:center; justify-content:center; border-radius:6px;">
+            No Thumbnail
+        </div>
+    <?php endif; ?>
+    <strong><?= htmlspecialchars($v['title']) ?></strong>
+    <a href="play_video.php?id=<?= $v['id'] ?>">Play Video</a>
+</div>
+
         <?php endwhile; ?>
     <?php else: ?>
         <p style="grid-column:1/-1; text-align:center;">No videos assigned yet.</p>
