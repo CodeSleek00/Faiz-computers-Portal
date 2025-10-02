@@ -4,7 +4,7 @@ include '../database_connection/db_connect.php';
 // Fetch all batches, students, and videos
 $batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
 $students = $conn->query("SELECT * FROM students ORDER BY name ASC");
-$videos = $conn->query("SELECT * FROM videos ORDER BY video_id DESC");
+$videos = $conn->query("SELECT * FROM videos ORDER BY id DESC");
 
 // Handle form submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
