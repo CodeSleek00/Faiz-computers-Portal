@@ -1,25 +1,32 @@
 <?php
 include '../database_connection/db_connect.php';
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $batch_name = $_POST['batch_name'];
     $timing = $_POST['timing'];
     $students = $_POST['students'];
 
+    // 1️⃣ Insert into batches table
     $stmt = $conn->prepare("INSERT INTO batches (batch_name, timing) VALUES (?, ?)");
     $stmt->bind_param("ss", $batch_name, $timing);
     $stmt->execute();
     $batch_id = $conn->insert_id;
 
+    // 2️⃣ Assign students to batch (student_batches table)
     foreach ($students as $student_id) {
         $stmt2 = $conn->prepare("INSERT INTO student_batches (student_id, batch_id) VALUES (?, ?)");
         $stmt2->bind_param("ii", $student_id, $batch_id);
         $stmt2->execute();
+
+        // 3️⃣ Update students table with batch_id
+        $stmt3 = $conn->prepare("UPDATE students SET batch_id = ? WHERE student_id = ?");
+        $stmt3->bind_param("ii", $batch_id, $student_id);
+        $stmt3->execute();
     }
 
     header("Location: view_batch.php");
     exit;
 }
+
 
 $students = $conn->query("SELECT * FROM students ORDER BY name ASC");
 $courses = $conn->query("SELECT DISTINCT course FROM students");
