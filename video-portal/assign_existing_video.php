@@ -316,13 +316,11 @@ $existing_videos = array_diff(scandir("../uploads/videos/"), array('.', '..'));
                     </select>
                 </div>
 
-                <!-- Student Dropdown -->
-                <!-- Student Dropdown with Search -->
+                <!-- Multi-Select Student Dropdown with Search -->
 <div id="student_select" class="form-group hidden">
-    <label for="student_search">Select Student</label>
-    <input type="text" id="student_search" placeholder="Search student by name or ID" onkeyup="filterStudents()">
-    <select name="student_id" id="student_dropdown" size="5">
-        <option value="">-- Select Student --</option>
+    <label for="student_search">Select Students</label>
+    <input type="text" id="student_search" placeholder="Search students by name or ID" onkeyup="filterStudents()">
+    <select name="student_ids[]" id="student_dropdown" multiple size="8">
         <?php 
         // Rewind the students result pointer to loop again
         $students->data_seek(0);
@@ -333,26 +331,24 @@ $existing_videos = array_diff(scandir("../uploads/videos/"), array('.', '..'));
 </div>
 
 
+
                 <button type="submit">Assign Video</button>
             </form>
         </div>
     </div>
 </body>
 <script>
-    function filterStudents() {
+   function filterStudents() {
     const input = document.getElementById('student_search').value.toLowerCase();
     const select = document.getElementById('student_dropdown');
     const options = select.options;
 
     for (let i = 0; i < options.length; i++) {
         const text = options[i].text.toLowerCase();
-        if (text.includes(input) || options[i].value.includes(input)) {
-            options[i].style.display = '';
-        } else {
-            options[i].style.display = 'none';
-        }
+        options[i].style.display = text.includes(input) ? '' : 'none';
     }
 }
+
 
 </script>
 </html>
