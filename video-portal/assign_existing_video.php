@@ -2,7 +2,7 @@
 include 'db_connect.php';
 
 // Fetch all batches
-$batches = $conn->query("SELECT batch_id, batch_name FROM students");
+$batches = $conn->query("SELECT batch_id, batch_name FROM batches");
 
 // Fetch all students
 $students = $conn->query("SELECT student_id, name FROM students");
