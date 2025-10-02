@@ -4,24 +4,24 @@ include '../database_connection/db_connect.php';
 // Fetch all batches, students, and videos
 $batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
 $students = $conn->query("SELECT * FROM students ORDER BY name ASC");
-$videos = $conn->query("SELECT * FROM videos ORDER BY id DESC");
+$videos = $conn->query("SELECT * FROM videos ORDER BY id DESC"); // video table has 'id'
 
-// Handle form submit
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $video_id = $_POST['video_id'];
+    $video_id = intval($_POST['video_id']);
     $targets = $_POST['targets'] ?? [];
 
-    // Purane assignments delete karo
+    // Delete old assignments
     $conn->query("DELETE FROM video_targets WHERE video_id = $video_id");
 
-    // Naye assignments insert karo
+    // Insert new assignments
     foreach ($targets as $t) {
         if (strpos($t, 'batch_') === 0) {
-            $bid = intval(str_replace('batch_', '', $t));
-            $conn->query("INSERT INTO video_targets (video_id, batch_id) VALUES ($video_id, $bid)");
+            $batch_id = intval(str_replace('batch_', '', $t));
+            $conn->query("INSERT INTO video_targets (video_id, batch_id) VALUES ($video_id, $batch_id)");
         } elseif (strpos($t, 'student_') === 0) {
-            $sid = intval(str_replace('student_', '', $t));
-            $conn->query("INSERT INTO video_targets (video_id, student_id) VALUES ($video_id, $sid)");
+            $student_id = intval(str_replace('student_', '', $t));
+            $conn->query("INSERT INTO video_targets (video_id, student_id) VALUES ($video_id, $student_id)");
         }
     }
 
@@ -63,26 +63,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container">
     <h2>Reassign Video</h2>
     <form method="POST">
+        <!-- Select Video -->
         <div class="form-group">
             <label for="video_id">Select Video:</label>
             <select id="video_id" name="video_id" required>
                 <?php while ($v = $videos->fetch_assoc()) { ?>
-                    <option value="<?= $v['video_id'] ?>"><?= $v['title'] ?> (ID: <?= $v['video_id'] ?>)</option>
+                    <option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['title']) ?> (ID: <?= $v['id'] ?>)</option>
                 <?php } ?>
             </select>
         </div>
 
+        <!-- Assign to Batches / Students -->
         <div class="form-group">
-            <label for="targets">Assign To:</label>
+            <label for="targets">Assign To (Batches / Students):</label>
             <select id="targets" name="targets[]" multiple required>
                 <optgroup label="Batches">
                     <?php while ($b = $batches->fetch_assoc()) { ?>
-                        <option value="batch_<?= $b['batch_id'] ?>">Batch: <?= $b['batch_name'] ?></option>
+                        <option value="batch_<?= $b['batch_id'] ?>">Batch: <?= htmlspecialchars($b['batch_name']) ?></option>
                     <?php } ?>
                 </optgroup>
                 <optgroup label="Students">
                     <?php while ($s = $students->fetch_assoc()) { ?>
-                        <option value="student_<?= $s['student_id'] ?>">Student: <?= $s['name'] ?> (<?= $s['enrollment_id'] ?>)</option>
+                        <option value="student_<?= $s['student_id'] ?>">Student: <?= htmlspecialchars($s['name']) ?> (<?= htmlspecialchars($s['enrollment_id']) ?>)</option>
                     <?php } ?>
                 </optgroup>
             </select>
