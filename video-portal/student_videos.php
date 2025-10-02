@@ -23,8 +23,10 @@ $videos = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Videos - Student Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -52,18 +54,22 @@ $videos = $conn->query($sql);
             background: var(--gray-light);
             color: var(--text-dark);
             line-height: 1.6;
+            min-height: 100vh;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
+            width: 100%;
         }
         
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 1px solid var(--border);
         }
@@ -81,6 +87,8 @@ $videos = $conn->query($sql);
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
+            font-size: 14px;
+            flex-shrink: 0;
         }
         
         .back-btn:hover {
@@ -89,22 +97,24 @@ $videos = $conn->query($sql);
         }
         
         .page-title {
-            margin-left: 20px;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--text-dark);
+            flex: 1;
+            min-width: 200px;
         }
         
         .welcome-section {
             background: var(--white);
-            padding: 20px;
+            padding: 18px;
             border-radius: 12px;
             box-shadow: var(--shadow);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            width: 100%;
         }
         
         .welcome-text {
-            font-size: 18px;
+            font-size: 16px;
             color: var(--text-dark);
             font-weight: 500;
         }
@@ -115,9 +125,9 @@ $videos = $conn->query($sql);
         }
         
         .section-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             color: var(--text-dark);
             display: flex;
             align-items: center;
@@ -130,8 +140,9 @@ $videos = $conn->query($sql);
         
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+            width: 100%;
         }
         
         .video-card {
@@ -141,6 +152,9 @@ $videos = $conn->query($sql);
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
             border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         
         .video-card:hover {
@@ -149,19 +163,20 @@ $videos = $conn->query($sql);
         }
         
         .video-thumbnail {
-            height: 160px;
+            height: 150px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             padding: 15px;
+            flex-shrink: 0;
         }
         
         .video-title-thumbnail {
             color: white;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 16px;
             text-align: center;
             line-height: 1.4;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -173,38 +188,43 @@ $videos = $conn->query($sql);
         
         .video-duration {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
+            bottom: 8px;
+            right: 8px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 3px 8px;
+            padding: 3px 6px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
         }
         
         .video-info {
-            padding: 16px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
         
         .video-title {
             font-weight: 600;
             margin-bottom: 10px;
             color: var(--text-dark);
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            height: 48px;
+            min-height: 42px;
         }
         
         .video-meta {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-light);
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 5px;
         }
         
         .play-btn {
@@ -220,6 +240,8 @@ $videos = $conn->query($sql);
             font-weight: 500;
             transition: all 0.3s ease;
             width: 100%;
+            font-size: 14px;
+            margin-top: auto;
         }
         
         .play-btn:hover {
@@ -233,6 +255,7 @@ $videos = $conn->query($sql);
             background: var(--white);
             border-radius: 12px;
             box-shadow: var(--shadow);
+            width: 100%;
         }
         
         .no-videos i {
@@ -246,19 +269,156 @@ $videos = $conn->query($sql);
             color: var(--text-light);
         }
         
+        /* Mobile-specific styles */
         @media (max-width: 768px) {
-            .video-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            .container {
+                padding: 12px;
             }
             
             .header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 15px;
+                gap: 12px;
+                margin-bottom: 20px;
             }
             
             .page-title {
-                margin-left: 0;
+                font-size: 20px;
+                min-width: unset;
+                width: 100%;
+            }
+            
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .welcome-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .welcome-text {
+                font-size: 15px;
+            }
+            
+            .section-title {
+                font-size: 17px;
+                margin-bottom: 15px;
+            }
+            
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+                gap: 15px;
+            }
+            
+            .video-thumbnail {
+                height: 140px;
+                padding: 12px;
+            }
+            
+            .video-title-thumbnail {
+                font-size: 15px;
+            }
+            
+            .video-info {
+                padding: 12px;
+            }
+            
+            .video-title {
+                font-size: 14px;
+                min-height: 40px;
+            }
+            
+            .video-meta {
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                margin-bottom: 15px;
+            }
+            
+            .page-title {
+                font-size: 18px;
+            }
+            
+            .welcome-section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .welcome-text {
+                font-size: 14px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .video-thumbnail {
+                height: 130px;
+            }
+            
+            .video-title-thumbnail {
+                font-size: 14px;
+            }
+            
+            .no-videos {
+                padding: 30px 15px;
+            }
+            
+            .no-videos i {
+                font-size: 40px;
+            }
+            
+            .no-videos p {
+                font-size: 16px;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media (max-width: 360px) {
+            .video-thumbnail {
+                height: 120px;
+            }
+            
+            .video-title-thumbnail {
+                font-size: 13px;
+            }
+            
+            .video-info {
+                padding: 10px;
+            }
+            
+            .video-title {
+                font-size: 13px;
+            }
+            
+            .video-meta {
+                font-size: 10px;
+            }
+            
+            .play-btn {
+                font-size: 13px;
+                padding: 8px;
+            }
+        }
+        
+        /* Large screens */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1300px;
+            }
+            
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 20px;
             }
         }
     </style>
@@ -288,11 +448,14 @@ $videos = $conn->query($sql);
                     <div class="video-card">
                         <div class="video-thumbnail">
                             <div class="video-title-thumbnail"><?= htmlspecialchars($v['title']) ?></div>
-
+                            <span class="video-duration">25:30</span>
                         </div>
                         <div class="video-info">
                             <h3 class="video-title"><?= htmlspecialchars($v['title']) ?></h3>
-                        
+                            <div class="video-meta">
+                                <span><i class="far fa-calendar-alt"></i> Added: 2 days ago</span>
+                                <span><i class="far fa-eye"></i> 145 views</span>
+                            </div>
                             <a href="play_video.php?id=<?= $v['id'] ?>" class="play-btn">
                                 <i class="fas fa-play"></i>
                                 Play Video
