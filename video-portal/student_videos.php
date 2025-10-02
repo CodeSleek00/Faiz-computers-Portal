@@ -433,9 +433,6 @@ $videos = $conn->query($sql);
             <h1 class="page-title">My Learning Videos</h1>
         </div>
         
-        <div class="welcome-section">
-            <p class="welcome-text">Welcome to your video library, <span class="highlight">Student</span>. Here you can access all your assigned learning materials.</p>
-        </div>
         
         <h2 class="section-title">
             <i class="fas fa-play-circle"></i>
