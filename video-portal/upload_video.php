@@ -1,57 +1,48 @@
 <?php
-include 'db_connect.php';
+include '../database_connection/db_connect.php';
 
-// Get form data
-$title = $_POST['title'] ?? '';
-$description = $_POST['description'] ?? '';
-$assigned_to = $_POST['assigned_to'] ?? '';
-$batch_id = $_POST['batch_id'] ?? null;
-$student_id = $_POST['student_id'] ?? null;
+// Fetch all batches and students
+$batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
+$students = $conn->query("SELECT * FROM students ORDER BY name ASC");
 
-// Check if video is uploaded
-if(!isset($_FILES['video']) || $_FILES['video']['error'] != 0){
-    http_response_code(400);
-    echo "Video upload failed!";
-    exit;
-}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = $_POST['title'];
+    $file = $_FILES['video_file'];
 
-// Video upload
-$videoFile = $_FILES['video'];
-$videoName = time().'_'.basename($videoFile['name']);
-$videoPath = "../uploads/videos/".$videoName;
+    if ($file['error'] == 0) {
+        $filename = time() . '_' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], '../uploads/videos/' . $filename);
 
-// Ensure directory exists
-if(!is_dir("../uploads/videos/")){
-    mkdir("../uploads/videos/", 0777, true);
-}
+        // Save video to DB
+        $stmt = $conn->prepare("INSERT INTO videos (title, file_name) VALUES (?, ?)");
+        $stmt->bind_param("ss", $title, $filename);
+        $stmt->execute();
+        $video_id = $stmt->insert_id;
 
-if(!move_uploaded_file($videoFile['tmp_name'], $videoPath)){
-    http_response_code(500);
-    echo "Video upload failed!";
-    exit;
-}
-
-// Thumbnail upload (optional)
-$thumbName = null;
-if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] == 0){
-    $thumbFile = $_FILES['thumbnail'];
-    $thumbName = time().'_'.basename($thumbFile['name']);
-    $thumbPath = "../uploads/thumbnails/".$thumbName;
-
-    if(!is_dir("../uploads/thumbnails/")){
-        mkdir("../uploads/thumbnails/", 0777, true);
+        header("Location: view_videos_admin.php?msg=uploaded");
+        exit;
     }
-
-    move_uploaded_file($thumbFile['tmp_name'], $thumbPath);
-}
-
-// Insert into database
-$stmt = $conn->prepare("INSERT INTO videos (title, description, filename, thumbnail, assigned_to, batch_id, student_id, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
-$stmt->bind_param("sssssis", $title, $description, $videoName, $thumbName, $assigned_to, $batch_id, $student_id);
-if($stmt->execute()){
-    echo "Upload successful";
-} else {
-    http_response_code(500);
-    echo "Database insert failed!";
 }
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Video</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background:#f4f4f4; }
+        .container { max-width: 600px; margin:auto; background:white; padding:20px; border-radius:8px; }
+        input, button { width:100%; padding:10px; margin:5px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+<h2>Upload Video</h2>
+<form method="POST" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="Video Title" required>
+    <input type="file" name="video_file" accept="video/*" required>
+    <button type="submit">Upload</button>
+</form>
+</div>
+</body>
+</html>
