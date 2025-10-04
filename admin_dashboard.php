@@ -637,7 +637,7 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
                             <h4>Fee Management</h4>
                         </div>
                         <div class="action-links">
-                            <a href="fee/admin_fee_dashboard.php" class="action-link">Fee Submissions</a>
+                            <a href="fee/.php" class="action-link">Fee Submissions</a>
         
                         </div>
                     </div>
