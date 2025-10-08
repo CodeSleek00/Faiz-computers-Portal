@@ -192,7 +192,7 @@ $assigned = $conn->query("
 // Auto-refresh page every 2 seconds (2000 milliseconds)
 setInterval(() => {
     location.reload();
-}, 2000);
+}, 1000);
 </script>
 
 </body>
