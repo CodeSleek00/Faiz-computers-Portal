@@ -276,16 +276,7 @@ $total = count($question_array);
         <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
-<script>
-    window.onload = () => {
-    if (!confirm("Are you ready to start your exam? Switching or closing tab will auto-submit.")) {
-        window.location.href = "../../index.php";
-    } else {
-        showQuestion(0);
-        startTimer();
-    }
-}
-</script>
+
 <script>
 // ================== 1. Prevent Switching / Tab Change ==================
 window.addEventListener('blur', () => {
