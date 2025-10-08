@@ -276,5 +276,55 @@ $total = count($question_array);
         <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
+<script>
+// ====== 1. Prevent Back Navigation Completely ======
+(function () {
+    // Disable back navigation by pushing a new history state
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        // Redirect to homepage (or logout page)
+        alert("You cannot go back during the exam!");
+        location.replace("../../index.php");
+    };
+})();
+
+// ====== 2. Disable Right Click & Reload Shortcuts (optional but helpful) ======
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.onkeydown = function (e) {
+    // F5, Ctrl+R, Alt+Left, Backspace (outside form)
+    if (e.keyCode === 116 || e.keyCode === 82 && e.ctrlKey || e.altKey && e.keyCode === 37) {
+        e.preventDefault();
+        alert("Page reload or navigation disabled during exam!");
+    }
+};
+
+// ====== 3. Prevent Tab Switching ======
+window.addEventListener('blur', () => {
+    alert("❌ You switched window/tab! Exam will be auto-submitted.");
+    document.getElementById("examForm").submit();
+});
+
+// ====== 4. Auto Submit When Tab Closed or Reloaded ======
+window.addEventListener("beforeunload", function (e) {
+    navigator.sendBeacon("auto_submit.php", new FormData(document.getElementById("examForm")));
+});
+
+// ====== 5. Fullscreen Lock ======
+document.addEventListener("DOMContentLoaded", () => {
+    document.documentElement.requestFullscreen().catch(err => {
+        console.warn("Fullscreen failed:", err);
+    });
+});
+
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+        alert("⚠️ You exited fullscreen! Exam will be submitted.");
+        document.getElementById("examForm").submit();
+    }
+});
+
+
+</script>
+
 </body>
 </html>

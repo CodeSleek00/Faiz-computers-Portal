@@ -188,6 +188,12 @@ $assigned = $conn->query("
         <p>No exams have been assigned yet.</p>
     <?php endif; ?>
 </div>
+<script>
+// Auto-refresh page every 2 seconds (2000 milliseconds)
+setInterval(() => {
+    location.reload();
+}, 1000);
+</script>
 
 </body>
 </html>
