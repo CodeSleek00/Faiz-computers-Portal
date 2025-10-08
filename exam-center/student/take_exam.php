@@ -323,15 +323,7 @@ document.addEventListener("fullscreenchange", () => {
     }
 });
 
-// ====== 6. Start Confirmation ======
-window.onload = () => {
-    if (!confirm("Are you ready to start your exam? Switching, closing or going back will submit automatically.")) {
-        window.location.href = "../../index.php";
-    } else {
-        showQuestion(0);
-        startTimer();
-    }
-};
+
 </script>
 
 </body>
