@@ -276,6 +276,51 @@ $total = count($question_array);
         <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
+<script>
+    window.onload = () => {
+    if (!confirm("Are you ready to start your exam? Switching or closing tab will auto-submit.")) {
+        window.location.href = "../../index.php";
+    } else {
+        showQuestion(0);
+        startTimer();
+    }
+}
+</script>
+<script>
+// ================== 1. Prevent Switching / Tab Change ==================
+window.addEventListener('blur', () => {
+    alert("❌ Window switched! Exam will be submitted automatically.");
+    document.getElementById("examForm").submit();
+});
 
+// ================== 2. Prevent Back Button ==================
+window.history.pushState(null, "", window.location.href);
+window.onpopstate = function () {
+    window.history.pushState(null, "", window.location.href);
+    window.location.href = "../../index.php"; // redirect to home
+};
+
+// ================== 3. Auto Submit on Tab Close or Refresh ==================
+window.addEventListener("beforeunload", function (e) {
+    // Submit in background silently using Beacon
+    navigator.sendBeacon("auto_submit.php", new FormData(document.getElementById("examForm")));
+});
+
+// ================== 4. Lock Fullscreen Mode ==================
+document.addEventListener("DOMContentLoaded", () => {
+    // Request fullscreen automatically when exam starts
+    document.documentElement.requestFullscreen().catch(err => {
+        console.warn("Fullscreen not allowed:", err);
+    });
+});
+
+// Detect when student exits fullscreen
+document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+        alert("⚠️ You exited fullscreen! Exam will be submitted.");
+        document.getElementById("examForm").submit();
+    }
+});
+</script>
 </body>
 </html>
