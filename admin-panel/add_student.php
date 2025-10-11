@@ -166,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="card">
-        <h2>Add New Student</h2>
+        <h2>Add New Students</h2>
         <form action="add_student.php" method="POST" enctype="multipart/form-data">
             <div>
                 <label for="photo">Photo</label>
