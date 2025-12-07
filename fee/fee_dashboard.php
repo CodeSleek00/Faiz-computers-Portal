@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "../config.php"; // adjust path if needed
+include "config.php"; // adjust path if needed
 ?>
 
 <!DOCTYPE html>
