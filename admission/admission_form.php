@@ -66,12 +66,6 @@ input, select, textarea{
     <input type="file" name="photo" required>
 
     <input type="text" name="full_name" placeholder="Full Name" required>
-    
-    <!-- New Fields -->
-    <input type="text" name="father_name" placeholder="Father's Name" required>
-    <input type="text" name="mother_name" placeholder="Mother's Name" required>
-    <input type="text" name="caste" placeholder="Caste" required>
-    
     <input type="text" name="aadhar_number" placeholder="Aadhar Number" required>
     <input type="text" name="aapar_id" placeholder="Aapar ID">
 
@@ -193,25 +187,16 @@ function prevStep() {
     current--;
     showStep();
 }
+
 function submitForm() {
     let method = document.getElementById("payment_method").value;
 
-    if (method === "") {
-        alert("Please select payment method");
-        return;
-    }
-
     if (method === "razorpay") {
         startRazorpay();
-    }
-
-    if (method === "cash") {
-        if (confirm("Are you sure you want to continue with Cash Payment?")) {
-            document.getElementById("admissionForm").submit();
-        }
+    } else {
+        document.getElementById("admissionForm").submit();
     }
 }
-
 
 function startRazorpay() {
     fetch("create_razorpay_order.php", { method: "POST" })

@@ -74,10 +74,10 @@ table td, table th {
 
 <div class="section-title">Education Details</div>
 <table>
-<tr><th>10th School</th><td><?= $data['tenth_school'] ?></td>
+<tr>
 <th>10th Board</th><td><?= $data['tenth_board'] ?></td>
 <th>10th Percentage</th><td><?= $data['tenth_percentage'] ?></td>
-<th>10th Year</th><td><?= $data['tenth_year'] ?></td></tr>
+</tr>
 
 <tr><th>12th School</th><td><?= $data['twelfth_school'] ?></td>
 <th>12th Board</th><td><?= $data['twelfth_board'] ?></td>
