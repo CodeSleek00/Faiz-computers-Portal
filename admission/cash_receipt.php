@@ -9,55 +9,15 @@ if (!isset($_SESSION['admission_id'])) {
 
 $id = $_SESSION['admission_id'];
 
-// FETCH ADMISSION DATA
+// FETCH STUDENT DATA
 $result = mysqli_query($conn, "SELECT * FROM admissions WHERE id='$id'");
 $data = mysqli_fetch_assoc($result);
 
-// UPDATE PAYMENT STATUS
+// MARK PAYMENT AS PAID
 mysqli_query($conn, "UPDATE admissions SET payment_status='Paid (Cash)' WHERE id='$id'");
 
 // AUTO ADMISSION NUMBER
 $admission_no = "AD-" . date("Y") . "-" . str_pad($id, 4, "0", STR_PAD_LEFT);
-
-// ---------- CREATE STUDENT ACCOUNT (students_2026) ----------
-
-// MONTH SHORT NAME (JAN, FEB...)
-$month = strtoupper(date("M"));
-
-// YEAR SHORT
-$year_short = "26"; // FIXED FOR 2026
-
-// GET LAST ENROLLMENT ID
-$check = mysqli_query($conn, "SELECT enrollment_id FROM students_2026 ORDER BY id DESC LIMIT 1");
-
-if (mysqli_num_rows($check) > 0) {
-    $row = mysqli_fetch_assoc($check);
-
-    // extract 4-digit number --> FAIZ-JAN26-1001
-    $last_no = (int)substr($row['enrollment_id'], -4);
-    $new_no = $last_no + 1;
-
-} else {
-    $new_no = 1001; // starting number
-}
-
-// NEW ENROLLMENT ID
-$enrollment_id = "FAIZ-" . $month . $year_short . "-" . $new_no;
-
-
-mysqli_query($conn, "
-INSERT INTO students_2026 (enrollment_id, name, photo, phone, address, course, password)
-VALUES (
-    '$enrollment_id',
-    '{$data['full_name']}',
-    '{$data['photo']}',
-    '{$data['phone']}',
-    '{$data['address']}',
-    '{$data['course_name']}',
-    '{$data['phone']}'
-)
-");
-
 ?>
 
 <!DOCTYPE html>
@@ -65,48 +25,27 @@ VALUES (
 <head>
 <title>Admission Receipt</title>
 <style>
-body {
-    background:#f4f4f4;
-    font-family:Arial;
-    padding:40px;
-}
+body { background:#f4f4f4; font-family:Arial; padding:40px; }
 .container {
-    width:70%;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border: 2px solid black;
-    border-radius:8px;
+    width:70%; margin:auto; background:#fff; padding:25px;
+    border:2px solid black; border-radius:5px;
 }
 .section-title {
-    font-size:20px;
-    font-weight:bold;
-    text-decoration: underline;
-    margin-top:30px;
-    margin-bottom:10px;
+    font-size:20px; margin-top:30px; margin-bottom:10px;
+    font-weight:bold; text-decoration: underline;
 }
-table {
-    width:100%;
-    border-collapse: collapse;
+table{
+    width:100%; border-collapse: collapse;
 }
-table th, table td {
-    border:1px solid black;
-    padding:10px;
-    font-size:16px;
+table td, table th {
+    border:1px solid #000; padding:10px; font-size:16px;
 }
 .photo {
-    width:140px;
-    height:140px;
-    border:1px solid black;
+    width:140px; height:140px; border:1px solid #000;
 }
 .print-btn {
-    padding:12px 20px;
-    font-size:18px;
-    background:blue;
-    color:white;
-    border:none;
-    cursor:pointer;
-    margin-top:20px;
+    padding:12px 25px; background:blue; color:white;
+    font-size:18px; border:none; cursor:pointer; margin:20px 0;
 }
 </style>
 </head>
@@ -115,16 +54,12 @@ table th, table td {
 <div class="container">
 
 <div style="text-align:center;">
-    <h2><b>STUDENT ADMISSION RECEIPT</b></h2>
-    <p><b>Admission No:</b> <?= $admission_no ?></p>
-    <p><b>Enrollment ID:</b> <?= $enrollment_id ?></p>
+    <h2>STUDENT ADMISSION RECEIPT</h2>
+    <p><b>Admission No: <?= $admission_no ?></b></p>
 </div>
 
-<center>
-    <img src="uploads/<?= $data['photo'] ?>" class="photo">
-</center>
+<center><img src="uploads/<?= $data['photo'] ?>" class="photo"></center>
 
-<!-- PERSONAL DETAILS -->
 <div class="section-title">Personal Details</div>
 <table>
 <tr><th>Full Name</th><td><?= $data['full_name'] ?></td></tr>
@@ -137,7 +72,6 @@ table th, table td {
 <tr><th>Permanent Address</th><td><?= $data['permanent_address'] ?></td></tr>
 </table>
 
-<!-- EDUCATION DETAILS -->
 <div class="section-title">Education Details</div>
 <table>
 <tr><th>10th School</th><td><?= $data['tenth_school'] ?></td></tr>
@@ -156,7 +90,6 @@ table th, table td {
 <tr><th>Degree Year</th><td><?= $data['degree_year'] ?></td></tr>
 </table>
 
-<!-- COURSE DETAILS -->
 <div class="section-title">Course & Fee Details</div>
 <table>
 <tr><th>Course Name</th><td><?= $data['course_name'] ?></td></tr>
@@ -168,10 +101,9 @@ table th, table td {
 <tr><th>Total Amount Paid</th><td><b>₹<?= $data['reg_fee'] ?></b></td></tr>
 </table>
 
-<!-- PAYMENT -->
-<div class="section-title">Payment Status</div>
+<div class="section-title">Payment</div>
 <table>
-<tr><th>Payment Method</th><td>CASH</td></tr>
+<tr><th>Method</th><td>CASH</td></tr>
 <tr><th>Status</th><td><b style="color:green;">PAID</b></td></tr>
 <tr><th>Date</th><td><?= date("d-m-Y"); ?></td></tr>
 </table>
