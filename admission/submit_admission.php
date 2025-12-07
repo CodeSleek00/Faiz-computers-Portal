@@ -2,13 +2,13 @@
 session_start();
 include "config.php";
 
-// CREATE UPLOAD FOLDER IF NOT EXISTS
+// CREATE UPLOAD FOLDER
 if (!is_dir("uploads")) {
     mkdir("uploads");
 }
 
 // PHOTO UPLOAD
-$target_dir = "uploads/";
+$target_dir = "../uploads/";
 $photo_name = time() . "_" . basename($_FILES["photo"]["name"]);
 $target_file = $target_dir . $photo_name;
 move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
@@ -16,7 +16,7 @@ move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
 // COLLECT FORM DATA
 $data = $_POST;
 
-// INSERT INTO DATABASE
+// INSERT DATA
 $sql = "INSERT INTO admissions
 (photo, full_name, aadhar_number, aapar_id, gender, phone, dob, address, permanent_address, religion, email, parents_mobile,
 tenth_school, tenth_board, tenth_percentage, tenth_year,
@@ -39,24 +39,17 @@ VALUES
 
 if (mysqli_query($conn, $sql)) {
 
-    // LAST ID → Admission Number
     $admission_id = mysqli_insert_id($conn);
 
     $_SESSION['admission_id'] = $admission_id;
     $_SESSION['student_name'] = $data['full_name'];
-    $_SESSION['amount'] = $data['reg_fee']; // payment amount
 
-    // PAYMENT METHOD CHECK
-    if ($data['payment_method'] == "razorpay") {
-
-        header("Location: razorpay_payment.php");
-        exit();
-
-    } else if ($data['payment_method'] == "cash") {
-
+    if ($data['payment_method'] == "cash") {
         header("Location: cash_success.php");
         exit();
-
+    } else {
+        header("Location: razorpay_payment.php");
+        exit();
     }
 
 } else {

@@ -187,16 +187,25 @@ function prevStep() {
     current--;
     showStep();
 }
-
 function submitForm() {
     let method = document.getElementById("payment_method").value;
 
+    if (method === "") {
+        alert("Please select payment method");
+        return;
+    }
+
     if (method === "razorpay") {
         startRazorpay();
-    } else {
-        document.getElementById("admissionForm").submit();
+    }
+
+    if (method === "cash") {
+        if (confirm("Are you sure you want to continue with Cash Payment?")) {
+            document.getElementById("admissionForm").submit();
+        }
     }
 }
+
 
 function startRazorpay() {
     fetch("create_razorpay_order.php", { method: "POST" })
