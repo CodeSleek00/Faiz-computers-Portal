@@ -58,7 +58,7 @@ table td, table th {
     <p><b>Admission No: <?= $admission_no ?></b></p>
 </div>
 
-<center><img src="uploads/<?= $data['photo'] ?>" class="photo"></center>
+<center><img src="../uploads/<?= $data['photo'] ?>" class="photo"></center>
 
 <div class="section-title">Personal Details</div>
 <table>
