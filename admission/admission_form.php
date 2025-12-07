@@ -35,7 +35,14 @@ button{
     font-size: 18px;
     font-weight: bold;
 }
+input, select, textarea{
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
+}
 </style>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 </head>
 <body>
@@ -45,7 +52,11 @@ button{
 <h2>Student Admission Form</h2>
 <div class="progress" id="progressText">Step 1 of 6</div>
 
-<form action="submit_admission.php" method="POST" enctype="multipart/form-data">
+<form id="admissionForm" action="submit_admission.php" method="POST" enctype="multipart/form-data">
+
+<!-- HIDDEN INPUT FOR PAYMENT -->
+<input type="hidden" name="razorpay_payment_id">
+<input type="hidden" name="razorpay_order_id">
 
 <!-- STEP 1 PERSONAL DETAILS -->
 <div class="step active">
@@ -57,7 +68,7 @@ button{
     <input type="text" name="full_name" placeholder="Full Name" required>
     <input type="text" name="aadhar_number" placeholder="Aadhar Number" required>
     <input type="text" name="aapar_id" placeholder="Aapar ID">
-    
+
     <select name="gender" required>
         <option value="">Select Gender</option>
         <option>Male</option>
@@ -135,15 +146,14 @@ button{
 <div class="step">
     <h3>Payment Method</h3>
 
-    <label>Select Payment Method</label>
-    <select name="payment_method" required>
+    <select name="payment_method" id="payment_method" required>
         <option value="">Choose</option>
         <option value="razorpay">Pay Online (Razorpay)</option>
         <option value="cash">Cash</option>
     </select>
 
     <button type="button" class="prev-btn" onclick="prevStep()">Back</button>
-    <button type="submit" class="submit-btn">Proceed to Payment</button>
+    <button type="button" class="submit-btn" onclick="submitForm()">Proceed to Payment</button>
 </div>
 
 </form>
@@ -162,17 +172,51 @@ function showStep() {
 }
 
 function nextStep() {
-    if (current < steps.length - 1) {
-        current++;
-        showStep();
+    let requiredFields = steps[current].querySelectorAll("[required]");
+    for (let field of requiredFields) {
+        if (!field.value.trim()) {
+            alert("Please fill all required fields!");
+            return;
+        }
     }
+    current++;
+    showStep();
 }
 
 function prevStep() {
-    if (current > 0) {
-        current--;
-        showStep();
+    current--;
+    showStep();
+}
+
+function submitForm() {
+    let method = document.getElementById("payment_method").value;
+
+    if (method === "razorpay") {
+        startRazorpay();
+    } else {
+        document.getElementById("admissionForm").submit();
     }
+}
+
+function startRazorpay() {
+    fetch("create_razorpay_order.php", { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+        let options = {
+            key: data.key,
+            amount: data.amount,
+            currency: "INR",
+            order_id: data.order_id,
+            name: "Student Admission",
+            handler: function (response) {
+                document.querySelector("input[name='razorpay_payment_id']").value = response.razorpay_payment_id;
+                document.querySelector("input[name='razorpay_order_id']").value = response.razorpay_order_id;
+                document.getElementById("admissionForm").submit();
+            }
+        };
+        let rzp = new Razorpay(options);
+        rzp.open();
+    });
 }
 </script>
 
