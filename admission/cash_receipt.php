@@ -74,23 +74,23 @@ table td, table th {
 
 <div class="section-title">Education Details</div>
 <table>
-<tr><th>10th School</th><td><?= $data['tenth_school'] ?></td></tr>
-<tr><th>10th Board</th><td><?= $data['tenth_board'] ?></td></tr>
-<tr><th>10th Percentage</th><td><?= $data['tenth_percentage'] ?></td></tr>
-<tr><th>10th Year</th><td><?= $data['tenth_year'] ?></td></tr>
+<tr><th>10th School</th><td><?= $data['tenth_school'] ?></td>
+<th>10th Board</th><td><?= $data['tenth_board'] ?></td>
+<th>10th Percentage</th><td><?= $data['tenth_percentage'] ?></td>
+<th>10th Year</th><td><?= $data['tenth_year'] ?></td></tr>
 
-<tr><th>12th School</th><td><?= $data['twelfth_school'] ?></td></tr>
-<tr><th>12th Board</th><td><?= $data['twelfth_board'] ?></td></tr>
-<tr><th>12th Percentage</th><td><?= $data['twelfth_percentage'] ?></td></tr>
-<tr><th>12th Year</th><td><?= $data['twelfth_year'] ?></td></tr>
+<tr><th>12th School</th><td><?= $data['twelfth_school'] ?></td>
+<th>12th Board</th><td><?= $data['twelfth_board'] ?></td>
+<th>12th Percentage</th><td><?= $data['twelfth_percentage'] ?></td>
+<th>12th Year</th><td><?= $data['twelfth_year'] ?></td></tr>
 
-<tr><th>Degree Name</th><td><?= $data['degree_name'] ?></td></tr>
-<tr><th>College Name</th><td><?= $data['college_name'] ?></td></tr>
-<tr><th>Degree Percentage</th><td><?= $data['degree_percentage'] ?></td></tr>
-<tr><th>Degree Year</th><td><?= $data['degree_year'] ?></td></tr>
+<tr><th>Degree Name</th><td><?= $data['degree_name'] ?></td>
+<th>College Name</th><td><?= $data['college_name'] ?></td>
+<th>Degree Percentage</th><td><?= $data['degree_percentage'] ?></td>
+<th>Degree Year</th><td><?= $data['degree_year'] ?></td></tr>
 </table>
 
-<div class="section-title">Course & Fee Details</div>
+<div class="section-title">Course Details</div>
 <table>
 <tr><th>Course Name</th><td><?= $data['course_name'] ?></td></tr>
 <tr><th>Duration</th><td><?= $data['duration'] ?></td></tr>
