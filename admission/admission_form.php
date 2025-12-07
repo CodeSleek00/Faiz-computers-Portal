@@ -66,6 +66,12 @@ input, select, textarea{
     <input type="file" name="photo" required>
 
     <input type="text" name="full_name" placeholder="Full Name" required>
+    
+    <!-- New Fields -->
+    <input type="text" name="father_name" placeholder="Father's Name" required>
+    <input type="text" name="mother_name" placeholder="Mother's Name" required>
+    <input type="text" name="caste" placeholder="Caste" required>
+    
     <input type="text" name="aadhar_number" placeholder="Aadhar Number" required>
     <input type="text" name="aapar_id" placeholder="Aapar ID">
 

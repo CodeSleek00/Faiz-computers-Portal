@@ -94,18 +94,7 @@ table td, table th {
 <table>
 <tr><th>Course Name</th><td><?= $data['course_name'] ?></td></tr>
 <tr><th>Duration</th><td><?= $data['duration'] ?></td></tr>
-<tr><th>Registration Fee</th><td>₹<?= $data['reg_fee'] ?></td></tr>
-<tr><th>Monthly Fee</th><td>₹<?= $data['per_month_fee'] ?></td></tr>
-<tr><th>Exam Fee</th><td>₹<?= $data['exam_fee'] ?></td></tr>
-<tr><th>Internal Exam Fee</th><td>₹<?= $data['internal_exam_fee'] ?></td></tr>
-<tr><th>Total Amount Paid</th><td><b>₹<?= $data['reg_fee'] ?></b></td></tr>
-</table>
-
-<div class="section-title">Payment</div>
-<table>
-<tr><th>Method</th><td>CASH</td></tr>
-<tr><th>Status</th><td><b style="color:green;">PAID</b></td></tr>
-<tr><th>Date</th><td><?= date("d-m-Y"); ?></td></tr>
+<tr><th>Admission Date</th><td><?= date("d-m-Y"); ?></td></tr>
 </table>
 
 <center>
