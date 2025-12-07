@@ -19,7 +19,7 @@ mysqli_query($conn, "UPDATE admissions SET payment_status='Paid (Cash)' WHERE id
 // AUTO ADMISSION NUMBER
 $admission_no = "AD-" . date("Y") . "-" . str_pad($id, 4, "0", STR_PAD_LEFT);
 
-// ---------- CREATE STUDENT ACCOUNT (student_2026) ----------
+// ---------- CREATE STUDENT ACCOUNT (students_2026) ----------
 
 // MONTH SHORT NAME (JAN, FEB...)
 $month = strtoupper(date("M"));
@@ -28,7 +28,7 @@ $month = strtoupper(date("M"));
 $year_short = "26"; // FIXED FOR 2026
 
 // GET LAST ENROLLMENT ID
-$check = mysqli_query($conn, "SELECT enrollment_id FROM student_2026 ORDER BY id DESC LIMIT 1");
+$check = mysqli_query($conn, "SELECT enrollment_id FROM students_2026 ORDER BY id DESC LIMIT 1");
 
 if (mysqli_num_rows($check) > 0) {
     $row = mysqli_fetch_assoc($check);
@@ -44,9 +44,9 @@ if (mysqli_num_rows($check) > 0) {
 // NEW ENROLLMENT ID
 $enrollment_id = "FAIZ-" . $month . $year_short . "-" . $new_no;
 
-// INSERT STUDENT INTO student_2026
+
 mysqli_query($conn, "
-INSERT INTO student_2026 (enrollment_id, name, photo, phone, address, course, password)
+INSERT INTO students_2026 (enrollment_id, name, photo, phone, address, course, password)
 VALUES (
     '$enrollment_id',
     '{$data['full_name']}',
