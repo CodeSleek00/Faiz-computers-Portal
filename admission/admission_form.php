@@ -1,180 +1,305 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Admission Form</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Admission Form</title>
 
-<style>
-.container{
-    width: 60%;
-    margin: auto;
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-}
-.step{ display: none; }
-.step.active{ display: block; }
-button{
-    padding: 10px 20px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-.next-btn, .prev-btn{
-    background: #007bff;
-    color: white;
-    border: none;
-}
-.submit-btn{
-    background: green;
-    color: white;
-    border: none;
-}
-.progress{
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
-}
-</style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
 
+        .container {
+            width: 80%;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 80px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 20px;
+        }
+
+        .flex .group {
+            flex: 1;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <h2>Student Admission Form</h2>
 
-<h2>Student Admission Form</h2>
-<div class="progress" id="progressText">Step 1 of 6</div>
+    <form action="submit_admission.php" method="POST" enctype="multipart/form-data">
 
-<form action="submit_admission.php" method="POST" enctype="multipart/form-data">
+        <!-- PHOTO -->
+        <div class="group">
+            <label>Student Photo</label>
+            <input type="file" name="photo" required>
+        </div>
 
-<!-- STEP 1 PERSONAL DETAILS -->
-<div class="step active">
-    <h3>Personal Details</h3>
+        <!-- PERSONAL DETAILS -->
+        <h3>Personal Information</h3>
 
-    <label>Upload Photo</label>
-    <input type="file" name="photo" required>
+        <div class="flex">
+            <div class="group">
+                <label>Full Name</label>
+                <input type="text" name="full_name" required>
+            </div>
 
-    <input type="text" name="full_name" placeholder="Full Name" required>
-    <input type="text" name="aadhar_number" placeholder="Aadhar Number" required>
-    <input type="text" name="aapar_id" placeholder="Aapar ID">
-    
-    <select name="gender" required>
-        <option value="">Select Gender</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-    </select>
+            <div class="group">
+                <label>Father's Name</label>
+                <input type="text" name="father_name" required>
+            </div>
+        </div>
 
-    <input type="text" name="phone" placeholder="Phone Number" required>
-    <input type="date" name="dob" required>
-    <textarea name="address" placeholder="Address" required></textarea>
-    <textarea name="permanent_address" placeholder="Permanent Address" required></textarea>
+        <div class="flex">
+            <div class="group">
+                <label>Mother's Name</label>
+                <input type="text" name="mother_name" required>
+            </div>
 
-    <input type="text" name="religion" placeholder="Religion">
-    <input type="email" name="email" placeholder="Email Address">
-    <input type="text" name="parents_mobile" placeholder="Parents Mobile Number">
+            <div class="group">
+                <label>Caste</label>
+                <input type="text" name="caste" required>
+            </div>
+        </div>
 
-    <button type="button" class="next-btn" onclick="nextStep()">Next</button>
+        <div class="flex">
+            <div class="group">
+                <label>Aadhar Number</label>
+                <input type="text" name="aadhar_number" required>
+            </div>
+
+            <div class="group">
+                <label>Aapar ID</label>
+                <input type="text" name="aapar_id" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Gender</label>
+                <select name="gender" required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div class="group">
+                <label>Phone</label>
+                <input type="text" name="phone" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Date of Birth</label>
+                <input type="date" name="dob" required>
+            </div>
+
+            <div class="group">
+                <label>Religion</label>
+                <input type="text" name="religion" required>
+            </div>
+        </div>
+
+        <div class="group">
+            <label>Address</label>
+            <textarea name="address" required></textarea>
+        </div>
+
+        <div class="group">
+            <label>Permanent Address</label>
+            <textarea name="permanent_address" required></textarea>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="group">
+                <label>Parents Mobile</label>
+                <input type="text" name="parents_mobile" required>
+            </div>
+        </div>
+
+        <!-- EDUCATION DETAILS -->
+        <h3>10th Details</h3>
+        <div class="flex">
+            <div class="group">
+                <label>School</label>
+                <input type="text" name="tenth_school" required>
+            </div>
+            <div class="group">
+                <label>Board</label>
+                <input type="text" name="tenth_board" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Percentage</label>
+                <input type="text" name="tenth_percentage" required>
+            </div>
+            <div class="group">
+                <label>Passing Year</label>
+                <input type="text" name="tenth_year" required>
+            </div>
+        </div>
+
+        <h3>12th Details</h3>
+        <div class="flex">
+            <div class="group">
+                <label>School</label>
+                <input type="text" name="twelfth_school" required>
+            </div>
+            <div class="group">
+                <label>Board</label>
+                <input type="text" name="twelfth_board" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Percentage</label>
+                <input type="text" name="twelfth_percentage" required>
+            </div>
+            <div class="group">
+                <label>Passing Year</label>
+                <input type="text" name="twelfth_year" required>
+            </div>
+        </div>
+
+        <h3>Graduation Details</h3>
+
+        <div class="flex">
+            <div class="group">
+                <label>Degree Name</label>
+                <input type="text" name="degree_name" required>
+            </div>
+            <div class="group">
+                <label>College Name</label>
+                <input type="text" name="college_name" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Year</label>
+                <input type="text" name="degree_year" required>
+            </div>
+            <div class="group">
+                <label>Percentage</label>
+                <input type="text" name="degree_percentage" required>
+            </div>
+        </div>
+
+        <!-- COURSE DETAILS -->
+        <h3>Course Details</h3>
+
+        <div class="flex">
+            <div class="group">
+                <label>Course Name</label>
+                <input type="text" name="course_name" required>
+            </div>
+
+            <div class="group">
+                <label>Duration</label>
+                <input type="text" name="duration" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Registration Fee</label>
+                <input type="text" name="reg_fee" required>
+            </div>
+
+            <div class="group">
+                <label>Per Month Fee</label>
+                <input type="text" name="per_month_fee" required>
+            </div>
+        </div>
+
+        <div class="flex">
+            <div class="group">
+                <label>Exam Fee</label>
+                <input type="text" name="exam_fee" required>
+            </div>
+
+            <div class="group">
+                <label>Internal Exam Fee</label>
+                <input type="text" name="internal_exam_fee" required>
+            </div>
+        </div>
+
+        <div class="group">
+            <label>Payment Method</label>
+            <select name="payment_method" required>
+                <option value="cash">Cash</option>
+                <option value="online">Online (Razorpay)</option>
+            </select>
+        </div>
+
+        <button type="submit">Submit Admission</button>
+    </form>
 </div>
-
-<!-- STEP 2: 10TH DETAILS -->
-<div class="step">
-    <h3>10th Details</h3>
-
-    <input type="text" name="tenth_school" placeholder="School Name">
-    <input type="text" name="tenth_board" placeholder="Board">
-    <input type="text" name="tenth_percentage" placeholder="Percentage">
-    <input type="text" name="tenth_year" placeholder="Year Of Passing">
-
-    <button type="button" class="prev-btn" onclick="prevStep()">Back</button>
-    <button type="button" class="next-btn" onclick="nextStep()">Next</button>
-</div>
-
-<!-- STEP 3: 12TH DETAILS -->
-<div class="step">
-    <h3>12th Details</h3>
-
-    <input type="text" name="twelfth_school" placeholder="School Name">
-    <input type="text" name="twelfth_board" placeholder="Board">
-    <input type="text" name="twelfth_percentage" placeholder="Percentage">
-    <input type="text" name="twelfth_year" placeholder="Year Of Passing">
-
-    <button type="button" class="prev-btn" onclick="prevStep()">Back</button>
-    <button type="button" class="next-btn" onclick="nextStep()">Next</button>
-</div>
-
-<!-- STEP 4: OTHER QUALIFICATION -->
-<div class="step">
-    <h3>Other Qualification</h3>
-
-    <input type="text" name="degree_name" placeholder="Degree Name">
-    <input type="text" name="college_name" placeholder="College Name">
-    <input type="text" name="degree_year" placeholder="Year Of Passing">
-    <input type="text" name="degree_percentage" placeholder="Percentage">
-
-    <button type="button" class="prev-btn" onclick="prevStep()">Back</button>
-    <button type="button" class="next-btn" onclick="nextStep()">Next</button>
-</div>
-
-<!-- STEP 5: COURSE DETAILS -->
-<div class="step">
-    <h3>Course Details</h3>
-
-    <input type="text" name="course_name" placeholder="Course Name" required>
-    <input type="text" name="duration" placeholder="Duration" required>
-    <input type="text" name="reg_fee" placeholder="Registration Fee" required>
-    <input type="text" name="per_month_fee" placeholder="Per Month Fee" required>
-    <input type="text" name="exam_fee" placeholder="Exam Fee" required>
-    <input type="text" name="internal_exam_fee" placeholder="Internal Exam Fee" required>
-
-    <button type="button" class="prev-btn" onclick="prevStep()">Back</button>
-    <button type="button" class="next-btn" onclick="nextStep()">Next</button>
-</div>
-
-<!-- STEP 6 = PAYMENT -->
-<div class="step">
-    <h3>Payment Method</h3>
-
-    <label>Select Payment Method</label>
-    <select name="payment_method" required>
-        <option value="">Choose</option>
-        <option value="razorpay">Pay Online (Razorpay)</option>
-        <option value="cash">Cash</option>
-    </select>
-
-    <button type="button" class="prev-btn" onclick="prevStep()">Back</button>
-    <button type="submit" class="submit-btn">Proceed to Payment</button>
-</div>
-
-</form>
-</div>
-
-<script>
-let current = 0;
-let steps = document.querySelectorAll(".step");
-let progress = document.getElementById("progressText");
-
-function showStep() {
-    steps.forEach((step, index) => {
-        step.classList.toggle("active", index === current);
-    });
-    progress.innerHTML = `Step ${current+1} of 6`;
-}
-
-function nextStep() {
-    if (current < steps.length - 1) {
-        current++;
-        showStep();
-    }
-}
-
-function prevStep() {
-    if (current > 0) {
-        current--;
-        showStep();
-    }
-}
-</script>
 
 </body>
 </html>
