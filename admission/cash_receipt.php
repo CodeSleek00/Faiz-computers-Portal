@@ -79,10 +79,10 @@ table td, table th {
 <th>10th Percentage</th><td><?= $data['tenth_percentage'] ?></td>
 </tr>
 
-<tr><th>12th School</th><td><?= $data['twelfth_school'] ?></td>
+<tr>
 <th>12th Board</th><td><?= $data['twelfth_board'] ?></td>
 <th>12th Percentage</th><td><?= $data['twelfth_percentage'] ?></td>
-<th>12th Year</th><td><?= $data['twelfth_year'] ?></td></tr>
+</tr>
 
 <tr><th>Degree Name</th><td><?= $data['degree_name'] ?></td>
 <th>College Name</th><td><?= $data['college_name'] ?></td>
