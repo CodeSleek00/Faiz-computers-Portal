@@ -56,7 +56,7 @@ $enrollment_id = "FAIZ-$month$year-$new";
 
 // ================= STUDENTS TABLE =================
 mysqli_query($conn,"
-INSERT INTO students
+INSERT INTO students26
 (name, photo, contact, course, enrollment_id, password)
 VALUES
 ('$name','$photo_name','$phone','$course','$enrollment_id','$phone')
