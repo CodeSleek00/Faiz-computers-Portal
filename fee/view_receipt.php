@@ -11,7 +11,7 @@ if(empty($eid) || empty($fee_ids)){
 $fee_ids_array = explode(',', $fee_ids);
 
 // Fetch student info
-$student = $conn->query("SELECT name, photo, course_name FROM students26 WHERE enrollment_id='$eid'")->fetch_assoc();
+$student = $conn->query("SELECT name, photo, course FROM students26 WHERE enrollment_id='$eid'")->fetch_assoc();
 
 // Fetch paid fees
 $fees = $conn->query("SELECT * FROM student_monthly_fee WHERE id IN (".implode(',', $fee_ids_array).")");
