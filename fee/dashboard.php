@@ -13,7 +13,7 @@ $students = $conn->query("
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Student Dashboard</title>
+<title>Student Dashboard - Multiple Fee Payment</title>
 <style>
 body{font-family:Arial;background:#f4f6f8;padding:20px;}
 table{width:100%;border-collapse:collapse;}
@@ -36,14 +36,16 @@ function toggleFees(id){
 </head>
 <body>
 
-<h2>Student Dashboard</h2>
+<h2>Student Dashboard - Multiple Fee Payment</h2>
+
+<form method="POST" action="submit_multiple_fees.php">
 
 <table>
 <tr>
     <th>Photo</th>
     <th>Name</th>
     <th>Course</th>
-    <th>Action</th>
+    <th>Action (Select Fees to Pay)</th>
 </tr>
 
 <?php while($student = $students->fetch_assoc()): ?>
@@ -52,30 +54,34 @@ function toggleFees(id){
     <td><?= htmlspecialchars($student['name']) ?></td>
     <td><?= htmlspecialchars($student['course_name']) ?></td>
     <td>
-        <button class="toggle-btn" onclick="toggleFees('<?= $student['enrollment_id'] ?>')">View Fees</button>
+        <button type="button" class="toggle-btn" onclick="toggleFees('<?= $student['enrollment_id'] ?>')">View Fees</button>
         <div id="fees_<?= $student['enrollment_id'] ?>" style="display:none;">
             <?php
             $fees = $conn->query("SELECT * FROM student_monthly_fee WHERE enrollment_id='".$student['enrollment_id']."' ORDER BY fee_type, month_no ASC");
             while($fee = $fees->fetch_assoc()):
+                if($fee['payment_status']=='Pending'):
             ?>
             <div class="fee-box">
+                <input type="checkbox" name="fee_ids[]" value="<?= $fee['id'] ?>">
                 <?= htmlspecialchars($fee['fee_type']) ?>
                 <?php if(!empty($fee['month_name'])): ?>
                     - <?= htmlspecialchars($fee['month_name']) ?>
                 <?php endif; ?>
-                : ₹<?= number_format($fee['fee_amount'],2) ?> -
-                <span class="fee-<?= strtolower($fee['payment_status']) ?>"><?= $fee['payment_status'] ?></span>
-                <?php if($fee['payment_status']=='Pending'): ?>
-                    <a href="submit_monthly_fee.php?fee_id=<?= $fee['id'] ?>"><button>Pay Now</button></a>
-                <?php endif; ?>
+                : ₹<?= number_format($fee['fee_amount'],2) ?>
             </div>
-            <?php endwhile; ?>
+            <?php
+                endif;
+            endwhile;
+            ?>
         </div>
     </td>
 </tr>
 <?php endwhile; ?>
-
 </table>
+
+<br>
+<button type="submit">Pay Selected Fees</button>
+</form>
 
 </body>
 </html>
