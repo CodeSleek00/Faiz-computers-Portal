@@ -1,7 +1,11 @@
 <?php
-include("db_connect.php"); // apna DB connection
+include("db_connect.php");
 
-// ================= SAFE POST DATA =================
+/* ================= BASIC SAFETY ================= */
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$conn->set_charset("utf8mb4");
+
+/* ================= SAFE POST DATA ================= */
 $name     = $_POST['name'] ?? '';
 $dob      = $_POST['dob'] ?? '';
 $aadhar   = $_POST['aadhar'] ?? '';
@@ -18,74 +22,79 @@ $mother_name = $_POST['mother_name'] ?? '';
 $parent_contact = $_POST['parent_contact'] ?? '';
 
 $course_name = $_POST['course_name'] ?? '';
-$duration = (int)($_POST['duration'] ?? 0);
+$duration_months = (int)($_POST['duration'] ?? 0);
 
-$registration_fee = (float)($_POST['registration_fee'] ?? 0);
+$registration_fee   = (float)($_POST['registration_fee'] ?? 0);
 $per_month_fee      = (float)($_POST['per_month_fee'] ?? 0);
-$internal_fee     = (float)($_POST['internal_fee'] ?? 0);
-$semester_exam_fee     = (float)($_POST['semester_exam_fee'] ?? 0);
-$additional_fee   = (float)($_POST['additional_fee'] ?? 0);
+$internal_fee       = (float)($_POST['internal_fee'] ?? 0);
+$semester_exam_fee  = (float)($_POST['semester_exam_fee'] ?? 0);
+$additional_fee     = (float)($_POST['additional_fee'] ?? 0);
 
-// ================= IMAGE UPLOAD =================
+/* ================= IMAGE UPLOAD ================= */
 $photo_name = '';
-if(isset($_FILES['photo']) && $_FILES['photo']['error']==0){
-    $photo_name = time().'_'.$_FILES['photo']['name'];
-    move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/".$photo_name);
+if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === 0) {
+    if (!is_dir("uploads")) {
+        mkdir("uploads", 0777, true);
+    }
+    $photo_name = time() . "_" . basename($_FILES['photo']['name']);
+    move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/" . $photo_name);
 }
 
-// ================= ENROLLMENT ID GENERATE =================
+/* ================= ENROLLMENT ID ================= */
 $month = strtoupper(date("M"));
 $year  = date("y");
 
-// Get last enrollment_id for current month
-$q = mysqli_query($conn,"
-SELECT enrollment_id 
-FROM students 
-WHERE enrollment_id LIKE 'FAIZ-$month$year-%'
-ORDER BY enrollment_id DESC
-LIMIT 1
+$q = $conn->query("
+    SELECT enrollment_id 
+    FROM students26
+    WHERE enrollment_id LIKE 'FAIZ-$month$year-%'
+    ORDER BY enrollment_id DESC
+    LIMIT 1
 ");
 
-if(mysqli_num_rows($q) > 0){
-    $row = mysqli_fetch_assoc($q);
-    $last = (int)substr($row['enrollment_id'], -4); // last 4 digits
+if ($q->num_rows > 0) {
+    $row = $q->fetch_assoc();
+    $last = (int)substr($row['enrollment_id'], -4);
     $new  = $last + 1;
-}else{
-    $new = 1001; // first admission for this month
+} else {
+    $new = 1001;
 }
 
 $enrollment_id = "FAIZ-$month$year-$new";
 
-// ================= STUDENTS TABLE =================
-mysqli_query($conn,"
+/* ================= START TRANSACTION ================= */
+$conn->begin_transaction();
+
+/* ================= STUDENTS TABLE ================= */
+$conn->query("
 INSERT INTO students26
 (name, photo, contact, course, enrollment_id, password)
 VALUES
 ('$name','$photo_name','$phone','$course_name','$enrollment_id','$phone')
 ");
 
-// ================= ADMISSION TABLE =================
-mysqli_query($conn,"
+/* ================= ADMISSION TABLE ================= */
+$conn->query("
 INSERT INTO admission
 (name,aadhar,apaar,phone,email,religion,caste,address,permanent_address,
 dob,photo,father_name,mother_name,parent_contact,course_name,duration,
 registration_fee,per_month_fee,internal_fee,semester_exam_fee,additional_fee,enrollment_id)
 VALUES
 ('$name','$aadhar','$apaar','$phone','$email','$religion','$caste','$address','$permanent_address',
-'$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course_name','$duration',
+'$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course_name','$duration_months',
 '$registration_fee','$per_month_fee','$internal_fee','$semester_exam_fee','$additional_fee','$enrollment_id')
 ");
 
-// ================= EDUCATION QUALIFICATION =================
+/* ================= EDUCATION QUALIFICATION ================= */
 $degree = $_POST['degree'] ?? [];
 $school_college = $_POST['school_college'] ?? [];
-$board  = $_POST['board'] ?? [];
-$yearp  = $_POST['year'] ?? [];
-$perc   = $_POST['percentage'] ?? [];
+$board = $_POST['board'] ?? [];
+$yearp = $_POST['year'] ?? [];
+$perc = $_POST['percentage'] ?? [];
 
-for($i=0; $i<count($degree); $i++){
-    if($degree[$i] != ""){
-        mysqli_query($conn,"
+for ($i = 0; $i < count($degree); $i++) {
+    if (!empty($degree[$i])) {
+        $conn->query("
         INSERT INTO education_qualification
         (enrollment_id,name,degree,school_college,board,year,percentage)
         VALUES
@@ -94,59 +103,63 @@ for($i=0; $i<count($degree); $i++){
     }
 }
 
-// ================= FEE SCHEDULE =================
-// Registration
-mysqli_query($conn,"
+/* ================= FEE SCHEDULE ================= */
+
+/* Registration Fee */
+$conn->query("
 INSERT INTO fee_schedule
 (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
 VALUES
-('$enrollment_id','$name','$course','Registration','$registration_fee','".date("M-Y")."')
+('$enrollment_id','$name','$course_name','Registration','$registration_fee','".date("M-Y")."')
 ");
 
-// Monthly Fee
-for($i=0; $i<$duration; $i++){
+/* Monthly Fees */
+for ($i = 0; $i < $duration_months; $i++) {
     $m = date("M-Y", strtotime("+$i month"));
-    mysqli_query($conn,"
+    $conn->query("
     INSERT INTO fee_schedule
     (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
     VALUES
-    ('$enrollment_id','$name','$course','Monthly','$monthly_fee','$m')
+    ('$enrollment_id','$name','$course_name','Monthly','$per_month_fee','$m')
     ");
 }
 
-// Internal Fee 2 times
-for($i=0;$i<2;$i++){
-    $m = date("M-Y", strtotime("+".($i*3)." month"));
-    mysqli_query($conn,"
+/* Internal Fees (2 times) */
+for ($i = 0; $i < 2; $i++) {
+    $m = date("M-Y", strtotime("+".($i * 3)." month"));
+    $conn->query("
     INSERT INTO fee_schedule
     (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
     VALUES
-    ('$enrollment_id','$name','$course','Internal','$internal_fee','$m')
+    ('$enrollment_id','$name','$course_name','Internal','$internal_fee','$m')
     ");
 }
 
-// Semester Fee 2 times
-for($i=0;$i<2;$i++){
-    $m = date("M-Y", strtotime("+".($i*3)." month"));
-    mysqli_query($conn,"
+/* Semester Fees (2 times) */
+for ($i = 0; $i < 2; $i++) {
+    $m = date("M-Y", strtotime("+".($i * 6)." month"));
+    $conn->query("
     INSERT INTO fee_schedule
     (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
     VALUES
-    ('$enrollment_id','$name','$course','Semester','$semester_exam_fee','$m')
+    ('$enrollment_id','$name','$course_name','Semester','$semester_exam_fee','$m')
     ");
 }
 
-// Additional Fee 1 time
-if($additional_fee > 0){
-    mysqli_query($conn,"
+/* Additional Fee */
+if ($additional_fee > 0) {
+    $conn->query("
     INSERT INTO fee_schedule
     (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
     VALUES
-    ('$enrollment_id','$name','$course','Additional','$additional_fee','".date("M-Y")."')
+    ('$enrollment_id','$name','$course_name','Additional','$additional_fee','".date("M-Y")."')
     ");
 }
 
-// ================= REDIRECT =================
+/* ================= COMMIT ================= */
+$conn->commit();
+
+/* ================= REDIRECT ================= */
 header("Location: admission_success.php?eid=$enrollment_id");
 exit;
 ?>
