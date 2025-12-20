@@ -96,67 +96,30 @@ for ($i = 0; $i < count($degree); $i++) {
     if (!empty($degree[$i])) {
         $conn->query("
         INSERT INTO education_qualification
-(enrollment_id, name, student_photo, degree, school_college, board_university, year_of_passing, percentage)
-VALUES
-('$enrollment_id','$name','$photo_name','$degree[$i]','$school_college[$i]','$board[$i]','$yearp[$i]','$perc[$i]')
-
+        (enrollment_id, name, student_photo, degree, school_college, board_university, year_of_passing, percentage)
+        VALUES
+        ('$enrollment_id','$name','$photo_name','$degree[$i]','$school_college[$i]','$board[$i]','$yearp[$i]','$perc[$i]')
         ");
     }
 }
- 
 
-/* ================= FEE SCHEDULE ================= */
+/* ================= NEW STUDENT_FEE TABLE INSERT ================= */
 
-/* Registration Fee */
+// Prepare 12 months
+$months = array_fill(1, 12, $per_month_fee);
+
 $conn->query("
-INSERT INTO fee_schedule
-(enrollment_id,student_name,course_name,fee_type,amount,fee_month)
+INSERT INTO student_fee
+(enrollment_id, name, photo, course_name, registration_fee, monthly_fee,
+month_1, month_2, month_3, month_4, month_5, month_6,
+month_7, month_8, month_9, month_10, month_11, month_12,
+july_internal_fee, dec_internal_fee, first_semester_fee, second_semester_fee)
 VALUES
-('$enrollment_id','$name','$course_name','Registration','$registration_fee','".date("M-Y")."')
+('$enrollment_id','$name','$photo_name','$course_name','$registration_fee','$per_month_fee',
+'$months[1]','$months[2]','$months[3]','$months[4]','$months[5]','$months[6]',
+'$months[7]','$months[8]','$months[9]','$months[10]','$months[11]','$months[12]',
+'$internal_fee','$internal_fee','$semester_exam_fee','$semester_exam_fee')
 ");
-
-/* Monthly Fees */
-for ($i = 0; $i < $duration_months; $i++) {
-    $m = date("M-Y", strtotime("+$i month"));
-    $conn->query("
-    INSERT INTO fee_schedule
-    (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
-    VALUES
-    ('$enrollment_id','$name','$course_name','Monthly','$per_month_fee','$m')
-    ");
-}
-
-/* Internal Fees (2 times) */
-for ($i = 0; $i < 2; $i++) {
-    $m = date("M-Y", strtotime("+".($i * 3)." month"));
-    $conn->query("
-    INSERT INTO fee_schedule
-    (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
-    VALUES
-    ('$enrollment_id','$name','$course_name','Internal','$internal_fee','$m')
-    ");
-}
-
-/* Semester Fees (2 times) */
-for ($i = 0; $i < 2; $i++) {
-    $m = date("M-Y", strtotime("+".($i * 6)." month"));
-    $conn->query("
-    INSERT INTO fee_schedule
-    (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
-    VALUES
-    ('$enrollment_id','$name','$course_name','Semester','$semester_exam_fee','$m')
-    ");
-}
-
-/* Additional Fee */
-if ($additional_fee > 0) {
-    $conn->query("
-    INSERT INTO fee_schedule
-    (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
-    VALUES
-    ('$enrollment_id','$name','$course_name','Additional','$additional_fee','".date("M-Y")."')
-    ");
-}
 
 /* ================= COMMIT ================= */
 $conn->commit();
