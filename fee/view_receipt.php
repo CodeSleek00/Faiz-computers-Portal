@@ -1,56 +1,79 @@
 <?php
 include("db_connect.php");
 
-/* ================= SAFE GET DATA ================= */
-$fee_id = $_GET['fee_id'] ?? null;
+$eid = $_GET['eid'] ?? '';
+$fee_ids = $_GET['fees'] ?? '';
 
-if(!$fee_id){
-    die("Invalid fee ID.");
+if(empty($eid) || empty($fee_ids)){
+    die("Invalid request");
 }
 
-/* ================= FETCH FEE RECORD ================= */
-$fee = $conn->query("SELECT * FROM student_monthly_fee WHERE id='$fee_id'")->fetch_assoc();
+$fee_ids_array = explode(',', $fee_ids);
 
-if(!$fee){
-    die("Fee record not found.");
-}
+// Fetch student info
+$student = $conn->query("SELECT name, photo, course_name FROM students26 WHERE enrollment_id='$eid'")->fetch_assoc();
+
+// Fetch paid fees
+$fees = $conn->query("SELECT * FROM student_monthly_fee WHERE id IN (".implode(',', $fee_ids_array).")");
+$total = 0;
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Fee Receipt - <?= htmlspecialchars($fee['name']) ?></title>
+<title>Fee Receipt</title>
 <style>
 body{font-family:Arial;background:#f4f6f8;padding:20px;}
-.receipt{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
-h2{background:#0d6efd;color:#fff;padding:10px;border-radius:4px;text-align:center;}
-table{width:100%;border-collapse:collapse;margin-top:20px;}
+.receipt{width:700px;margin:auto;background:#fff;padding:20px;border-radius:8px;border:1px solid #ccc;}
+h2{text-align:center;background:#0d6efd;color:#fff;padding:10px;border-radius:4px;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
 th,td{border:1px solid #ccc;padding:8px;text-align:left;}
-th{background:#0d6efd;color:#fff;}
-button{padding:8px 12px;border:none;background:#198754;color:#fff;cursor:pointer;margin-top:15px;}
-img{width:70px;height:70px;border-radius:50%;}
+th{background:#198754;color:#fff;}
+.total{font-weight:bold;}
+button{padding:10px 15px;margin-top:15px;background:#0d6efd;color:#fff;border:none;cursor:pointer;border-radius:4px;}
 </style>
+<script>
+function printReceipt(){
+    window.print();
+}
+</script>
 </head>
 <body>
 
 <div class="receipt">
 <h2>Fee Receipt</h2>
 
+<p><strong>Name:</strong> <?= htmlspecialchars($student['name']) ?></p>
+<p><strong>Enrollment ID:</strong> <?= htmlspecialchars($eid) ?></p>
+<p><strong>Course:</strong> <?= htmlspecialchars($student['course_name']) ?></p>
+
 <table>
-<tr><th>Student Name</th><td><?= htmlspecialchars($fee['name']) ?></td></tr>
-<tr><th>Enrollment ID</th><td><?= htmlspecialchars($fee['enrollment_id']) ?></td></tr>
-<tr><th>Course</th><td><?= htmlspecialchars($fee['course_name']) ?></td></tr>
-<tr><th>Fee Type</th><td><?= htmlspecialchars($fee['fee_type']) ?></td></tr>
-<?php if(!empty($fee['month_name'])): ?>
-<tr><th>Month</th><td><?= htmlspecialchars($fee['month_name']) ?></td></tr>
-<?php endif; ?>
-<tr><th>Amount Paid</th><td>₹<?= number_format($fee['fee_amount'],2) ?></td></tr>
-<tr><th>Payment Date</th><td><?= date('d-M-Y', strtotime($fee['payment_date'])) ?></td></tr>
+<tr>
+    <th>Fee Type</th>
+    <th>Month</th>
+    <th>Amount (₹)</th>
+    <th>Payment Date</th>
+</tr>
+
+<?php while($fee = $fees->fetch_assoc()): 
+    $total += $fee['fee_amount'];
+?>
+<tr>
+    <td><?= htmlspecialchars($fee['fee_type']) ?></td>
+    <td><?= htmlspecialchars($fee['month_name'] ?: '-') ?></td>
+    <td><?= number_format($fee['fee_amount'],2) ?></td>
+    <td><?= date('d-M-Y', strtotime($fee['payment_date'])) ?></td>
+</tr>
+<?php endwhile; ?>
+
+<tr>
+    <td colspan="2" class="total">Total</td>
+    <td colspan="2" class="total">₹<?= number_format($total,2) ?></td>
+</tr>
 </table>
 
-<button onclick="window.print()">🖨️ Print Receipt</button>
-
+<button onclick="printReceipt()">🖨 Print Receipt</button>
 </div>
 
 </body>

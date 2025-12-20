@@ -8,7 +8,14 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         die("No fee selected.");
     }
 
+    $enrollment_id = '';
+
     foreach($fee_ids as $fid){
+        // Get enrollment_id for redirect/receipt
+        $res = $conn->query("SELECT enrollment_id FROM student_monthly_fee WHERE id='$fid'")->fetch_assoc();
+        $enrollment_id = $res['enrollment_id'];
+
+        // Update payment status
         $conn->query("
             UPDATE student_monthly_fee
             SET payment_status='Paid', payment_date=NOW()
@@ -16,8 +23,8 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         ");
     }
 
-    // Redirect to dashboard with success message
-    header("Location: dashboard.php?msg=Fees paid successfully");
+    // Redirect to receipt page
+    header("Location: view_receipt.php?eid=".$enrollment_id."&fees=".implode(',', $fee_ids));
     exit;
 }
 ?>
