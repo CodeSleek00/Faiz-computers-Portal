@@ -120,52 +120,55 @@ VALUES
 '$months[7]','$months[8]','$months[9]','$months[10]','$months[11]','$months[12]',
 '$internal_fee','$internal_fee','$semester_exam_fee','$semester_exam_fee')
 ");
-/* ================= INSERT MONTHLY FEES ================= */
-// Months array
+/* ================= INSERT FEES ================= */
+// 1️⃣ Registration Fee
+$conn->query("
+INSERT INTO student_monthly_fee
+(enrollment_id,name,photo,course_name,fee_type,fee_amount,payment_status)
+VALUES
+('$enrollment_id','$name','$photo_name','$course_name','Registration','$registration_fee','Pending')
+");
+
+// 2️⃣ Monthly Fees (1 to duration)
 $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-// Insert monthly fees for the student
 for($i=0; $i<$duration_months; $i++){
-    $month_name = $months[$i];
-
     $conn->query("
-        INSERT INTO student_monthly_fee
-        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
-        VALUES
-        ('$enrollment_id','$name','$photo_name','$course_name',".($i+1).",'$month_name','$per_month_fee','Pending')
+    INSERT INTO student_monthly_fee
+    (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
+    VALUES
+    ('$enrollment_id','$name','$photo_name','$course_name','Monthly',".($i+1).",'".$months[$i]."','$per_month_fee','Pending')
     ");
 }
 
-/* ================= INSERT INTERNAL / SEMESTER FEES ================= */
-// Internal Fee 2 times
-$internal_months = [7,12]; // July and December
-foreach($internal_months as $m_no){
+// 3️⃣ Internal Fees 2 times (e.g., July & Dec)
+$internal_months = [7,12];
+foreach($internal_months as $m){
     $conn->query("
-        INSERT INTO student_monthly_fee
-        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
-        VALUES
-        ('$enrollment_id','$name','$photo_name','$course_name','$m_no','".$months[$m_no-1]."','$internal_fee','Pending')
+    INSERT INTO student_monthly_fee
+    (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
+    VALUES
+    ('$enrollment_id','$name','$photo_name','$course_name','Internal','$m','".$months[$m-1]."','$internal_fee','Pending')
     ");
 }
 
-// Semester Exam Fee 2 times
-$semester_months = [6,12]; // June and December
-foreach($semester_months as $m_no){
+// 4️⃣ Semester Exam Fees 2 times (e.g., June & Dec)
+$semester_months = [6,12];
+foreach($semester_months as $m){
     $conn->query("
-        INSERT INTO student_monthly_fee
-        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
-        VALUES
-        ('$enrollment_id','$name','$photo_name','$course_name','$m_no','".$months[$m_no-1]."','$semester_exam_fee','Pending')
+    INSERT INTO student_monthly_fee
+    (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
+    VALUES
+    ('$enrollment_id','$name','$photo_name','$course_name','Semester','$m','".$months[$m-1]."','$semester_exam_fee','Pending')
     ");
 }
 
-// Additional Fee if any
+// 5️⃣ Additional Fee if any
 if($additional_fee>0){
     $conn->query("
-        INSERT INTO student_monthly_fee
-        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
-        VALUES
-        ('$enrollment_id','$name','$photo_name','$course_name',0,'Additional','$additional_fee','Pending')
+    INSERT INTO student_monthly_fee
+    (enrollment_id,name,photo,course_name,fee_type,fee_amount,payment_status)
+    VALUES
+    ('$enrollment_id','$name','$photo_name','$course_name','Additional','$additional_fee','Pending')
     ");
 }
 
