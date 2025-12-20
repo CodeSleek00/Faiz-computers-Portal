@@ -37,19 +37,21 @@ if(isset($_FILES['photo']) && $_FILES['photo']['error']==0){
 $month = strtoupper(date("M"));
 $year  = date("y");
 
+// Get last enrollment_id for current month
 $q = mysqli_query($conn,"
 SELECT enrollment_id 
 FROM students 
 WHERE enrollment_id LIKE 'FAIZ-$month$year-%'
-ORDER BY enrollment_id DESC LIMIT 1
+ORDER BY enrollment_id DESC
+LIMIT 1
 ");
 
 if(mysqli_num_rows($q) > 0){
     $row = mysqli_fetch_assoc($q);
-    $last = (int)substr($row['enrollment_id'], -4);
+    $last = (int)substr($row['enrollment_id'], -4); // last 4 digits
     $new  = $last + 1;
 }else{
-    $new = 1001;
+    $new = 1001; // first admission for this month
 }
 
 $enrollment_id = "FAIZ-$month$year-$new";
