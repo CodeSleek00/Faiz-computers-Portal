@@ -17,7 +17,7 @@ $father_name = $_POST['father_name'] ?? '';
 $mother_name = $_POST['mother_name'] ?? '';
 $parent_contact = $_POST['parent_contact'] ?? '';
 
-$course   = $_POST['course'] ?? '';
+$course   = $_POST['course_name'] ?? '';
 $duration = (int)($_POST['duration'] ?? 0);
 
 $registration_fee = (float)($_POST['registration_fee'] ?? 0);
