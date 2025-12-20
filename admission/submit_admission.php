@@ -23,7 +23,7 @@ $duration = (int)($_POST['duration'] ?? 0);
 $registration_fee = (float)($_POST['registration_fee'] ?? 0);
 $monthly_fee      = (float)($_POST['per_month_fee'] ?? 0);
 $internal_fee     = (float)($_POST['internal_fee'] ?? 0);
-$semester_exam_fee     = (float)($_POST['semester_fee'] ?? 0);
+$semester_exam_fee     = (float)($_POST['semester_exam_fee'] ?? 0);
 $additional_fee   = (float)($_POST['additional_fee'] ?? 0);
 
 // ================= IMAGE UPLOAD =================
@@ -132,7 +132,7 @@ for($i=0;$i<2;$i++){
     INSERT INTO fee_schedule
     (enrollment_id,student_name,course_name,fee_type,amount,fee_month)
     VALUES
-    ('$enrollment_id','$name','$course','Semester','$semester_fee','$m')
+    ('$enrollment_id','$name','$course','Semester','$semester_exam_fee','$m')
     ");
 }
 
