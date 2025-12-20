@@ -1,5 +1,5 @@
 <?php
-include("../db_connect.php"); // apna DB connection
+include("db_connect.php"); // apna DB connection
 
 // ================= SAFE POST DATA =================
 $name     = $_POST['name'] ?? '';
