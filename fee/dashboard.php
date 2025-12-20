@@ -17,7 +17,7 @@ $students = $conn->query("
 <style>
 body{font-family:Arial;background:#f4f6f8;padding:20px;}
 table{width:100%;border-collapse:collapse;}
-th,td{border:1px solid #ccc;padding:10px;text-align:left;}
+th,td{border:1px solid #ccc;padding:10px;text-align:left;vertical-align:top;}
 th{background:#0d6efd;color:#fff;}
 img{width:50px;height:50px;border-radius:50%;}
 button{padding:5px 10px;border:none;background:#0d6efd;color:#fff;cursor:pointer;border-radius:4px;margin:2px;}
@@ -46,7 +46,7 @@ function toggleFees(id){
     <th>Name</th>
     <th>Course</th>
     <th>Action (Select Fees to Pay)</th>
-    <th>Last Fee Submitted On</th>
+    <th>Paid Fees Details</th>
 </tr>
 
 <?php while($student = $students->fetch_assoc()): ?>
@@ -55,7 +55,7 @@ function toggleFees(id){
     <td><?= htmlspecialchars($student['name']) ?></td>
     <td><?= htmlspecialchars($student['course_name']) ?></td>
     <td>
-        <button type="button" class="toggle-btn" onclick="toggleFees('<?= $student['enrollment_id'] ?>')">View Fees</button>
+        <button type="button" class="toggle-btn" onclick="toggleFees('<?= $student['enrollment_id'] ?>')">View Pending Fees</button>
         <div id="fees_<?= $student['enrollment_id'] ?>" style="display:none;">
             <?php
             $fees = $conn->query("SELECT * FROM student_monthly_fee WHERE enrollment_id='".$student['enrollment_id']."' ORDER BY fee_type, month_no ASC");
@@ -78,8 +78,21 @@ function toggleFees(id){
     </td>
     <td>
         <?php
-        $last_fee = $conn->query("SELECT payment_date FROM student_monthly_fee WHERE enrollment_id='".$student['enrollment_id']."' AND payment_status='Paid' ORDER BY payment_date DESC LIMIT 1")->fetch_assoc();
-        echo $last_fee ? date('d-M-Y', strtotime($last_fee['payment_date'])) : '-';
+        $paid_fees = $conn->query("SELECT * FROM student_monthly_fee WHERE enrollment_id='".$student['enrollment_id']."' AND payment_status='Paid' ORDER BY fee_type, month_no ASC");
+        if($paid_fees->num_rows > 0){
+            while($pf = $paid_fees->fetch_assoc()){
+                echo "<div class='fee-box fee-paid'>";
+                echo htmlspecialchars($pf['fee_type']);
+                if(!empty($pf['month_name'])){
+                    echo " - ".htmlspecialchars($pf['month_name']);
+                }
+                echo ": ₹".number_format($pf['fee_amount'],2);
+                echo " (".date('d-M-Y', strtotime($pf['payment_date'])).")";
+                echo "</div>";
+            }
+        }else{
+            echo "-";
+        }
         ?>
     </td>
 </tr>
