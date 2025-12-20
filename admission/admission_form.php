@@ -78,7 +78,7 @@ button{padding:10px 15px;border:none;background:#198754;color:#fff;cursor:pointe
 <hr>
 
 <h2>Course & Fees</h2>
-<input type="text" name="course" placeholder="Course Name" required>
+<input type="text" name="course_name" placeholder="Course Name" required>
 
 <div class="row">
   <div class="col"><input type="number" name="duration" placeholder="Duration (Months)" required></div>
