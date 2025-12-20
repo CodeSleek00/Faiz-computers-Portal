@@ -11,9 +11,9 @@ body{font-family:Arial;background:#f4f6f8}
 form{background:#fff;padding:20px;width:90%;max-width:1000px;margin:20px auto;border-radius:8px}
 h2{background:#0d6efd;color:#fff;padding:10px;border-radius:4px}
 input,select,textarea{width:100%;padding:8px;margin:6px 0}
-.row{display:flex;gap:15px}
+.row{display:flex;gap:15px;flex-wrap:wrap}
 .col{flex:1}
-button{padding:10px 15px;border:none;background:#198754;color:#fff;cursor:pointer}
+button{padding:10px 15px;border:none;background:#198754;color:#fff;cursor:pointer;margin-top:10px}
 .add-btn{background:#0d6efd}
 .remove-btn{background:#dc3545}
 .edu-box{border:1px solid #ccc;padding:10px;margin-top:10px;border-radius:6px}
@@ -65,6 +65,7 @@ button{padding:10px 15px;border:none;background:#198754;color:#fff;cursor:pointe
 
 <div class="edu-box">
   <input type="text" name="degree[]" placeholder="Degree Name">
+  <input type="text" name="school_college[]" placeholder="School / College Name">
   <input type="text" name="board[]" placeholder="Board / University">
   <input type="text" name="year[]" placeholder="Year of Passing">
   <input type="text" name="percentage[]" placeholder="Percentage">
@@ -105,6 +106,7 @@ function addEducation(){
   div.className = "edu-box";
   div.innerHTML = `
     <input type="text" name="degree[]" placeholder="Degree Name">
+    <input type="text" name="school_college[]" placeholder="School / College Name">
     <input type="text" name="board[]" placeholder="Board / University">
     <input type="text" name="year[]" placeholder="Year of Passing">
     <input type="text" name="percentage[]" placeholder="Percentage">
