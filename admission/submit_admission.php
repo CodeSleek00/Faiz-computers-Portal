@@ -66,11 +66,11 @@ VALUES
 mysqli_query($conn,"
 INSERT INTO admission
 (name,aadhar,apaar,phone,email,religion,caste,address,permanent_address,
-dob,photo,father_name,mother_name,parent_contact,course,duration,
+dob,photo,father_name,mother_name,parent_contact,course_name,duration,
 registration_fee,monthly_fee,internal_fee,semester_fee,additional_fee,enrollment_id)
 VALUES
 ('$name','$aadhar','$apaar','$phone','$email','$religion','$caste','$address','$permanent_address',
-'$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course','$duration',
+'$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course_name','$duration',
 '$registration_fee','$monthly_fee','$internal_fee','$semester_fee','$additional_fee','$enrollment_id')
 ");
 
