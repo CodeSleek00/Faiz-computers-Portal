@@ -120,6 +120,54 @@ VALUES
 '$months[7]','$months[8]','$months[9]','$months[10]','$months[11]','$months[12]',
 '$internal_fee','$internal_fee','$semester_exam_fee','$semester_exam_fee')
 ");
+/* ================= INSERT MONTHLY FEES ================= */
+// Months array
+$months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Insert monthly fees for the student
+for($i=0; $i<$duration_months; $i++){
+    $month_name = $months[$i];
+
+    $conn->query("
+        INSERT INTO student_monthly_fee
+        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
+        VALUES
+        ('$enrollment_id','$name','$photo_name','$course_name',".($i+1).",'$month_name','$per_month_fee','Pending')
+    ");
+}
+
+/* ================= INSERT INTERNAL / SEMESTER FEES ================= */
+// Internal Fee 2 times
+$internal_months = [7,12]; // July and December
+foreach($internal_months as $m_no){
+    $conn->query("
+        INSERT INTO student_monthly_fee
+        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
+        VALUES
+        ('$enrollment_id','$name','$photo_name','$course_name','$m_no','".$months[$m_no-1]."','$internal_fee','Pending')
+    ");
+}
+
+// Semester Exam Fee 2 times
+$semester_months = [6,12]; // June and December
+foreach($semester_months as $m_no){
+    $conn->query("
+        INSERT INTO student_monthly_fee
+        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
+        VALUES
+        ('$enrollment_id','$name','$photo_name','$course_name','$m_no','".$months[$m_no-1]."','$semester_exam_fee','Pending')
+    ");
+}
+
+// Additional Fee if any
+if($additional_fee>0){
+    $conn->query("
+        INSERT INTO student_monthly_fee
+        (enrollment_id, name, photo, course_name, month_no, month_name, fee_amount, payment_status)
+        VALUES
+        ('$enrollment_id','$name','$photo_name','$course_name',0,'Additional','$additional_fee','Pending')
+    ");
+}
 
 /* ================= COMMIT ================= */
 $conn->commit();
