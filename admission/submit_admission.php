@@ -1,5 +1,5 @@
 <?php
-include("../db_connect.php"); // apna DB connection file
+include("db_connect.php"); // apna DB connection file
 
 // ================= BASIC DATA =================
 $name     = $_POST['name'];
