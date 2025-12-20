@@ -96,12 +96,13 @@ for ($i = 0; $i < count($degree); $i++) {
     if (!empty($degree[$i])) {
         $conn->query("
         INSERT INTO education_qualification
-        (enrollment_id,name,degree,school_college,board,year,percentage)
+        (admission_id, enrollment_id, name, student_photo, degree, school_college, board_university, year_of_passing, percentage)
         VALUES
-        ('$enrollment_id','$name','$degree[$i]','$school_college[$i]','$board[$i]','$yearp[$i]','$perc[$i]')
+        ('$admission_id','$enrollment_id','$name','$photo_name','$degree[$i]','$school_college[$i]','$board[$i]','$yearp[$i]','$perc[$i]')
         ");
     }
 }
+
 
 /* ================= FEE SCHEDULE ================= */
 
