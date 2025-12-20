@@ -21,7 +21,7 @@ $course   = $_POST['course_name'] ?? '';
 $duration = (int)($_POST['duration'] ?? 0);
 
 $registration_fee = (float)($_POST['registration_fee'] ?? 0);
-$monthly_fee      = (float)($_POST['monthly_fee'] ?? 0);
+$monthly_fee      = (float)($_POST['per_month_fee'] ?? 0);
 $internal_fee     = (float)($_POST['internal_fee'] ?? 0);
 $semester_fee     = (float)($_POST['semester_fee'] ?? 0);
 $additional_fee   = (float)($_POST['additional_fee'] ?? 0);
@@ -69,11 +69,11 @@ mysqli_query($conn,"
 INSERT INTO admission
 (name,aadhar,apaar,phone,email,religion,caste,address,permanent_address,
 dob,photo,father_name,mother_name,parent_contact,course_name,duration,
-registration_fee,monthly_fee,internal_fee,semester_fee,additional_fee,enrollment_id)
+registration_fee,per_month_fee,internal_fee,semester_fee,additional_fee,enrollment_id)
 VALUES
 ('$name','$aadhar','$apaar','$phone','$email','$religion','$caste','$address','$permanent_address',
 '$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course_name','$duration',
-'$registration_fee','$monthly_fee','$internal_fee','$semester_fee','$additional_fee','$enrollment_id')
+'$registration_fee','$per_month_fee','$internal_fee','$semester_fee','$additional_fee','$enrollment_id')
 ");
 
 // ================= EDUCATION QUALIFICATION =================
