@@ -73,7 +73,7 @@ registration_fee,per_month_fee,internal_fee,semester_exam_fee,additional_fee,enr
 VALUES
 ('$name','$aadhar','$apaar','$phone','$email','$religion','$caste','$address','$permanent_address',
 '$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course_name','$duration',
-'$registration_fee','$per_month_fee','$internal_fee','$semester_fee','$additional_fee','$enrollment_id')
+'$registration_fee','$per_month_fee','$internal_fee','$semester_exam_fee','$additional_fee','$enrollment_id')
 ");
 
 // ================= EDUCATION QUALIFICATION =================
