@@ -13,7 +13,7 @@ $students = $conn->query("
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Student Dashboard - Multiple Fee Payment</title>
+<title>Student Dashboard - Fee Payment</title>
 <style>
 body{font-family:Arial;background:#f4f6f8;padding:20px;}
 table{width:100%;border-collapse:collapse;}
@@ -46,6 +46,7 @@ function toggleFees(id){
     <th>Name</th>
     <th>Course</th>
     <th>Action (Select Fees to Pay)</th>
+    <th>Last Fee Submitted On</th>
 </tr>
 
 <?php while($student = $students->fetch_assoc()): ?>
@@ -75,8 +76,15 @@ function toggleFees(id){
             ?>
         </div>
     </td>
+    <td>
+        <?php
+        $last_fee = $conn->query("SELECT payment_date FROM student_monthly_fee WHERE enrollment_id='".$student['enrollment_id']."' AND payment_status='Paid' ORDER BY payment_date DESC LIMIT 1")->fetch_assoc();
+        echo $last_fee ? date('d-M-Y', strtotime($last_fee['payment_date'])) : '-';
+        ?>
+    </td>
 </tr>
 <?php endwhile; ?>
+
 </table>
 
 <br>
