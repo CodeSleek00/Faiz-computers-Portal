@@ -91,17 +91,25 @@ $school_college = $_POST['school_college'] ?? [];
 $board = $_POST['board'] ?? [];
 $yearp = $_POST['year'] ?? [];
 $perc = $_POST['percentage'] ?? [];
-
 for ($i = 0; $i < count($degree); $i++) {
+
     if (!empty($degree[$i])) {
+
+        $year_clean = !empty($yearp[$i]) ? (int)$yearp[$i] : NULL;
+        $perc_clean = !empty($perc[$i]) ? (float)$perc[$i] : NULL;
+
         $conn->query("
         INSERT INTO education_qualification
         (enrollment_id, name, student_photo, degree, school_college, board_university, year_of_passing, percentage)
         VALUES
-        ('$enrollment_id','$name','$photo_name','$degree[$i]','$school_college[$i]','$board[$i]','$yearp[$i]','$perc[$i]')
+        ('$enrollment_id','$name','$photo_name',
+         '$degree[$i]','$school_college[$i]','$board[$i]',
+         ".($year_clean === NULL ? "NULL" : "'$year_clean'").",
+         ".($perc_clean === NULL ? "NULL" : "'$perc_clean'").")
         ");
     }
 }
+
 
 /* ================= NEW STUDENT_FEE TABLE INSERT ================= */
 
