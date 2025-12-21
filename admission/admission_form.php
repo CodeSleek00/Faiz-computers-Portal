@@ -126,7 +126,7 @@ button {
   <input type="text" name="degree[]" placeholder="Degree Name">
   <input type="text" name="school_college[]" placeholder="School / College Name">
   <input type="text" name="board[]" placeholder="Board / University">
-  <input type="text" name="year[]" placeholder="Year of Passing">
+  <input type="number" name="year[]" placeholder="Year of Passing" min="1950" max="2100">
   <input type="text" name="percentage[]" placeholder="Percentage">
   <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove</button>
 </div>
