@@ -60,7 +60,7 @@ td,th{
     text-align:center;
 }
 .sign-box{
-    height:80px;
+    height:120px;
     text-align:center;
     vertical-align:bottom;
 }
