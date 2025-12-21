@@ -141,6 +141,8 @@ td,th{
 <tr><td>Course</td><td><?= $data['course_name'] ?></td></tr>
 <tr><td>Duration</td><td><?= $data['duration'] ?> Months</td></tr>
 <tr><td>Registration Fee</td><td>₹<?= $data['registration_fee'] ?></td></tr>
+<tr><td>Semester Exam Fee</td><td>₹<?= $data['semester_exam_fee'] ?></td></tr>
+<tr><td>Internal Fee</td><td>₹<?= $data['internal_fee'] ?></td></tr>
 <tr><td>Monthly Fee</td><td>₹<?= $data['per_month_fee'] ?></td></tr>
 </table>
 
