@@ -169,31 +169,36 @@ button {
 let step = 0;
 const steps = document.querySelectorAll(".step");
 
-function nextStep(){
-    steps[step].classList.remove("active");
-    step++;
-    steps[step].classList.add("active");
+function showStep(index){
+    steps.forEach(s => s.classList.remove("active"));
+    steps[index].classList.add("active");
 }
+
+function nextStep(){
+    if(step < steps.length - 1){
+        step++;
+        showStep(step);
+    }
+}
+
 function prevStep(){
-    steps[step].classList.remove("active");
-    step--;
-    steps[step].classList.add("active");
+    if(step > 0){
+        step--;
+        showStep(step);
+    }
 }
 
 function addEducation(){
-  let div = document.createElement("div");
-  div.className = "edu-box";
-  div.innerHTML = `
-    <input type="text" name="degree[]" placeholder="Degree Name">
-    <input type="text" name="school_college[]" placeholder="School / College Name">
-    <input type="text" name="board[]" placeholder="Board / University">
-    <input type="text" name="year[]" placeholder="Year of Passing">
-    <input type="text" name="percentage[]" placeholder="Percentage">
-    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove</button>
-  `;
-  document.getElementById("education_area").appendChild(div);
+    let div = document.createElement("div");
+    div.className = "edu-box";
+    div.innerHTML = `
+        <input type="text" name="degree[]" placeholder="Degree Name">
+        <input type="text" name="school_college[]" placeholder="School / College Name">
+        <input type="text" name="board[]" placeholder="Board / University">
+        <input type="number" name="year[]" placeholder="Year of Passing">
+        <input type="text" name="percentage[]" placeholder="Percentage">
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove</button>
+    `;
+    document.getElementById("education_area").appendChild(div);
 }
 </script>
-
-</body>
-</html>
