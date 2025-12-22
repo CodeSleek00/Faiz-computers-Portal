@@ -33,7 +33,7 @@ $additional_fee     = (float)($_POST['additional_fee'] ?? 0);
 
 $photo_name = '';
 
-$upload_dir = __DIR__ . "/../uploads/";   // parent folder uploads
+$upload_dir = __DIR__ . "../uploads/";   // parent folder uploads
 
 if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === 0) {
 
