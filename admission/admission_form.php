@@ -691,204 +691,217 @@
     </div>
 
     <script>
-        // Step management
-        let currentStep = 0;
-        const steps = document.querySelectorAll('.form-step');
-        const stepIndicators = document.querySelectorAll('.step-indicator');
-        const progressFill = document.getElementById('progressFill');
-        
-        function showStep(stepIndex) {
-            // Hide all steps
-            steps.forEach(step => step.classList.remove('active'));
-            stepIndicators.forEach(indicator => {
-                indicator.classList.remove('active', 'completed');
-            });
-            
-            // Show current step
-            steps[stepIndex].classList.add('active');
-            stepIndicators[stepIndex].classList.add('active');
-            
-            // Mark previous steps as completed
-            for (let i = 0; i < stepIndex; i++) {
-                stepIndicators[i].classList.add('completed');
-            }
-            
-            // Update progress bar
-            const progressPercentage = (stepIndex / (steps.length - 1)) * 100;
-            progressFill.style.width = `${progressPercentage}%`;
-            
-            currentStep = stepIndex;
+/* =========================
+   GLOBAL VARIABLES
+========================= */
+let currentStep = 0;
+const steps = document.querySelectorAll(".form-step");
+const stepIndicators = document.querySelectorAll(".step-indicator");
+const progressFill = document.getElementById("progressFill");
+
+let educationCount = 1;
+
+/* =========================
+   STEP DISPLAY FUNCTION
+========================= */
+function showStep(index) {
+    steps.forEach(step => step.classList.remove("active"));
+    stepIndicators.forEach(ind => ind.classList.remove("active", "completed"));
+
+    steps[index].classList.add("active");
+    stepIndicators[index].classList.add("active");
+
+    for (let i = 0; i < index; i++) {
+        stepIndicators[i].classList.add("completed");
+    }
+
+    const percent = (index / (steps.length - 1)) * 100;
+    progressFill.style.width = percent + "%";
+
+    currentStep = index;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+function nextStep() {
+    if (validateStep(currentStep)) {
+        if (currentStep < steps.length - 1) {
+            showStep(currentStep + 1);
         }
-        
-        function nextStep() {
-            // Validate current step before proceeding
-            if (validateStep(currentStep)) {
-                if (currentStep < steps.length - 1) {
-                    showStep(currentStep + 1);
-                }
-            }
+    }
+}
+
+function prevStep() {
+    if (currentStep > 0) {
+        showStep(currentStep - 1);
+    }
+}
+
+/* =========================
+   VALIDATION
+========================= */
+function clearErrors() {
+    document.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
+    document.querySelectorAll(".error-message").forEach(el => el.style.display = "none");
+}
+
+function validateStep(step) {
+    clearErrors();
+    let valid = true;
+
+    /* STEP 1 : PERSONAL */
+    if (step === 0) {
+        const name = document.getElementById("name");
+        const dob = document.getElementById("dob");
+        const phone = document.getElementById("phone");
+        const photo = document.getElementById("photo");
+
+        if (name.value.trim() === "") {
+            name.classList.add("error");
+            document.getElementById("nameError").style.display = "block";
+            valid = false;
         }
-        
-        function prevStep() {
-            if (currentStep > 0) {
-                showStep(currentStep - 1);
-            }
+
+        if (!dob.value) {
+            dob.classList.add("error");
+            document.getElementById("dobError").style.display = "block";
+            valid = false;
         }
-        
-        // Form validation
-        function validateStep(stepIndex) {
-            let isValid = true;
-            
-            // Reset errors
-            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-            
-            // Step 1 validation
-            if (stepIndex === 0) {
-                const name = document.getElementById('name');
-                const dob = document.getElementById('dob');
-                const phone = document.getElementById('phone');
-                const photo = document.getElementById('photo');
-                
-                if (!name.value.trim()) {
-                    name.classList.add('error');
-                    document.getElementById('nameError').style.display = 'block';
-                    isValid = false;
-                }
-                
-                if (!dob.value) {
-                    dob.classList.add('error');
-                    document.getElementById('dobError').style.display = 'block';
-                    isValid = false;
-                }
-                
-                const phoneRegex = /^[0-9]{10}$/;
-                if (!phoneRegex.test(phone.value.trim())) {
-                    phone.classList.add('error');
-                    document.getElementById('phoneError').style.display = 'block';
-                    isValid = false;
-                }
-                
-                // Check if file is selected
-                if (photo.files.length === 0) {
-                    photo.classList.add('error');
-                    document.getElementById('photoError').style.display = 'block';
-                    isValid = false;
-                }
-            }
-            
-            // Step 4 validation (course name)
-            if (stepIndex === 3) {
-                const courseName = document.getElementById('course_name');
-                if (!courseName.value.trim()) {
-                    courseName.classList.add('error');
-                    document.getElementById('courseError').style.display = 'block';
-                    isValid = false;
-                } else {
-                    // Show success message
-                    document.getElementById('successMessage').style.display = 'block';
-                }
-            }
-            
-            return isValid;
+
+        if (!/^[0-9]{10}$/.test(phone.value)) {
+            phone.classList.add("error");
+            document.getElementById("phoneError").style.display = "block";
+            valid = false;
         }
-        
-        // Education qualification management
-        let educationCount = 1;
-        
-        function addEducation() {
-            educationCount++;
-            const educationArea = document.getElementById('education_area');
-            const newEducation = document.createElement('div');
-            newEducation.className = 'education-box';
-            newEducation.innerHTML = `
-                <div class="education-header">
-                    <div class="education-title">Qualification ${educationCount}</div>
-                    <button type="button" class="remove-btn" onclick="removeEducation(this)">Remove</button>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Degree Name</label>
-                        <input type="text" name="degree[]" placeholder="e.g., Bachelor of Science">
-                    </div>
-                    <div class="form-group">
-                        <label>School / College Name</label>
-                        <input type="text" name="school_college[]" placeholder="Institution name">
-                    </div>
-                    <div class="form-group">
-                        <label>Board / University</label>
-                        <input type="text" name="board[]" placeholder="Board or University">
-                    </div>
-                    <div class="form-group">
-                        <label>Year of Passing</label>
-                        <input type="number" name="year[]" placeholder="YYYY" min="1950" max="2100">
-                    </div>
-                    <div class="form-group">
-                        <label>Percentage / CGPA</label>
-                        <input type="text" name="percentage[]" placeholder="Percentage or CGPA">
-                    </div>
-                </div>
-            `;
-            educationArea.appendChild(newEducation);
-            
-            // Scroll to the new education box
-            newEducation.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        if (photo.files.length === 0) {
+            photo.classList.add("error");
+            document.getElementById("photoError").style.display = "block";
+            valid = false;
+        } else if (photo.files[0].size > 2 * 1024 * 1024) {
+            photo.classList.add("error");
+            document.getElementById("photoError").innerText = "Photo must be under 2MB";
+            document.getElementById("photoError").style.display = "block";
+            valid = false;
         }
-        
-        function removeEducation(button) {
-            const educationBox = button.closest('.education-box');
-            if (document.querySelectorAll('.education-box').length > 1) {
-                educationBox.remove();
-                // Update remaining education titles
-                updateEducationTitles();
-            } else {
-                alert('At least one education qualification is required.');
-            }
+    }
+
+    /* STEP 4 : COURSE & FEES */
+    if (step === 3) {
+        const course = document.getElementById("course_name");
+        const duration = document.getElementById("duration");
+
+        if (course.value.trim() === "") {
+            course.classList.add("error");
+            document.getElementById("courseError").style.display = "block";
+            valid = false;
         }
-        
-        function updateEducationTitles() {
-            const educationBoxes = document.querySelectorAll('.education-box');
-            educationBoxes.forEach((box, index) => {
-                const titleElement = box.querySelector('.education-title');
-                titleElement.textContent = `Qualification ${index + 1}`;
-            });
-            educationCount = educationBoxes.length;
+
+        if (!duration.value || duration.value <= 0) {
+            duration.classList.add("error");
+            valid = false;
         }
-        
-        // File input label update
-        document.getElementById('photo').addEventListener('change', function() {
-            const fileLabel = document.getElementById('fileLabel');
-            if (this.files.length > 0) {
-                fileLabel.textContent = this.files[0].name;
-            } else {
-                fileLabel.textContent = 'Upload your recent passport size photo (Max 2MB)';
-            }
-        });
-        
-        // Form submission
-        document.getElementById('admissionForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validate all steps
-            let allValid = true;
-            for (let i = 0; i < steps.length; i++) {
-                if (!validateStep(i)) {
-                    allValid = false;
-                    showStep(i);
-                    break;
-                }
-            }
-            
-            if (allValid) {
-                // Show submission confirmation
-                alert('Form submitted successfully! Your application is under review.');
-                // In a real application, you would submit the form here
-                // this.submit();
-            }
-        });
-        
-        // Initialize the form
-        showStep(0);
-    </script>
+
+        if (valid) {
+            document.getElementById("successMessage").style.display = "block";
+        }
+    }
+
+    return valid;
+}
+
+/* =========================
+   EDUCATION SECTION
+========================= */
+function addEducation() {
+    educationCount++;
+    const area = document.getElementById("education_area");
+
+    const div = document.createElement("div");
+    div.className = "education-box";
+    div.innerHTML = `
+        <div class="education-header">
+            <div class="education-title">Qualification ${educationCount}</div>
+            <button type="button" class="remove-btn" onclick="removeEducation(this)">Remove</button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Degree Name</label>
+                <input type="text" name="degree[]">
+            </div>
+            <div class="form-group">
+                <label>School / College</label>
+                <input type="text" name="school_college[]">
+            </div>
+            <div class="form-group">
+                <label>Board / University</label>
+                <input type="text" name="board[]">
+            </div>
+            <div class="form-group">
+                <label>Year of Passing</label>
+                <input type="number" name="year[]" min="1950" max="2100">
+            </div>
+            <div class="form-group">
+                <label>Percentage / CGPA</label>
+                <input type="text" name="percentage[]">
+            </div>
+        </div>
+    `;
+
+    area.appendChild(div);
+    updateEducationTitles();
+    div.scrollIntoView({ behavior: "smooth" });
+}
+
+function removeEducation(btn) {
+    const boxes = document.querySelectorAll(".education-box");
+    if (boxes.length > 1) {
+        btn.closest(".education-box").remove();
+        updateEducationTitles();
+    }
+}
+
+function updateEducationTitles() {
+    const boxes = document.querySelectorAll(".education-box");
+    boxes.forEach((box, i) => {
+        box.querySelector(".education-title").innerText = `Qualification ${i + 1}`;
+        const removeBtn = box.querySelector(".remove-btn");
+        removeBtn.style.display = boxes.length > 1 ? "inline-block" : "none";
+    });
+    educationCount = boxes.length;
+}
+
+/* =========================
+   FILE LABEL UPDATE
+========================= */
+document.getElementById("photo").addEventListener("change", function () {
+    const label = document.getElementById("fileLabel");
+    label.innerText = this.files.length ? this.files[0].name : "Upload your recent passport size photo (Max 2MB)";
+});
+
+/* =========================
+   FINAL SUBMIT
+========================= */
+document.getElementById("admissionForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    for (let i = 0; i < steps.length; i++) {
+        if (!validateStep(i)) {
+            showStep(i);
+            return;
+        }
+    }
+
+    this.submit(); // ✅ ACTUAL SUBMISSION
+});
+
+/* =========================
+   INIT
+========================= */
+showStep(0);
+updateEducationTitles();
+</script>
+
 </body>
 </html>
