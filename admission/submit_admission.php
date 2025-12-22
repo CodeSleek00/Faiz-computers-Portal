@@ -29,16 +29,22 @@ $per_month_fee      = (float)($_POST['per_month_fee'] ?? 0);
 $internal_fee       = (float)($_POST['internal_fee'] ?? 0);
 $semester_exam_fee  = (float)($_POST['semester_exam_fee'] ?? 0);
 $additional_fee     = (float)($_POST['additional_fee'] ?? 0);
+/* ================= IMAGE UPLOAD (FIXED) ================= */
 
-/* ================= IMAGE UPLOAD ================= */
 $photo_name = '';
+
+$upload_dir = __DIR__ . "/../uploads/";   // parent folder uploads
+
 if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === 0) {
-    if (!is_dir("uploads")) {
-        mkdir("uploads", 0777, true);
+
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
     }
+
     $photo_name = time() . "_" . basename($_FILES['photo']['name']);
-    move_uploaded_file($_FILES['photo']['tmp_name'], "uploads/" . $photo_name);
+    move_uploaded_file($_FILES['photo']['tmp_name'], $upload_dir . $photo_name);
 }
+
 
 /* ================= ENROLLMENT ID ================= */
 $month = strtoupper(date("M"));
