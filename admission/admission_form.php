@@ -685,10 +685,7 @@
                 </div>
             </form>
         </div>
-        
-        <div style="text-align: center; margin-top: 30px; color: #666; font-size: 0.9rem;">
-            <p>Need help? Contact admissions office at <strong>admissions@institute.edu</strong> or call <strong>+1 (234) 567-8900</strong></p>
-        </div>
+       
     </div>
 
     <script>
