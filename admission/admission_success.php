@@ -92,7 +92,7 @@ td,th{
 <td><?= $data['enrollment_id'] ?></td>
 <td rowspan="4" class="photo">
 <?php if($data['photo']){ ?>
-<img src="uploads/<?= $data['photo'] ?>" width="120" height="140">
+<img src="../uploads/<?= $data['photo'] ?>" width="120" height="140">
 <?php } else { echo "Photo"; } ?>
 </td>
 </tr>
