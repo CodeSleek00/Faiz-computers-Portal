@@ -458,6 +458,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <h1>FAIZ COMPUTER INSTITUTE</h1>
             <h1>Student Admission Form</h1>
             <p>Complete the following steps to submit your admission application. All fields marked with * are required.</p>
         </div>
