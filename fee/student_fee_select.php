@@ -14,7 +14,7 @@ $student = $conn->query("
 // fallback safety
 $student_name = $student['name'] ?? 'Student';
 $photo = (!empty($student['photo']))
-    ? "uploads/students/" . $student['photo']
+    ? "../uploads/students/" . $student['photo']
     : "assets/no-photo.png";
 ?>
 
