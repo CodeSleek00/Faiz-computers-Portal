@@ -294,7 +294,7 @@ th {
 
 <div class="photo-container">
     <?php if($data['photo']){ ?>
-        <img src="../uploads/<?= $data['photo'] ?>" alt="Student Photo">
+        <img src="/../uploads/<?= $data['photo'] ?>" alt="Student Photo">
     <?php } else { ?>
         <div class="photo-placeholder">Passport Size<br>Photo</div>
     <?php } ?>
