@@ -11,18 +11,19 @@ $student = $conn->query("
     LIMIT 1
 ")->fetch_assoc();
 
-// ================= FEES DATA =================
-$fees = $conn->query("
-    SELECT * FROM student_monthly_fee
-    WHERE enrollment_id='$enroll'
-    ORDER BY fee_type, month_name
-");
+// fallback safety
+$student_name = $student['name'] ?? 'Student';
+$photo = (!empty($student['photo']))
+    ? "uploads/students/" . $student['photo']
+    : "assets/no-photo.png";
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Student Fee Details</title>
+
     <style>
         body{
             margin:0;
@@ -118,19 +119,19 @@ $fees = $conn->query("
 
 <!-- ================= STUDENT CARD ================= -->
 <div class="student-card">
-    <img src="<?= $student['photo'] ?: 'assets/no-photo.png' ?>">
+    <img src="<?= $photo ?>" onerror="this.src='assets/no-photo.png'">
     <div class="student-info">
-        <h2><?= htmlspecialchars($student['name']) ?></h2>
-        <p><strong>Enrollment ID:</strong> <?= $enroll ?></p>
-        <p><strong>Institute:</strong> Faiz Computer Institute</p>
+        <h2><?= htmlspecialchars($student_name) ?></h2>
+        <p><strong>Enrollment ID:</strong> <?= htmlspecialchars($enroll) ?></p>
     </div>
 </div>
 
 <form method="POST" action="fee_payment.php">
-<input type="hidden" name="enrollment_id" value="<?= $enroll ?>">
+<input type="hidden" name="enrollment_id" value="<?= htmlspecialchars($enroll) ?>">
 
 <?php
-$groups = ['Registration', 'Semester', 'Monthly'];
+// ALL fee categories
+$groups = ['Registration', 'Semester', 'Monthly', 'Internal', 'Additional'];
 
 foreach ($groups as $type):
 
@@ -139,6 +140,7 @@ $result = $conn->query("
     WHERE enrollment_id='$enroll'
     AND fee_type='$type'
 ");
+
 if ($result->num_rows == 0) continue;
 ?>
 
@@ -157,20 +159,21 @@ if ($result->num_rows == 0) continue;
 <?php while($f = $result->fetch_assoc()): ?>
 <tr>
     <td>
-        <?php if($f['payment_status']=='Pending'): ?>
+        <?php if($f['payment_status'] === 'Pending'): ?>
             <input type="checkbox" name="fee_ids[]" value="<?= $f['id'] ?>">
         <?php else: ?>
             —
         <?php endif; ?>
     </td>
-    <td><?= $f['fee_type'] ?></td>
-    <td><?= $f['month_name'] ?: '-' ?></td>
-    <td><?= number_format($f['fee_amount'],2) ?></td>
+    <td><?= htmlspecialchars($f['fee_type']) ?></td>
+    <td><?= htmlspecialchars($f['month_name'] ?: '-') ?></td>
+    <td><?= number_format($f['fee_amount'], 2) ?></td>
     <td class="<?= strtolower($f['payment_status']) ?>">
-        <?= $f['payment_status'] ?>
+        <?= htmlspecialchars($f['payment_status']) ?>
     </td>
 </tr>
 <?php endwhile; ?>
+
 </table>
 
 <?php endforeach; ?>
