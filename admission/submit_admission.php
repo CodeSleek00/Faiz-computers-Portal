@@ -121,19 +121,27 @@ for ($i = 0; $i < count($degree); $i++) {
 
 // Prepare 12 months
 $months = array_fill(1, 12, $per_month_fee);
-
 $conn->query("
 INSERT INTO student_fee
-(enrollment_id, name, photo, course_name, registration_fee, monthly_fee,
-month_1, month_2, month_3, month_4, month_5, month_6,
-month_7, month_8, month_9, month_10, month_11, month_12,
-july_internal_fee, dec_internal_fee, first_semester_fee, second_semester_fee)
+(
+ enrollment_id, name, photo, course_name,
+ registration_fee, monthly_fee, additional_fee,
+ month_1, month_2, month_3, month_4, month_5, month_6,
+ month_7, month_8, month_9, month_10, month_11, month_12,
+ july_internal_fee, dec_internal_fee,
+ first_semester_fee, second_semester_fee
+)
 VALUES
-('$enrollment_id','$name','$photo_name','$course_name','$registration_fee','$per_month_fee',
-'$months[1]','$months[2]','$months[3]','$months[4]','$months[5]','$months[6]',
-'$months[7]','$months[8]','$months[9]','$months[10]','$months[11]','$months[12]',
-'$internal_fee','$internal_fee','$semester_exam_fee','$semester_exam_fee')
+(
+ '$enrollment_id','$name','$photo_name','$course_name',
+ '$registration_fee','$per_month_fee','$additional_fee',
+ '$months[1]','$months[2]','$months[3]','$months[4]','$months[5]','$months[6]',
+ '$months[7]','$months[8]','$months[9]','$months[10]','$months[11]','$months[12]',
+ '$internal_fee','$internal_fee',
+ '$semester_exam_fee','$semester_exam_fee'
+)
 ");
+
 /* ================= INSERT FEES ================= */
 // 1️⃣ Registration Fee
 $conn->query("
