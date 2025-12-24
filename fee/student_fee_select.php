@@ -1,9 +1,16 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include("db_connect.php");
 
+/* ================= ENROLLMENT CHECK ================= */
 $enroll = $_GET['enroll'] ?? '';
+if (empty($enroll)) {
+    die("Enrollment ID missing in URL");
+}
 
-// ================= STUDENT INFO =================
+/* ================= STUDENT INFO ================= */
 $student = $conn->query("
     SELECT name, photo 
     FROM student_monthly_fee 
@@ -11,11 +18,14 @@ $student = $conn->query("
     LIMIT 1
 ")->fetch_assoc();
 
-// fallback safety
 $student_name = $student['name'] ?? 'Student';
-$photo = (!empty($student['photo']))
-    ? "../uploads/students/" . $student['photo']
-    : "assets/no-photo.png";
+
+/* ================= PHOTO HANDLING ================= */
+if (!empty($student) && !empty($student['photo'])) {
+    $photo = "../uploads/" . $student['photo'];
+} else {
+    $photo = "assets/no-photo.png";
+}
 ?>
 
 <!DOCTYPE html>
@@ -130,7 +140,7 @@ $photo = (!empty($student['photo']))
 <input type="hidden" name="enrollment_id" value="<?= htmlspecialchars($enroll) ?>">
 
 <?php
-// ALL fee categories
+/* ================= ALL FEE TYPES ================= */
 $groups = ['Registration', 'Semester', 'Monthly', 'Internal', 'Additional'];
 
 foreach ($groups as $type):
@@ -159,7 +169,7 @@ if ($result->num_rows == 0) continue;
 <?php while($f = $result->fetch_assoc()): ?>
 <tr>
     <td>
-        <?php if($f['payment_status'] === 'Pending'): ?>
+        <?php if ($f['payment_status'] === 'Pending'): ?>
             <input type="checkbox" name="fee_ids[]" value="<?= $f['id'] ?>">
         <?php else: ?>
             —
