@@ -18,7 +18,7 @@ $students = $conn->query("
 
 <?php while($s = $students->fetch_assoc()): ?>
 <tr>
-    <td><img src="uploads/<?= $s['photo'] ?>" width="50"></td>
+    <td><img src="../uploads/<?= $s['photo'] ?>" width="50"></td>
     <td><?= $s['name'] ?></td>
     <td><?= $s['course_name'] ?></td>
     <td>
