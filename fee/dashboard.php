@@ -7,7 +7,7 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 // Build query with search filter
 $query = "
     SELECT DISTINCT enrollment_id, name, photo, course_name, 
-           email, phone, created_at
+           , phone, created_at
     FROM student_monthly_fee
 ";
 
@@ -15,7 +15,7 @@ if (!empty($search)) {
     $query .= " WHERE name LIKE '%" . $conn->real_escape_string($search) . "%' 
                 OR course_name LIKE '%" . $conn->real_escape_string($search) . "%'
                 OR enrollment_id LIKE '%" . $conn->real_escape_string($search) . "%'
-                OR email LIKE '%" . $conn->real_escape_string($search) . "%'";
+                OR  LIKE '%" . $conn->real_escape_string($search) . "%'";
 }
 
 $query .= " ORDER BY created_at DESC";
