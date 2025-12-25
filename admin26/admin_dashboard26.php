@@ -1,7 +1,7 @@
 <?php
 // admin_students.php
 session_start();
-include("database_connection/db_connect.php");
+include("../database_connection/db_connect.php");
 
 // ================= FETCH ALL STUDENTS =================
 $result = $conn->query("SELECT id, name, contact, enrollment_id, course, photo FROM students26 ORDER BY id DESC");
