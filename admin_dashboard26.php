@@ -6,7 +6,7 @@ include("database_connection/db_connect.php");
 // ================= GET STUDENT =================
 $student_id = $_GET['id'] ?? 26; // default student26
 
-$stmt = $conn->prepare("SELECT id, name, contact_number, enrollment_id, course, photo FROM students WHERE id=? LIMIT 1");
+$stmt = $conn->prepare("SELECT id, name, contact_number, enrollment_id, course, photo FROM students26 WHERE id=? LIMIT 1");
 $stmt->bind_param("i", $student_id);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $photoName = $student['photo'];
     }
 
-    $update = $conn->prepare("UPDATE students SET name=?, contact_number=?, enrollment_id=?, course=?, photo=? WHERE id=?");
+    $update = $conn->prepare("UPDATE students26 SET name=?, contact_number=?, enrollment_id=?, course=?, photo=? WHERE id=?");
     $update->bind_param("sssssi", $name, $contact, $enroll, $course, $photoName, $student_id);
     $update->execute();
 
