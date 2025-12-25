@@ -4,7 +4,7 @@ include("../database_connection/db_connect.php");
 $id = $_GET['id'] ?? 0;
 
 // Fetch student
-$stmt = $conn->prepare("SELECT * FROM students WHERE id=?");
+$stmt = $conn->prepare("SELECT * FROM students26 WHERE id=?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
@@ -28,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $update = $conn->prepare("
-        UPDATE students 
-        SET name=?, contact_number=?, enrollment_id=?, course=?, photo=? 
+        UPDATE students26 
+        SET name=?, contact=?, enrollment_id=?, course=?, photo=? 
         WHERE id=?
     ");
     $update->bind_param("sssssi", $name, $contact, $enroll, $course, $photo, $id);
@@ -59,7 +59,7 @@ button{background:#2563eb;color:#fff;border:none;border-radius:6px}
 
 <form method="post" enctype="multipart/form-data">
     <input type="text" name="name" value="<?= $student['name'] ?>" required>
-    <input type="text" name="contact" value="<?= $student['contact_number'] ?>" required>
+    <input type="text" name="contact" value="<?= $student['contact'] ?>" required>
     <input type="text" name="enrollment" value="<?= $student['enrollment_id'] ?>" required>
     <input type="text" name="course" value="<?= $student['course'] ?>" required>
     <input type="file" name="photo">
