@@ -42,7 +42,7 @@ img{width:50px;height:50px;border-radius:50%;object-fit:cover}
             </tr>
             <?php while($row = $result->fetch_assoc()): ?>
             <tr>
-                <td><img src="uploads/<?= htmlspecialchars($row['photo']) ?>"></td>
+                <td><img src="../uploads/<?= htmlspecialchars($row['photo']) ?>"></td>
                 <td><?= htmlspecialchars($row['name']) ?></td>
                 <td><?= htmlspecialchars($row['contact']) ?></td>
                 <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
