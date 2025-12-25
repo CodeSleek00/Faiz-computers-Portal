@@ -7,7 +7,7 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 // Build query with search filter
 $query = "
     SELECT DISTINCT enrollment_id, name, photo, course_name, 
-           , phone, created_at
+           phone, created_at
     FROM student_monthly_fee
 ";
 
