@@ -44,170 +44,141 @@ if (!empty($search)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Fee Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #dbeafe;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
         }
         
         body {
-            background-color: #f8fafc;
-            color: #334155;
-            line-height: 1.6;
-        }
-        
-        /* Color Scheme: 70% White, 20% Blue, 10% Accent */
-        :root {
-            --white-bg: #ffffff;
-            --white-card: #ffffff;
-            --blue-primary: #1e40af; /* Primary blue */
-            --blue-light: #3b82f6; /* Light blue */
-            --accent-color: #10b981; /* Emerald green accent */
-            --border-color: #e2e8f0;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            min-height: 100vh;
+            padding: 20px;
         }
         
         .container {
             max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 0 auto;
         }
         
-        /* Header Section */
+        /* Header */
         .header {
-            background-color: var(--white-bg);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
         }
         
         .header h1 {
-            color: var(--text-primary);
             font-size: 28px;
             font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .header p {
-            color: var(--text-secondary);
-            font-size: 16px;
-            font-weight: 400;
-        }
-        
-        /* Stats Section - 20% Blue */
-        .stats-section {
-            background-color: var(--blue-primary);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            color: white;
-        }
-        
-        .stats-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .stats-item {
-            text-align: center;
-        }
-        
-        .stats-number {
-            font-size: 32px;
-            font-weight: 700;
+            color: var(--gray-900);
             margin-bottom: 4px;
         }
         
-        .stats-label {
+        .header p {
+            color: var(--gray-600);
             font-size: 14px;
-            opacity: 0.9;
-            font-weight: 400;
         }
         
-        /* Search Section - 70% White */
-        .search-section {
-            background-color: var(--white-card);
+        /* Search */
+        .search-container {
+            background: white;
+            border: 1px solid var(--gray-200);
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            max-width: 600px;
         }
         
         .search-form {
             display: flex;
             gap: 12px;
-            max-width: 600px;
         }
         
         .search-input {
             flex: 1;
-            padding: 14px 20px;
-            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border: 1px solid var(--gray-200);
             border-radius: 8px;
             font-size: 15px;
-            font-weight: 400;
-            color: var(--text-primary);
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
         
         .search-input:focus {
             outline: none;
-            border-color: var(--blue-light);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         
         .search-button {
-            background-color: var(--blue-primary);
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 0 28px;
+            padding: 0 24px;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .search-button:hover {
-            background-color: var(--blue-light);
         }
         
         .clear-button {
-            background-color: transparent;
-            color: var(--blue-primary);
-            border: 1px solid var(--blue-primary);
+            background: transparent;
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
             border-radius: 8px;
             padding: 0 20px;
             font-size: 15px;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
         
-        .clear-button:hover {
-            background-color: rgba(30, 64, 175, 0.05);
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
         
-        /* Table Section - 70% White */
-        .table-section {
-            background-color: var(--white-card);
+        .stat-item {
+            background: white;
+            border: 1px solid var(--gray-200);
             border-radius: 12px;
-            padding: 0;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            padding: 20px;
+            min-width: 200px;
         }
         
+        .stat-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+        
+        /* Table */
         .table-container {
-            overflow-x: auto;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
         }
         
         table {
@@ -215,25 +186,19 @@ if (!empty($search)) {
             border-collapse: collapse;
         }
         
-        thead {
-            background-color: #f8fafc;
-            border-bottom: 2px solid var(--border-color);
-        }
-        
         th {
-            padding: 20px 24px;
+            padding: 16px 24px;
             text-align: left;
-            font-weight: 600;
-            color: var(--text-primary);
+            font-weight: 500;
+            color: var(--gray-600);
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--gray-200);
+            background: var(--gray-50);
         }
         
         td {
             padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
+            border-bottom: 1px solid var(--gray-200);
         }
         
         tr:last-child td {
@@ -241,195 +206,126 @@ if (!empty($search)) {
         }
         
         tr:hover {
-            background-color: #f8fafc;
+            background: var(--gray-50);
         }
         
-        /* Student Photo */
-        .student-photo {
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .student-avatar {
             width: 48px;
             height: 48px;
-            object-fit: cover;
             border-radius: 8px;
-            border: 2px solid var(--border-color);
+            background: var(--primary-light);
+            overflow: hidden;
+            flex-shrink: 0;
         }
         
-        /* Student Info */
-        .student-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
-        .student-name {
+        .student-info h4 {
             font-weight: 500;
-            color: var(--text-primary);
-            font-size: 16px;
+            margin-bottom: 4px;
         }
         
-        .student-id {
+        .student-info p {
+            color: var(--gray-600);
             font-size: 13px;
-            color: var(--text-secondary);
         }
         
-        /* Course Badge */
         .course-badge {
             display: inline-block;
-            background-color: #f0f9ff;
-            color: var(--blue-primary);
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 6px;
             font-size: 13px;
             font-weight: 500;
         }
         
-        /* Action Button - 10% Accent */
         .action-button {
-            background-color: var(--accent-color);
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 10px 24px;
+            border-radius: 6px;
+            padding: 10px 20px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
-            text-align: center;
         }
         
-        .action-button:hover {
-            background-color: #0da271;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-        }
-        
-        /* No Results */
-        .no-results {
-            text-align: center;
+        /* Empty State */
+        .empty-state {
             padding: 60px 24px;
+            text-align: center;
+            color: var(--gray-600);
         }
         
-        .no-results-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: var(--border-color);
-        }
-        
-        .no-results h3 {
+        .empty-state h3 {
             font-size: 18px;
-            color: var(--text-primary);
             margin-bottom: 8px;
-            font-weight: 600;
-        }
-        
-        .no-results p {
-            color: var(--text-secondary);
-            font-size: 15px;
+            color: var(--gray-900);
         }
         
         /* Footer */
         .footer {
-            text-align: center;
-            padding: 24px;
-            color: var(--text-secondary);
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-600);
             font-size: 14px;
-            margin-top: 24px;
+            text-align: center;
         }
         
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 16px;
-                margin: 20px auto;
-            }
-            
-            .header {
-                padding: 24px;
-            }
-            
-            .stats-container {
-                flex-direction: column;
-                gap: 20px;
-                align-items: flex-start;
-            }
-            
-            .stats-item {
-                text-align: left;
+            body {
+                padding: 16px;
             }
             
             .search-form {
                 flex-direction: column;
             }
             
-            th, td {
-                padding: 16px;
-                font-size: 14px;
+            .stats {
+                flex-direction: column;
             }
             
-            .action-button {
-                padding: 8px 16px;
-                font-size: 13px;
+            .stat-item {
+                min-width: auto;
             }
-        }
-        
-        /* Animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+            
+            th, td {
+                padding: 16px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header (70% White) -->
-        <div class="header fade-in">
+        <!-- Header -->
+        <div class="header">
             <h1>Student Fee Management</h1>
-            <p>Manage and process student fee submissions efficiently</p>
+            <p>Submit and manage student fees</p>
         </div>
         
-        <!-- Stats Section (20% Blue) -->
-        <div class="stats-section fade-in">
-            <div class="stats-container">
-                <div class="stats-item">
-                    <div class="stats-number"><?php echo $totalStudents; ?></div>
-                    <div class="stats-label">Total Students</div>
-                </div>
-                
-                <?php if (!empty($search)): ?>
-                <div class="stats-item">
-                    <div class="stats-number"><?php echo $filteredStudents; ?></div>
-                    <div class="stats-label">Search Results</div>
-                </div>
-                
-                <div class="stats-item">
-                    <div class="stats-number" style="color: var(--accent-color);">
-                        <?php echo round(($filteredStudents / $totalStudents) * 100, 1); ?>%
-                    </div>
-                    <div class="stats-label">Match Rate</div>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
-        
-        <!-- Search Section (70% White) -->
-        <div class="search-section fade-in">
+        <!-- Search -->
+        <div class="search-container">
             <form method="GET" action="" class="search-form">
                 <input 
                     type="text" 
                     name="search" 
                     class="search-input" 
-                    placeholder="Search students by name, course, or enrollment ID..." 
+                    placeholder="Search students..." 
                     value="<?php echo htmlspecialchars($search); ?>"
                 >
                 <button type="submit" class="search-button">Search</button>
@@ -439,110 +335,86 @@ if (!empty($search)) {
             </form>
         </div>
         
-        <!-- Table Section (70% White) -->
-        <div class="table-section fade-in">
-            <div class="table-container">
-                <?php if ($filteredStudents > 0): ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Course</th>
-                            <th style="text-align: right;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while($s = $students->fetch_assoc()): ?>
-                        <tr>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 16px;">
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number"><?php echo $totalStudents; ?></div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            
+            <?php if (!empty($search)): ?>
+            <div class="stat-item">
+                <div class="stat-number"><?php echo $filteredStudents; ?></div>
+                <div class="stat-label">Search Results</div>
+            </div>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Table -->
+        <div class="table-container">
+            <?php if ($filteredStudents > 0): ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while($s = $students->fetch_assoc()): ?>
+                    <tr>
+                        <td>
+                            <div class="student-cell">
+                                <div class="student-avatar">
                                     <img 
                                         src="../uploads/<?= htmlspecialchars($s['photo']) ?>" 
-                                        alt="Student Photo" 
-                                        class="student-photo"
-                                        onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($s['name']) ?>&background=1e40af&color=fff&size=96&font-size=0.4&bold=true'"
+                                        alt="<?= htmlspecialchars($s['name']) ?>"
+                                        onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#dbeafe'; this.parentElement.innerHTML='<span style=\'color:#2563eb;font-weight:500\'>' + '<?= strtoupper(substr($s['name'], 0, 1)) ?>' + '</span>'"
                                     >
-                                    <div class="student-info">
-                                        <div class="student-name"><?= htmlspecialchars($s['name']) ?></div>
-                                        <div class="student-id">ID: <?= htmlspecialchars($s['enrollment_id']) ?></div>
-                                    </div>
                                 </div>
-                            </td>
-                            <td>
-                                <span class="course-badge"><?= htmlspecialchars($s['course_name']) ?></span>
-                            </td>
-                            <td style="text-align: right;">
-                                <a href="student_fee_select.php?enroll=<?= $s['enrollment_id'] ?>" class="action-button">
-                                    Submit Fee
-                                </a>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-                <?php else: ?>
-                <div class="no-results">
-                    <div class="no-results-icon">📋</div>
-                    <h3>No students found</h3>
-                    <p>
-                        <?php if (!empty($search)): ?>
-                        No students match "<?php echo htmlspecialchars($search); ?>"
-                        <?php else: ?>
-                        No students found in the database
-                        <?php endif; ?>
-                    </p>
+                                <div class="student-info">
+                                    <h4><?= htmlspecialchars($s['name']) ?></h4>
+                                    <p>ID: <?= htmlspecialchars($s['enrollment_id']) ?></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="course-badge"><?= htmlspecialchars($s['course_name']) ?></span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="student_fee_select.php?enroll=<?= $s['enrollment_id'] ?>" class="action-button">
+                                Submit Fee
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+            <?php else: ?>
+            <div class="empty-state">
+                <h3>No students found</h3>
+                <p>
                     <?php if (!empty($search)): ?>
-                    <p style="margin-top: 16px;">
-                        <a href="?" style="color: var(--blue-primary); text-decoration: none; font-weight: 500;">
-                            ← View all students
-                        </a>
-                    </p>
+                    No results for "<?php echo htmlspecialchars($search); ?>"
+                    <?php else: ?>
+                    No student records available
                     <?php endif; ?>
-                </div>
+                </p>
+                <?php if (!empty($search)): ?>
+                <p style="margin-top: 16px;">
+                    <a href="?" style="color: var(--primary); text-decoration: none;">
+                        ← View all students
+                    </a>
+                </p>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
         </div>
         
         <div class="footer">
-            <p>© <?php echo date('Y'); ?> Student Management System. All rights reserved.</p>
+            <p>© <?php echo date('Y'); ?> Student Management System</p>
         </div>
     </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add fade-in animation to table rows
-            const tableRows = document.querySelectorAll('tbody tr');
-            tableRows.forEach((row, index) => {
-                row.style.opacity = '0';
-                row.style.transform = 'translateY(10px)';
-                
-                setTimeout(() => {
-                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    row.style.opacity = '1';
-                    row.style.transform = 'translateY(0)';
-                }, index * 50);
-            });
-            
-            // Highlight search terms in table
-            const searchTerm = "<?php echo addslashes($search); ?>";
-            if (searchTerm.trim() !== '') {
-                const cells = document.querySelectorAll('td .student-name, td .course-badge');
-                cells.forEach(cell => {
-                    const original = cell.textContent;
-                    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                    const highlighted = original.replace(regex, '<span style="background-color: #fef3c7; padding: 1px 3px; border-radius: 2px;">$1</span>');
-                    if (highlighted !== original) {
-                        cell.innerHTML = highlighted;
-                    }
-                });
-            }
-            
-            // Focus search input on page load
-            const searchInput = document.querySelector('.search-input');
-            if (searchInput) {
-                searchInput.focus();
-            }
-        });
-    </script>
 </body>
 </html>
