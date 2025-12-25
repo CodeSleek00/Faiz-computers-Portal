@@ -101,7 +101,7 @@ if (!empty($search)) {
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 24px;
-            max-width: 600px;
+            
         }
         
         .search-form {
