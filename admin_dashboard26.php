@@ -1,7 +1,7 @@
 <?php
 // student26.php
 session_start();
-include("db_connect.php");
+include("database_connection/db_connect.php");
 
 // ================= GET STUDENT =================
 $student_id = $_GET['id'] ?? 26; // default student26
