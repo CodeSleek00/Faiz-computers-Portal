@@ -1,31 +1,31 @@
 <?php
-include("db_connect.php"); // adjust path if needed
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// ================= BASIC SAFETY =================
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-$conn->set_charset("utf8mb4");
+include("db_connect.php");
 
-// ================= GET ENROLLMENT =================
+/* ================= ENROLLMENT CHECK ================= */
 $enroll = $_GET['enroll'] ?? '';
-
-if ($enroll == '') {
-    die("Enrollment ID missing");
+if (empty($enroll)) {
+    die("Enrollment ID missing in URL");
 }
 
-// ================= FETCH STUDENT INFO =================
+/* ================= STUDENT INFO ================= */
 $student = $conn->query("
     SELECT name, photo 
     FROM student_monthly_fee 
-    WHERE enrollment_id='$enroll'
+    WHERE enrollment_id='$enroll' 
     LIMIT 1
 ")->fetch_assoc();
 
-if (!$student) {
-    die("Student not found");
-}
+$student_name = $student['name'] ?? 'Student';
 
-$student_name = $student['name'];
-$photo = $student['photo'] ?: 'assets/no-photo.png';
+/* ================= PHOTO HANDLING ================= */
+if (!empty($student) && !empty($student['photo'])) {
+    $photo = "../uploads/" . $student['photo'];
+} else {
+    $photo = "assets/no-photo.png";
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,24 +50,9 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             --dark: #212529;
             --gray: #6c757d;
             --gray-light: #dee2e6;
-            --border-radius: 10px;
-            --box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
-            
-            /* Responsive base font size */
-            font-size: 14px;
-        }
-        
-        @media (min-width: 768px) {
-            :root {
-                font-size: 15px;
-            }
-        }
-        
-        @media (min-width: 1200px) {
-            :root {
-                font-size: 16px;
-            }
         }
         
         * {
@@ -80,44 +65,40 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             font-family: 'Poppins', sans-serif;
             background-color: #f5f7ff;
             color: var(--dark);
-            line-height: 1.5;
-            padding: 1rem;
+            line-height: 1.6;
+            padding: 20px;
             min-height: 100vh;
-            font-size: 0.95rem;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            width: 100%;
         }
         
-        /* Header - More Compact */
+        /* Header */
         .header {
             text-align: center;
-            margin-bottom: 1.5rem;
-            padding: 0.5rem;
+            margin-bottom: 30px;
         }
         
         .header h1 {
             color: var(--primary);
             font-weight: 600;
-            margin-bottom: 0.3rem;
-            font-size: 1.5rem;
+            margin-bottom: 10px;
         }
         
         .header p {
             color: var(--gray);
-            font-size: 0.85rem;
+            font-size: 16px;
         }
         
-        /* Student Card - More Compact */
+        /* Student Card */
         .student-card {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 1.2rem;
-            margin-bottom: 1.5rem;
+            padding: 25px;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -126,62 +107,62 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
         }
         
         .student-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         }
         
         .student-photo {
-            width: 5rem;
-            height: 5rem;
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--primary-light);
-            margin-bottom: 0.8rem;
+            border: 5px solid var(--primary-light);
+            margin-bottom: 20px;
         }
         
         .student-info h2 {
-            font-size: 1.2rem;
+            font-size: 24px;
             font-weight: 600;
             color: var(--dark);
-            margin-bottom: 0.3rem;
+            margin-bottom: 8px;
         }
         
         .enrollment-id {
             display: inline-block;
             background: var(--primary-light);
             color: var(--primary);
-            padding: 0.3rem 0.8rem;
+            padding: 6px 15px;
             border-radius: 50px;
             font-weight: 500;
-            font-size: 0.8rem;
-            margin-bottom: 0.5rem;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
         
-        /* Fee Sections - More Compact */
+        /* Fee Sections */
         .fee-section {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 1.2rem;
-            margin-bottom: 1rem;
+            padding: 25px;
+            margin-bottom: 25px;
             transition: var(--transition);
         }
         
         .fee-section:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.09);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
         
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid var(--primary-light);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-light);
         }
         
         .section-title h3 {
-            font-size: 1rem;
+            font-size: 20px;
             font-weight: 600;
             color: var(--secondary);
         }
@@ -189,17 +170,16 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
         .fee-count {
             background: var(--primary);
             color: white;
-            font-size: 0.75rem;
+            font-size: 14px;
             font-weight: 500;
-            padding: 0.2rem 0.6rem;
+            padding: 4px 12px;
             border-radius: 50px;
         }
         
-        /* Fee Table - More Compact */
+        /* Fee Table */
         .fee-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
         }
         
         .fee-table thead {
@@ -207,15 +187,16 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
         }
         
         .fee-table th {
-            padding: 0.8rem 0.5rem;
+            padding: 15px;
             text-align: left;
             font-weight: 600;
             color: var(--primary);
-            border-bottom: 1px solid var(--gray-light);
+            font-size: 15px;
+            border-bottom: 2px solid var(--gray-light);
         }
         
         .fee-table td {
-            padding: 0.7rem 0.5rem;
+            padding: 15px;
             border-bottom: 1px solid var(--gray-light);
         }
         
@@ -227,12 +208,12 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             background-color: #f9f9ff;
         }
         
-        /* Status Badges - Smaller */
+        /* Status Badges */
         .status-badge {
             display: inline-block;
-            padding: 0.3rem 0.7rem;
+            padding: 6px 15px;
             border-radius: 50px;
-            font-size: 0.75rem;
+            font-size: 13px;
             font-weight: 500;
         }
         
@@ -246,7 +227,7 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             color: var(--pending);
         }
         
-        /* Checkbox Styling - Smaller */
+        /* Checkbox Styling */
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -255,8 +236,8 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
         
         .custom-checkbox {
             position: relative;
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
         }
         
@@ -272,11 +253,11 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             position: absolute;
             top: 0;
             left: 0;
-            height: 18px;
-            width: 18px;
+            height: 22px;
+            width: 22px;
             background-color: white;
-            border: 1.5px solid var(--gray-light);
-            border-radius: 4px;
+            border: 2px solid var(--gray-light);
+            border-radius: 6px;
             transition: var(--transition);
         }
         
@@ -297,38 +278,38 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
         
         .custom-checkbox input:checked ~ .checkmark:after {
             display: block;
-            left: 5px;
-            top: 2px;
-            width: 5px;
-            height: 8px;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 10px;
             border: solid white;
-            border-width: 0 1.5px 1.5px 0;
+            border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
         
-        /* Payment Section - More Compact */
+        /* Payment Button */
         .payment-section {
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 1.2rem;
-            margin-top: 1.5rem;
+            padding: 25px;
+            margin-top: 30px;
             text-align: center;
         }
         
         .total-amount {
-            font-size: 1.2rem;
+            font-size: 22px;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 1rem;
+            margin-bottom: 20px;
         }
         
         .pay-btn {
             background: linear-gradient(to right, var(--primary), var(--secondary));
             color: white;
             border: none;
-            padding: 0.8rem 2rem;
-            font-size: 0.9rem;
+            padding: 16px 40px;
+            font-size: 17px;
             font-weight: 600;
             border-radius: var(--border-radius);
             cursor: pointer;
@@ -336,14 +317,13 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.2);
-            min-width: 200px;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
         }
         
         .pay-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
         }
         
         .pay-btn:active {
@@ -351,139 +331,75 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
         }
         
         .pay-btn i {
-            font-size: 1rem;
-        }
-        
-        .pay-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+            font-size: 20px;
         }
         
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 40px 20px;
             color: var(--gray);
         }
         
         .empty-state i {
-            font-size: 2.5rem;
-            margin-bottom: 0.8rem;
+            font-size: 50px;
+            margin-bottom: 15px;
             opacity: 0.6;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
-            body {
-                padding: 0.8rem;
-            }
-            
-            .container {
-                padding: 0 0.5rem;
-            }
-            
-            .header {
-                margin-bottom: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 1.3rem;
-            }
-            
             .student-card {
-                padding: 1rem;
-                margin-bottom: 1rem;
+                padding: 20px;
             }
             
             .student-photo {
-                width: 4rem;
-                height: 4rem;
-                margin-bottom: 0.6rem;
-            }
-            
-            .student-info h2 {
-                font-size: 1.1rem;
+                width: 110px;
+                height: 110px;
             }
             
             .fee-section {
-                padding: 1rem;
-                margin-bottom: 0.8rem;
+                padding: 20px;
             }
             
             .section-title {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 0.5rem;
-                margin-bottom: 0.8rem;
+                gap: 10px;
             }
             
             .fee-table {
-                font-size: 0.8rem;
                 display: block;
                 overflow-x: auto;
             }
             
             .fee-table th,
             .fee-table td {
-                min-width: 90px;
-                padding: 0.6rem 0.4rem;
-            }
-            
-            .fee-table th:first-child,
-            .fee-table td:first-child {
-                min-width: 50px;
+                min-width: 120px;
+                padding: 12px 10px;
             }
             
             .pay-btn {
                 width: 100%;
-                padding: 0.9rem;
-                min-width: auto;
-            }
-            
-            .payment-section {
-                padding: 1rem;
-                margin-top: 1rem;
+                padding: 18px;
             }
         }
         
         @media (max-width: 480px) {
-            :root {
-                font-size: 13px;
-            }
-            
             body {
-                padding: 0.5rem;
+                padding: 15px;
             }
             
             .header h1 {
-                font-size: 1.1rem;
-            }
-            
-            .header p {
-                font-size: 0.75rem;
+                font-size: 24px;
             }
             
             .student-info h2 {
-                font-size: 1rem;
+                font-size: 20px;
             }
             
             .section-title h3 {
-                font-size: 0.9rem;
-            }
-            
-            .total-amount {
-                font-size: 1.1rem;
-            }
-            
-            .custom-checkbox {
-                width: 16px;
-                height: 16px;
-            }
-            
-            .checkmark {
-                width: 16px;
-                height: 16px;
+                font-size: 18px;
             }
         }
     </style>
@@ -507,7 +423,7 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
                 <div class="enrollment-id">
                     <i class="fas fa-id-card"></i> <?= htmlspecialchars($enroll) ?>
                 </div>
-                <p style="font-size: 0.85rem; color: var(--gray);">Select pending fees and proceed to payment</p>
+                <p>Select pending fees and proceed to payment</p>
             </div>
         </div>
         
@@ -551,7 +467,7 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
                 <table class="fee-table">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">Select</th>
+                            <th style="width: 50px;">Select</th>
                             <th>Fee Type</th>
                             <th>Month / Term</th>
                             <th>Amount (₹)</th>
@@ -570,7 +486,7 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
                                         </label>
                                     </div>
                                 <?php else: ?>
-                                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 0.9rem;"></i>
+                                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 18px;"></i>
                                 <?php endif; ?>
                             </td>
                             <td><?= htmlspecialchars($f['fee_type']) ?></td>
@@ -592,12 +508,12 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
             <!-- Payment Summary -->
             <div class="payment-section">
                 <div class="total-amount" id="totalAmount">Total: ₹0.00</div>
-                <button type="submit" class="pay-btn" id="payButton" <?= !$hasPendingFees ? 'disabled' : '' ?> data-has-pending="<?= $hasPendingFees ? 'true' : 'false' ?>">
+                <button type="submit" class="pay-btn" id="payButton" <?= !$hasPendingFees ? 'disabled' : '' ?>>
                     <i class="fas fa-credit-card"></i> Proceed to Secure Payment
                 </button>
                 
                 <?php if (!$hasPendingFees): ?>
-                    <p style="margin-top: 0.8rem; color: var(--success); font-weight: 500; font-size: 0.85rem;">
+                    <p style="margin-top: 15px; color: var(--success); font-weight: 500;">
                         <i class="fas fa-check-circle"></i> All fees are already paid!
                     </p>
                 <?php endif; ?>
@@ -606,6 +522,7 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
     </div>
     
     <script>
+        // Calculate total amount for selected fees
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('input[name="fee_ids[]"]');
             const totalAmountElement = document.getElementById('totalAmount');
@@ -630,7 +547,7 @@ $photo = $student['photo'] ?: 'assets/no-photo.png';
                     payButton.disabled = false;
                 } else {
                     payButton.innerHTML = `<i class="fas fa-credit-card"></i> Proceed to Secure Payment`;
-                    payButton.disabled = !(payButton.dataset.hasPending === 'true');
+                    payButton.disabled = !payButton.hasAttribute('data-has-pending');
                 }
             }
             
