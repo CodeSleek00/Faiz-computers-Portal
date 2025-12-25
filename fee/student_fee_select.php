@@ -1,5 +1,5 @@
 <?php
-include("../db_connect.php"); // adjust path if needed
+include("db_connect.php"); // adjust path if needed
 
 // ================= BASIC SAFETY =================
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
