@@ -44,7 +44,7 @@ img{width:50px;height:50px;border-radius:50%;object-fit:cover}
             <tr>
                 <td><img src="uploads/<?= htmlspecialchars($row['photo']) ?>"></td>
                 <td><?= htmlspecialchars($row['name']) ?></td>
-                <td><?= htmlspecialchars($row['contact_number']) ?></td>
+                <td><?= htmlspecialchars($row['contact']) ?></td>
                 <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
                 <td><?= htmlspecialchars($row['course']) ?></td>
                 <td><a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a></td>
