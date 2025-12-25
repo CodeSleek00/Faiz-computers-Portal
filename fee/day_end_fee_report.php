@@ -34,24 +34,75 @@ $modes = $conn->query("
 <html>
 <head>
     <title>Day End Fee Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial; background:#f5f6fa; padding:20px; }
-        h2 { margin-bottom:10px; }
-        table { width:100%; border-collapse:collapse; background:#fff; }
-        th, td { padding:10px; border:1px solid #ccc; text-align:center; }
-        th { background:#2f3640; color:#fff; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: #fff; 
+            padding: 20px; 
+            color: #333; 
+        }
+        h2 { 
+            margin-bottom: 10px; 
+            color: #2f3640; 
+        }
+        h3 { 
+            margin-top: 20px; 
+            color: #2f3640; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: #fff; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        th, td { 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            text-align: center; 
+        }
+        th { 
+            background: #2f3640; 
+            color: #fff; 
+            font-weight: 600; 
+        }
         .total-box {
-            background:#27ae60;
-            color:#fff;
-            padding:15px;
-            font-size:20px;
-            margin-top:15px;
-            text-align:center;
+            background: #27ae60;
+            color: #fff;
+            padding: 15px;
+            font-size: 20px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
         }
         .filter-box {
-            margin-bottom:15px;
-            background:#fff;
-            padding:10px;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .filter-box label {
+            margin-right: 10px;
+            font-weight: 600;
+        }
+        .filter-box input[type="date"] {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        .filter-box button {
+            padding: 5px 10px;
+            background: #2f3640;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+        .filter-box a {
+            margin-left: 10px;
+            color: #27ae60;
+            text-decoration: none;
+            font-weight: 600;
         }
     </style>
 </head>
