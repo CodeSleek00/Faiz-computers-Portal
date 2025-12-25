@@ -1,33 +1,3 @@
-<?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-include("db_connect.php");
-
-/* ================= ENROLLMENT CHECK ================= */
-$enroll = $_GET['enroll'] ?? '';
-if (empty($enroll)) {
-    die("Enrollment ID missing in URL");
-}
-
-/* ================= STUDENT INFO ================= */
-$student = $conn->query("
-    SELECT name, photo 
-    FROM student_monthly_fee 
-    WHERE enrollment_id='$enroll' 
-    LIMIT 1
-")->fetch_assoc();
-
-$student_name = $student['name'] ?? 'Student';
-
-/* ================= PHOTO HANDLING ================= */
-if (!empty($student) && !empty($student['photo'])) {
-    $photo = "../uploads/" . $student['photo'];
-} else {
-    $photo = "assets/no-photo.png";
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,19 +10,19 @@ if (!empty($student) && !empty($student['photo'])) {
     
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-light: #eef2ff;
-            --secondary: #3a0ca3;
-            --success: #06d6a0;
-            --pending: #ff9e00;
-            --danger: #ef476f;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --gray-light: #dee2e6;
-            --border-radius: 12px;
-            --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s ease;
+            --primary: #007bff;
+            --primary-light: #f0f8ff;
+            --secondary: #0056b3;
+            --success: #28a745;
+            --pending: #ffc107;
+            --danger: #dc3545;
+            --light: #ffffff;
+            --dark: #333333;
+            --gray: #666666;
+            --gray-light: #e9ecef;
+            --border-radius: 4px;
+            --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.2s ease;
         }
         
         * {
@@ -63,42 +33,44 @@ if (!empty($student) && !empty($student['photo'])) {
         
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f5f7ff;
+            background-color: #ffffff;
             color: var(--dark);
-            line-height: 1.6;
-            padding: 20px;
+            line-height: 1.4;
+            padding: 10px;
+            font-size: 12px;
             min-height: 100vh;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
         }
         
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
         
         .header h1 {
             color: var(--primary);
             font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 14px;
+            margin-bottom: 3px;
         }
         
         .header p {
             color: var(--gray);
-            font-size: 16px;
+            font-size: 11px;
         }
         
         /* Student Card */
         .student-card {
-            background: white;
+            background: var(--light);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-bottom: 30px;
+            padding: 12px;
+            margin-bottom: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -107,62 +79,62 @@ if (!empty($student) && !empty($student['photo'])) {
         }
         
         .student-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
         
         .student-photo {
-            width: 130px;
-            height: 130px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             object-fit: cover;
-            border: 5px solid var(--primary-light);
-            margin-bottom: 20px;
+            border: 2px solid var(--primary-light);
+            margin-bottom: 8px;
         }
         
         .student-info h2 {
-            font-size: 24px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--dark);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         
         .enrollment-id {
             display: inline-block;
             background: var(--primary-light);
             color: var(--primary);
-            padding: 6px 15px;
-            border-radius: 50px;
+            padding: 3px 8px;
+            border-radius: 15px;
             font-weight: 500;
-            font-size: 14px;
-            margin-bottom: 15px;
+            font-size: 10px;
+            margin-bottom: 8px;
         }
         
         /* Fee Sections */
         .fee-section {
-            background: white;
+            background: var(--light);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-bottom: 25px;
+            padding: 12px;
+            margin-bottom: 12px;
             transition: var(--transition);
         }
         
         .fee-section:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
         
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--primary-light);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--primary-light);
         }
         
         .section-title h3 {
-            font-size: 20px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--secondary);
         }
@@ -170,16 +142,17 @@ if (!empty($student) && !empty($student['photo'])) {
         .fee-count {
             background: var(--primary);
             color: white;
-            font-size: 14px;
+            font-size: 10px;
             font-weight: 500;
-            padding: 4px 12px;
-            border-radius: 50px;
+            padding: 2px 6px;
+            border-radius: 15px;
         }
         
         /* Fee Table */
         .fee-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 11px;
         }
         
         .fee-table thead {
@@ -187,16 +160,16 @@ if (!empty($student) && !empty($student['photo'])) {
         }
         
         .fee-table th {
-            padding: 15px;
+            padding: 6px;
             text-align: left;
             font-weight: 600;
             color: var(--primary);
-            font-size: 15px;
-            border-bottom: 2px solid var(--gray-light);
+            font-size: 11px;
+            border-bottom: 1px solid var(--gray-light);
         }
         
         .fee-table td {
-            padding: 15px;
+            padding: 6px;
             border-bottom: 1px solid var(--gray-light);
         }
         
@@ -211,19 +184,19 @@ if (!empty($student) && !empty($student['photo'])) {
         /* Status Badges */
         .status-badge {
             display: inline-block;
-            padding: 6px 15px;
-            border-radius: 50px;
-            font-size: 13px;
+            padding: 2px 6px;
+            border-radius: 15px;
+            font-size: 10px;
             font-weight: 500;
         }
         
         .status-paid {
-            background-color: rgba(6, 214, 160, 0.15);
+            background-color: rgba(40, 167, 69, 0.15);
             color: var(--success);
         }
         
         .status-pending {
-            background-color: rgba(255, 158, 0, 0.15);
+            background-color: rgba(255, 193, 7, 0.15);
             color: var(--pending);
         }
         
@@ -236,8 +209,8 @@ if (!empty($student) && !empty($student['photo'])) {
         
         .custom-checkbox {
             position: relative;
-            width: 22px;
-            height: 22px;
+            width: 16px;
+            height: 16px;
             cursor: pointer;
         }
         
@@ -253,11 +226,11 @@ if (!empty($student) && !empty($student['photo'])) {
             position: absolute;
             top: 0;
             left: 0;
-            height: 22px;
-            width: 22px;
+            height: 16px;
+            width: 16px;
             background-color: white;
-            border: 2px solid var(--gray-light);
-            border-radius: 6px;
+            border: 1px solid var(--gray-light);
+            border-radius: 3px;
             transition: var(--transition);
         }
         
@@ -278,10 +251,10 @@ if (!empty($student) && !empty($student['photo'])) {
         
         .custom-checkbox input:checked ~ .checkmark:after {
             display: block;
-            left: 7px;
-            top: 3px;
-            width: 6px;
-            height: 10px;
+            left: 4px;
+            top: 1px;
+            width: 3px;
+            height: 7px;
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
@@ -289,27 +262,27 @@ if (!empty($student) && !empty($student['photo'])) {
         
         /* Payment Button */
         .payment-section {
-            background: white;
+            background: var(--light);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-top: 30px;
+            padding: 12px;
+            margin-top: 15px;
             text-align: center;
         }
         
         .total-amount {
-            font-size: 22px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
         
         .pay-btn {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 16px 40px;
-            font-size: 17px;
+            padding: 8px 20px;
+            font-size: 12px;
             font-weight: 600;
             border-radius: var(--border-radius);
             cursor: pointer;
@@ -317,13 +290,14 @@ if (!empty($student) && !empty($student['photo'])) {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            gap: 4px;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
         }
         
         .pay-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+            background: var(--secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 123, 255, 0.4);
         }
         
         .pay-btn:active {
@@ -331,41 +305,42 @@ if (!empty($student) && !empty($student['photo'])) {
         }
         
         .pay-btn i {
-            font-size: 20px;
+            font-size: 12px;
         }
         
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 15px 8px;
             color: var(--gray);
+            font-size: 11px;
         }
         
         .empty-state i {
-            font-size: 50px;
-            margin-bottom: 15px;
+            font-size: 25px;
+            margin-bottom: 8px;
             opacity: 0.6;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
             .student-card {
-                padding: 20px;
+                padding: 10px;
             }
             
             .student-photo {
-                width: 110px;
-                height: 110px;
+                width: 60px;
+                height: 60px;
             }
             
             .fee-section {
-                padding: 20px;
+                padding: 10px;
             }
             
             .section-title {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 4px;
             }
             
             .fee-table {
@@ -375,31 +350,31 @@ if (!empty($student) && !empty($student['photo'])) {
             
             .fee-table th,
             .fee-table td {
-                min-width: 120px;
-                padding: 12px 10px;
+                min-width: 80px;
+                padding: 5px 4px;
             }
             
             .pay-btn {
                 width: 100%;
-                padding: 18px;
+                padding: 10px;
             }
         }
         
         @media (max-width: 480px) {
             body {
-                padding: 15px;
+                padding: 8px;
             }
             
             .header h1 {
-                font-size: 24px;
+                font-size: 13px;
             }
             
             .student-info h2 {
-                font-size: 20px;
+                font-size: 13px;
             }
             
             .section-title h3 {
-                font-size: 18px;
+                font-size: 12px;
             }
         }
     </style>
@@ -486,7 +461,7 @@ if (!empty($student) && !empty($student['photo'])) {
                                         </label>
                                     </div>
                                 <?php else: ?>
-                                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 18px;"></i>
+                                    <i class="fas fa-check-circle" style="color: var(--success); font-size: 12px;"></i>
                                 <?php endif; ?>
                             </td>
                             <td><?= htmlspecialchars($f['fee_type']) ?></td>
@@ -513,7 +488,7 @@ if (!empty($student) && !empty($student['photo'])) {
                 </button>
                 
                 <?php if (!$hasPendingFees): ?>
-                    <p style="margin-top: 15px; color: var(--success); font-weight: 500;">
+                    <p style="margin-top: 8px; color: var(--success); font-weight: 500; font-size: 11px;">
                         <i class="fas fa-check-circle"></i> All fees are already paid!
                     </p>
                 <?php endif; ?>
