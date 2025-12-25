@@ -132,7 +132,7 @@ if (!empty($search)) {
         }
         
         .search-container {
-            
+            max-width: 800px;
             margin: 0 auto;
             position: relative;
         }
