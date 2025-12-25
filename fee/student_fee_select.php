@@ -1,3 +1,33 @@
+<?php
+include("db_connect.php"); // adjust path if needed
+
+// ================= BASIC SAFETY =================
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$conn->set_charset("utf8mb4");
+
+// ================= GET ENROLLMENT =================
+$enroll = $_GET['enroll'] ?? '';
+
+if ($enroll == '') {
+    die("Enrollment ID missing");
+}
+
+// ================= FETCH STUDENT INFO =================
+$student = $conn->query("
+    SELECT name, photo 
+    FROM student_monthly_fee 
+    WHERE enrollment_id='$enroll'
+    LIMIT 1
+")->fetch_assoc();
+
+if (!$student) {
+    die("Student not found");
+}
+
+$student_name = $student['name'];
+$photo = $student['photo'] ?: 'assets/no-photo.png';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
