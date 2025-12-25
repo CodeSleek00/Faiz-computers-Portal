@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $update->bind_param("sssssi", $name, $contact, $enroll, $course, $photo, $id);
     $update->execute();
 
-    header("Location: admin_students.php");
+    header("Location: admin_dashboard26.php");
     exit;
 }
 ?>
