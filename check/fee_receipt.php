@@ -6,8 +6,8 @@ $id = $_GET['id'];
 
 $data = $conn->query("
     SELECT f.*, s.name, s.course
-    FROM student_fee_payments f
-    JOIN students s ON f.enrollment_id = s.enrollment_id
+    FROM student_monthly_fee f
+    JOIN students26 s ON f.enrollment_id = s.enrollment_id
     WHERE f.id='$id'
 ")->fetch_assoc();
 ?>
