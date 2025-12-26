@@ -4,7 +4,7 @@ include("db_connect.php");
 $enroll = $_POST['enrollment_id'];
 $pass   = $_POST['password'];
 
-$q = $conn->prepare("SELECT * FROM students WHERE enrollment_id=?");
+$q = $conn->prepare("SELECT * FROM students26 WHERE enrollment_id=?");
 $q->bind_param("s", $enroll);
 $q->execute();
 $res = $q->get_result();
