@@ -1,48 +1,46 @@
 <?php
-include 'database_connection/db_connect.php';
 session_start();
+include 'database_connection/db_connect.php';
 
-$enrollment_id = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment_id) {
+if (!isset($_SESSION['enrollment_id'], $_SESSION['login_from'])) {
     header("Location: login-system/login.php");
     exit;
 }
 
-$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
-$student_id = $student['student_id'];
+$enrollment_id = $_SESSION['enrollment_id'];
+$login_from    = $_SESSION['login_from'];
 
-// Fetch assignments
-$assignments = $conn->query("
-    SELECT a.*, s.submission_id, s.marks_awarded
-    FROM assignments a
-    LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
-    LEFT JOIN assignment_submissions s ON s.assignment_id = a.assignment_id AND s.student_id = $student_id
-    WHERE t.student_id = $student_id
-       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
-    GROUP BY a.assignment_id
-    ORDER BY a.created_at DESC
-    LIMIT 3
-");
+/* =========================
+   FETCH STUDENT + NORMALIZE ID
+   ========================= */
+if ($login_from === 'students') {
 
-// Fetch course stats
-$course_stats = $conn->query("
-    SELECT COUNT(*) as total_courses 
-    FROM student_batches 
-    WHERE student_id = $student_id
-")->fetch_assoc();
+    $student = $conn->query("
+        SELECT * FROM students 
+        WHERE enrollment_id = '$enrollment_id'
+    ")->fetch_assoc();
 
-// Fetch assignment stats
-$assignment_stats = $conn->query("
-    SELECT 
-        COUNT(DISTINCT a.assignment_id) as total_assignments,
-        COUNT(s.submission_id) as submitted_assignments
-    FROM assignments a
-    LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
-    LEFT JOIN assignment_submissions s ON s.assignment_id = a.assignment_id AND s.student_id = $student_id
-    WHERE t.student_id = $student_id
-       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
-")->fetch_assoc();
+    $student_id = $student['student_id'] ?? null; // ✅ students table
+
+} else {
+
+    $student = $conn->query("
+        SELECT * FROM students26 
+        WHERE enrollment_id = '$enrollment_id'
+    ")->fetch_assoc();
+
+    $student_id = $student['id'] ?? null; // ✅ students26 table
+}
+
+/* =========================
+   SAFETY CHECK
+   ========================= */
+if (!$student_id) {
+    session_destroy();
+    die("Student not found. Please login again.");
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
