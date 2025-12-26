@@ -36,7 +36,7 @@ $data = $conn->query("
     <p>
     <b>Fee Type:</b> <?= $data['fee_type'] ?><br>
     <b>Month:</b> <?= $data['month_name'] ?><br>
-    <b>Amount:</b> ₹<?= $data['amount'] ?><br>
+    <b>Amount:</b> ₹<?= $data['fee_amount'] ?><br>
     <b>Payment Mode:</b> <?= $data['payment_mode'] ?><br>
     <b>Date:</b> <?= $data['payment_date'] ?><br>
     <b>Receipt No:</b> <?= $data['receipt_no'] ?>
