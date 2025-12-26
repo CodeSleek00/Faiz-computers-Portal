@@ -1,3 +1,4 @@
+<?php
 session_start();
 include("db_connect.php");
 
@@ -12,8 +13,8 @@ $res = $q->get_result();
 if ($res->num_rows == 1) {
     $row = $res->fetch_assoc();
 
-    // ✅ DIRECT PASSWORD MATCH
-    if ($pass === $row['password']) {
+    // DIRECT PASSWORD MATCH (plain password)
+    if ($pass == $row['password']) {
 
         $_SESSION['student_enroll'] = $row['enrollment_id'];
         $_SESSION['student_name']   = $row['name'];
@@ -23,4 +24,5 @@ if ($res->num_rows == 1) {
     }
 }
 
-echo "Invalid Login Details";
+echo "<h3 style='color:red'>Invalid Login Details</h3>";
+?>
