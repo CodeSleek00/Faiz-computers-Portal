@@ -60,7 +60,7 @@ $fees = $conn->query("
         <td><?= $row['payment_date'] ?></td>
         <td><?= $row['fee_type'] ?></td>
         <td><?= $row['month_name'] ?></td>
-        <td>₹<?= $row['amount'] ?></td>
+        <td>₹<?= $row['fee_amount'] ?></td>
         <td>
             <a href="fee_receipt.php?id=<?= $row['id'] ?>" target="_blank">
                 View / Print
