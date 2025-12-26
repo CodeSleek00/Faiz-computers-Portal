@@ -819,7 +819,8 @@ $assignment_stats = $stmt->get_result()->fetch_assoc();
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="uploads/<?= $student['photo'] ?>" alt="User" class="sidebar-user-avatar">
+        <img src="uploads/<?= htmlspecialchars($student['photo']) ?>" alt="User" class="sidebar-user-avatar">
+
             <div class="sidebar-user-info">
                 <h4><?= htmlspecialchars($student['name']) ?></h4>
                 <p><?= $student['enrollment_id'] ?></p>
