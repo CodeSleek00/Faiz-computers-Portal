@@ -2,7 +2,7 @@
 session_start();
 include '../database_connection/db_connect.php';
 
-// If already logged in
+// Already logged in
 if (isset($_SESSION['enrollment_id'])) {
     header("Location: ../test.php");
     exit;
@@ -12,13 +12,18 @@ $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $enrollment_id = trim($_POST['enrollment_id']);
-    $password = $_POST['password'];
+    $password      = $_POST['password'];
 
-    // Tables to check
-    $tables = ['students', 'students26'];
+    // Table-wise password type
+    $tables = [
+        'students'   => 'hashed',     // password_hash
+        'students26' => 'plain'       // normal text
+    ];
+
     $userFound = false;
 
-    foreach ($tables as $table) {
+    foreach ($tables as $table => $type) {
+
         $stmt = $conn->prepare("SELECT * FROM $table WHERE enrollment_id = ?");
         $stmt->bind_param("s", $enrollment_id);
         $stmt->execute();
@@ -26,13 +31,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($row = $result->fetch_assoc()) {
             $userFound = true;
+            $loginOK = false;
 
-            if (password_verify($password, $row['password'])) {
-                // Login success
+            // 🔐 Password check
+            if ($type === 'hashed') {
+                $loginOK = password_verify($password, $row['password']);
+            } else {
+                $loginOK = ($password === $row['password']);
+            }
+
+            if ($loginOK) {
+                // SUCCESS
                 $_SESSION['enrollment_id'] = $row['enrollment_id'];
                 $_SESSION['student_id']    = $row['student_id'] ?? $row['id'];
                 $_SESSION['name']          = $row['name'];
-                $_SESSION['student_table'] = $table; // VERY IMPORTANT
+                $_SESSION['student_table'] = $table;
 
                 header("Location: ../test.php");
                 exit;
