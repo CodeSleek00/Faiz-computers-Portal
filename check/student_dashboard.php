@@ -1,19 +1,32 @@
 <?php
-include("auth_check.php");
-include("db_connect.php");
+// 🚨 ABSOLUTELY NOTHING before this (no space, no HTML)
+session_start();
+
+// Debug (remove later)
+if (!isset($_SESSION)) {
+    die("Session not started");
+}
+
+if (!isset($_SESSION['student_enroll'])) {
+    header("Location: student_login.php");
+    exit;
+}
+
+include("db_connect.php"); // correct path
 
 $enroll = $_SESSION['student_enroll'];
 
 $student = $conn->query("
-    SELECT * FROM students WHERE enrollment_id='$enroll'
+    SELECT * FROM students26 
+    WHERE enrollment_id='$enroll' 
+    LIMIT 1
 ")->fetch_assoc();
 
-$fees = $conn->query("
-    SELECT * FROM student_monthly_fee
-    WHERE enrollment_id='$enroll'
-    ORDER BY payment_date DESC
-");
+if (!$student) {
+    die("Student record not found");
+}
 ?>
+
 
 <!DOCTYPE html>
 <html>
