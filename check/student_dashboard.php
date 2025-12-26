@@ -9,7 +9,7 @@ $student = $conn->query("
 ")->fetch_assoc();
 
 $fees = $conn->query("
-    SELECT * FROM student_fee_payments
+    SELECT * FROM student_monthly_fee
     WHERE enrollment_id='$enroll'
     ORDER BY payment_date DESC
 ");
