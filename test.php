@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../database_connection/db_connect.php';
+include 'database_connection/db_connect.php';
 
 // Check if student is logged in
 if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'])) {
