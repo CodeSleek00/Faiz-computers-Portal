@@ -22,7 +22,7 @@ if (!$student) {
 
 // ================= PAID FEES ONLY =================
 $fees = $conn->query("
-    SELECT * FROM student_fee_payments
+    SELECT * FROM student_monthly_fee
     WHERE enrollment_id='$enroll'
     AND payment_status='Paid'
     ORDER BY payment_date DESC
