@@ -2,40 +2,53 @@
 session_start();
 include '../database_connection/db_connect.php';
 
-// If already logged in, redirect to dashboard
+// If already logged in
 if (isset($_SESSION['enrollment_id'])) {
-    header("Location:../test.php");
+    header("Location: ../test.php");
     exit;
 }
 
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $enrollment_id = $_POST['enrollment_id'];
+    $enrollment_id = trim($_POST['enrollment_id']);
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM students WHERE enrollment_id = ?");
-    $stmt->bind_param("s", $enrollment_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Tables to check
+    $tables = ['students', 'students26'];
+    $userFound = false;
 
-    if ($result && $row = $result->fetch_assoc()) {
-        if (password_verify($password, $row['password'])) {
-            // Login success - store session
-            $_SESSION['enrollment_id'] = $row['enrollment_id'];
-            $_SESSION['student_id'] = $row['student_id'];
-            $_SESSION['name'] = $row['name'];
+    foreach ($tables as $table) {
+        $stmt = $conn->prepare("SELECT * FROM $table WHERE enrollment_id = ?");
+        $stmt->bind_param("s", $enrollment_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-            header("Location: ../test.php");
-            exit;
-        } else {
-            $error = "❌ Incorrect password.";
+        if ($row = $result->fetch_assoc()) {
+            $userFound = true;
+
+            if (password_verify($password, $row['password'])) {
+                // Login success
+                $_SESSION['enrollment_id'] = $row['enrollment_id'];
+                $_SESSION['student_id']    = $row['student_id'] ?? $row['id'];
+                $_SESSION['name']          = $row['name'];
+                $_SESSION['student_table'] = $table; // VERY IMPORTANT
+
+                header("Location: ../test.php");
+                exit;
+            } else {
+                $error = "❌ Incorrect password.";
+                break;
+            }
         }
-    } else {
+    }
+
+    if (!$userFound && empty($error)) {
         $error = "❌ Invalid enrollment ID.";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
