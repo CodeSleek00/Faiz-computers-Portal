@@ -5,127 +5,103 @@ $exam_id = $_GET['exam_id'];
 
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();
 
+/* ===================== FIXED RESULT QUERY ===================== */
 $results = $conn->query("
-    SELECT s.*, st.name, st.enrollment_id 
+    SELECT 
+        s.score, s.submitted_at,
+        st.name, st.enrollment_id
     FROM exam_submissions s
-    JOIN students st ON s.student_id = st.student_id
+    JOIN students st 
+        ON s.student_id = st.student_id 
+       AND s.student_table = 'students'
     WHERE s.exam_id = $exam_id
+
+    UNION ALL
+
+    SELECT 
+        s.score, s.submitted_at,
+        st26.name, st26.enrollment_id
+    FROM exam_submissions s
+    JOIN students26 st26 
+        ON s.student_id = st26.id
+       AND s.student_table = 'students26'
+    WHERE s.exam_id = $exam_id
+
+    ORDER BY submitted_at DESC
 ");
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Exam Results</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="image.png">
-    <link rel="apple-touch-icon" href="image.png">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Exam Results</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 40px 20px;
-            font-family: 'Poppins', sans-serif;
-            background: #f1f5f9;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .header h2 {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 600;
-            color: #4f46e5;
-        }
-
-        .exam-meta {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        thead {
-            background: #eef2ff;
-        }
-
-        th, td {
-            padding: 14px 12px;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        th {
-            font-weight: 600;
-            color: #3730a3;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        td {
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        tr:hover {
-            background: #f9fafb;
-        }
-
-        .score {
-            font-weight: 600;
-            color: #16a34a;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 20px;
-            color: #6b7280;
-        }
-
-        .footer {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #6b7280;
-            text-align: right;
-        }
-
-        @media (max-width: 768px) {
-            th, td {
-                font-size: 13px;
-                padding: 10px;
-            }
-
-            .header h2 {
-                font-size: 18px;
-            }
-        }
-    </style>
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 40px 20px;
+    font-family: 'Poppins', sans-serif;
+    background: #f1f5f9;
+}
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+.header h2 {
+    margin: 0;
+    color: #4f46e5;
+}
+.exam-meta {
+    font-size: 14px;
+    color: #6b7280;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+thead { background: #eef2ff; }
+th, td {
+    padding: 14px;
+    font-size: 14px;
+}
+th {
+    text-align: left;
+    color: #3730a3;
+}
+tr:hover { background: #f9fafb; }
+.score {
+    font-weight: 600;
+    color: #16a34a;
+}
+.no-data {
+    text-align: center;
+    padding: 20px;
+    color: #6b7280;
+}
+.footer {
+    margin-top: 20px;
+    font-size: 13px;
+    text-align: right;
+    color: #6b7280;
+}
+</style>
 </head>
-<body>
 
+<body>
 <div class="container">
 
     <div class="header">
@@ -138,19 +114,20 @@ $results = $conn->query("
 
     <table>
         <thead>
-            <tr>
-                <th>#</th>
-                <th>Student Name</th>
-                <th>Enrollment No.</th>
-                <th>Score</th>
-                <th>Submitted On</th>
-            </tr>
+        <tr>
+            <th>#</th>
+            <th>Student Name</th>
+            <th>Enrollment No</th>
+            <th>Score</th>
+            <th>Submitted On</th>
+        </tr>
         </thead>
         <tbody>
-        <?php 
+        <?php
         if ($results->num_rows > 0) {
             $i = 1;
-            while ($r = $results->fetch_assoc()) { ?>
+            while ($r = $results->fetch_assoc()) {
+        ?>
             <tr>
                 <td><?= $i++ ?></td>
                 <td><?= htmlspecialchars($r['name']) ?></td>
@@ -158,10 +135,9 @@ $results = $conn->query("
                 <td class="score"><?= $r['score'] ?> / <?= $exam['total_questions'] ?></td>
                 <td><?= date('d M Y, h:i A', strtotime($r['submitted_at'])) ?></td>
             </tr>
-        <?php } 
-        } else { ?>
+        <?php } } else { ?>
             <tr>
-                <td colspan="5" class="no-data">No submissions found for this exam.</td>
+                <td colspan="5" class="no-data">No submissions found</td>
             </tr>
         <?php } ?>
         </tbody>
@@ -172,6 +148,5 @@ $results = $conn->query("
     </div>
 
 </div>
-
 </body>
 </html>
