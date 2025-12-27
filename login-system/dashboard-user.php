@@ -10,27 +10,35 @@ if (!isset($_SESSION['enrollment_id'])) {
 $enrollment_id = $_SESSION['enrollment_id'];
 $student = null;
 
-/* 🔹 Check students table */
+/* 🔹 students table */
 $stmt = $conn->prepare("SELECT * FROM students WHERE enrollment_id = ?");
 $stmt->bind_param("s", $enrollment_id);
 $stmt->execute();
-$result = $stmt->get_result();
+$res = $stmt->get_result();
 
-if ($result->num_rows === 1) {
-    $student = $result->fetch_assoc();
+if ($res->num_rows === 1) {
+    $student = $res->fetch_assoc();
+
+    // 🔥 normalize field
+    $student['contact_number'] = $student['contact_number'];
+
 } else {
-    /* 🔹 Check students26 table */
+
+    /* 🔹 students26 table */
     $stmt = $conn->prepare("SELECT * FROM students26 WHERE enrollment_id = ?");
     $stmt->bind_param("s", $enrollment_id);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $res = $stmt->get_result();
 
-    if ($result->num_rows === 1) {
-        $student = $result->fetch_assoc();
+    if ($res->num_rows === 1) {
+        $student = $res->fetch_assoc();
+
+        // 🔥 normalize field
+        $student['contact_number'] = $student['contact'];
     }
 }
 
-/* 🔹 If not found anywhere */
+/* 🔹 not found anywhere */
 if (!$student) {
     echo "Student record not found!";
     exit;
