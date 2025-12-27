@@ -2,23 +2,49 @@
 include '../database_connection/db_connect.php';
 session_start();
 
-$enrollment = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment) die("Please login.");
+/* ================= LOGIN CHECK ================= */
+if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'])) {
+    die("Please login.");
+}
 
-$student = $conn->query("SELECT student_id, name FROM students WHERE enrollment_id = '$enrollment'")->fetch_assoc();
-$student_id = $student['student_id'];
+$enrollment   = $_SESSION['enrollment_id'];
+$studentTable = $_SESSION['student_table']; // students OR students26
+
+/* ================= FETCH STUDENT ================= */
+$stmt = $conn->prepare("SELECT student_id, name FROM $studentTable WHERE enrollment_id = ?");
+$stmt->bind_param("s", $enrollment);
+$stmt->execute();
+$student = $stmt->get_result()->fetch_assoc();
+
+if (!$student) {
+    die("Student not found.");
+}
+
+$student_id   = $student['student_id'];
 $student_name = $student['name'];
 
+/* ================= FETCH STUDY MATERIAL ================= */
 $query = "
     SELECT DISTINCT m.*
     FROM study_materials m
     JOIN study_material_targets t ON m.id = t.material_id
-    WHERE t.student_id = $student_id
-       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
+    WHERE 
+        (t.student_id = ? AND t.student_table = ?)
+        OR 
+        t.batch_id IN (
+            SELECT batch_id 
+            FROM student_batches 
+            WHERE student_id = ? AND student_table = ?
+        )
     ORDER BY m.uploaded_at DESC
 ";
-$data = $conn->query($query);
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("isis", $student_id, $studentTable, $student_id, $studentTable);
+$stmt->execute();
+$data = $stmt->get_result();
 ?>
+
 
 <!DOCTYPE html>
 <html>
