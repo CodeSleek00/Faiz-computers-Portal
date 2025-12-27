@@ -1,435 +1,261 @@
 <?php
 include '../database_connection/db_connect.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $batch_name = $_POST['batch_name'];
-    $timing = $_POST['timing'];
-    $students = $_POST['students'];
+/* =========================
+   FORM SUBMIT LOGIC
+========================= */
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $stmt = $conn->prepare("INSERT INTO batches (batch_name, timing) VALUES (?, ?)");
-    $stmt->bind_param("ss", $batch_name, $timing);
-    $stmt->execute();
-    $batch_id = $conn->insert_id;
+    $batch_name = trim($_POST['batch_name']);
+    $timing     = trim($_POST['timing']);
+    $students   = $_POST['students'] ?? [];
 
-    foreach ($students as $student_id) {
-        $stmt2 = $conn->prepare("INSERT INTO student_batches (student_id, batch_id) VALUES (?, ?)");
-        $stmt2->bind_param("ii", $student_id, $batch_id);
-        $stmt2->execute();
+    if ($batch_name === "" || $timing === "") {
+        die("Batch name and timing are required");
     }
 
-    header("Location: view_batch.php");
-    exit;
+    if (count($students) === 0) {
+        die("Please select at least one student");
+    }
+
+    $conn->begin_transaction();
+
+    try {
+        // Insert batch
+        $stmt = $conn->prepare(
+            "INSERT INTO batches (batch_name, timing) VALUES (?, ?)"
+        );
+        $stmt->bind_param("ss", $batch_name, $timing);
+        $stmt->execute();
+
+        $batch_id = $conn->insert_id;
+
+        // Insert students into batch
+        $stmt2 = $conn->prepare(
+            "INSERT IGNORE INTO student_batches (student_id, student_table, batch_id)
+             VALUES (?, ?, ?)"
+        );
+
+        foreach ($students as $data) {
+            list($student_id, $student_table) = explode('|', $data);
+            $stmt2->bind_param("isi", $student_id, $student_table, $batch_id);
+            $stmt2->execute();
+        }
+
+        $conn->commit();
+        header("Location: view_batch.php?success=1");
+        exit;
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        die("Error: " . $e->getMessage());
+    }
 }
 
-$students = $conn->query("SELECT * FROM students ORDER BY name ASC");
-$courses = $conn->query("SELECT DISTINCT course FROM students");
+/* =========================
+   FETCH STUDENTS (students + students26)
+========================= */
+$students = $conn->query("
+    SELECT student_id, name, enrollment_id, course, 'students' AS student_table
+    FROM students
+
+    UNION ALL
+
+    SELECT student_id, name, enrollment_id, course, 'students26' AS student_table
+    FROM students26
+
+    ORDER BY name ASC
+");
+
+$courses = $conn->query("
+    SELECT DISTINCT course FROM (
+        SELECT course FROM students
+        UNION ALL
+        SELECT course FROM students26
+    ) x
+");
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Create Batch</title>
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #4361ee;
-            --primary-light: #e0e7ff;
-            --secondary: #3f37c9;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --success: #10b981;
-        }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<style>
+:root {
+    --primary:#4361ee;
+    --primary-light:#e0e7ff;
+    --secondary:#3f37c9;
+    --text:#1e293b;
+    --text-light:#64748b;
+    --border:#e2e8f0;
+    --bg:#f8fafc;
+    --card:#ffffff;
+}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-        }
+body {
+    font-family:Inter,sans-serif;
+    background:var(--bg);
+    margin:0;
+}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+.container {
+    max-width:1200px;
+    margin:auto;
+    padding:2rem;
+}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:2rem;
+}
 
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text);
-        }
+.card {
+    background:var(--card);
+    border-radius:1rem;
+    padding:2rem;
+    margin-bottom:2rem;
+    box-shadow:0 4px 10px rgba(0,0,0,.05);
+}
 
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-        }
+.form-grid {
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1.5rem;
+}
 
-        .back-btn:hover {
-            background-color: var(--primary-light);
-        }
+.form-control {
+    width:100%;
+    padding:.75rem 1rem;
+    border:1px solid var(--border);
+    border-radius:.5rem;
+}
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
+.student-list {
+    max-height:420px;
+    overflow-y:auto;
+    border:1px solid var(--border);
+    border-radius:.75rem;
+}
 
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--text);
-        }
+.student-item {
+    display:flex;
+    align-items:center;
+    padding:1rem;
+    border-bottom:1px solid var(--border);
+}
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
+.student-item:hover {
+    background:var(--primary-light);
+}
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+.student-checkbox {
+    margin-right:1rem;
+    width:18px;
+    height:18px;
+    accent-color:var(--primary);
+}
 
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
+.btn {
+    background:var(--primary);
+    color:#fff;
+    padding:1rem;
+    border:none;
+    width:100%;
+    border-radius:.5rem;
+    font-size:1rem;
+    cursor:pointer;
+}
 
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-family: inherit;
-            font-size: 0.9375rem;
-            transition: border-color 0.2s;
-        }
+@media(max-width:768px){
+    .form-grid{grid-template-columns:1fr;}
+}
+</style>
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        }
+<script>
+function filterStudents(){
+    let s = document.getElementById('search').value.toLowerCase();
+    let c = document.getElementById('course').value.toLowerCase();
 
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
+    document.querySelectorAll('.student-item').forEach(item=>{
+        let name = item.dataset.name;
+        let enroll = item.dataset.enroll;
+        let course = item.dataset.course;
 
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
+        let show =
+            (name.includes(s) || enroll.includes(s)) &&
+            (c === "" || course === c);
 
-        .student-list-container {
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            overflow: hidden;
-        }
-
-        .student-list-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--primary-light);
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .student-list-header h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .selected-count {
-            background-color: var(--primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .student-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .student-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            transition: background-color 0.2s;
-        }
-
-        .student-item:last-child {
-            border-bottom: none;
-        }
-
-        .student-item:hover {
-            background-color: var(--primary-light);
-        }
-
-        .student-checkbox {
-            margin-right: 1rem;
-            width: 1.25rem;
-            height: 1.25rem;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .student-info {
-            flex: 1;
-        }
-
-        .student-name {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .student-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.875rem;
-            color: var(--text-light);
-        }
-
-        .student-id {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .student-course {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9375rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            width: 100%;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-light);
-        }
-
-        .empty-state i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--border);
-        }
-
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .filters {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .filter-group {
-                width: 100%;
-            }
-        }
-    </style>
-
-    <script>
-        function filterStudents() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const course = document.getElementById('courseFilter').value.toLowerCase();
-            const items = document.querySelectorAll('.student-item');
-            let selectedCount = 0;
-
-            items.forEach(item => {
-                const name = item.dataset.name.toLowerCase();
-                const enroll = item.dataset.enroll.toLowerCase();
-                const courseVal = item.dataset.course.toLowerCase();
-
-                const matchText = name.includes(search) || enroll.includes(search);
-                const matchCourse = course === "" || courseVal === course;
-
-                if (matchText && matchCourse) {
-                    item.style.display = 'flex';
-                    if (item.querySelector('.student-checkbox').checked) {
-                        selectedCount++;
-                    }
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            document.getElementById('selectedCount').textContent = selectedCount;
-        }
-
-        function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
-            document.getElementById('selectedCount').textContent = checkboxes.length;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('.student-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updateSelectedCount);
-            });
-            
-            // Initialize count
-            updateSelectedCount();
-        });
-    </script>
+        item.style.display = show ? "flex" : "none";
+    });
+}
+</script>
 </head>
+
 <body>
-
 <div class="container">
-    <div class="header">
-        <h1>Create New Batch</h1>
-        <a href="view_batch.php" class="back-btn">
-            <i class="fas fa-arrow-left"></i> Back to Batches
-        </a>
-    </div>
 
-    <form method="POST">
-        <div class="card">
-            <h2 class="card-title">Batch Information</h2>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="batch_name">Batch Name</label>
-                    <input type="text" id="batch_name" name="batch_name" class="form-control" placeholder="e.g. CS-2023-Batch-A" required>
-                </div>
-                <div class="form-group">
-                    <label for="timing">Schedule</label>
-                    <input type="text" id="timing" name="timing" class="form-control" placeholder="e.g. Mon-Fri 9:00 AM - 11:00 AM" required>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="card-title">Add Students</h2>
-            
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="searchInput">Search Students</label>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name or ID..." onkeyup="filterStudents()">
-                </div>
-                <div class="filter-group">
-                    <label for="courseFilter">Filter by Course</label>
-                    <select id="courseFilter" class="form-control" onchange="filterStudents()">
-                        <option value="">All Courses</option>
-                        <?php while ($course = $courses->fetch_assoc()) { ?>
-                            <option value="<?= htmlspecialchars($course['course']) ?>"><?= htmlspecialchars($course['course']) ?></option>
-                        <?php } ?>
-                    </select>
-                </div>
-            </div>
-
-            <div class="student-list-container">
-                <div class="student-list-header">
-                    <h3>Available Students</h3>
-                    <span id="selectedCount" class="selected-count">0</span>
-                </div>
-                
-                <div class="student-list">
-                    <?php if ($students->num_rows > 0): ?>
-                        <?php while ($row = $students->fetch_assoc()) { ?>
-                            <div class="student-item" 
-                                 data-name="<?= htmlspecialchars($row['name']) ?>" 
-                                 data-enroll="<?= htmlspecialchars($row['enrollment_id']) ?>" 
-                                 data-course="<?= htmlspecialchars($row['course']) ?>">
-                                <input type="checkbox" 
-                                       name="students[]" 
-                                       value="<?= $row['student_id'] ?>" 
-                                       class="student-checkbox">
-                                <div class="student-info">
-                                    <div class="student-name"><?= htmlspecialchars($row['name']) ?></div>
-                                    <div class="student-meta">
-                                        <span class="student-id">
-                                            <i class="fas fa-id-card"></i>
-                                            <?= htmlspecialchars($row['enrollment_id']) ?>
-                                        </span>
-                                        <span class="student-course">
-                                            <i class="fas fa-book"></i>
-                                            <?= htmlspecialchars($row['course']) ?>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php } ?>
-                    <?php else: ?>
-                        <div class="empty-state">
-                            <i class="fas fa-user-graduate"></i>
-                            <p>No students found. Please add students first.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-plus-circle"></i> Create Batch
-        </button>
-    </form>
+<div class="header">
+    <h2>Create New Batch</h2>
+    <a href="view_batch.php">← Back</a>
 </div>
 
+<form method="POST">
+
+<div class="card">
+    <div class="form-grid">
+        <input type="text" name="batch_name" class="form-control" placeholder="Batch Name" required>
+        <input type="text" name="timing" class="form-control" placeholder="Timing" required>
+    </div>
+</div>
+
+<div class="card">
+    <div class="form-grid">
+        <input type="text" id="search" class="form-control" placeholder="Search name / enrollment" onkeyup="filterStudents()">
+
+        <select id="course" class="form-control" onchange="filterStudents()">
+            <option value="">All Courses</option>
+            <?php while($c = $courses->fetch_assoc()){ ?>
+                <option value="<?= strtolower($c['course']) ?>"><?= $c['course'] ?></option>
+            <?php } ?>
+        </select>
+    </div>
+
+    <br>
+
+    <div class="student-list">
+        <?php while($row = $students->fetch_assoc()){ ?>
+            <div class="student-item"
+                 data-name="<?= strtolower($row['name']) ?>"
+                 data-enroll="<?= strtolower($row['enrollment_id']) ?>"
+                 data-course="<?= strtolower($row['course']) ?>">
+
+                <input type="checkbox"
+                       class="student-checkbox"
+                       name="students[]"
+                       value="<?= $row['student_id'].'|'.$row['student_table'] ?>">
+
+                <div>
+                    <strong><?= $row['name'] ?></strong><br>
+                    <?= $row['enrollment_id'] ?> | <?= $row['course'] ?> |
+                    <small><?= $row['student_table'] ?></small>
+                </div>
+            </div>
+        <?php } ?>
+    </div>
+</div>
+
+<button class="btn">
+    <i class="fas fa-plus-circle"></i> Create Batch
+</button>
+
+</form>
+</div>
 </body>
 </html>
