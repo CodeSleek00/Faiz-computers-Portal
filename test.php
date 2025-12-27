@@ -1,61 +1,120 @@
 <?php
-include 'database_connection/db_connect.php';
 session_start();
+require_once 'database_connection/db_connect.php';
 
-$enrollment_id = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment_id) {
+/* =====================================================
+   1. LOGIN CHECK
+===================================================== */
+if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'], $_SESSION['student_id'])) {
     header("Location: login-system/login.php");
     exit;
 }
-$studentRes = $conn->query("
-    SELECT student_id, name, photo, enrollment_id 
-    FROM students 
-    WHERE enrollment_id = '$enrollment_id'
+
+$enrollment_id = $_SESSION['enrollment_id'];
+$table         = $_SESSION['student_table']; // students OR students26
+$student_id    = (int) $_SESSION['student_id'];
+
+/* =====================================================
+   2. FETCH STUDENT DATA (SAFE & DYNAMIC)
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT 
+        name,
+        enrollment_id,
+        photo
+    FROM $table
+    WHERE enrollment_id = ?
     LIMIT 1
 ");
+$stmt->bind_param("s", $enrollment_id);
+$stmt->execute();
+$res = $stmt->get_result();
 
-if (!$studentRes || $studentRes->num_rows === 0) {
-    // Session is valid but student not found
+if ($res->num_rows === 0) {
     session_destroy();
     header("Location: login-system/login.php?error=student_not_found");
     exit;
 }
 
-$student = $studentRes->fetch_assoc();
-$student_id = (int)$student['student_id'];
+$student = $res->fetch_assoc();
 
-// Fetch assignments
-$assignments = $conn->query("
-    SELECT a.*, s.submission_id, s.marks_awarded
+/* =====================================================
+   3. COURSE / BATCH COUNT
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT COUNT(*) AS total_courses
+    FROM student_batches
+    WHERE student_id = ?
+");
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$course_stats = $stmt->get_result()->fetch_assoc();
+
+/* =====================================================
+   4. ASSIGNMENT STATS
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT 
+        COUNT(DISTINCT a.assignment_id) AS total_assignments,
+        COUNT(DISTINCT s.submission_id) AS submitted_assignments
     FROM assignments a
-    LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
-    LEFT JOIN assignment_submissions s ON s.assignment_id = a.assignment_id AND s.student_id = $student_id
-    WHERE t.student_id = $student_id
-       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
+    INNER JOIN assignment_targets t 
+        ON a.assignment_id = t.assignment_id
+    LEFT JOIN assignment_submissions s 
+        ON s.assignment_id = a.assignment_id 
+        AND s.student_id = ?
+    WHERE 
+        t.student_id = ?
+        OR t.batch_id IN (
+            SELECT batch_id 
+            FROM student_batches 
+            WHERE student_id = ?
+        )
+");
+$stmt->bind_param("iii", $student_id, $student_id, $student_id);
+$stmt->execute();
+$assignment_stats = $stmt->get_result()->fetch_assoc();
+
+/* =====================================================
+   5. RECENT ASSIGNMENTS (LAST 3)
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT 
+        a.assignment_id,
+        a.title,
+        a.question_text,
+        a.created_at,
+        s.submission_id,
+        s.marks_awarded
+    FROM assignments a
+    INNER JOIN assignment_targets t 
+        ON a.assignment_id = t.assignment_id
+    LEFT JOIN assignment_submissions s 
+        ON s.assignment_id = a.assignment_id 
+        AND s.student_id = ?
+    WHERE 
+        t.student_id = ?
+        OR t.batch_id IN (
+            SELECT batch_id 
+            FROM student_batches 
+            WHERE student_id = ?
+        )
     GROUP BY a.assignment_id
     ORDER BY a.created_at DESC
     LIMIT 3
 ");
+$stmt->bind_param("iii", $student_id, $student_id, $student_id);
+$stmt->execute();
+$assignments = $stmt->get_result();
 
-// Fetch course stats
-$course_stats = $conn->query("
-    SELECT COUNT(*) as total_courses 
-    FROM student_batches 
-    WHERE student_id = $student_id
-")->fetch_assoc();
-
-// Fetch assignment stats
-$assignment_stats = $conn->query("
-    SELECT 
-        COUNT(DISTINCT a.assignment_id) as total_assignments,
-        COUNT(s.submission_id) as submitted_assignments
-    FROM assignments a
-    LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
-    LEFT JOIN assignment_submissions s ON s.assignment_id = a.assignment_id AND s.student_id = $student_id
-    WHERE t.student_id = $student_id
-       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
-")->fetch_assoc();
+/* =====================================================
+   6. FALLBACK SAFETY (ZERO VALUES)
+===================================================== */
+$course_stats['total_courses']          = $course_stats['total_courses'] ?? 0;
+$assignment_stats['total_assignments']  = $assignment_stats['total_assignments'] ?? 0;
+$assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assignments'] ?? 0;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
