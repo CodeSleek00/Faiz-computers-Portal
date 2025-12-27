@@ -14,43 +14,164 @@ $results = $conn->query("
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>View Results</title>
+    <meta charset="UTF-8">
+    <title>Exam Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: Arial; background: #eef1f5; padding: 40px; }
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Poppins', sans-serif;
+            background: #f1f5f9;
+            color: #1f2937;
+        }
+
         .container {
-            max-width: 950px; margin: auto; background: white; padding: 30px;
-            border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            max-width: 1000px;
+            margin: auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            color: #4f46e5;
+        }
+
+        .exam-meta {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background: #eef2ff;
+        }
+
         th, td {
-            padding: 12px; border-bottom: 1px solid #ddd; text-align: left;
+            padding: 14px 12px;
+            text-align: left;
+            font-size: 14px;
         }
-        th { background-color: #f8f9fa; }
+
+        th {
+            font-weight: 600;
+            color: #3730a3;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .score {
+            font-weight: 600;
+            color: #16a34a;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #6b7280;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 13px;
+                padding: 10px;
+            }
+
+            .header h2 {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>🧾 Results - <?= htmlspecialchars($exam['exam_name']) ?></h2>
+
+    <div class="header">
+        <h2>🧾 Exam Results</h2>
+        <div class="exam-meta">
+            <strong><?= htmlspecialchars($exam['exam_name']) ?></strong><br>
+            Total Questions: <?= $exam['total_questions'] ?>
+        </div>
+    </div>
+
     <table>
-        <tr>
-            <th>Student Name</th>
-            <th>Enrollment</th>
-            <th>Score</th>
-            <th>Submitted On</th>
-        </tr>
-        <?php while ($r = $results->fetch_assoc()) { ?>
-        <tr>
-            <td><?= $r['name'] ?></td>
-            <td><?= $r['enrollment_id'] ?></td>
-            <td><?= $r['score'] ?> / <?= $exam['total_questions'] ?></td>
-            <td><?= date('d M Y, h:i A', strtotime($r['submitted_at'])) ?></td>
-        </tr>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>Enrollment No.</th>
+                <th>Score</th>
+                <th>Submitted On</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php 
+        if ($results->num_rows > 0) {
+            $i = 1;
+            while ($r = $results->fetch_assoc()) { ?>
+            <tr>
+                <td><?= $i++ ?></td>
+                <td><?= htmlspecialchars($r['name']) ?></td>
+                <td><?= htmlspecialchars($r['enrollment_id']) ?></td>
+                <td class="score"><?= $r['score'] ?> / <?= $exam['total_questions'] ?></td>
+                <td><?= date('d M Y, h:i A', strtotime($r['submitted_at'])) ?></td>
+            </tr>
+        <?php } 
+        } else { ?>
+            <tr>
+                <td colspan="5" class="no-data">No submissions found for this exam.</td>
+            </tr>
         <?php } ?>
+        </tbody>
     </table>
+
+    <div class="footer">
+        Generated on <?= date('d M Y, h:i A') ?>
+    </div>
+
 </div>
+
 </body>
 </html>
