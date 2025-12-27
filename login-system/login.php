@@ -2,40 +2,66 @@
 session_start();
 include '../database_connection/db_connect.php';
 
-// If already logged in, redirect to dashboard
+// Already logged in
 if (isset($_SESSION['enrollment_id'])) {
-    header("Location:../test.php");
+    header("Location: ../test.php");
     exit;
 }
 
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $enrollment_id = $_POST['enrollment_id'];
-    $password = $_POST['password'];
+    $enrollment_id = trim($_POST['enrollment_id']);
+    $password      = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM students WHERE enrollment_id = ?");
-    $stmt->bind_param("s", $enrollment_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Table-wise password type
+    $tables = [
+        'students'   => 'hashed',     // password_hash
+        'students26' => 'plain'       // normal text
+    ];
 
-    if ($result && $row = $result->fetch_assoc()) {
-        if (password_verify($password, $row['password'])) {
-            // Login success - store session
-            $_SESSION['enrollment_id'] = $row['enrollment_id'];
-            $_SESSION['student_id'] = $row['student_id'];
-            $_SESSION['name'] = $row['name'];
+    $userFound = false;
 
-            header("Location: ../test.php");
-            exit;
-        } else {
-            $error = "❌ Incorrect password.";
+    foreach ($tables as $table => $type) {
+
+        $stmt = $conn->prepare("SELECT * FROM $table WHERE enrollment_id = ?");
+        $stmt->bind_param("s", $enrollment_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($row = $result->fetch_assoc()) {
+            $userFound = true;
+            $loginOK = false;
+
+            // 🔐 Password check
+            if ($type === 'hashed') {
+                $loginOK = password_verify($password, $row['password']);
+            } else {
+                $loginOK = ($password === $row['password']);
+            }
+
+            if ($loginOK) {
+                // SUCCESS
+                $_SESSION['enrollment_id'] = $row['enrollment_id'];
+                $_SESSION['student_id']    = $row['student_id'] ?? $row['id'];
+                $_SESSION['name']          = $row['name'];
+                $_SESSION['student_table'] = $table;
+
+                header("Location: ../test.php");
+                exit;
+            } else {
+                $error = "❌ Incorrect password.";
+                break;
+            }
         }
-    } else {
+    }
+
+    if (!$userFound && empty($error)) {
         $error = "❌ Invalid enrollment ID.";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
