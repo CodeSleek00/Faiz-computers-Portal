@@ -35,15 +35,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         die("❌ No students selected for assignment.");
     }
 
-    // Prevent duplicates: Only insert if not already submitted or assigned (SAFE)
-    $stmt_check = $conn->prepare("SELECT submission_id FROM assignment_submissions WHERE assignment_id = ? AND student_id = ? LIMIT 1");
-    $stmt_insert = $conn->prepare("INSERT INTO assignment_submissions (assignment_id, student_id, submitted_at) VALUES (?, ?, NOW())");
+    // Insert into assignment_targets (NOT assignment_submissions!)
+    // assignment_targets is for assigning assignments to students
+    // assignment_submissions is only for when students actually submit their work
+    $stmt_check = $conn->prepare("SELECT assignment_target_id FROM assignment_targets WHERE assignment_id = ? AND student_id = ? LIMIT 1");
+    $stmt_insert = $conn->prepare("INSERT INTO assignment_targets (assignment_id, student_id) VALUES (?, ?)");
     
     foreach ($student_ids as $student_id) {
         $stmt_check->bind_param("ii", $assignment_id, $student_id);
         $stmt_check->execute();
         $check_result = $stmt_check->get_result();
         
+        // Only insert if not already assigned
         if ($check_result->num_rows == 0) {
             $stmt_insert->bind_param("ii", $assignment_id, $student_id);
             $stmt_insert->execute();
