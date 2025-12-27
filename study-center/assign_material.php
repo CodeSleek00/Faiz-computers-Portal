@@ -4,7 +4,8 @@ include '../database_connection/db_connect.php';
 // Fetch all batches and students
 $batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
 $students = $conn->query("SELECT student_id, name, enrollment_id FROM students ORDER BY name ASC");
-$students26 = $conn->query("SELECT id AS student_id, name FROM students26 ORDER BY name ASC"); // student_id as alias
+$students26 = $conn->query("SELECT id AS student_id, name, enrollment_id FROM students26 ORDER BY name ASC");
+
 
 // Handle form submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -105,8 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="student_<?= $s['student_id'] ?>">Student: <?= htmlspecialchars($s['name']) ?> (<?= htmlspecialchars($s['enrollment_id']) ?>)</option>
                     <?php } ?>
                    <?php while ($s26 = $students26->fetch_assoc()) { ?>
-    <option value="student26_<?= $s26['student_id'] ?>">Student26: <?= htmlspecialchars($s26['name']) ?>  <?= $s26['enrollment_id'] ?></option>
+    <option value="student26_<?= $s26['student_id'] ?>">Student26: <?= htmlspecialchars($s26['name']) ?> (<?= htmlspecialchars($s26['enrollment_id']) ?>)</option>
 <?php } ?>
+
 
                 </optgroup>
             </select>
