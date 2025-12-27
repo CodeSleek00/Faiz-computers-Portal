@@ -144,7 +144,7 @@ tr:hover { background: #f9fafb; }
     </table>
 
     <div class="footer">
-        Generated on <?= date('d M Y, h:i A') ?>
+        Generated on <?= date('d M Y A') ?>
     </div>
 
 </div>
