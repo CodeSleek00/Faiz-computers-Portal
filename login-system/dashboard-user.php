@@ -8,18 +8,7 @@ if (!isset($_SESSION['enrollment_id'])) {
 }
 
 $enrollment_id = $_SESSION['enrollment_id'];
-
-/* ===== SAFE FETCH ===== */
-$stmt = $conn->prepare("SELECT * FROM students WHERE enrollment_id = ?");
-$stmt->bind_param("s", $enrollment_id);
-$stmt->execute();
-$student = $stmt->get_result()->fetch_assoc();
-
-if (!$student) {
-    die("Student not found");
-}
-
-$photo = !empty($student['photo']) ? $student['photo'] : 'default.png';
+$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,40 +20,31 @@ $photo = !empty($student['photo']) ? $student['photo'] : 'default.png';
     <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- ===== SAME CSS (unchanged) ===== -->
-    <style>
-        /* --- CSS SAME AS YOU PROVIDED (unchanged) --- */
-        /* (CSS omitted here for brevity – keep your existing CSS exactly same) */
-    </style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <!-- ✅ Proper Back Button -->
-    <a href="../test.php" class="back-btn" title="Back">
+    <!-- ✅ BACK BUTTON FIX (HTML ONLY) -->
+    <a href="../test.php" class="back-btn">
         <i class="fas fa-arrow-left"></i>
     </a>
 
     <div class="profile-card">
 
-        <!-- HEADER -->
         <div class="profile-header">
             <h1><?= htmlspecialchars($student['name']) ?></h1>
             <p><?= htmlspecialchars($student['course']) ?></p>
         </div>
 
-        <!-- PHOTO -->
-        <img src="../uploads/<?= htmlspecialchars($photo) ?>" 
+        <!-- PROFILE IMAGE -->
+        <img src="../uploads/<?= htmlspecialchars($student['photo']) ?>" 
              alt="Profile Photo" 
-             class="profile-pic"
-             onerror="this.src='../uploads/default.png'">
+             class="profile-pic">
 
-        <!-- BODY -->
         <div class="profile-body">
 
-            <!-- BASIC INFO -->
             <div class="profile-section">
                 <h2 class="section-title">
                     <i class="fas fa-user-graduate"></i> Basic Information
@@ -72,7 +52,7 @@ $photo = !empty($student['photo']) ? $student['photo'] : 'default.png';
 
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="info-label">Enrollment ID</span>
+                        <span class="info-label">Student ID</span>
                         <span class="info-value"><?= htmlspecialchars($student['enrollment_id']) ?></span>
                     </div>
 
@@ -89,13 +69,13 @@ $photo = !empty($student['photo']) ? $student['photo'] : 'default.png';
                     <div class="info-item">
                         <span class="info-label">Status</span>
                         <span class="status-badge status-active">
-                            <i class="fas fa-circle" style="font-size:8px;"></i> Active
+                            <i class="fas fa-circle" style="font-size: 8px;"></i>
+                            Active
                         </span>
                     </div>
                 </div>
             </div>
 
-            <!-- CONTACT -->
             <div class="profile-section">
                 <h2 class="section-title">
                     <i class="fas fa-address-card"></i> Contact Details
@@ -114,7 +94,6 @@ $photo = !empty($student['photo']) ? $student['photo'] : 'default.png';
                 </div>
             </div>
 
-            <!-- ACTIONS -->
             <div class="action-buttons">
                 <a href="logout.php" class="btn btn-danger">
                     <i class="fas fa-sign-out-alt"></i> Logout
