@@ -1,249 +1,163 @@
 <?php
 require '../../database_connection/db_connect.php';
 
-// Validate and sanitize exam_id
+/* ================= VALIDATE EXAM ID ================= */
 $exam_id = isset($_GET['exam_id']) ? intval($_GET['exam_id']) : 0;
 if ($exam_id <= 0) {
-    die("Invalid exam ID");
+    die("Invalid Exam ID");
 }
 
-// Check database connection
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
-}
+/* ================= FETCH ALL STUDENTS (MERGED) ================= */
+/*
+ We normalize data:
+ enrollment_id = COMMON KEY
+*/
+$students = $conn->query("
+    SELECT enrollment_id, name FROM students
+    UNION
+    SELECT enrollment_id, name FROM students26
+    ORDER BY name ASC
+");
 
-// Fetch students and batches
-$students = $conn->query("SELECT * FROM students ORDER BY name ASC");
+/* ================= FETCH BATCHES ================= */
 $batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $type = $_POST['assign_type'] ?? '';
-    $assignments_made = 0;
+/* ================= FORM SUBMIT ================= */
+$message = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $assign_type = $_POST['assign_type'] ?? '';
+    $count = 0;
 
     try {
-        // First remove all existing assignments for this exam
-        $conn->query("DELETE FROM exam_assignments WHERE exam_id = $exam_id");
+        // Remove old assignments
+        $stmt = $conn->prepare("DELETE FROM exam_assignments WHERE exam_id = ?");
+        $stmt->bind_param("i", $exam_id);
+        $stmt->execute();
 
-        if ($type == 'student' && !empty($_POST['student_ids'])) {
-            $stmt = $conn->prepare("INSERT INTO exam_assignments (exam_id, student_id) VALUES (?, ?)");
-            foreach ($_POST['student_ids'] as $student_id) {
-                $student_id = intval($student_id);
-                if ($student_id > 0) {
-                    $stmt->bind_param("ii", $exam_id, $student_id);
-                    $stmt->execute();
-                    $assignments_made++;
-                }
+        /* ========= ASSIGN TO STUDENTS ========= */
+        if ($assign_type === 'student' && !empty($_POST['enrollment_ids'])) {
+
+            $stmt = $conn->prepare("
+                INSERT INTO exam_assignments (exam_id, enrollment_id)
+                VALUES (?, ?)
+            ");
+
+            foreach ($_POST['enrollment_ids'] as $enroll) {
+                $stmt->bind_param("is", $exam_id, $enroll);
+                $stmt->execute();
+                $count++;
             }
-        } 
-        elseif ($type == 'batch' && !empty($_POST['batch_ids'])) {
-            $stmt = $conn->prepare("INSERT INTO exam_assignments (exam_id, batch_id) VALUES (?, ?)");
-            foreach ($_POST['batch_ids'] as $batch_id) {
-                $batch_id = intval($batch_id);
-                if ($batch_id > 0) {
-                    $stmt->bind_param("ii", $exam_id, $batch_id);
-                    $stmt->execute();
-                    $assignments_made++;
-                }
-            }
-        } 
-        elseif ($type == 'all') {
-            $result = $conn->query("INSERT INTO exam_assignments (exam_id, student_id) 
-                                  SELECT $exam_id, student_id FROM students");
-            $assignments_made = $conn->affected_rows;
         }
 
-        $message = "Successfully reassigned exam to $assignments_made recipients";
+        /* ========= ASSIGN TO BATCHES ========= */
+        elseif ($assign_type === 'batch' && !empty($_POST['batch_ids'])) {
+
+            $stmt = $conn->prepare("
+                INSERT INTO exam_assignments (exam_id, batch_id)
+                VALUES (?, ?)
+            ");
+
+            foreach ($_POST['batch_ids'] as $batch_id) {
+                $stmt->bind_param("ii", $exam_id, $batch_id);
+                $stmt->execute();
+                $count++;
+            }
+        }
+
+        /* ========= ASSIGN TO ALL ========= */
+        elseif ($assign_type === 'all') {
+
+            $conn->query("
+                INSERT INTO exam_assignments (exam_id, enrollment_id)
+                SELECT $exam_id, enrollment_id FROM students
+                UNION
+                SELECT $exam_id, enrollment_id FROM students26
+            ");
+
+            $count = $conn->affected_rows;
+        }
+
+        $message = "✅ Exam successfully assigned to $count record(s)";
+
     } catch (Exception $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = "❌ Error: " . $e->getMessage();
     }
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Re-Assign Exam</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            padding: 20px;
-            background: #f3f4f6;
-        }
-        .form-box {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            max-width: 750px;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #4f46e5;
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: 600;
-            display: block;
-            margin-top: 20px;
-        }
-        select, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        .btn {
-            margin-top: 25px;
-            padding: 10px 20px;
-            background: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .btn:hover {
-            background: #4338ca;
-        }
-        #studentList, #batchList {
-            max-height: 250px;
-            overflow-y: auto;
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: #f9f9f9;
-        }
-        #studentList div, #batchList div {
-            margin-bottom: 8px;
-            padding: 5px;
-            border-radius: 4px;
-        }
-        #studentList div:hover, #batchList div:hover {
-            background: #e0e7ff;
-        }
-        .message {
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #86efac;
-        }
-        .error {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #fca5a5;
-        }
-        .select-all {
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
+        body{font-family:Poppins;background:#f1f5f9;padding:20px}
+        .box{background:#fff;padding:25px;border-radius:10px;max-width:800px;margin:auto}
+        h2{text-align:center;color:#4f46e5}
+        label{font-weight:600;margin-top:15px;display:block}
+        select,input{width:100%;padding:10px;margin-top:5px}
+        .list{border:1px solid #ddd;padding:10px;margin-top:10px;max-height:250px;overflow:auto}
+        .btn{margin-top:20px;background:#4f46e5;color:#fff;padding:12px;border:none;width:100%;cursor:pointer}
+        .msg{margin-bottom:15px;padding:10px;background:#dcfce7;color:#166534}
+        .err{background:#fee2e2;color:#b91c1c}
     </style>
 </head>
 <body>
-    <div class="form-box">
-        <h2>Re-Assign Exam</h2>
-        
-        <?php if (!empty($message)): ?>
-            <div class="<?= strpos($message, 'Error') !== false ? 'error' : 'message' ?>">
-                <?= htmlspecialchars($message) ?>
-            </div>
-        <?php endif; ?>
 
-        <form method="POST">
-            <label>Select Assignment Type:</label>
-            <select name="assign_type" id="assignType" onchange="toggleSection(this.value)" required>
-                <option value="">--Select--</option>
-                <option value="student">Specific Students</option>
-                <option value="batch">Batch</option>
-                <option value="all">All Students</option>
-            </select>
+<div class="box">
+<h2>Re-Assign Exam</h2>
 
-            <!-- Students Section -->
-            <div id="students" style="display:none;">
-                <label>Search Students:</label>
-                <input type="text" id="studentSearch" placeholder="Type to search..." onkeyup="filterList('studentSearch', 'studentList')">
+<?php if($message): ?>
+<div class="<?= str_contains($message,'Error')?'err':'msg' ?>">
+<?= htmlspecialchars($message) ?>
+</div>
+<?php endif; ?>
 
-                <div class="select-all">
-                    <input type="checkbox" id="selectAllStudents" onclick="toggleAllCheckboxes('studentList', this.checked)">
-                    <label for="selectAllStudents">Select All Students</label>
-                </div>
+<form method="post">
+<label>Assignment Type</label>
+<select name="assign_type" onchange="toggle(this.value)" required>
+    <option value="">-- Select --</option>
+    <option value="student">Specific Students</option>
+    <option value="batch">Batch</option>
+    <option value="all">All Students</option>
+</select>
 
-                <div id="studentList">
-                    <?php while ($s = $students->fetch_assoc()): ?>
-                        <div>
-                            <input type="checkbox" name="student_ids[]" value="<?= htmlspecialchars($s['student_id']) ?>"> 
-                            <?= htmlspecialchars($s['name']) ?> (ID: <?= htmlspecialchars($s['student_id']) ?>)
-                        </div>
-                    <?php endwhile; ?>
-                </div>
-            </div>
+<div id="students" style="display:none">
+<label>Select Students</label>
+<div class="list">
+<?php while($s=$students->fetch_assoc()): ?>
+<div>
+<input type="checkbox" name="enrollment_ids[]" value="<?= $s['enrollment_id'] ?>">
+<?= htmlspecialchars($s['name']) ?> (<?= $s['enrollment_id'] ?>)
+</div>
+<?php endwhile; ?>
+</div>
+</div>
 
-            <!-- Batches Section -->
-            <div id="batches" style="display:none;">
-                <label>Search Batches:</label>
-                <input type="text" id="batchSearch" placeholder="Type to search..." onkeyup="filterList('batchSearch', 'batchList')">
+<div id="batches" style="display:none">
+<label>Select Batches</label>
+<div class="list">
+<?php while($b=$batches->fetch_assoc()): ?>
+<div>
+<input type="checkbox" name="batch_ids[]" value="<?= $b['batch_id'] ?>">
+<?= htmlspecialchars($b['batch_name']) ?>
+</div>
+<?php endwhile; ?>
+</div>
+</div>
 
-                <div class="select-all">
-                    <input type="checkbox" id="selectAllBatches" onclick="toggleAllCheckboxes('batchList', this.checked)">
-                    <label for="selectAllBatches">Select All Batches</label>
-                </div>
+<button class="btn">Re-Assign Exam</button>
+</form>
+</div>
 
-                <div id="batchList">
-                    <?php mysqli_data_seek($batches, 0); while ($b = $batches->fetch_assoc()): ?>
-                        <div>
-                            <input type="checkbox" name="batch_ids[]" value="<?= htmlspecialchars($b['batch_id']) ?>"> 
-                            <?= htmlspecialchars($b['batch_name']) ?> (ID: <?= htmlspecialchars($b['batch_id']) ?>)
-                        </div>
-                    <?php endwhile; ?>
-                </div>
-            </div>
+<script>
+function toggle(type){
+    document.getElementById('students').style.display = (type==='student')?'block':'none';
+    document.getElementById('batches').style.display = (type==='batch')?'block':'none';
+}
+</script>
 
-            <button type="submit" class="btn">✅ Re-Assign Exam</button>
-        </form>
-    </div>
-
-    <script>
-        function toggleSection(type) {
-            document.getElementById('students').style.display = (type === 'student') ? 'block' : 'none';
-            document.getElementById('batches').style.display = (type === 'batch') ? 'block' : 'none';
-        }
-
-        function filterList(searchInputId, listContainerId) {
-            const input = document.getElementById(searchInputId).value.toLowerCase();
-            const items = document.getElementById(listContainerId).getElementsByTagName('div');
-            
-            for (let i = 0; i < items.length; i++) {
-                const text = items[i].textContent.toLowerCase();
-                items[i].style.display = text.includes(input) ? '' : 'none';
-            }
-        }
-
-        function toggleAllCheckboxes(containerId, checked) {
-            const container = document.getElementById(containerId);
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            
-            checkboxes.forEach(checkbox => {
-                if (!checkbox.id.includes('selectAll')) {
-                    checkbox.checked = checked;
-                }
-            });
-        }
-
-        // Initialize form based on any previously selected type
-        document.addEventListener('DOMContentLoaded', function() {
-            const assignType = document.getElementById('assignType');
-            if (assignType.value) {
-                toggleSection(assignType.value);
-            }
-        });
-    </script>
 </body>
 </html>
 <?php $conn->close(); ?>
