@@ -2,29 +2,35 @@
 include '../../database_connection/db_connect.php';
 session_start();
 
+// Check if student is logged in
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
 if (!$enrollment_id) die("Login required.");
 
 // Fetch student from students or students26
-$student = $conn->query("SELECT *, 'students' AS student_table FROM students WHERE enrollment_id = '$enrollment_id' 
-    UNION 
-    SELECT *, 'students26' AS student_table FROM students26 WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+if (!$student) {
+    $student = $conn->query("SELECT * FROM students26 WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+}
 
 if (!$student) die("Student not found.");
 
-$student_id = $student['student_id'];
-$exam_id = $_GET['exam_id'];
+$student_id = $student['student_id'] ?? $student['id']; // id for students26
 
-// Fetch exam and questions
+// Get exam ID from GET
+$exam_id = $_GET['exam_id'] ?? 0;
+$exam_id = intval($exam_id);
+
+// Fetch exam
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();
-$questions = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id ORDER BY RAND()");
+if (!$exam) die("Exam not found.");
 
-$question_array = [];
-while ($q = $questions->fetch_assoc()) {
-    $question_array[] = $q;
+// Fetch questions
+$questions_result = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id ORDER BY RAND()");
+$questions = [];
+while ($q = $questions_result->fetch_assoc()) {
+    $questions[] = $q;
 }
-
-$total = count($question_array);
+$total = count($questions);
 ?>
 
 <!DOCTYPE html>
@@ -36,92 +42,37 @@ $total = count($question_array);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f2f4f8;
-            margin: 0;
-            padding: 0;
-        }
-        .exam-container {
-            max-width: 1000px;
-            margin: 30px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-        }
-        .exam-header {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-        .exam-info h2 { margin:0; color:#2c3e50; }
-        .exam-info p { margin:5px 0; color:#555; font-size:15px; }
-        .exam-profile img { width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:5px; }
-        #timer { font-weight:bold; font-size:16px; color:#e74c3c; }
-
-        .bubble-nav {
-            margin-bottom: 25px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .bubble {
-            width:36px; height:36px;
-            background:#ecf0f1;
-            color:#333;
-            border-radius:50%;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.2s;
-        }
-        .bubble.active { background:#4f46e5; color:#fff; }
-        .bubble.answered { background:#28a745; color:#fff; }
-
-        .question-card {
-            display:none;
-            padding:25px;
-            border:1px solid #ddd;
-            border-radius:10px;
-            background:#fafafa;
-            margin-bottom:20px;
-        }
-        .question-card.active { display:block; }
-        .question-title { font-weight:600; font-size:17px; margin-bottom:15px; color:#333; }
-        .option { margin:10px 0; }
-
-        .option input[type=radio]:checked + label { font-weight:600; color:#4f46e5; }
-
-        .btns { display:flex; justify-content:space-between; margin-top:20px; }
-        .btn { background:#4f46e5; border:none; color:white; padding:10px 20px; border-radius:6px; cursor:pointer; }
-        .btn:disabled { background:#ccc; cursor:not-allowed; }
-        .submit-btn { background:#28a745; width:100%; margin-top:25px; padding:12px; }
-
-        @media(max-width:768px){
-            .exam-header { flex-direction:column; align-items:flex-start; gap:15px; }
-            .bubble { width:30px; height:30px; font-size:14px; }
-        }
+        body { font-family: 'Poppins', sans-serif; background: #f2f4f8; margin: 0; padding: 0; }
+        .exam-container { max-width: 1000px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .exam-header { display: flex; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
+        .exam-info h2 { margin: 0; color: #2c3e50; }
+        .exam-info p { margin: 5px 0; color: #555; font-size: 15px; }
+        .exam-profile { text-align: right; }
+        .exam-profile img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; }
+        #timer { font-weight: bold; font-size: 16px; color: #e74c3c; }
+        .bubble-nav { margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .bubble { width: 36px; height: 36px; background: #ecf0f1; color: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .bubble.active { background: #4f46e5; color: #fff; }
+        .question-card { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 10px; background: #fafafa; margin-bottom: 20px; }
+        .question-card.active { display: block; }
+        .question-title { font-weight: 600; font-size: 17px; margin-bottom: 15px; color: #333; }
+        .option { margin: 10px 0; }
+        .btns { display: flex; justify-content: space-between; margin-top: 20px; }
+        .btn { background: #4f46e5; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .submit-btn { background: #28a745; width: 100%; margin-top: 25px; padding: 12px; }
+        @media (max-width: 768px) { .exam-header { flex-direction: column; align-items: flex-start; gap: 15px; } .exam-profile { text-align: left; } .bubble { width: 30px; height: 30px; font-size: 14px; } }
     </style>
-
     <script>
         let current = 0;
         let total = <?= $total ?>;
-        let duration = <?= $exam['duration'] ?> * 60;
+        let duration = <?= intval($exam['duration']) ?> * 60; // in seconds
 
-        function showQuestion(index){
-            document.querySelectorAll('.question-card').forEach((el,i)=>{
-                el.classList.toggle('active', i===index);
-                document.querySelectorAll('.bubble')[i].classList.toggle('active', i===index);
-            });
+        function showQuestion(index) {
+            document.querySelectorAll('.question-card').forEach((el,i) => { el.classList.toggle('active', i===index); document.querySelectorAll('.bubble')[i].classList.toggle('active', i===index); });
             document.getElementById('prevBtn').disabled = index===0;
             document.getElementById('nextBtn').disabled = index===total-1;
-            document.getElementById('submitBtn').style.display = index===total-1?'block':'none';
+            document.getElementById('submitBtn').style.display = index===total-1 ? 'block' : 'none';
         }
 
         function nextQuestion(){ if(current<total-1){ current++; showQuestion(current); } }
@@ -131,11 +82,7 @@ $total = count($question_array);
         function startTimer(){
             const timerEl=document.getElementById("timer");
             const interval=setInterval(()=>{
-                if(duration<=0){
-                    clearInterval(interval);
-                    alert("Time's up! Submitting exam.");
-                    document.getElementById("examForm").submit();
-                }
+                if(duration<=0){ clearInterval(interval); alert("Time's up! Submitting exam."); document.getElementById("examForm").submit(); }
                 let mins=Math.floor(duration/60);
                 let secs=duration%60;
                 timerEl.innerText=`${mins}:${secs<10?'0'+secs:secs}`;
@@ -143,25 +90,10 @@ $total = count($question_array);
             },1000);
         }
 
-        function updateBubbleStatus(){
-            document.querySelectorAll('.question-card').forEach((q,index)=>{
-                const checked=q.querySelector('input[type=radio]:checked');
-                const bubble=document.querySelectorAll('.bubble')[index];
-                if(checked) bubble.classList.add('answered');
-            });
-        }
-
-        window.onload=()=>{
-            showQuestion(0);
-            startTimer();
-            document.querySelectorAll('input[type=radio]').forEach(r=>{
-                r.addEventListener('change', updateBubbleStatus);
-            });
-        }
+        window.onload = ()=>{ showQuestion(0); startTimer(); }
     </script>
 </head>
 <body>
-
 <div class="exam-container">
     <div class="exam-header">
         <div class="exam-info">
@@ -171,7 +103,7 @@ $total = count($question_array);
             <p><strong>Course:</strong> <?= htmlspecialchars($student['course']) ?></p>
         </div>
         <div class="exam-profile">
-            <img src="../../uploads/<?= $student['photo'] ?: 'default.png' ?>" alt="Photo">
+            <img src="../../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Photo">
             <p>⏱ <span id="timer">--:--</span></p>
         </div>
     </div>
@@ -185,13 +117,14 @@ $total = count($question_array);
     <form method="POST" action="submit_exam.php" id="examForm">
         <input type="hidden" name="exam_id" value="<?= $exam_id ?>">
 
-        <?php foreach($question_array as $index=>$q): ?>
+        <?php foreach($questions as $index => $q): ?>
             <div class="question-card" id="q<?= $index ?>">
                 <div class="question-title">Q<?= $index+1 ?>. <?= htmlspecialchars($q['question']) ?></div>
                 <?php foreach(['a','b','c','d'] as $opt): ?>
                     <div class="option">
-                        <input type="radio" name="answers[<?= $q['question_id'] ?>]" id="q<?= $q['question_id'] ?>_<?= $opt ?>" value="<?= $opt ?>">
-                        <label for="q<?= $q['question_id'] ?>_<?= $opt ?>"><?= strtoupper($opt) ?>. <?= htmlspecialchars($q["option_$opt"]) ?></label>
+                        <label>
+                            <input type="radio" name="answers[<?= $q['question_id'] ?>]" value="<?= $opt ?>"> <?= strtoupper($opt) ?>. <?= htmlspecialchars($q["option_$opt"]) ?>
+                        </label>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -205,6 +138,5 @@ $total = count($question_array);
         <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
-
 </body>
 </html>
