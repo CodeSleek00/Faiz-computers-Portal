@@ -2,19 +2,31 @@
 include '../../database_connection/db_connect.php';
 session_start();
 
+// Check login
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
 if (!$enrollment_id) die("Login required.");
 
-$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+// Fetch student from students table first
+$student = $conn->query("SELECT 'students' as student_table, student_id, name FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+
+// If not found, try students26
+if (!$student) {
+    $student = $conn->query("SELECT 'students26' as student_table, id as student_id, name FROM students26 WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+}
+
+if (!$student) die("Student not found.");
+
 $student_id = $student['student_id'];
+$student_table = $student['student_table'];
 
 // Fetch all assigned exams
 $assigned = $conn->query("
     SELECT DISTINCT e.*
     FROM exams e
     JOIN exam_assignments ea ON e.exam_id = ea.exam_id
-    WHERE ea.student_id = $student_id
-       OR ea.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
+    LEFT JOIN student_batches sb ON ea.batch_id = sb.batch_id
+    WHERE (ea.student_id = $student_id AND ea.student_table = '$student_table')
+       OR (sb.student_id = $student_id AND sb.student_table = '$student_table')
     ORDER BY e.created_at DESC
 ");
 ?>
@@ -24,7 +36,7 @@ $assigned = $conn->query("
 <head>
     <title>My Exams</title>
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -80,9 +92,7 @@ $assigned = $conn->query("
             gap: 6px;
         }
 
-        .back-btn i {
-            font-size: 14px;
-        }
+        .back-btn i { font-size: 14px; }
 
         .exam-card {
             border: 1px solid #e5e7eb;
@@ -93,9 +103,7 @@ $assigned = $conn->query("
             transition: all 0.2s;
         }
 
-        .exam-card:hover {
-            background: #eef2ff;
-        }
+        .exam-card:hover { background: #eef2ff; }
 
         .exam-title {
             font-weight: 600;
@@ -121,9 +129,7 @@ $assigned = $conn->query("
             transition: background 0.2s;
         }
 
-        .start-btn:hover {
-            background: #4338ca;
-        }
+        .start-btn:hover { background: #4338ca; }
 
         .taken-msg {
             color: var(--success);
@@ -134,20 +140,11 @@ $assigned = $conn->query("
             font-size: 15px;
         }
 
-        .taken-msg i {
-            font-size: 16px;
-        }
+        .taken-msg i { font-size: 16px; }
 
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-
-            .exam-title {
-                font-size: 16px;
-            }
+            .header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .exam-title { font-size: 16px; }
         }
     </style>
 </head>
@@ -164,7 +161,7 @@ $assigned = $conn->query("
 
     <?php if ($assigned->num_rows > 0): ?>
         <?php while ($exam = $assigned->fetch_assoc()):
-            $check = $conn->query("SELECT 1 FROM exam_submissions WHERE exam_id = {$exam['exam_id']} AND student_id = $student_id");
+            $check = $conn->query("SELECT 1 FROM exam_submissions WHERE exam_id = {$exam['exam_id']} AND student_id = $student_id AND student_table = '$student_table'");
             $already_submitted = $check->num_rows > 0;
         ?>
             <div class="exam-card">
