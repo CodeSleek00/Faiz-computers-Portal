@@ -7,6 +7,7 @@ if (!$submission_id || !is_numeric($submission_id)) die("Invalid submission ID."
 $submission_id = (int) $submission_id;
 
 // Get submission with assignment & student details (SAFE - Check both students and students26 tables)
+// Note: students table uses student_id, students26 table uses id
 $submission_query = "
     SELECT s.*, st.name AS student_name, st.enrollment_id, a.title AS assignment_title, a.marks AS total_marks
     FROM assignment_submissions s
@@ -17,8 +18,8 @@ $submission_query = "
     SELECT s.*, st26.name AS student_name, st26.enrollment_id, a.title AS assignment_title, a.marks AS total_marks
     FROM assignment_submissions s
     JOIN assignments a ON s.assignment_id = a.assignment_id
-    LEFT JOIN students26 st26 ON s.student_id = st26.student_id
-    WHERE s.submission_id = ? AND st26.student_id IS NOT NULL
+    LEFT JOIN students26 st26 ON s.student_id = st26.id
+    WHERE s.submission_id = ? AND st26.id IS NOT NULL
     LIMIT 1
 ";
 $stmt = $conn->prepare($submission_query);

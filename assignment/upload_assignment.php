@@ -31,10 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Assignment targets
     if ($target_type == 'all') {
         // Get students from both students and students26 tables
+        // Note: students table uses student_id, students26 table uses id
         $students = $conn->query("
             SELECT student_id FROM students
             UNION
-            SELECT student_id FROM students26
+            SELECT id AS student_id FROM students26
         ");
         $stmt_target = $conn->prepare("INSERT INTO assignment_targets (assignment_id, student_id) VALUES (?, ?)");
         while ($row = $students->fetch_assoc()) {

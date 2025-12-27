@@ -6,6 +6,7 @@ $assignment_result = $conn->query("SELECT * FROM assignments ORDER BY created_at
 $filter_assignment = $_GET['assignment_id'] ?? null;
 
 // Use UNION query to fetch from both students and students26 tables
+// Note: students table uses student_id, students26 table uses id
 if (!empty($filter_assignment) && is_numeric($filter_assignment)) {
     $filter_assignment = (int) $filter_assignment;
     $submission_query = "
@@ -18,8 +19,8 @@ if (!empty($filter_assignment) && is_numeric($filter_assignment)) {
         SELECT s.*, st26.name AS student_name, st26.enrollment_id, a.title AS assignment_title
         FROM assignment_submissions s
         JOIN assignments a ON s.assignment_id = a.assignment_id
-        LEFT JOIN students26 st26 ON s.student_id = st26.student_id
-        WHERE s.assignment_id = ? AND st26.student_id IS NOT NULL
+        LEFT JOIN students26 st26 ON s.student_id = st26.id
+        WHERE s.assignment_id = ? AND st26.id IS NOT NULL
         ORDER BY submitted_at DESC
     ";
     $stmt = $conn->prepare($submission_query);
@@ -37,8 +38,8 @@ if (!empty($filter_assignment) && is_numeric($filter_assignment)) {
         SELECT s.*, st26.name AS student_name, st26.enrollment_id, a.title AS assignment_title
         FROM assignment_submissions s
         JOIN assignments a ON s.assignment_id = a.assignment_id
-        LEFT JOIN students26 st26 ON s.student_id = st26.student_id
-        WHERE st26.student_id IS NOT NULL
+        LEFT JOIN students26 st26 ON s.student_id = st26.id
+        WHERE st26.id IS NOT NULL
         ORDER BY submitted_at DESC
     ";
     $submissions = $conn->query($submission_query);
