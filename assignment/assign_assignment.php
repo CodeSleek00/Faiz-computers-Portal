@@ -1,10 +1,17 @@
 <?php
 include '../database_connection/db_connect.php';
 
-// Fetch all assignments, batches, and students
+// Fetch all assignments, batches, and students (from both students and students26 tables)
 $assignments = $conn->query("SELECT * FROM assignments ORDER BY created_at DESC");
 $batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
-$students = $conn->query("SELECT * FROM students ORDER BY name ASC");
+$students = $conn->query("
+    SELECT student_id, name, enrollment_id 
+    FROM students
+    UNION
+    SELECT student_id, name, enrollment_id 
+    FROM students26
+    ORDER BY name ASC
+");
 ?>
 
 <!DOCTYPE html>

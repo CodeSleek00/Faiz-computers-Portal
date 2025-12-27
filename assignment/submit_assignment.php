@@ -1,26 +1,51 @@
 <?php
-include '../database_connection/db_connect.php';
 session_start();
+require_once '../database_connection/db_connect.php';
 
-// Check login
-$enrollment_id = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment_id) die("Please login to submit an assignment.");
+/* =====================================================
+   1. LOGIN CHECK
+===================================================== */
+if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'], $_SESSION['student_id'])) {
+    header("Location: ../login-system/login.php");
+    exit;
+}
 
-// Get student ID
-$student_query = $conn->query("SELECT student_id FROM students WHERE enrollment_id = '$enrollment_id'");
-if ($student_query->num_rows == 0) die("Student not found.");
-$student_id = $student_query->fetch_assoc()['student_id'];
+$enrollment_id = $_SESSION['enrollment_id'];
+$table         = $_SESSION['student_table']; // students OR students26
+$student_id    = (int) $_SESSION['student_id'];
 
-// Get assignment details
+/* =====================================================
+   2. GET ASSIGNMENT DETAILS (SAFE)
+===================================================== */
 $assignment_id = $_GET['assignment_id'] ?? null;
-if (!$assignment_id) die("Assignment ID missing.");
+if (!$assignment_id || !is_numeric($assignment_id)) {
+    die("Assignment ID missing.");
+}
 
-$assignment = $conn->query("SELECT * FROM assignments WHERE assignment_id = $assignment_id")->fetch_assoc();
-if (!$assignment) die("Assignment not found.");
+$assignment_id = (int) $assignment_id;
 
-// Check if already submitted
-$submitted = $conn->query("SELECT * FROM assignment_submissions WHERE assignment_id = $assignment_id AND student_id = $student_id");
-if ($submitted->num_rows > 0) die("You have already submitted this assignment.");
+$stmt = $conn->prepare("SELECT * FROM assignments WHERE assignment_id = ? LIMIT 1");
+$stmt->bind_param("i", $assignment_id);
+$stmt->execute();
+$assignment_result = $stmt->get_result();
+
+if ($assignment_result->num_rows === 0) {
+    die("Assignment not found.");
+}
+
+$assignment = $assignment_result->fetch_assoc();
+
+/* =====================================================
+   3. CHECK IF ALREADY SUBMITTED (SAFE)
+===================================================== */
+$stmt = $conn->prepare("SELECT submission_id FROM assignment_submissions WHERE assignment_id = ? AND student_id = ? LIMIT 1");
+$stmt->bind_param("ii", $assignment_id, $student_id);
+$stmt->execute();
+$submitted_result = $stmt->get_result();
+
+if ($submitted_result->num_rows > 0) {
+    die("You have already submitted this assignment.");
+}
 ?>
 
 <!DOCTYPE html>

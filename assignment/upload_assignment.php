@@ -30,19 +30,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Assignment targets
     if ($target_type == 'all') {
-        $students = $conn->query("SELECT student_id FROM students");
+        // Get students from both students and students26 tables
+        $students = $conn->query("
+            SELECT student_id FROM students
+            UNION
+            SELECT student_id FROM students26
+        ");
+        $stmt_target = $conn->prepare("INSERT INTO assignment_targets (assignment_id, student_id) VALUES (?, ?)");
         while ($row = $students->fetch_assoc()) {
-            $sid = $row['student_id'];
-            $conn->query("INSERT INTO assignment_targets (assignment_id, student_id) VALUES ($assignment_id, $sid)");
+            $sid = (int) $row['student_id'];
+            $stmt_target->bind_param("ii", $assignment_id, $sid);
+            $stmt_target->execute();
         }
+        $stmt_target->close();
     } elseif ($target_type == 'batch') {
-        $batch_id = $_POST['batch_id'];
-        $conn->query("INSERT INTO assignment_targets (assignment_id, batch_id) VALUES ($assignment_id, $batch_id)");
+        $batch_id = (int) $_POST['batch_id'];
+        $stmt_batch = $conn->prepare("INSERT INTO assignment_targets (assignment_id, batch_id) VALUES (?, ?)");
+        $stmt_batch->bind_param("ii", $assignment_id, $batch_id);
+        $stmt_batch->execute();
+        $stmt_batch->close();
     } elseif ($target_type == 'student') {
         $selected_students = $_POST['student_ids'];
+        $stmt_student = $conn->prepare("INSERT INTO assignment_targets (assignment_id, student_id) VALUES (?, ?)");
         foreach ($selected_students as $sid) {
-            $conn->query("INSERT INTO assignment_targets (assignment_id, student_id) VALUES ($assignment_id, $sid)");
+            $sid = (int) $sid;
+            $stmt_student->bind_param("ii", $assignment_id, $sid);
+            $stmt_student->execute();
         }
+        $stmt_student->close();
     }
 
     header("Location: admin_assignments.php?success=1");

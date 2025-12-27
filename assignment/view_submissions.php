@@ -4,22 +4,45 @@ include '../database_connection/db_connect.php';
 $assignment_result = $conn->query("SELECT * FROM assignments ORDER BY created_at DESC");
 
 $filter_assignment = $_GET['assignment_id'] ?? null;
-$filter_condition = "";
 
-if (!empty($filter_assignment)) {
-    $filter_assignment = intval($filter_assignment);
-    $filter_condition = "WHERE s.assignment_id = $filter_assignment";
+// Use UNION query to fetch from both students and students26 tables
+if (!empty($filter_assignment) && is_numeric($filter_assignment)) {
+    $filter_assignment = (int) $filter_assignment;
+    $submission_query = "
+        SELECT s.*, st.name AS student_name, st.enrollment_id, a.title AS assignment_title
+        FROM assignment_submissions s
+        JOIN assignments a ON s.assignment_id = a.assignment_id
+        LEFT JOIN students st ON s.student_id = st.student_id
+        WHERE s.assignment_id = ? AND st.student_id IS NOT NULL
+        UNION
+        SELECT s.*, st26.name AS student_name, st26.enrollment_id, a.title AS assignment_title
+        FROM assignment_submissions s
+        JOIN assignments a ON s.assignment_id = a.assignment_id
+        LEFT JOIN students26 st26 ON s.student_id = st26.student_id
+        WHERE s.assignment_id = ? AND st26.student_id IS NOT NULL
+        ORDER BY submitted_at DESC
+    ";
+    $stmt = $conn->prepare($submission_query);
+    $stmt->bind_param("ii", $filter_assignment, $filter_assignment);
+    $stmt->execute();
+    $submissions = $stmt->get_result();
+} else {
+    $submission_query = "
+        SELECT s.*, st.name AS student_name, st.enrollment_id, a.title AS assignment_title
+        FROM assignment_submissions s
+        JOIN assignments a ON s.assignment_id = a.assignment_id
+        LEFT JOIN students st ON s.student_id = st.student_id
+        WHERE st.student_id IS NOT NULL
+        UNION
+        SELECT s.*, st26.name AS student_name, st26.enrollment_id, a.title AS assignment_title
+        FROM assignment_submissions s
+        JOIN assignments a ON s.assignment_id = a.assignment_id
+        LEFT JOIN students26 st26 ON s.student_id = st26.student_id
+        WHERE st26.student_id IS NOT NULL
+        ORDER BY submitted_at DESC
+    ";
+    $submissions = $conn->query($submission_query);
 }
-
-$submission_query = "
-    SELECT s.*, st.name AS student_name, st.enrollment_id, a.title AS assignment_title
-    FROM assignment_submissions s
-    JOIN students st ON s.student_id = st.student_id
-    JOIN assignments a ON s.assignment_id = a.assignment_id
-    $filter_condition
-    ORDER BY s.submitted_at DESC
-";
-$submissions = $conn->query($submission_query);
 ?>
 
 <!DOCTYPE html>

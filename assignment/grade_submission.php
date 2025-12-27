@@ -4,15 +4,27 @@ include '../database_connection/db_connect.php';
 $submission_id = $_GET['id'] ?? null;
 if (!$submission_id || !is_numeric($submission_id)) die("Invalid submission ID.");
 
-// Get submission with assignment & student details
-$query = "
+$submission_id = (int) $submission_id;
+
+// Get submission with assignment & student details (SAFE - Check both students and students26 tables)
+$submission_query = "
     SELECT s.*, st.name AS student_name, st.enrollment_id, a.title AS assignment_title, a.marks AS total_marks
     FROM assignment_submissions s
-    JOIN students st ON s.student_id = st.student_id
     JOIN assignments a ON s.assignment_id = a.assignment_id
-    WHERE s.submission_id = $submission_id
+    LEFT JOIN students st ON s.student_id = st.student_id
+    WHERE s.submission_id = ? AND st.student_id IS NOT NULL
+    UNION
+    SELECT s.*, st26.name AS student_name, st26.enrollment_id, a.title AS assignment_title, a.marks AS total_marks
+    FROM assignment_submissions s
+    JOIN assignments a ON s.assignment_id = a.assignment_id
+    LEFT JOIN students26 st26 ON s.student_id = st26.student_id
+    WHERE s.submission_id = ? AND st26.student_id IS NOT NULL
+    LIMIT 1
 ";
-$result = $conn->query($query);
+$stmt = $conn->prepare($submission_query);
+$stmt->bind_param("ii", $submission_id, $submission_id);
+$stmt->execute();
+$result = $stmt->get_result();
 if ($result->num_rows == 0) die("Submission not found.");
 
 $submission = $result->fetch_assoc();

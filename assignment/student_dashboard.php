@@ -1,30 +1,71 @@
 <?php 
-include '../database_connection/db_connect.php';
 session_start();
+require_once '../database_connection/db_connect.php';
 
-$enrollment_id = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment_id) {
-    die("Please login to view your dashboard.");
+/* =====================================================
+   1. LOGIN CHECK
+===================================================== */
+if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'], $_SESSION['student_id'])) {
+    header("Location: ../login-system/login.php");
+    exit;
 }
 
-$student_query = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'");
-if ($student_query->num_rows == 0) {
-    die("Student not found.");
-}
-$student = $student_query->fetch_assoc();
-$student_id = $student['student_id'];
+$enrollment_id = $_SESSION['enrollment_id'];
+$table         = $_SESSION['student_table']; // students OR students26
+$student_id    = (int) $_SESSION['student_id'];
 
-$assignment_sql = "
-    SELECT a.*, s.submission_id, s.marks_awarded, s.submitted_at
+/* =====================================================
+   2. FETCH STUDENT DATA (SAFE & DYNAMIC)
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT 
+        name,
+        enrollment_id,
+        photo
+    FROM $table
+    WHERE enrollment_id = ?
+    LIMIT 1
+");
+$stmt->bind_param("s", $enrollment_id);
+$stmt->execute();
+$res = $stmt->get_result();
+
+if ($res->num_rows === 0) {
+    session_destroy();
+    header("Location: ../login-system/login.php?error=student_not_found");
+    exit;
+}
+
+$student = $res->fetch_assoc();
+
+/* =====================================================
+   3. FETCH ASSIGNMENTS (SAFE & DYNAMIC)
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT 
+        a.*, 
+        s.submission_id, 
+        s.marks_awarded, 
+        s.submitted_at
     FROM assignments a
-    LEFT JOIN assignment_targets t ON a.assignment_id = t.assignment_id
-    LEFT JOIN assignment_submissions s ON a.assignment_id = s.assignment_id AND s.student_id = $student_id
-    WHERE t.student_id = $student_id
-       OR t.batch_id IN (SELECT batch_id FROM student_batches WHERE student_id = $student_id)
+    INNER JOIN assignment_targets t 
+        ON a.assignment_id = t.assignment_id
+    LEFT JOIN assignment_submissions s 
+        ON s.assignment_id = a.assignment_id 
+        AND s.student_id = ?
+    WHERE 
+        t.student_id = ?
+        OR t.batch_id IN (
+            SELECT batch_id 
+            FROM student_batches 
+            WHERE student_id = ?
+        )
     GROUP BY a.assignment_id
     ORDER BY a.created_at DESC
-";
-$assignments = $conn->query($assignment_sql);
+");
+$stmt->bind_param("iii", $student_id, $student_id, $student_id);
+$stmt->execute();
+$assignments = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>

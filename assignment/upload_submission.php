@@ -1,21 +1,40 @@
 <?php
-include '../database_connection/db_connect.php';
 session_start();
+require_once '../database_connection/db_connect.php';
 
-$enrollment_id = $_SESSION['enrollment_id'] ?? null;
-if (!$enrollment_id) die("Please login to submit.");
+/* =====================================================
+   1. LOGIN CHECK
+===================================================== */
+if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'], $_SESSION['student_id'])) {
+    header("Location: ../login-system/login.php");
+    exit;
+}
 
+$enrollment_id = $_SESSION['enrollment_id'];
+$table         = $_SESSION['student_table']; // students OR students26
+$student_id    = (int) $_SESSION['student_id'];
+
+/* =====================================================
+   2. VALIDATE ASSIGNMENT ID
+===================================================== */
 $assignment_id = $_POST['assignment_id'] ?? null;
-if (!$assignment_id || !is_numeric($assignment_id)) die("Invalid assignment ID.");
+if (!$assignment_id || !is_numeric($assignment_id)) {
+    die("Invalid assignment ID.");
+}
 
-// Get student ID
-$student_query = $conn->query("SELECT student_id FROM students WHERE enrollment_id = '$enrollment_id'");
-if ($student_query->num_rows == 0) die("Student not found.");
-$student_id = $student_query->fetch_assoc()['student_id'];
+$assignment_id = (int) $assignment_id;
 
-// Check if already submitted
-$check = $conn->query("SELECT * FROM assignment_submissions WHERE student_id = $student_id AND assignment_id = $assignment_id");
-if ($check->num_rows > 0) die("Assignment already submitted.");
+/* =====================================================
+   3. CHECK IF ALREADY SUBMITTED (SAFE)
+===================================================== */
+$stmt = $conn->prepare("SELECT submission_id FROM assignment_submissions WHERE student_id = ? AND assignment_id = ? LIMIT 1");
+$stmt->bind_param("ii", $student_id, $assignment_id);
+$stmt->execute();
+$check_result = $stmt->get_result();
+
+if ($check_result->num_rows > 0) {
+    die("Assignment already submitted.");
+}
 
 // Handle file upload
 $file_name = null;

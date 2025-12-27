@@ -1,9 +1,16 @@
 <?php 
 include '../database_connection/db_connect.php';
 
-// Fetch batches and students
+// Fetch batches and students (from both students and students26 tables)
 $batches = $conn->query("SELECT * FROM batches");
-$students = $conn->query("SELECT * FROM students");
+$students = $conn->query("
+    SELECT student_id, name, enrollment_id 
+    FROM students
+    UNION
+    SELECT student_id, name, enrollment_id 
+    FROM students26
+    ORDER BY name ASC
+");
 ?>
 
 <!DOCTYPE html>
