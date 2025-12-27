@@ -1,20 +1,14 @@
 <?php
 include '../database_connection/db_connect.php';
-session_start();
 
-/* ===================== ADMIN AUTH CHECK ===================== */
-if (!isset($_SESSION['admin_logged_in'])) {
-    die("Access denied. Please login as admin.");
-}
-
-/* ===================== Success Messages ===================== */
+// Success message handler
 $successMsg = '';
 if (isset($_GET['msg'])) {
     if ($_GET['msg'] === 'uploaded') $successMsg = '✅ Material uploaded successfully!';
     if ($_GET['msg'] === 'deleted') $successMsg = '🗑 Material deleted successfully!';
 }
 
-/* ===================== Fetch all materials ===================== */
+// Fetch all materials
 $materials = $conn->query("SELECT * FROM study_materials ORDER BY uploaded_at DESC");
 if (!$materials) {
     die("Query Error: " . $conn->error);
@@ -22,14 +16,12 @@ if (!$materials) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Admin - Study Materials</title>
     <link rel="icon" type="image/png" href="image.png">
     <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body { font-family: 'Poppins', sans-serif; background: #eef2f5; padding: 40px; }
         .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
