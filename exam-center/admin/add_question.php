@@ -1,20 +1,19 @@
 <?php
 include '../../database_connection/db_connect.php';
 
-$exam_id = $_GET['exam_id'];
-$total = $_GET['total'];
-$q_num = isset($_GET['q_num']) ? $_GET['q_num'] : 1;
+$exam_id = intval($_GET['exam_id']);
+$total = intval($_GET['total']);
+$q_num = isset($_GET['q_num']) ? intval($_GET['q_num']) : 1;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $question = $_POST['question'];
-    $a = $_POST['option_a'];
-    $b = $_POST['option_b'];
-    $c = $_POST['option_c'];
-    $d = $_POST['option_d'];
-    $correct = $_POST['correct_option'];
+    $question = trim($_POST['question']);
+    $a = trim($_POST['option_a']);
+    $b = trim($_POST['option_b']);
+    $c = trim($_POST['option_c']);
+    $d = trim($_POST['option_d']);
+    $correct = trim($_POST['correct_option']);
 
-    $stmt = $conn->prepare("INSERT INTO exam_questions (exam_id, question, option_a, option_b, option_c, option_d, correct_option)
-        VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO exam_questions (exam_id, question, option_a, option_b, option_c, option_d, correct_option) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("issssss", $exam_id, $question, $a, $b, $c, $d, $correct);
     $stmt->execute();
 
@@ -31,37 +30,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Add Exam Question</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4f46e5;
             --success: #28a745;
-            --light-bg: #f3f4f6;
-            --white: #ffffff;
-            --gray: #6b7280;
-            --radius: 10px;
-            --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
+            --bg: #f4f7fa;
+            --white: #fff;
+            --radius: 12px;
+            --shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: var(--light-bg);
             margin: 0;
+            background: var(--bg);
             padding: 40px 20px;
-            color: #333;
         }
 
-        .form-box {
-            background: var(--white);
+        .container {
             max-width: 750px;
             margin: auto;
+            background: var(--white);
             padding: 30px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
@@ -69,93 +62,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         h2 {
             text-align: center;
-            margin-bottom: 25px;
             color: var(--primary);
+            margin-bottom: 25px;
         }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        form { display: flex; flex-direction: column; gap: 15px; }
 
-        label {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        textarea {
+        label { font-weight: 500; margin-bottom: 5px; }
+        textarea, input[type="text"] {
             padding: 12px;
-            border: 1px solid #ccc;
             border-radius: var(--radius);
+            border: 1px solid #ccc;
             font-size: 15px;
             resize: vertical;
         }
+        textarea { min-height: 100px; }
 
-        textarea {
-            min-height: 100px;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; }
 
         button {
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
             background: var(--success);
             color: var(--white);
-            border: none;
-            padding: 14px;
-            font-weight: 600;
-            font-size: 16px;
-            border-radius: var(--radius);
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: 0.3s;
         }
 
-        button:hover {
-            background: #218838;
-        }
+        button:hover { background: #218838; }
 
-        @media (max-width: 480px) {
-            body {
-                padding: 20px;
-            }
-
-            .form-box {
-                padding: 20px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
+        @media(max-width:480px){
+            .container{padding:20px;}
+            h2{font-size:20px;}
         }
     </style>
 </head>
 <body>
 
-<div class="form-box">
+<div class="container">
     <h2>🧾 Question <?= $q_num ?> of <?= $total ?></h2>
     <form method="POST">
-        <label for="question">Question:</label>
-        <textarea name="question" id="question" required></textarea>
+        <label>Question:</label>
+        <textarea name="question" required></textarea>
 
-        <label for="option_a">Option A:</label>
-        <input type="text" name="option_a" id="option_a" required>
+        <label>Option A:</label>
+        <input type="text" name="option_a" required>
+        <label>Option B:</label>
+        <input type="text" name="option_b" required>
+        <label>Option C:</label>
+        <input type="text" name="option_c" required>
+        <label>Option D:</label>
+        <input type="text" name="option_d" required>
 
-        <label for="option_b">Option B:</label>
-        <input type="text" name="option_b" id="option_b" required>
-
-        <label for="option_c">Option C:</label>
-        <input type="text" name="option_c" id="option_c" required>
-
-        <label for="option_d">Option D:</label>
-        <input type="text" name="option_d" id="option_d" required>
-
-        <label for="correct_option">Correct Option (a / b / c / d):</label>
-        <input type="text" name="correct_option" id="correct_option" pattern="[abcd]" required>
+        <label>Correct Option (a / b / c / d):</label>
+        <input type="text" name="correct_option" pattern="[abcd]" required>
 
         <button type="submit">💾 Save & Next</button>
     </form>
