@@ -1,20 +1,34 @@
 <?php
 include '../../database_connection/db_connect.php';
 
-$exam_id = $_GET['exam_id'];
-$students = $conn->query("SELECT student_id, name, enrollment_id FROM students");
-$batches = $conn->query("SELECT * FROM batches");
+$exam_id = intval($_GET['exam_id']);
 
+// Fetch students from both tables
+$students1 = $conn->query("SELECT student_id, name, enrollment_id, 'students' AS student_table FROM students ORDER BY name ASC");
+$students2 = $conn->query("SELECT id AS student_id, name, enrollment_id, 'students26' AS student_table FROM students26 ORDER BY name ASC");
+
+// Merge students into one array
+$all_students = [];
+while ($row = $students1->fetch_assoc()) $all_students[] = $row;
+while ($row = $students2->fetch_assoc()) $all_students[] = $row;
+
+// Fetch batches
+$batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
+
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $targets = $_POST['targets'];
+    $targets = $_POST['targets'] ?? [];
 
     foreach ($targets as $target) {
         if (strpos($target, 'batch_') !== false) {
-            $batch_id = str_replace('batch_', '', $target);
+            $batch_id = intval(str_replace('batch_', '', $target));
             $conn->query("INSERT INTO exam_assignments (exam_id, batch_id) VALUES ($exam_id, $batch_id)");
         } else {
-            $student_id = str_replace('student_', '', $target);
-            $conn->query("INSERT INTO exam_assignments (exam_id, student_id) VALUES ($exam_id, $student_id)");
+            // Format: students:123 OR students26:45
+            list($table, $student_id) = explode(":", $target);
+            $stmt = $conn->prepare("INSERT INTO exam_assignments (exam_id, student_id, student_table) VALUES (?, ?, ?)");
+            $stmt->bind_param("iis", $exam_id, $student_id, $table);
+            $stmt->execute();
         }
     }
 
@@ -29,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Assign Exam</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -94,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         input[type="checkbox"] {
             margin-right: 10px;
+            transform: scale(1.1);
         }
 
         button {
@@ -142,10 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <h4>👤 Assign to Individual Students</h4>
         <div class="checkbox-list">
-            <?php while ($s = $students->fetch_assoc()) { ?>
+            <?php foreach ($all_students as $s) { ?>
                 <label>
-                    <input type="checkbox" name="targets[]" value="student_<?= $s['student_id'] ?>">
-                    <?= htmlspecialchars($s['name']) ?> (<?= $s['enrollment_id'] ?>)
+                    <input type="checkbox" name="targets[]" value="<?= $s['student_table'] ?>:<?= $s['student_id'] ?>">
+                    <?= htmlspecialchars($s['name']) ?> (<?= htmlspecialchars($s['enrollment_id']) ?>)
                 </label>
             <?php } ?>
         </div>
