@@ -8,8 +8,34 @@ if (!isset($_SESSION['enrollment_id'])) {
 }
 
 $enrollment_id = $_SESSION['enrollment_id'];
-$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+$student = null;
+
+/* 🔹 Check students table */
+$stmt = $conn->prepare("SELECT * FROM students WHERE enrollment_id = ?");
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 1) {
+    $student = $result->fetch_assoc();
+} else {
+    /* 🔹 Check students26 table */
+    $stmt = $conn->prepare("SELECT * FROM students26 WHERE enrollment_id = ?");
+    $stmt->bind_param("s", $enrollment_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 1) {
+        $student = $result->fetch_assoc();
+    }
+}
+
+/* 🔹 If not found anywhere */
+if (!$student) {
+    echo "Student record not found!";
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
