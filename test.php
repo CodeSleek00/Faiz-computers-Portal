@@ -7,9 +7,22 @@ if (!$enrollment_id) {
     header("Location: login-system/login.php");
     exit;
 }
+$studentRes = $conn->query("
+    SELECT student_id, name, photo, enrollment_id 
+    FROM students 
+    WHERE enrollment_id = '$enrollment_id'
+    LIMIT 1
+");
 
-$student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
-$student_id = $student['student_id'];
+if (!$studentRes || $studentRes->num_rows === 0) {
+    // Session is valid but student not found
+    session_destroy();
+    header("Location: login-system/login.php?error=student_not_found");
+    exit;
+}
+
+$student = $studentRes->fetch_assoc();
+$student_id = (int)$student['student_id'];
 
 // Fetch assignments
 $assignments = $conn->query("
