@@ -12,6 +12,7 @@ $student = null;
 
 /* 🔹 Check students table */
 $stmt = $conn->prepare("SELECT * FROM students WHERE enrollment_id = ?");
+$stmt->bind_param("s", $enrollment_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
