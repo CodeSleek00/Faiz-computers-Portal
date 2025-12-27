@@ -10,8 +10,11 @@ if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'])) {
 $enrollment   = $_SESSION['enrollment_id'];
 $studentTable = $_SESSION['student_table']; // students OR students26
 
+/* ================= DETERMINE ID COLUMN ================= */
+$idColumn = ($studentTable === 'students') ? 'student_id' : 'id';
+
 /* ================= FETCH STUDENT ================= */
-$stmt = $conn->prepare("SELECT student_id, name FROM $studentTable WHERE enrollment_id = ?");
+$stmt = $conn->prepare("SELECT $idColumn AS student_id, name FROM $studentTable WHERE enrollment_id = ?");
 $stmt->bind_param("s", $enrollment);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
@@ -23,7 +26,14 @@ if (!$student) {
 $student_id   = $student['student_id'];
 $student_name = $student['name'];
 
-/* ================= FETCH STUDY MATERIAL ================= */
+/* ================= FETCH STUDY MATERIALS ================= */
+
+/*
+IMPORTANT:
+study_material_targets table should have a student_table column (ENUM: 'students','students26')
+student_batches table should have student_table column (ENUM: 'students','students26')
+*/
+
 $query = "
     SELECT DISTINCT m.*
     FROM study_materials m
@@ -45,14 +55,13 @@ $stmt->execute();
 $data = $stmt->get_result();
 ?>
 
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>My Study Materials</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -65,9 +74,7 @@ $data = $stmt->get_result();
             --radius: 10px;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -77,10 +84,7 @@ $data = $stmt->get_result();
             padding: 20px;
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-        }
+        .container { max-width: 900px; margin: auto; }
 
         .header {
             background: var(--card-bg);
@@ -102,10 +106,7 @@ $data = $stmt->get_result();
             gap: 6px;
         }
 
-        .header h2 {
-            margin: 0;
-            font-size: 22px;
-        }
+        .header h2 { margin: 0; font-size: 22px; }
 
         .material {
             background: var(--card-bg);
@@ -118,10 +119,7 @@ $data = $stmt->get_result();
             gap: 10px;
         }
 
-        .material-title {
-            font-weight: 600;
-            font-size: 18px;
-        }
+        .material-title { font-weight: 600; font-size: 18px; }
 
         .download {
             display: inline-flex;
@@ -138,9 +136,7 @@ $data = $stmt->get_result();
             transition: background 0.3s;
         }
 
-        .download:hover {
-            background-color: #3f3bd9;
-        }
+        .download:hover { background-color: #3f3bd9; }
 
         .no-data {
             text-align: center;
@@ -152,10 +148,7 @@ $data = $stmt->get_result();
         }
 
         @media (max-width: 768px) {
-            .header {
-                text-align: center;
-                align-items: center;
-            }
+            .header { text-align: center; align-items: center; }
         }
     </style>
 </head>
@@ -187,6 +180,7 @@ $data = $stmt->get_result();
             <p>You haven't been assigned any study material yet.</p>
         </div>
     <?php endif; ?>
+
 </div>
 
 </body>
