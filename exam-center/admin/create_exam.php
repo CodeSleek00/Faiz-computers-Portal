@@ -2,10 +2,10 @@
 include '../../database_connection/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $exam_name = $_POST['exam_name'];
-    $total_questions = $_POST['total_questions'];
-    $duration = $_POST['duration'];
-    $marks = $_POST['marks'];
+    $exam_name = trim($_POST['exam_name']);
+    $total_questions = intval($_POST['total_questions']);
+    $duration = intval($_POST['duration']);
+    $marks = intval($_POST['marks']);
 
     $stmt = $conn->prepare("INSERT INTO exams (exam_name, total_questions, duration, marks_per_question) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("siii", $exam_name, $total_questions, $duration, $marks);
@@ -21,36 +21,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Create Exam</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4f46e5;
-            --light-bg: #f3f4f6;
-            --white: #ffffff;
+            --bg: #f4f7fa;
+            --white: #fff;
             --gray: #6b7280;
-            --radius: 10px;
+            --radius: 12px;
             --shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: var(--light-bg);
             margin: 0;
+            background: var(--bg);
             padding: 40px 20px;
-            color: #333;
         }
 
-        .form-box {
-            background: var(--white);
+        .container {
             max-width: 600px;
             margin: auto;
+            background: var(--white);
             padding: 30px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
@@ -58,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         h2 {
             text-align: center;
-            margin-bottom: 25px;
             color: var(--primary);
+            margin-bottom: 25px;
         }
 
         form {
@@ -68,13 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 15px;
         }
 
-        input[type="text"],
-        input[type="number"] {
-            padding: 12px 15px;
-            border: 1px solid #ccc;
+        input[type="text"], input[type="number"] {
+            padding: 12px;
             border-radius: var(--radius);
+            border: 1px solid #ccc;
             font-size: 15px;
-            transition: border 0.2s;
         }
 
         input:focus {
@@ -83,41 +78,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         button {
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
             background: var(--primary);
             color: var(--white);
-            border: none;
-            padding: 12px;
-            font-weight: 600;
-            border-radius: var(--radius);
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s ease;
+            transition: 0.3s;
         }
 
-        button:hover {
-            background: #4338ca;
-        }
+        button:hover { background: #4338ca; }
 
-        @media (max-width: 480px) {
-            .form-box {
-                padding: 20px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
+        @media(max-width:480px){
+            .container{padding:20px;}
+            h2{font-size:20px;}
         }
     </style>
 </head>
 <body>
 
-<div class="form-box">
+<div class="container">
     <h2>📝 Create New Exam</h2>
     <form method="POST">
-        <input type="text" name="exam_name" placeholder="Enter Exam Name" required>
-        <input type="number" name="total_questions" placeholder="Total Questions" required>
-        <input type="number" name="marks" placeholder="Marks per Question" required>
-        <input type="number" name="duration" placeholder="Duration (in minutes)" required>
+        <input type="text" name="exam_name" placeholder="Exam Name" required>
+        <input type="number" name="total_questions" placeholder="Total Questions" required min="1">
+        <input type="number" name="marks" placeholder="Marks per Question" required min="1">
+        <input type="number" name="duration" placeholder="Duration (minutes)" required min="1">
         <button type="submit">➕ Add Questions</button>
     </form>
 </div>
