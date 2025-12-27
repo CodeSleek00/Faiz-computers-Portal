@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($res->num_rows == 1) {
         $_SESSION['enrollment_id'] = $enrollment_id;
         $_SESSION['student_table'] = 'students';   // ✅ table stored
-        header("Location: test.php");
+        header("Location: ../test.php");
         exit;
     }
 
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($res->num_rows == 1) {
         $_SESSION['enrollment_id'] = $enrollment_id;
         $_SESSION['student_table'] = 'students26';  // ✅ table stored
-        header("Location: test.php");
+        header("Location: ../test.php");
         exit;
     }
 
