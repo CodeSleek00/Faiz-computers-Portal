@@ -74,9 +74,10 @@ $conn->begin_transaction();
 /* ================= STUDENTS TABLE ================= */
 $conn->query("
 INSERT INTO students26
-(name, photo, contact, course, enrollment_id, password)
+(name, photo, contact, address, course, enrollment_id, password)
 VALUES
-('$name','$photo_name','$phone','$course_name','$enrollment_id','$phone')
+('$name','$photo_name','$phone','$address','$course_name','$enrollment_id','$phone')
+
 ");
 
 /* ================= ADMISSION TABLE ================= */
