@@ -104,9 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php while ($s = $students->fetch_assoc()) { ?>
                         <option value="student_<?= $s['student_id'] ?>">Student: <?= htmlspecialchars($s['name']) ?> (<?= htmlspecialchars($s['enrollment_id']) ?>)</option>
                     <?php } ?>
-                    <?php while ($s26 = $students26->fetch_assoc()) { ?>
-                        <option value="student26_<?= $s26['student_id'] ?>">Student26: <?= htmlspecialchars($s26['name']) ?></option>
-                    <?php } ?>
+                   <?php while ($s26 = $students26->fetch_assoc()) { ?>
+    <option value="student26_<?= $s26['student_id'] ?>">Student26: <?= htmlspecialchars($s26['name']) ?> (ID: <?= $s26['student_id'] ?>)</option>
+<?php } ?>
+
                 </optgroup>
             </select>
         </div>
