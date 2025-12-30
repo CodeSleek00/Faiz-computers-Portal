@@ -1,43 +1,36 @@
 <?php
 include "../includes/db_connect.php";
 
-// Fetch batches & students dynamically
+// Fetch batches & students
 $batches = $conn->query("SELECT * FROM batches");
-$students = $conn->query("SELECT student_id, name FROM students");
+$students1 = $conn->query("SELECT student_id, name FROM students");
+$students2 = $conn->query("SELECT id AS student_id, name FROM students26");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-<title>Upload Video</title>
-<link rel="stylesheet" href="../assets/style.css">
-</head>
-<body>
-<h2>Upload New Video</h2>
 <form action="upload_video_action.php" method="POST" enctype="multipart/form-data">
-<label>Title:</label>
-<input type="text" name="title" required><br>
-<label>Description:</label>
-<textarea name="description"></textarea><br>
-<label>Video File:</label>
-<input type="file" name="video_file" accept="video/*" required><br>
+<input type="text" name="title" placeholder="Title" required>
+<textarea name="description" placeholder="Description"></textarea>
+<input type="file" name="video_file" accept="video/*" required>
 
 <label>Assign to Batch:</label>
-<select name="batch_id">
-<option value="">None</option>
-<?php while($b = $batches->fetch_assoc()) { ?>
+<select name="batch_id"><option value="">None</option>
+<?php while($b = $batches->fetch_assoc()){ ?>
 <option value="<?= $b['batch_id'] ?>"><?= $b['batch_name'] ?></option>
 <?php } ?>
-</select><br>
+</select>
 
 <label>Assign to Student:</label>
-<select name="student_id">
-<option value="">None</option>
-<?php while($s = $students->fetch_assoc()) { ?>
-<option value="<?= $s['student_id'] ?>"><?= $s['name'] ?></option>
+<select name="student_id"><option value="">None</option>
+<optgroup label="Students">
+<?php while($s = $students1->fetch_assoc()){ ?>
+<option value="<?= $s['student_id'] ?>|students"><?= $s['name'] ?></option>
 <?php } ?>
-</select><br>
+</optgroup>
+<optgroup label="Students26">
+<?php while($s = $students2->fetch_assoc()){ ?>
+<option value="<?= $s['student_id'] ?>|students26"><?= $s['name'] ?></option>
+<?php } ?>
+</optgroup>
+</select>
 
-<button type="submit">Upload</button>
+<button type="submit">Upload Video</button>
 </form>
-</body>
-</html>
