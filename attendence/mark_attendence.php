@@ -44,7 +44,7 @@ $date = $_GET['date'];
 
 $students = $conn->query("
 SELECT s.id, s.name, s.enrollment_id 
-FROM batch_students bs
+FROM student_batches bs
 JOIN students s ON bs.student_id = s.id
 WHERE bs.batch_id = $batch_id
 ");
