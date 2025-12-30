@@ -563,13 +563,19 @@ $total = $row['total_students'];
                         </div>
                     </div>
                 </div>
-
-<div class="card">
-    <h2>Total Students</h2>
-    <div class="count"><?= $total ?></div>
-    <p>(students26 table)</p>
-</div>
-            </div>
+                 <div class="stat-card materials">
+                    <div class="stat-card-header">
+                        <div>
+                           <h3 class="count"><?= $total ?></h3>
+                            <p>Students 2026</p>
+                        </div>
+                        <div class="stat-icon materials">
+                            <i class="fas fa-book"></i>
+                        </div>
+                    </div>
+                </div>
+               
+                   
             
             <!-- Quick Actions -->
             <div class="quick-actions">
