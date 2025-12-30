@@ -1,27 +1,27 @@
 <?php
-include("db_connect.php");
+include("../database_connection/db_connect.php");
 
 /* ================= BASIC SAFETY ================= */
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $conn->set_charset("utf8mb4");
 
-/* ================= SAFE POST DATA ================= */
-$name     = $_POST['name'] ?? '';
+/* ================= SAFE POST DATA & UPPERCASE ================= */
+$name     = strtoupper($_POST['name'] ?? '');
 $dob      = $_POST['dob'] ?? '';
-$aadhar   = $_POST['aadhar'] ?? '';
-$apaar    = $_POST['apaar'] ?? '';
+$aadhar   = strtoupper($_POST['aadhar'] ?? '');
+$apaar    = strtoupper($_POST['apaar'] ?? '');
 $phone    = $_POST['phone'] ?? '';
-$email    = $_POST['email'] ?? '';
-$religion = $_POST['religion'] ?? '';
-$caste    = $_POST['caste'] ?? '';
-$address  = $_POST['address'] ?? '';
-$permanent_address = $_POST['permanent_address'] ?? '';
+$email    = strtoupper($_POST['email'] ?? '');
+$religion = strtoupper($_POST['religion'] ?? '');
+$caste    = strtoupper($_POST['caste'] ?? '');
+$address  = strtoupper($_POST['address'] ?? '');
+$permanent_address = strtoupper($_POST['permanent_address'] ?? '');
 
-$father_name = $_POST['father_name'] ?? '';
-$mother_name = $_POST['mother_name'] ?? '';
+$father_name = strtoupper($_POST['father_name'] ?? '');
+$mother_name = strtoupper($_POST['mother_name'] ?? '');
 $parent_contact = $_POST['parent_contact'] ?? '';
 
-$course_name = $_POST['course_name'] ?? '';
+$course_name = strtoupper($_POST['course_name'] ?? '');
 $duration_months = (int)($_POST['duration'] ?? 0);
 
 $registration_fee   = (float)($_POST['registration_fee'] ?? 0);
@@ -35,10 +35,8 @@ $photo_name = '';
 $upload_dir = __DIR__ . "/../uploads/";
 
 if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === 0) {
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
-    }
-    $photo_name = time() . "_" . basename($_FILES['photo']['name']);
+    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+    $photo_name = time() . "_" . strtoupper(basename($_FILES['photo']['name']));
     move_uploaded_file($_FILES['photo']['tmp_name'], $upload_dir . $photo_name);
 }
 
@@ -66,8 +64,7 @@ $enrollment_id = "FAIZ-$month$year-$new";
 
 /* ================= ADMISSION MONTH LOGIC ================= */
 $admission_month_no = (int)date('n'); // 1-12
-
-$all_months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+$all_months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 $rotated_months = [];
 for ($i = 0; $i < 12; $i++) {
@@ -116,7 +113,7 @@ for ($i = 0; $i < count($degree); $i++) {
         (enrollment_id, name, student_photo, degree, school_college, board_university, year_of_passing, percentage)
         VALUES
         ('$enrollment_id','$name','$photo_name',
-         '$degree[$i]','$school_college[$i]','$board[$i]',
+         '".strtoupper($degree[$i])."','".strtoupper($school_college[$i])."','".strtoupper($board[$i])."',
          ".($year_clean === NULL ? "NULL" : "'$year_clean'").",
          ".($perc_clean === NULL ? "NULL" : "'$perc_clean'").")
         ");
@@ -153,7 +150,7 @@ INSERT INTO student_monthly_fee
 (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
 VALUES
 ('$enrollment_id','$name','$photo_name','$course_name',
- 'Registration','$admission_month_no','".$rotated_months[0]."','$registration_fee','Pending')
+ 'REGISTRATION','$admission_month_no','".$rotated_months[0]."','$registration_fee','PENDING')
 ");
 
 /* Monthly Fees (Dynamic Month-1) */
@@ -167,7 +164,7 @@ for ($i = 0; $i < $duration_months; $i++) {
     (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
     VALUES
     ('$enrollment_id','$name','$photo_name','$course_name',
-     'Monthly','$month_no','$month_name','$per_month_fee','Pending')
+     'MONTHLY','$month_no','$month_name','$per_month_fee','PENDING')
     ");
 }
 
@@ -178,7 +175,7 @@ foreach ([7,12] as $m) {
     (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
     VALUES
     ('$enrollment_id','$name','$photo_name','$course_name',
-     'Internal','$m','".$all_months[$m-1]."','$internal_fee','Pending')
+     'INTERNAL','$m','".$all_months[$m-1]."','$internal_fee','PENDING')
     ");
 }
 
@@ -189,7 +186,7 @@ foreach ([6,12] as $m) {
     (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
     VALUES
     ('$enrollment_id','$name','$photo_name','$course_name',
-     'Semester','$m','".$all_months[$m-1]."','$semester_exam_fee','Pending')
+     'SEMESTER','$m','".$all_months[$m-1]."','$semester_exam_fee','PENDING')
     ");
 }
 
@@ -200,7 +197,7 @@ if ($additional_fee > 0) {
     (enrollment_id,name,photo,course_name,fee_type,fee_amount,payment_status)
     VALUES
     ('$enrollment_id','$name','$photo_name','$course_name',
-     'Additional','$additional_fee','Pending')
+     'ADDITIONAL','$additional_fee','PENDING')
     ");
 }
 
