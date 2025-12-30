@@ -508,7 +508,7 @@ $total = $row['total_students'];
                     <div class="stat-card-header">
                         <div>
                             <h3><?= $total_students ?></h3>
-                            <p>Total Students</p>
+                            <p>Total Students 2025</p>
                         </div>
                         <div class="stat-icon students">
                             <i class="fas fa-users"></i>
@@ -570,7 +570,7 @@ $total = $row['total_students'];
                             <p>Students 2026</p>
                         </div>
                         <div class="stat-icon materials">
-                            <i class="fas fa-book"></i>
+                             <i class="fas fa-users"></i>
                         </div>
                     </div>
                 </div>
