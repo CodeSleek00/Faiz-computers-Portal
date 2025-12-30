@@ -30,7 +30,7 @@ button{padding:10px 20px;background:#2ecc71;color:#fff;border:none;border-radius
     <select name="batch_id" required>
         <option value="">Select Batch</option>
         <?php while($b=$batches->fetch_assoc()){ ?>
-            <option value="<?= $b['id'] ?>"><?= $b['batch_name'] ?></option>
+            <option value="<?= $b['batch_id'] ?>"><?= $b['batch_name'] ?></option>
         <?php } ?>
     </select>
 
