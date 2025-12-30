@@ -59,7 +59,7 @@ select,input[type=date]{
         <option value="">Select Batch</option>
         <?php while($b = $batches->fetch_assoc()){ ?>
             <option value="<?= $b['batch_id'] ?>">
-                <?= $b['batch_name'] ?>
+                <?= htmlspecialchars($b['batch_name']) ?>
             </option>
         <?php } ?>
     </select>
@@ -74,28 +74,23 @@ $batch_id = intval($_GET['batch_id']);
 $date     = $_GET['date'];
 
 /*
-  ================= STUDENT FETCH LOGIC =================
-  Supports BOTH tables: students & students26
+==================================================
+ FETCH STUDENTS USING student_table (REAL FIX)
+==================================================
 */
 $students = $conn->query("
     SELECT 
-        s.student_id AS sid,
-        s.name,
-        s.enrollment_id,
-        'students' AS source
+        sb.student_id,
+        sb.student_table,
+        COALESCE(s.name, s26.name) AS name,
+        COALESCE(s.enrollment_id, s26.enrollment_id) AS enrollment_id
     FROM student_batches sb
-    JOIN students s ON sb.student_id = s.student_id
-    WHERE sb.batch_id = $batch_id
-
-    UNION ALL
-
-    SELECT 
-        s26.id AS sid,
-        s26.name,
-        s26.enrollment_id,
-        'students26' AS source
-    FROM student_batches sb
-    JOIN students26 s26 ON sb.id = s26.id
+    LEFT JOIN students s 
+        ON sb.student_id = s.student_id 
+       AND sb.student_table = 'students'
+    LEFT JOIN students26 s26 
+        ON sb.student_id = s26.student_id 
+       AND sb.student_table = 'students26'
     WHERE sb.batch_id = $batch_id
 ");
 ?>
@@ -112,28 +107,25 @@ $students = $conn->query("
     <th>Status</th>
 </tr>
 
-<?php
-if($students->num_rows > 0):
-while($st = $students->fetch_assoc()):
-?>
+<?php if($students->num_rows > 0): ?>
+<?php while($st = $students->fetch_assoc()): ?>
 <tr>
     <td><?= htmlspecialchars($st['enrollment_id']) ?></td>
     <td><?= htmlspecialchars($st['name']) ?></td>
     <td>
-        <select name="status[<?= $st['sid'] ?>]">
+        <select name="status[<?= $st['student_table'] ?>][<?= $st['student_id'] ?>]">
             <option value="Present">Present</option>
             <option value="Absent">Absent</option>
         </select>
     </td>
 </tr>
-<?php
-endwhile;
-else:
-?>
+<?php endwhile; ?>
+<?php else: ?>
 <tr>
     <td colspan="3">No students found in this batch</td>
 </tr>
 <?php endif; ?>
+
 </table>
 
 <br>
