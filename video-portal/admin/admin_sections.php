@@ -1,28 +1,23 @@
 <?php
-include '../../database_connection/db_connect.php';
+include '../database_connection/db_connect.php';
 
+// Add section
 if($_SERVER['REQUEST_METHOD']=="POST"){
     $title = $_POST['title'];
-    $desc  = $_POST['description'];
-    $created_by = "Admin";
-
+    $desc  = $_POST['description'] ?? '';
     $stmt = $conn->prepare("INSERT INTO sections (title, description, created_by) VALUES (?,?,?)");
-    $stmt->bind_param("sss",$title,$desc,$created_by);
+    $admin = "Admin";
+    $stmt->bind_param("sss",$title,$desc,$admin);
     $stmt->execute();
     header("Location: dashboard.php");
     exit;
 }
 
+// Fetch sections
 $sections = $conn->query("SELECT * FROM sections ORDER BY created_at DESC");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-<title>Manage Sections</title>
-</head>
-<body>
-<h1>Sections</h1>
+<h1>Manage Sections</h1>
 <form method="POST">
 <input type="text" name="title" placeholder="Section Title" required>
 <textarea name="description" placeholder="Description"></textarea>
@@ -35,5 +30,3 @@ $sections = $conn->query("SELECT * FROM sections ORDER BY created_at DESC");
 <li><?= htmlspecialchars($sec['title']) ?> - <?= htmlspecialchars($sec['description']) ?></li>
 <?php endwhile; ?>
 </ul>
-</body>
-</html>
