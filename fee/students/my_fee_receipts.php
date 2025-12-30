@@ -3,7 +3,7 @@ session_start();
 include '../../database_connection/db_connect.php';
 
 if (!isset($_SESSION['enrollment_id'])) {
-    header("Location: ../../login-system/login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -11,7 +11,7 @@ $enrollment_id = $_SESSION['enrollment_id'];
 
 $stmt = $conn->prepare("
     SELECT * 
-    FROM student_monthly_fee 
+    FROM student_monthly_fee
     WHERE enrollment_id = ?
     ORDER BY payment_date DESC
 ");
@@ -24,7 +24,7 @@ $result = $stmt->get_result();
 
 <table border="1" cellpadding="8" width="100%">
 <tr>
-    <th>Receipt No</th>
+    <th>Fee Type</th>
     <th>Month</th>
     <th>Amount</th>
     <th>Payment Date</th>
@@ -33,14 +33,14 @@ $result = $stmt->get_result();
     <th>Action</th>
 </tr>
 
-<?php while($row = $result->fetch_assoc()) { ?>
+<?php while ($row = $result->fetch_assoc()) { ?>
 <tr>
-    <td><?= $row['receipt_no']; ?></td>
-    <td><?= $row['month']; ?></td>
-    <td>₹<?= $row['amount']; ?></td>
+    <td><?= $row['fee_type']; ?></td>
+    <td><?= $row['month_name'] ?? '-'; ?></td>
+    <td>₹<?= $row['fee_amount']; ?></td>
     <td><?= $row['payment_date']; ?></td>
     <td><?= $row['payment_mode']; ?></td>
-    <td><?= $row['status']; ?></td>
+    <td><?= $row['payment_status']; ?></td>
     <td>
         <a href="view_fee_receipt.php?id=<?= $row['id']; ?>">View</a>
     </td>
