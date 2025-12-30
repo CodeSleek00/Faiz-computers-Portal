@@ -64,25 +64,28 @@ h1{
 }
 .table-wrapper{
     overflow-x:auto;
-}
-table{
-    width:100%;
+}table{
     border-collapse:collapse;
-    font-size:14px;
+    width:max-content;       /* table jitni content utni wide */
+    min-width:100%;          /* but screen se chhoti na ho */
 }
-th,td{
-    padding:10px 12px;
+
+th, td{
+    padding:12px 18px;       /* 👈 MORE SPACE */
     text-align:left;
     border-bottom:1px solid #e5e7eb;
     vertical-align:top;
+    white-space:normal;      /* 👈 TEXT WRAP */
+    word-break:break-word;  /* 👈 LONG WORDS BREAK */
 }
+
 th{
     background:#2563eb;
     color:#fff;
-    position:sticky;
-    top:0;
-    z-index:10;
+    font-weight:500;
+    white-space:nowrap;     /* headings ek line me */
 }
+
 img{
     width:50px;
     height:50px;
