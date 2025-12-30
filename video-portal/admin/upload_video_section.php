@@ -11,7 +11,11 @@ if($_SERVER["REQUEST_METHOD"]=="POST" && isset($_FILES['video_file'])){
     move_uploaded_file($file['tmp_name'], 'videos/'.$filename);
 
     $stmt = $conn->prepare("INSERT INTO videos (section_id,title,description,filename,uploaded_by) VALUES (?,?,?,?,?)");
-    $stmt->bind_param("issss",$section_id,$title,$desc,$filename,"Admin");
+   $uploaded_by = "Admin"; // variable assign karo
+$stmt = $conn->prepare("INSERT INTO videos (section_id,title,description,filename,uploaded_by) VALUES (?,?,?,?,?)");
+$stmt->bind_param("issss",$section_id,$title,$desc,$filename,$uploaded_by);
+$stmt->execute();
+
     $stmt->execute();
     $video_id = $conn->insert_id;
 
