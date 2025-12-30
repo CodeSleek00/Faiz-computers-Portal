@@ -909,7 +909,12 @@ $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assign
                     <span>Online Classes</span>
                 </a>
             </div>
-            
+             <div class="nav-item">
+                <a href="fee/students/my_fee_receipts.php" class="nav-link">
+                   <i class="fa-solid fa-video"></i>
+                    <span>Fee Center</span>
+                </a>
+            </div>
             <div class="nav-item">
                 <a href="login-system/dashboard-user.php" class="nav-link">
                     <i class="fas fa-user"></i>
