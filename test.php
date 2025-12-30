@@ -916,7 +916,7 @@ $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assign
                 </a>
             </div>
              <div class="nav-item">
-                <a href="attendence/student_attendence.php" class="nav-link">
+                <a href="attendence/student_attendance.php" class="nav-link">
                    <i class="fa-solid fa-video"></i>
                     <span> Attendance</span>
                 </a>
