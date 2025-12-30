@@ -1,9 +1,9 @@
 <?php
 session_start();
-include '../../database_connection/db_connect.php';
+include 'database_connection/db_connect.php';
 
 if (!isset($_SESSION['enrollment_id'])) {
-    header("Location: ../../login-system/login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -27,7 +27,7 @@ $result = $stmt->get_result();
     <th>Receipt No</th>
     <th>Month</th>
     <th>Amount</th>
-    <th>Paid Date</th>
+    <th>Payment Date</th>
     <th>Mode</th>
     <th>Status</th>
     <th>Action</th>
