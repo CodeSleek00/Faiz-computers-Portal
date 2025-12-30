@@ -29,22 +29,18 @@ $per_month_fee      = (float)($_POST['per_month_fee'] ?? 0);
 $internal_fee       = (float)($_POST['internal_fee'] ?? 0);
 $semester_exam_fee  = (float)($_POST['semester_exam_fee'] ?? 0);
 $additional_fee     = (float)($_POST['additional_fee'] ?? 0);
-/* ================= IMAGE UPLOAD (FIXED) ================= */
 
+/* ================= IMAGE UPLOAD ================= */
 $photo_name = '';
-
-$upload_dir = __DIR__ . "/../uploads/";   // parent folder uploads
+$upload_dir = __DIR__ . "/../uploads/";
 
 if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === 0) {
-
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
-
     $photo_name = time() . "_" . basename($_FILES['photo']['name']);
     move_uploaded_file($_FILES['photo']['tmp_name'], $upload_dir . $photo_name);
 }
-
 
 /* ================= ENROLLMENT ID ================= */
 $month = strtoupper(date("M"));
@@ -68,6 +64,17 @@ if ($q->num_rows > 0) {
 
 $enrollment_id = "FAIZ-$month$year-$new";
 
+/* ================= ADMISSION MONTH LOGIC ================= */
+$admission_month_no = (int)date('n'); // 1-12
+
+$all_months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+$rotated_months = [];
+for ($i = 0; $i < 12; $i++) {
+    $index = ($admission_month_no - 1 + $i) % 12;
+    $rotated_months[] = $all_months[$index];
+}
+
 /* ================= START TRANSACTION ================= */
 $conn->begin_transaction();
 
@@ -78,7 +85,6 @@ INSERT INTO students26
 VALUES
 ('$name','$photo_name','$phone','$permanent_address','$course_name','$enrollment_id','$phone')
 ");
-
 
 /* ================= ADMISSION TABLE ================= */
 $conn->query("
@@ -98,8 +104,8 @@ $school_college = $_POST['school_college'] ?? [];
 $board = $_POST['board'] ?? [];
 $yearp = $_POST['year'] ?? [];
 $perc = $_POST['percentage'] ?? [];
-for ($i = 0; $i < count($degree); $i++) {
 
+for ($i = 0; $i < count($degree); $i++) {
     if (!empty($degree[$i])) {
 
         $year_clean = !empty($yearp[$i]) ? (int)$yearp[$i] : NULL;
@@ -117,11 +123,7 @@ for ($i = 0; $i < count($degree); $i++) {
     }
 }
 
-
-/* ================= NEW STUDENT_FEE TABLE INSERT ================= */
-
-// Prepare 12 months
-$months = array_fill(1, 12, $per_month_fee);
+/* ================= STUDENT_FEE TABLE ================= */
 $conn->query("
 INSERT INTO student_fee
 (
@@ -136,62 +138,69 @@ VALUES
 (
  '$enrollment_id','$name','$photo_name','$course_name',
  '$registration_fee','$per_month_fee','$additional_fee',
- '$months[1]','$months[2]','$months[3]','$months[4]','$months[5]','$months[6]',
- '$months[7]','$months[8]','$months[9]','$months[10]','$months[11]','$months[12]',
+ '$per_month_fee','$per_month_fee','$per_month_fee','$per_month_fee','$per_month_fee','$per_month_fee',
+ '$per_month_fee','$per_month_fee','$per_month_fee','$per_month_fee','$per_month_fee','$per_month_fee',
  '$internal_fee','$internal_fee',
  '$semester_exam_fee','$semester_exam_fee'
 )
 ");
 
-/* ================= INSERT FEES ================= */
-// 1️⃣ Registration Fee
+/* ================= STUDENT_MONTHLY_FEE ================= */
+
+/* Registration Fee */
 $conn->query("
 INSERT INTO student_monthly_fee
-(enrollment_id,name,photo,course_name,fee_type,fee_amount,payment_status)
+(enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
 VALUES
-('$enrollment_id','$name','$photo_name','$course_name','Registration','$registration_fee','Pending')
+('$enrollment_id','$name','$photo_name','$course_name',
+ 'Registration','$admission_month_no','".$rotated_months[0]."','$registration_fee','Pending')
 ");
 
-// 2️⃣ Monthly Fees (1 to duration)
-$months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-for($i=0; $i<$duration_months; $i++){
+/* Monthly Fees (Dynamic Month-1) */
+for ($i = 0; $i < $duration_months; $i++) {
+
+    $month_no   = ($admission_month_no + $i - 1) % 12 + 1;
+    $month_name = $rotated_months[$i];
+
     $conn->query("
     INSERT INTO student_monthly_fee
     (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
     VALUES
-    ('$enrollment_id','$name','$photo_name','$course_name','Monthly',".($i+1).",'".$months[$i]."','$per_month_fee','Pending')
+    ('$enrollment_id','$name','$photo_name','$course_name',
+     'Monthly','$month_no','$month_name','$per_month_fee','Pending')
     ");
 }
 
-// 3️⃣ Internal Fees 2 times (e.g., July & Dec)
-$internal_months = [7,12];
-foreach($internal_months as $m){
+/* Internal Fees (July & December) */
+foreach ([7,12] as $m) {
     $conn->query("
     INSERT INTO student_monthly_fee
     (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
     VALUES
-    ('$enrollment_id','$name','$photo_name','$course_name','Internal','$m','".$months[$m-1]."','$internal_fee','Pending')
+    ('$enrollment_id','$name','$photo_name','$course_name',
+     'Internal','$m','".$all_months[$m-1]."','$internal_fee','Pending')
     ");
 }
 
-// 4️⃣ Semester Exam Fees 2 times (e.g., June & Dec)
-$semester_months = [6,12];
-foreach($semester_months as $m){
+/* Semester Fees (June & December) */
+foreach ([6,12] as $m) {
     $conn->query("
     INSERT INTO student_monthly_fee
     (enrollment_id,name,photo,course_name,fee_type,month_no,month_name,fee_amount,payment_status)
     VALUES
-    ('$enrollment_id','$name','$photo_name','$course_name','Semester','$m','".$months[$m-1]."','$semester_exam_fee','Pending')
+    ('$enrollment_id','$name','$photo_name','$course_name',
+     'Semester','$m','".$all_months[$m-1]."','$semester_exam_fee','Pending')
     ");
 }
 
-// 5️⃣ Additional Fee if any
-if($additional_fee>0){
+/* Additional Fee */
+if ($additional_fee > 0) {
     $conn->query("
     INSERT INTO student_monthly_fee
     (enrollment_id,name,photo,course_name,fee_type,fee_amount,payment_status)
     VALUES
-    ('$enrollment_id','$name','$photo_name','$course_name','Additional','$additional_fee','Pending')
+    ('$enrollment_id','$name','$photo_name','$course_name',
+     'Additional','$additional_fee','Pending')
     ");
 }
 
