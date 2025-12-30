@@ -89,7 +89,7 @@ $students = $conn->query("
         ON sb.student_id = s.student_id 
        AND sb.student_table = 'students'
     LEFT JOIN students26 s26 
-        ON sb.student_id = s26.student_id 
+        ON sb.id = s26.id 
        AND sb.student_table = 'students26'
     WHERE sb.batch_id = $batch_id
 ");
