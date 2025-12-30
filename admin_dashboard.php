@@ -7,6 +7,12 @@ $total_batches = $conn->query("SELECT COUNT(*) AS c FROM batches")->fetch_assoc(
 $total_exams = $conn->query("SELECT COUNT(*) AS c FROM exams")->fetch_assoc()['c'];
 $total_assignments = $conn->query("SELECT COUNT(*) AS c FROM assignments")->fetch_assoc()['c'];
 $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fetch_assoc()['c'];
+
+
+/* ===== COUNT STUDENTS ===== */
+$result = $conn->query("SELECT COUNT(*) AS total_students FROM students26");
+$row = $result->fetch_assoc();
+$total = $row['total_students'];
 ?>
 
 <!DOCTYPE html>
@@ -679,6 +685,13 @@ $total_materials = $conn->query("SELECT COUNT(*) AS c FROM study_materials")->fe
             </div>
         </div>
     </div>
+
+<div class="card">
+    <h2>Total Students</h2>
+    <div class="count"><?= $total ?></div>
+    <p>(students26 table)</p>
+</div>
+
     
     <script>
         // Password Protection
