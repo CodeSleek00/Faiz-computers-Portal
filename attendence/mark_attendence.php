@@ -90,7 +90,7 @@ $students = $conn->query("
     UNION ALL
 
     SELECT 
-        s26.student_id AS sid,
+        s26.id AS sid,
         s26.name,
         s26.enrollment_id,
         'students26' AS source
