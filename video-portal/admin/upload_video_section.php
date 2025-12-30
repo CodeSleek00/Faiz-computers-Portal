@@ -1,5 +1,5 @@
 <?php
-include '../database_connection/db_connect.php';
+include '../../database_connection/db_connect.php';
 $section_id = $_GET['section_id'];
 
 // Handle video upload
