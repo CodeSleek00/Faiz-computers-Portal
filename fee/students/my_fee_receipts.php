@@ -13,7 +13,7 @@ $stmt = $conn->prepare("
     SELECT * 
     FROM student_monthly_fee 
     WHERE enrollment_id = ?
-    ORDER BY paid_date DESC
+    ORDER BY payment_date DESC
 ");
 $stmt->bind_param("s", $enrollment_id);
 $stmt->execute();
