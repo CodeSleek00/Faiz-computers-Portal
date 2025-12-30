@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../database_connection/db_connect.php';
+include '../../database_connection/db_connect.php';
 if(!isset($_SESSION['enrollment_id'])){ header("Location: ../login/login.php"); exit; }
 
 $student_id = $_SESSION['student_id'];
