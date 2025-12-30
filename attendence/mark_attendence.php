@@ -38,9 +38,6 @@ button{
     border-radius:5px;
     cursor:pointer;
 }
-select,input[type=date]{
-    padding:6px;
-}
 </style>
 </head>
 
@@ -49,7 +46,6 @@ select,input[type=date]{
 <div class="card">
 <h2>📋 Batch Wise Attendance</h2>
 
-<!-- ================= FILTER FORM ================= -->
 <form method="GET">
     <label>Date:</label>
     <input type="date" name="date" required>
@@ -75,27 +71,42 @@ $date     = $_GET['date'];
 
 /*
 ==================================================
- FETCH STUDENTS USING student_table (REAL FIX)
+ CORRECT JOIN (students.student_id & students26.id)
 ==================================================
 */
 $students = $conn->query("
-    SELECT 
-        sb.student_id,
-        sb.student_table,
-        COALESCE(s.name, s26.name) AS name,
-        COALESCE(s.enrollment_id, s26.enrollment_id) AS enrollment_id
-    FROM student_batches sb
-    LEFT JOIN students s 
-        ON sb.student_id = s.student_id 
-       AND sb.student_table = 'students'
-    LEFT JOIN students26 s26 
-        ON sb.id = s26.id 
-       AND sb.student_table = 'students26'
-    WHERE sb.batch_id = $batch_id
+SELECT 
+    sb.student_id,
+    sb.student_table,
+
+    CASE 
+        WHEN sb.student_table = 'students' 
+            THEN s.name
+        WHEN sb.student_table = 'students26' 
+            THEN s26.name
+    END AS name,
+
+    CASE 
+        WHEN sb.student_table = 'students' 
+            THEN s.enrollment_id
+        WHEN sb.student_table = 'students26' 
+            THEN s26.enrollment_id
+    END AS enrollment_id
+
+FROM student_batches sb
+
+LEFT JOIN students s 
+    ON sb.student_id = s.student_id 
+   AND sb.student_table = 'students'
+
+LEFT JOIN students26 s26 
+    ON sb.student_id = s26.id 
+   AND sb.student_table = 'students26'
+
+WHERE sb.batch_id = $batch_id
 ");
 ?>
 
-<!-- ================= ATTENDANCE FORM ================= -->
 <form action="save_attendance.php" method="POST">
 <input type="hidden" name="batch_id" value="<?= $batch_id ?>">
 <input type="hidden" name="date" value="<?= $date ?>">
@@ -122,7 +133,7 @@ $students = $conn->query("
 <?php endwhile; ?>
 <?php else: ?>
 <tr>
-    <td colspan="3">No students found in this batch</td>
+    <td colspan="3">No students found</td>
 </tr>
 <?php endif; ?>
 
