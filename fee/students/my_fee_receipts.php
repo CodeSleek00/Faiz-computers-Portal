@@ -38,7 +38,7 @@ $result = $stmt->get_result();
     <td><?= $row['receipt_no']; ?></td>
     <td><?= $row['month']; ?></td>
     <td>₹<?= $row['amount']; ?></td>
-    <td><?= $row['paid_date']; ?></td>
+    <td><?= $row['payment_date']; ?></td>
     <td><?= $row['payment_mode']; ?></td>
     <td><?= $row['status']; ?></td>
     <td>
