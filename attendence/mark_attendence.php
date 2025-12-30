@@ -41,13 +41,13 @@ button{padding:10px 20px;background:#2ecc71;color:#fff;border:none;border-radius
 if(isset($_GET['batch_id'], $_GET['date'])):
 $batch_id = $_GET['batch_id'];
 $date = $_GET['date'];
-
 $students = $conn->query("
-SELECT s.id, s.name, s.enrollment_id 
-FROM student_batches bs
-JOIN students s ON bs.student_id = s.id
+SELECT s.student_id, s.name, s.enrollment_id 
+FROM batch_students bs
+JOIN students s ON bs.student_id = s.student_id
 WHERE bs.batch_id = $batch_id
 ");
+
 ?>
 
 <form action="save_attendance.php" method="POST">
