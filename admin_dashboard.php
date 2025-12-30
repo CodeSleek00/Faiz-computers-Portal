@@ -561,14 +561,14 @@ $total = $row['total_students'];
                         <div class="stat-icon materials">
                             <i class="fas fa-book"></i>
                         </div>
+                    </div>
+                </div>
 
 <div class="card">
     <h2>Total Students</h2>
     <div class="count"><?= $total ?></div>
     <p>(students26 table)</p>
 </div>
-                    </div>
-                </div>
             </div>
             
             <!-- Quick Actions -->
