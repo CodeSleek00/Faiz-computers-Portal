@@ -585,6 +585,19 @@ $total = $row['total_students'];
                     <div class="action-card">
                         <div class="action-card-header">
                             <div class="action-icon">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <h4>Admission</h4>
+                        </div>
+                        <div class="action-links">
+                            <a href="admission/new_admission.php" class="action-link">New Admission</a>
+                            <a href="admission/view_admissions.php" class="action-link">View Admissions</a>
+                        </div>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-card-header">
+                            <div class="action-icon">
                                 <i class="fas fa-clipboard-list"></i>
                             </div>
                             <h4>Exam Center</h4>
