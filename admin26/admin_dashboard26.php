@@ -26,7 +26,7 @@ SELECT
     a.parent_contact,
     a.course_name,
     a.duration,
-    a.created_at AS admission_date
+    a.admission_date
 
 FROM students26 s
 LEFT JOIN admission a 
