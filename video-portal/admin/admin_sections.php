@@ -1,36 +1,39 @@
 <?php
 include '../../database_connection/db_connect.php';
 
-if($_SERVER["REQUEST_METHOD"]=="POST" && isset($_POST['title'])){
+if($_SERVER['REQUEST_METHOD']=="POST"){
     $title = $_POST['title'];
-    $desc  = $_POST['description'] ?? '';
-    $stmt = $conn->prepare("INSERT INTO sections (title, description, created_by) VALUES (?,?,?)");
-   $created_by = "Admin";
-$stmt = $conn->prepare("INSERT INTO sections (title, description, created_by) VALUES (?,?,?)");
-$stmt->bind_param("sss", $title, $desc, $created_by);
-$stmt->execute();
+    $desc  = $_POST['description'];
+    $created_by = "Admin";
 
+    $stmt = $conn->prepare("INSERT INTO sections (title, description, created_by) VALUES (?,?,?)");
+    $stmt->bind_param("sss",$title,$desc,$created_by);
     $stmt->execute();
-    header("Location: admin_sections.php");
+    header("Location: dashboard.php");
     exit;
 }
 
 $sections = $conn->query("SELECT * FROM sections ORDER BY created_at DESC");
 ?>
 
-<h2>Create Section</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Manage Sections</title>
+</head>
+<body>
+<h1>Sections</h1>
 <form method="POST">
-    <input type="text" name="title" placeholder="Section Title" required>
-    <textarea name="description" placeholder="Section Description"></textarea>
-    <button type="submit">Create Section</button>
+<input type="text" name="title" placeholder="Section Title" required>
+<textarea name="description" placeholder="Description"></textarea>
+<button type="submit">Add Section</button>
 </form>
 
 <h2>Existing Sections</h2>
+<ul>
 <?php while($sec=$sections->fetch_assoc()): ?>
-    <div>
-        <h3><?= htmlspecialchars($sec['title']) ?></h3>
-        <p><?= htmlspecialchars($sec['description']) ?></p>
-        <a href="upload_video_section.php?section_id=<?= $sec['section_id'] ?>">Add Videos</a> |
-        <a href="assign_video.php?section_id=<?= $sec['section_id'] ?>">Assign</a>
-    </div>
+<li><?= htmlspecialchars($sec['title']) ?> - <?= htmlspecialchars($sec['description']) ?></li>
 <?php endwhile; ?>
+</ul>
+</body>
+</html>

@@ -1,81 +1,94 @@
 <?php
 include '../../database_connection/db_connect.php';
 
-$section_id = $_POST['section_id'] ?? NULL;
-$video_id   = $_POST['video_id'] ?? NULL;
-$selected_students = $_POST['students'] ?? [];
-$selected_batches  = $_POST['batches'] ?? [];
+$students = $conn->query("SELECT student_id, name, 'students' as student_table FROM students
+                         UNION
+                         SELECT id, name, 'students26' as student_table FROM students26
+                         ORDER BY name ASC");
 
-// Check if assigning a video
-if($video_id){
-    // Verify video exists
-    $check = $conn->prepare("SELECT video_id FROM videos WHERE video_id=?");
-    $check->bind_param("i",$video_id);
-    $check->execute();
-    $res = $check->get_result();
-    if($res->num_rows==0){
-        die("Error: Selected video does not exist.");
+$batches = $conn->query("SELECT * FROM batches ORDER BY batch_name ASC");
+
+if($_SERVER['REQUEST_METHOD']=="POST"){
+    $section_id = $_POST['section_id'] ?? NULL;
+    $video_id   = $_POST['video_id'] ?? NULL;
+    $selected_students = $_POST['students'] ?? [];
+    $selected_batches  = $_POST['batches'] ?? [];
+
+    $video_id_list = [];
+
+    if($video_id){ // single video
+        $chk = $conn->prepare("SELECT video_id FROM videos WHERE video_id=?");
+        $chk->bind_param("i",$video_id);
+        $chk->execute();
+        $res = $chk->get_result();
+        if($res->num_rows==0){ die("Video does not exist"); }
+        $video_id_list[] = $video_id;
+    } elseif($section_id){ // assign entire section
+        $vids = $conn->query("SELECT video_id FROM videos WHERE section_id=$section_id");
+        while($v=$vids->fetch_assoc()){ $video_id_list[] = $v['video_id']; }
     }
-}
 
-// If assigning section (all videos inside it)
-if($section_id && !$video_id){
-    $vids = $conn->query("SELECT video_id FROM videos WHERE section_id=$section_id");
-    while($v=$vids->fetch_assoc()){
-        $video_id_list[] = $v['video_id'];
+    // Assign to students
+    foreach($selected_students as $s){
+        list($student_id,$student_table) = explode("|",$s);
+        foreach($video_id_list as $vid){
+            $stmt = $conn->prepare("INSERT INTO video_assignments (video_id, section_id, student_id, student_table) VALUES (?,?,?,?)");
+            $stmt->bind_param("iiis",$vid,$section_id,$student_id,$student_table);
+            $stmt->execute();
+        }
     }
-} else {
-    $video_id_list[] = $video_id; // single video
-}
 
-// Assign to students
-foreach($selected_students as $s){
-    list($student_id,$student_table) = explode("|",$s);
-    foreach($video_id_list as $vid){
-        $stmt = $conn->prepare("INSERT INTO video_assignments (video_id, section_id, student_id, student_table) VALUES (?,?,?,?)");
-        $stmt->bind_param("iiis",$vid,$section_id,$student_id,$student_table);
-        $stmt->execute();
+    // Assign to batches
+    foreach($selected_batches as $b){
+        $batch_id = $b;
+        foreach($video_id_list as $vid){
+            $stmt = $conn->prepare("INSERT INTO video_assignments (video_id, section_id, batch_id) VALUES (?,?,?)");
+            $stmt->bind_param("iii",$vid,$section_id,$batch_id);
+            $stmt->execute();
+        }
     }
+
+    echo "Assigned successfully!";
 }
-
-// Assign to batches
-foreach($selected_batches as $b){
-    $batch_id = $b;
-    foreach($video_id_list as $vid){
-        $stmt = $conn->prepare("INSERT INTO video_assignments (video_id, section_id, batch_id) VALUES (?,?,?)");
-        $stmt->bind_param("iii",$vid,$section_id,$batch_id);
-        $stmt->execute();
-    }
-}
-
-echo "Assigned successfully!";
-
 ?>
 
-<h2>Assign Section/Video</h2>
+<h1>Assign Video / Section</h1>
 <form method="POST">
-    <label>Select Video (optional if assigning entire section)</label>
-    <select name="video_id">
-        <option value="">Assign Entire Section</option>
-        <?php while($v=$videos->fetch_assoc()): ?>
-            <option value="<?= $v['video_id'] ?>"><?= htmlspecialchars($v['title']) ?></option>
-        <?php endwhile; ?>
-    </select>
+<label>Section (optional)</label>
+<select name="section_id">
+<option value="">--Select Section--</option>
+<?php
+$secs = $conn->query("SELECT * FROM sections");
+while($s=$secs->fetch_assoc()):
+?>
+<option value="<?= $s['section_id'] ?>"><?= htmlspecialchars($s['title']) ?></option>
+<?php endwhile; ?>
+</select>
 
-    <input type="hidden" name="section_id" value="<?= $section_id ?>">
+<label>Or Single Video</label>
+<select name="video_id">
+<option value="">--Select Video--</option>
+<?php
+$vids = $conn->query("SELECT * FROM videos");
+while($v=$vids->fetch_assoc()):
+?>
+<option value="<?= $v['video_id'] ?>"><?= htmlspecialchars($v['title']) ?></option>
+<?php endwhile; ?>
+</select>
 
-    <h3>Select Students</h3>
-    <?php while($s=$students->fetch_assoc()): ?>
-        <input type="checkbox" name="students[]" value="<?= $s['id'] ?>|students"> <?= htmlspecialchars($s['name']) ?><br>
-    <?php endwhile; ?>
-    <?php while($s=$students26->fetch_assoc()): ?>
-        <input type="checkbox" name="students[]" value="<?= $s['id'] ?>|students26"> <?= htmlspecialchars($s['name']) ?><br>
-    <?php endwhile; ?>
+<label>Select Students</label>
+<select name="students[]" multiple>
+<?php while($st=$students->fetch_assoc()): ?>
+<option value="<?= $st['student_id'] ?>|<?= $st['student_table'] ?>"><?= htmlspecialchars($st['name']) ?></option>
+<?php endwhile; ?>
+</select>
 
-    <h3>Select Batches</h3>
-    <?php while($b=$batches->fetch_assoc()): ?>
-        <input type="checkbox" name="batches[]" value="<?= $b['batch_id'] ?>"> <?= htmlspecialchars($b['batch_name']) ?><br>
-    <?php endwhile; ?>
+<label>Select Batches</label>
+<select name="batches[]" multiple>
+<?php while($b=$batches->fetch_assoc()): ?>
+<option value="<?= $b['batch_id'] ?>"><?= htmlspecialchars($b['batch_name']) ?></option>
+<?php endwhile; ?>
+</select>
 
-    <button type="submit">Assign</button>
+<button type="submit">Assign</button>
 </form>

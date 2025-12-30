@@ -1,29 +1,33 @@
 <?php
 session_start();
-include '../../database_connection/db_connect.php';
-
-if(!isset($_SESSION['enrollment_id'])){
-    header("Location: ../login/login.php");
-    exit;
-}
+include '../database_connection/db_connect.php';
+if(!isset($_SESSION['enrollment_id'])){ header("Location: ../login/login.php"); exit; }
 
 $student_id = $_SESSION['student_id'];
 $student_table = $_SESSION['student_table'];
 
-// Fetch assigned sections
-$sql = "SELECT DISTINCT s.section_id, s.title, s.description
-        FROM sections s
-        JOIN video_assignments va ON va.section_id = s.section_id
-        LEFT JOIN student_batches sb ON va.batch_id = sb.batch_id
-            AND sb.student_id=? AND sb.student_table=?
-        WHERE (va.student_id=? AND va.student_table=?) OR (va.batch_id IS NOT NULL AND sb.id IS NOT NULL)
-        ORDER BY s.created_at DESC";
-
-$stmt = $conn->prepare($sql);
+// Fetch assigned videos
+$stmt = $conn->prepare("SELECT DISTINCT v.* 
+    FROM videos v
+    JOIN video_assignments va ON va.video_id=v.video_id
+    LEFT JOIN student_batches sb ON va.batch_id=sb.batch_id AND sb.student_id=? AND sb.student_table=?
+    WHERE (va.student_id=? AND va.student_table=?) OR (va.batch_id IS NOT NULL AND sb.id IS NOT NULL)
+    ORDER BY v.upload_date DESC");
 $stmt->bind_param("isis",$student_id,$student_table,$student_id,$student_table);
 $stmt->execute();
-$sections = $stmt->get_result();
+$videos = $stmt->get_result();
 ?>
+
+<h1>Welcome <?= htmlspecialchars($_SESSION['name']) ?></h1>
+
+<?php while($v=$videos->fetch_assoc()): ?>
+<div>
+<h2><?= htmlspecialchars($v['title']) ?></h2>
+<p><?= htmlspecialchars($v['description']) ?></p>
+<video controls src="../admin/videos/<?= htmlspecialchars($v['filename']) ?>"></video>
+</div>
+<?php endwhile; ?>
+
 
 <!DOCTYPE html>
 <html>
