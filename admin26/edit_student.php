@@ -73,19 +73,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ===== admission =====
     $stmt2 = $conn->prepare("
-        UPDATE admission SET
-            name=?, phone=?, aadhar=?, apaar=?, email=?, religion=?, caste=?,
-            address=?, permanent_address=?, dob=?, father_name=?, mother_name=?, parent_contact=?,
-            course_name=?, duration=?, registration_fee=?, per_month_fee=?, internal_fee=?, semester_exam_fee=?,
-            photo=?, enrollment_id=?
-        WHERE enrollment_id=?
-    ");
-    $stmt2->bind_param("ssssssssssssssssdddddss",
-        $name,$contact,$aadhar,$apaar,$student['email'],$religion,$caste,
-        $address,$paddress,$dob,$father,$mother,$parent_c,
-        $course_name,$duration,$registration_fee,$monthly_fee,$internal_fee,$semester_fee,
-        $photo,$enrollment,$old_enrollment
-    );
+    UPDATE admission SET
+        name=?, phone=?, aadhar=?, apaar=?, email=?, religion=?, caste=?,
+        address=?, permanent_address=?, dob=?, father_name=?, mother_name=?, parent_contact=?,
+        course_name=?, duration=?, registration_fee=?, per_month_fee=?, internal_fee=?, semester_exam_fee=?,
+        photo=?, enrollment_id=?
+    WHERE enrollment_id=?
+");
+
+$stmt2->bind_param(
+    "ssssssssssssssiddddsss",
+    $name,
+    $contact,
+    $aadhar,
+    $apaar,
+    $student['email'],
+    $religion,
+    $caste,
+    $address,
+    $paddress,
+    $dob,
+    $father,
+    $mother,
+    $parent_c,
+    $course_name,
+    $duration,
+    $registration_fee,
+    $monthly_fee,
+    $internal_fee,
+    $semester_fee,
+    $photo,
+    $enrollment,
+    $old_enrollment
+);
+
     $stmt2->execute();
 
     // ===== student_fee =====
