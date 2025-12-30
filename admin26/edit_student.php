@@ -139,7 +139,7 @@ $stmt2->bind_param(
     $stmt5->execute();
 
     $conn->commit();
-    header("Location: admin_students.php");
+    header("Location: admin_dashboard26.php");
     exit;
 }
 ?>
