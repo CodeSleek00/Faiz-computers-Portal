@@ -95,7 +95,7 @@ $students = $conn->query("
         s26.enrollment_id,
         'students26' AS source
     FROM student_batches sb
-    JOIN students26 s26 ON sb.student_id = s26.student_id
+    JOIN students26 s26 ON sb.id = s26.id
     WHERE sb.batch_id = $batch_id
 ");
 ?>
