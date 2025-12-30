@@ -591,7 +591,7 @@ $total = $row['total_students'];
                         </div>
                         <div class="action-links">
                             <a href="admission/admission_form.php" class="action-link">New Admission</a>
-                            <a href="admission/view_admissions.php" class="action-link">View Admissions</a>
+                            <a href="admin26/admin_dashboard26.php" class="action-link">Manage Students</a>
                         </div>
                     </div>
 
