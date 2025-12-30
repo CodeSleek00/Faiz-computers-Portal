@@ -5,7 +5,11 @@ if($_SERVER["REQUEST_METHOD"]=="POST" && isset($_POST['title'])){
     $title = $_POST['title'];
     $desc  = $_POST['description'] ?? '';
     $stmt = $conn->prepare("INSERT INTO sections (title, description, created_by) VALUES (?,?,?)");
-    $stmt->bind_param("sss",$title,$desc,"Admin");
+   $created_by = "Admin";
+$stmt = $conn->prepare("INSERT INTO sections (title, description, created_by) VALUES (?,?,?)");
+$stmt->bind_param("sss", $title, $desc, $created_by);
+$stmt->execute();
+
     $stmt->execute();
     header("Location: admin_sections.php");
     exit;
