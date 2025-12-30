@@ -17,5 +17,6 @@ foreach ($_POST['status'] as $table => $students) {
 }
 
 
+
 header("Location: mark_attendance.php?success=1");
 exit;
