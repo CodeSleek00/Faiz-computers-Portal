@@ -1,6 +1,5 @@
 <?php
 include "../includes/db_connect.php";
-include "../includes/session_check.php";
 
 $title = $_POST['title'];
 $description = $_POST['description'];
@@ -14,7 +13,8 @@ if(isset($_FILES['video_file'])){
     move_uploaded_file($file['tmp_name'], '../videos/'.$filename);
 
     $stmt = $conn->prepare("INSERT INTO videos (title, description, filename, uploaded_by) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $title, $description, $filename, $_SESSION['user_type']);
+    $uploaded_by = "Admin";  // Default, no login required
+    $stmt->bind_param("ssss", $title, $description, $filename, $uploaded_by);
     $stmt->execute();
     $video_id = $stmt->insert_id;
 

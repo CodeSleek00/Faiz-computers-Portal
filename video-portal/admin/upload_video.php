@@ -1,8 +1,7 @@
 <?php
 include "../includes/db_connect.php";
-include "../includes/session_check.php";
 
-// Fetch batches & students
+// Fetch batches & students dynamically
 $batches = $conn->query("SELECT * FROM batches");
 $students = $conn->query("SELECT student_id, name FROM students");
 ?>

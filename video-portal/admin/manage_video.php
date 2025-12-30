@@ -1,6 +1,5 @@
 <?php
 include "../includes/db_connect.php";
-include "../includes/session_check.php";
 
 if($_GET['action']=='delete' && isset($_GET['id'])){
     $id = $_GET['id'];

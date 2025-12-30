@@ -1,6 +1,5 @@
 <?php
 include "../includes/db_connect.php";
-include "../includes/session_check.php";
 
 $result = $conn->query("SELECT * FROM videos ORDER BY upload_date DESC");
 ?>
