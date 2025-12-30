@@ -575,7 +575,7 @@ $total = $row['total_students'];
                     </div>
                 </div>
                
-                   
+                   </div>
             
             <!-- Quick Actions -->
             <div class="quick-actions">
