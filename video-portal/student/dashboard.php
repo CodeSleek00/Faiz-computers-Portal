@@ -20,7 +20,7 @@ $videos = $stmt->get_result();
 <h1>Welcome <?= htmlspecialchars($_SESSION['name']) ?></h1>
 
 <?php while($v=$videos->fetch_assoc()): ?>
-<div style="border:1px solid #ccc;padding:10px;margin:10px 0;">
+<div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
 <h2><?= htmlspecialchars($v['title']) ?></h2>
 <p><?= htmlspecialchars($v['description']) ?></p>
 <video controls width="600" src="../admin/videos/<?= htmlspecialchars($v['filename']) ?>"></video>
