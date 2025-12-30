@@ -668,7 +668,7 @@ $total = $row['total_students'];
                             <h4>Fee Management</h4>
                         </div>
                         <div class="action-links">
-                            <a href="fee/.php" class="action-link">Fee Submissions</a>
+                            <a href="fee/dashboard.php" class="action-link">Fee Submissions</a>
         
                         </div>
                     </div>
