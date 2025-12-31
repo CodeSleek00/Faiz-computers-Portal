@@ -164,9 +164,16 @@ $stmt->bind_param("is", $student_id, $student_table);
 $stmt->execute();
 $last_materials = $stmt->get_result();
 /* =====================================================
-   THIS MONTH FEE STATUS (student_monthly_fee)
+   AUTO MONTH DETECT → CHECK FEE STATUS
 ===================================================== */
 
+$enrollment_id = $_SESSION['enrollment_id'];
+
+// Step 1: current month
+$currentMonthNo   = (int) date('n');   // 1–12
+$currentMonthName = date('F');         // January, February...
+
+// Step 2: check fee for this month
 $stmt = $conn->prepare("
     SELECT payment_status
     FROM student_monthly_fee
@@ -178,14 +185,14 @@ $stmt = $conn->prepare("
 
 $stmt->bind_param("si", $enrollment_id, $currentMonthNo);
 $stmt->execute();
-
 $result = $stmt->get_result();
 
+// Step 3: decide status
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $feeStatus = $row['payment_status']; // Paid / Pending
 } else {
-    $feeStatus = 'Pending';
+    $feeStatus = 'Pending'; // no entry = not paid
 }
 
 ?>
@@ -1308,8 +1315,8 @@ if ($result->num_rows > 0) {
 </div>
 <div class="stat-card fees animate-in">
     <div class="stat-title">
-        <i class="fas fa-rupee-sign"></i>
-        <span>This Month Fee</span>
+        <i class="fas fa-calendar-alt"></i>
+        <span><?= $currentMonthName ?> Fee</span>
     </div>
 
     <div class="stat-value" style="font-size:22px;">
