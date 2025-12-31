@@ -134,7 +134,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $students->data_seek(0); // reset pointer
 while($s=$students->fetch_assoc()): ?>
 <div>
-<input type="checkbox" name="students_assign[]" value="<?= $s['enrollment_id'] ?>|<?= $s['student_table'] ?>">
+<input type="checkbox" name="students_assign[]" value="<?= $s['student_id'] ?>|<?= $s['student_table'] ?>">
+
 <?= htmlspecialchars($s['name']) ?> (<?= $s['enrollment_id'] ?>)
 </div>
 <?php endwhile; ?>
