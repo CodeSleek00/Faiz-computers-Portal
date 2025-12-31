@@ -232,7 +232,7 @@ $total_materials = $total_materials ?? 0;
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/png" href="image.png">
     <link rel="apple-touch-icon" href="image.png">
     <title>Dashboard | Faiz Computer Institute</title>
@@ -260,6 +260,8 @@ $total_materials = $total_materials ?? 0;
             --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
             --card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.2);
         }
 
         * {
@@ -270,20 +272,23 @@ $total_materials = $total_materials ?? 0;
 
         body {
             font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: var(--light-gray);
+            background: linear-gradient(135deg, #f5f7fa 0%, #f2f2f7 100%);
             color: var(--dark);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             display: flex;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar Navigation - Enhanced */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--sidebar-bg);
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid var(--glass-border);
             position: fixed;
             top: 0;
             left: 0;
@@ -291,12 +296,13 @@ $total_materials = $total_materials ?? 0;
             z-index: 1000;
             overflow-y: auto;
             padding: 20px 0;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-header {
             padding: 0 20px 24px;
-            border-bottom: 1px solid var(--light-gray);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             margin-bottom: 16px;
         }
 
@@ -312,7 +318,7 @@ $total_materials = $total_materials ?? 0;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--white);
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
         }
 
         .profile-info h3 {
@@ -348,39 +354,29 @@ $total_materials = $total_materials ?? 0;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             color: var(--dark-gray);
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
-            border-radius: 10px;
+            border-radius: 12px;
             margin: 0 12px 4px;
             transition: var(--transition);
             position: relative;
+            background: transparent;
         }
 
         .nav-item:hover {
             background: rgba(0, 122, 255, 0.08);
             color: var(--primary-blue);
-            transform: translateX(2px);
+            transform: translateX(4px);
         }
 
         .nav-item.active {
             background: rgba(0, 122, 255, 0.12);
             color: var(--primary-blue);
             font-weight: 600;
-        }
-
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 60%;
-            background: var(--primary-blue);
-            border-radius: 0 2px 2px 0;
+            box-shadow: inset 2px 0 0 var(--primary-blue);
         }
 
         .nav-icon {
@@ -393,17 +389,19 @@ $total_materials = $total_materials ?? 0;
         .nav-badge {
             margin-left: auto;
             font-size: 11px;
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 10px;
             background: rgba(0, 122, 255, 0.1);
             color: var(--primary-blue);
             font-weight: 600;
+            min-width: 24px;
+            text-align: center;
         }
 
         .sidebar-footer {
             padding: 20px;
             margin-top: auto;
-            border-top: 1px solid var(--light-gray);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .logout-btn {
@@ -411,11 +409,11 @@ $total_materials = $total_materials ?? 0;
             align-items: center;
             gap: 10px;
             width: 100%;
-            padding: 10px 16px;
+            padding: 12px 16px;
             background: rgba(255, 59, 48, 0.08);
             color: var(--danger);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
@@ -424,72 +422,114 @@ $total_materials = $total_materials ?? 0;
 
         .logout-btn:hover {
             background: rgba(255, 59, 48, 0.15);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
-        /* Main Content */
+        /* Main Content - Enhanced */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
-            padding: 20px;
+            padding: 24px;
             min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Dashboard Header */
+        /* Dashboard Header - Enhanced */
         .dashboard-header {
-            background: var(--white);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--card-radius);
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 24px;
             box-shadow: var(--card-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid var(--glass-border);
         }
 
         .welcome-section h1 {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             color: var(--dark);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .welcome-section p {
             color: var(--dark-gray);
             font-size: 14px;
             font-weight: 400;
+            max-width: 500px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Live Clock - New */
+        .live-clock {
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(0, 122, 255, 0.2);
+        }
+
+        .clock-icon {
+            color: var(--primary-blue);
+            font-size: 14px;
+        }
+
+        .clock-time {
+            font-family: 'SF Pro Display', monospace;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--dark);
         }
 
         .date-display {
             font-size: 14px;
             color: var(--dark-gray);
-            background: var(--light-gray);
-            padding: 6px 12px;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 8px 14px;
+            border-radius: 12px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Stats Grid - Compact */
+        /* Stats Grid - Enhanced for Mobile */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
         }
 
         .stat-card {
-            background: var(--white);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--card-radius);
-            padding: 16px;
+            padding: 20px;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--glass-border);
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-6px);
             box-shadow: var(--card-shadow-hover);
         }
 
@@ -498,9 +538,10 @@ $total_materials = $total_materials ?? 0;
             position: absolute;
             top: 0;
             left: 0;
-            width: 3px;
+            width: 4px;
             height: 100%;
-            background: var(--primary-blue);
+            background: linear-gradient(to bottom, var(--primary-blue), var(--accent-blue));
+            border-radius: 4px 0 0 4px;
         }
 
         .stat-content {
@@ -513,114 +554,118 @@ $total_materials = $total_materials ?? 0;
             font-size: 12px;
             font-weight: 500;
             color: var(--dark-gray);
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
         }
 
         .stat-number {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
             color: var(--dark);
             line-height: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stat-icon {
-            font-size: 24px;
+            font-size: 32px;
             color: var(--primary-blue);
-            opacity: 0.8;
+            opacity: 0.9;
         }
 
-        /* Content Grid */
+        /* Content Grid - Enhanced */
         .content-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
+            gap: 32px;
+            margin-bottom: 32px;
         }
 
-        @media (max-width: 1024px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Cards */
+        /* Cards - Enhanced */
         .card {
-            background: var(--white);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--card-radius);
-            padding: 20px;
+            padding: 24px;
             box-shadow: var(--card-shadow);
-            margin-bottom: 20px;
-            border: 1px solid rgba(0, 0, 0, 0.03);
+            margin-bottom: 24px;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--card-shadow-hover);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: var(--dark);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .card-title i {
             color: var(--primary-blue);
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .view-all {
             color: var(--primary-blue);
             text-decoration: none;
-            font-weight: 500;
-            font-size: 12px;
+            font-weight: 600;
+            font-size: 13px;
             transition: var(--transition);
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-
-        .view-all:hover {
+            padding: 6px 12px;
+            border-radius: 8px;
             background: rgba(0, 122, 255, 0.08);
         }
 
-        /* Assignment List */
+        .view-all:hover {
+            background: rgba(0, 122, 255, 0.12);
+            transform: translateX(2px);
+        }
+
+        /* Assignment List - Enhanced */
         .assignment-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: var(--card-gray);
-            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
             transition: var(--transition);
             border: 1px solid transparent;
         }
 
         .assignment-item:hover {
-            background: var(--light-gray);
+            background: rgba(0, 122, 255, 0.04);
             border-color: rgba(0, 122, 255, 0.1);
-            transform: translateX(2px);
+            transform: translateX(4px);
         }
 
         .assignment-info h4 {
             font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 2px;
+            font-size: 14px;
+            margin-bottom: 4px;
             color: var(--dark);
         }
 
         .assignment-info p {
             color: var(--dark-gray);
-            font-size: 11px;
+            font-size: 12px;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
@@ -628,33 +673,40 @@ $total_materials = $total_materials ?? 0;
         }
 
         .assignment-status {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
-            min-width: 70px;
+            min-width: 80px;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .status-submitted {
-            background: rgba(52, 199, 89, 0.1);
+            background: rgba(52, 199, 89, 0.12);
             color: var(--success);
-            border: 1px solid rgba(52, 199, 89, 0.2);
+            border: 1px solid rgba(52, 199, 89, 0.3);
         }
 
         .status-pending {
-            background: rgba(255, 59, 48, 0.1);
+            background: rgba(255, 59, 48, 0.12);
             color: var(--danger);
-            border: 1px solid rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.3);
         }
 
         /* Materials List */
         .material-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--light-gray);
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .material-item:hover {
+            transform: translateX(4px);
         }
 
         .material-item:last-child {
@@ -662,81 +714,86 @@ $total_materials = $total_materials ?? 0;
         }
 
         .material-icon {
-            width: 32px;
-            height: 32px;
-            background: rgba(0, 122, 255, 0.08);
-            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(90, 200, 250, 0.1) 100%);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-blue);
-            font-size: 12px;
+            font-size: 14px;
+            border: 1px solid rgba(0, 122, 255, 0.1);
         }
 
         .material-info h4 {
             font-weight: 500;
-            font-size: 12px;
+            font-size: 13px;
             margin-bottom: 2px;
             color: var(--dark);
         }
 
         /* Exam List */
         .exam-item {
-            background: var(--card-gray);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
             transition: var(--transition);
             border: 1px solid transparent;
         }
 
         .exam-item:hover {
-            background: var(--light-gray);
+            background: rgba(0, 122, 255, 0.04);
             border-color: rgba(0, 122, 255, 0.1);
+            transform: translateY(-2px);
         }
 
         .exam-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .exam-name {
             font-weight: 600;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--dark);
         }
 
         .exam-duration {
             color: var(--dark-gray);
-            font-size: 11px;
+            font-size: 12px;
             background: rgba(0, 0, 0, 0.04);
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 8px;
+            font-weight: 500;
         }
 
         .exam-action {
             display: inline-block;
-            padding: 6px 12px;
-            background: var(--primary-blue);
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 11px;
+            border-radius: 10px;
+            font-size: 12px;
             font-weight: 600;
             transition: var(--transition);
+            border: none;
+            cursor: pointer;
         }
 
         .exam-action:hover {
-            background: var(--primary-blue-dark);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
 
         /* Charts */
         .chart-container {
-            height: 160px;
-            margin-top: 12px;
+            height: 180px;
+            margin-top: 16px;
         }
 
         /* Fee Status */
@@ -744,73 +801,83 @@ $total_materials = $total_materials ?? 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 12px;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .fee-amount {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: 800;
             color: var(--dark);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .fee-badge {
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 12px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .badge-paid {
-            background: rgba(52, 199, 89, 0.1);
+            background: rgba(52, 199, 89, 0.15);
             color: var(--success);
-            border: 1px solid rgba(52, 199, 89, 0.2);
+            border: 2px solid rgba(52, 199, 89, 0.3);
         }
 
         .badge-pending {
-            background: rgba(255, 59, 48, 0.1);
+            background: rgba(255, 59, 48, 0.15);
             color: var(--danger);
-            border: 1px solid rgba(255, 59, 48, 0.2);
+            border: 2px solid rgba(255, 59, 48, 0.3);
         }
 
         /* Attendance */
         .attendance-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 16px;
+            gap: 16px;
+            margin-top: 20px;
         }
 
         .attendance-stat {
             text-align: center;
-            padding: 12px;
-            background: var(--card-gray);
-            border-radius: 10px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
             border: 1px solid transparent;
+            transition: var(--transition);
         }
 
         .attendance-stat:hover {
             border-color: rgba(0, 0, 0, 0.05);
-            transform: translateY(-1px);
+            transform: translateY(-4px);
         }
 
         .attendance-number {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 2px;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
 
         .attendance-label {
             color: var(--dark-gray);
-            font-size: 11px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 16px;
+            gap: 16px;
+            margin-top: 20px;
         }
 
         .action-btn {
@@ -818,9 +885,9 @@ $total_materials = $total_materials ?? 0;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 16px;
-            background: var(--card-gray);
-            border-radius: 10px;
+            padding: 24px 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
             text-decoration: none;
             color: var(--dark);
             transition: var(--transition);
@@ -828,34 +895,38 @@ $total_materials = $total_materials ?? 0;
         }
 
         .action-btn:hover {
-            background: var(--light-gray);
-            border-color: rgba(0, 122, 255, 0.1);
-            transform: translateY(-2px);
+            background: rgba(0, 122, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.2);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.15);
         }
 
         .action-btn i {
-            font-size: 18px;
+            font-size: 24px;
             color: var(--primary-blue);
-            margin-bottom: 6px;
+            margin-bottom: 12px;
         }
 
         .action-btn span {
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
         }
 
-        /* Mobile Navigation */
+        /* Mobile Navigation - Enhanced */
         .mobile-nav {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--white);
-            padding: 10px 16px;
-            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 20px;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            border-top: 1px solid var(--light-gray);
+            border-top: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
         }
 
         .nav-items {
@@ -872,98 +943,47 @@ $total_materials = $total_materials ?? 0;
             color: var(--dark-gray);
             font-size: 11px;
             transition: var(--transition);
-            padding: 6px 8px;
-            border-radius: 10px;
-            min-width: 60px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            min-width: 64px;
+            background: transparent;
         }
 
         .nav-item-mobile.active {
             color: var(--primary-blue);
-            background: rgba(0, 122, 255, 0.08);
+            background: rgba(0, 122, 255, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
         }
 
         .nav-item-mobile i {
-            font-size: 16px;
-            margin-bottom: 3px;
+            font-size: 18px;
+            margin-bottom: 4px;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: var(--transition);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding-bottom: 70px;
-            }
-            
-            .mobile-nav {
-                display: block;
-            }
-            
-            .menu-toggle {
-                display: block;
-                background: none;
-                border: none;
-                color: var(--dark);
-                font-size: 20px;
-                cursor: pointer;
-                padding: 8px;
-                border-radius: 8px;
-                transition: var(--transition);
-            }
-            
-            .menu-toggle:hover {
-                background: var(--light-gray);
-            }
+        .nav-item-mobile span {
+            font-weight: 500;
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 16px;
-            }
-            
-            .dashboard-header {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .content-grid {
-                gap: 16px;
-            }
-            
-            .welcome-section h1 {
-                font-size: 20px;
-            }
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--dark);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            transition: var(--transition);
+            z-index: 1001;
         }
 
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .attendance-stats {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .card {
-                padding: 16px;
-            }
+        .menu-toggle:hover {
+            background: rgba(0, 122, 255, 0.1);
+            transform: rotate(90deg);
         }
 
         /* Overlay for mobile */
@@ -977,17 +997,224 @@ $total_materials = $total_materials ?? 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .overlay.active {
             display: block;
+            opacity: 1;
+        }
+
+        /* Responsive Design - Fucking Amazing */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-grid {
+                gap: 24px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-bottom: 90px;
+                padding-top: 20px;
+            }
+            
+            .mobile-nav {
+                display: block;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1002;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+                padding: 20px;
+                margin-top: 60px;
+            }
+            
+            .header-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .live-clock {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .date-display {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+                padding-bottom: 90px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 22px;
+            }
+            
+            .welcome-section p {
+                font-size: 13px;
+            }
+            
+            .stat-number {
+                font-size: 28px;
+            }
+            
+            .attendance-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .assignment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .assignment-status {
+                align-self: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobile-nav {
+                padding: 8px 16px;
+            }
+            
+            .nav-item-mobile {
+                min-width: 56px;
+                padding: 8px;
+                font-size: 10px;
+            }
+            
+            .nav-item-mobile i {
+                font-size: 16px;
+            }
+            
+            .dashboard-header {
+                padding: 16px;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .stat-card {
+                padding: 16px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+            }
+            
+            .attendance-stat {
+                padding: 16px;
+            }
+            
+            .attendance-number {
+                font-size: 24px;
+            }
+            
+            .action-btn {
+                padding: 20px 12px;
+            }
+            
+            .action-btn i {
+                font-size: 20px;
+            }
+            
+            .chart-container {
+                height: 160px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .mobile-nav {
+                border-radius: 20px 20px 0 0;
+            }
+            
+            .nav-items {
+                gap: 4px;
+            }
+            
+            .nav-item-mobile {
+                min-width: 48px;
+                padding: 6px;
+                font-size: 9px;
+            }
+            
+            .nav-item-mobile i {
+                font-size: 14px;
+            }
+            
+            .stat-card::before {
+                width: 3px;
+            }
+        }
+
+        /* iPhone Notch Support */
+        @supports (padding: max(0px)) {
+            .mobile-nav {
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
         }
 
         /* Animations */
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -995,8 +1222,80 @@ $total_materials = $total_materials ?? 0;
             }
         }
 
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
         .animate-in {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue-dark);
+        }
+
+        /* Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Focus States for Accessibility */
+        *:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        *:focus:not(:focus-visible) {
+            outline: none;
         }
     </style>
 </head>
@@ -1005,7 +1304,7 @@ $total_materials = $total_materials ?? 0;
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="user-profile">
-                <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="profile-avatar">
+                <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="profile-avatar float-animation">
                 <div class="profile-info">
                     <h3><?= htmlspecialchars($student['name']) ?></h3>
                     <p><?= $student['enrollment_id'] ?></p>
@@ -1017,9 +1316,9 @@ $total_materials = $total_materials ?? 0;
         <div class="sidebar-section">
             <span class="section-label">Dashboard</span>
             <a href="test.php" class="nav-item active">
-                <i class="fas fa-tachometer-alt-alt nav-icon"></i>
+                <i class="fas fa-tachometer-alt nav-icon"></i>
                 <span>Overview</span>
-                <span class="nav-badge">Live</span>
+                <span class="nav-badge pulse-animation">Live</span>
             </a>
         </div>
 
@@ -1109,60 +1408,68 @@ $total_materials = $total_materials ?? 0;
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- Dashboard Header -->
-        <div class="dashboard-header animate-in">
+        <div class="dashboard-header animate-in" style="animation-delay: 0.1s">
             <div class="welcome-section">
-                <h1>Welcome back, <?= htmlspecialchars($student['name']) ?></h1>
-                <p>Track your progress and manage your learning journey</p>
+                <h1>Welcome back, <?= htmlspecialchars($student['name']) ?> 👋</h1>
+                <p>Track your progress and manage your learning journey at Faiz Computer Institute</p>
             </div>
-            <div class="date-display">
-                <i class="fas fa-calendar-alt" style="margin-right: 6px;"></i>
-                <?= date('l, F j, Y') ?>
+            <div class="header-right">
+                <div class="live-clock">
+                    <i class="fas fa-clock clock-icon"></i>
+                    <div class="clock-time" id="liveClock">--:--:--</div>
+                </div>
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"><?= date('l, F j, Y') ?></span>
+                </div>
             </div>
-            <button class="menu-toggle" id="menuToggle" style="display: none;">
-                <i class="fas fa-bars"></i>
-            </button>
         </div>
 
         <!-- Stats Grid -->
         <div class="stats-grid">
-            <div class="stat-card animate-in">
+            <div class="stat-card animate-in" style="animation-delay: 0.2s">
                 <div class="stat-content">
                     <div class="stat-text">
                         <h3>Enrolled Courses</h3>
                         <div class="stat-number"><?= $course_stats['total_courses'] ?></div>
                     </div>
-                    <i class="fas fa-graduation-cap stat-icon"></i>
-                </div>
-            </div>
-
-            <div class="stat-card animate-in" style="animation-delay: 0.1s">
-                <div class="stat-content">
-                    <div class="stat-text">
-                        <h3>Total Assignments</h3>
-                        <div class="stat-number"><?= $assignment_stats['total_assignments'] ?></div>
-                    </div>
-                    <i class="fas fa-tasks stat-icon"></i>
-                </div>
-            </div>
-
-            <div class="stat-card animate-in" style="animation-delay: 0.2s">
-                <div class="stat-content">
-                    <div class="stat-text">
-                        <h3>Submitted</h3>
-                        <div class="stat-number"><?= $assignment_stats['submitted_assignments'] ?></div>
-                    </div>
-                    <i class="fas fa-check-circle stat-icon"></i>
+                    <i class="fas fa-graduation-cap stat-icon float-animation"></i>
                 </div>
             </div>
 
             <div class="stat-card animate-in" style="animation-delay: 0.3s">
                 <div class="stat-content">
                     <div class="stat-text">
+                        <h3>Total Assignments</h3>
+                        <div class="stat-number"><?= $assignment_stats['total_assignments'] ?></div>
+                    </div>
+                    <i class="fas fa-tasks stat-icon float-animation"></i>
+                </div>
+            </div>
+
+            <div class="stat-card animate-in" style="animation-delay: 0.4s">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Submitted</h3>
+                        <div class="stat-number"><?= $assignment_stats['submitted_assignments'] ?></div>
+                    </div>
+                    <i class="fas fa-check-circle stat-icon float-animation"></i>
+                </div>
+            </div>
+
+            <div class="stat-card animate-in" style="animation-delay: 0.5s">
+                <div class="stat-content">
+                    <div class="stat-text">
                         <h3>Study Materials</h3>
                         <div class="stat-number"><?= $total_materials ?></div>
                     </div>
-                    <i class="fas fa-book stat-icon"></i>
+                    <i class="fas fa-book stat-icon float-animation"></i>
                 </div>
             </div>
         </div>
@@ -1172,17 +1479,17 @@ $total_materials = $total_materials ?? 0;
             <!-- Left Column -->
             <div class="left-column">
                 <!-- Recent Assignments -->
-                <div class="card animate-in">
+                <div class="card animate-in" style="animation-delay: 0.2s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-tasks"></i> Recent Assignments</h2>
-                        <a href="assignment/student_dashboard.php" class="view-all">View All</a>
+                        <a href="assignment/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
                         <?php while($assignment = $assignments->fetch_assoc()): ?>
                         <div class="assignment-item">
                             <div class="assignment-info">
                                 <h4><?= htmlspecialchars($assignment['title']) ?></h4>
-                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 60)) ?>...</p>
+                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 80)) ?>...</p>
                             </div>
                             <span class="assignment-status <?= $assignment['submission_id'] ? 'status-submitted' : 'status-pending' ?>">
                                 <?= $assignment['submission_id'] ? 'Submitted' : 'Pending' ?>
@@ -1193,7 +1500,7 @@ $total_materials = $total_materials ?? 0;
                 </div>
 
                 <!-- Performance Chart -->
-                <div class="card animate-in" style="animation-delay: 0.1s">
+                <div class="card animate-in" style="animation-delay: 0.3s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-chart-line"></i> Performance Trend</h2>
                     </div>
@@ -1203,39 +1510,23 @@ $total_materials = $total_materials ?? 0;
                 </div>
 
                 <!-- Assigned Exams -->
-                <div class="card animate-in" style="animation-delay: 0.2s">
+                <div class="card animate-in" style="animation-delay: 0.4s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-pencil-alt"></i> Assigned Exams</h2>
-                        <a href="exam-center/student/student_dashboard.php" class="view-all">View All</a>
+                        <a href="exam-center/student/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
-                      <?php while ($exam = $exams->fetch_assoc()): ?>
-    <?php
-        // Check if student already submitted this exam
-        $stmt2 = $conn->prepare("
-            SELECT COUNT(*) AS attempted
-            FROM exam_submissions
-            WHERE exam_id = ? AND student_id = ? AND student_table = ?
-        ");
-        $stmt2->bind_param("iis", $exam['exam_id'], $student_id, $table);
-        $stmt2->execute();
-        $attempted = $stmt2->get_result()->fetch_assoc()['attempted'];
-    ?>
-    <div class="exam-item">
-        <div class="exam-header">
-            <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
-            <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
-        </div>
-        <?php if ($attempted): ?>
-            <span class="exam-action" style="background:#8E8E93; cursor:default;">Attempted</span>
-        <?php else: ?>
-            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
-                Start Exam
-            </a>
-        <?php endif; ?>
-    </div>
-<?php endwhile; ?>
-
+                        <?php while ($exam = $exams->fetch_assoc()): ?>
+                        <div class="exam-item">
+                            <div class="exam-header">
+                                <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
+                                <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
+                            </div>
+                            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
+                                Start Exam <i class="fas fa-play ml-2"></i>
+                            </a>
+                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </div>
@@ -1243,21 +1534,21 @@ $total_materials = $total_materials ?? 0;
             <!-- Right Column -->
             <div class="right-column">
                 <!-- Attendance -->
-                <div class="card animate-in">
+                <div class="card animate-in" style="animation-delay: 0.2s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-calendar-check"></i> Attendance</h2>
-                        <a href="attendence/student_attendance.php" class="view-all">Details</a>
+                        <a href="attendence/student_attendance.php" class="view-all">Details <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="attendance-stats">
-                        <div class="attendance-stat">
+                        <div class="attendance-stat" style="border-color: rgba(52, 199, 89, 0.2);">
                             <div class="attendance-number" style="color: #34C759;"><?= $present ?></div>
                             <div class="attendance-label">Present</div>
                         </div>
-                        <div class="attendance-stat">
+                        <div class="attendance-stat" style="border-color: rgba(255, 59, 48, 0.2);">
                             <div class="attendance-number" style="color: #FF3B30;"><?= $absent ?></div>
                             <div class="attendance-label">Absent</div>
                         </div>
-                        <div class="attendance-stat">
+                        <div class="attendance-stat" style="border-color: rgba(255, 149, 0, 0.2);">
                             <div class="attendance-number" style="color: #FF9500;"><?= $leave ?></div>
                             <div class="attendance-label">Leave</div>
                         </div>
@@ -1268,26 +1559,26 @@ $total_materials = $total_materials ?? 0;
                 </div>
 
                 <!-- Fee Status -->
-                <div class="card animate-in" style="animation-delay: 0.1s">
+                <div class="card animate-in" style="animation-delay: 0.3s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Fee Status</h2>
                     </div>
                     <div class="fee-status">
                         <div>
-                            <div style="color: var(--dark-gray); font-size: 12px;"><?= $currentMonthName ?> Fee</div>
+                            <div style="color: var(--dark-gray); font-size: 13px; font-weight: 500;"><?= $currentMonthName ?> Fee</div>
                             <div class="fee-amount">₹<?= $feeAmount ?></div>
                         </div>
-                        <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?>">
+                        <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?> float-animation">
                             <?= $feeStatus ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Study Materials -->
-                <div class="card animate-in" style="animation-delay: 0.2s">
+                <div class="card animate-in" style="animation-delay: 0.4s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-book-open"></i> Recent Materials</h2>
-                        <a href="study-center/view_materials_student.php" class="view-all">View All</a>
+                        <a href="study-center/view_materials_student.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
                         <?php if ($last_materials->num_rows > 0): ?>
@@ -1302,31 +1593,33 @@ $total_materials = $total_materials ?? 0;
                             </div>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <p style="color: var(--dark-gray); text-align: center; padding: 16px; font-size: 12px;">No materials assigned</p>
+                            <p style="color: var(--dark-gray); text-align: center; padding: 20px; font-size: 13px; background: rgba(0, 0, 0, 0.02); border-radius: 12px;">
+                                <i class="fas fa-inbox mr-2"></i> No materials assigned
+                            </p>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="card animate-in" style="animation-delay: 0.3s">
+                <div class="card animate-in" style="animation-delay: 0.5s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
                     </div>
                     <div class="quick-actions">
                         <a href="assignment/student_dashboard.php" class="action-btn">
-                            <i class="fas fa-tasks"></i>
+                            <i class="fas fa-tasks float-animation"></i>
                             <span>Assignments</span>
                         </a>
                         <a href="study-center/view_materials_student.php" class="action-btn">
-                            <i class="fas fa-book"></i>
+                            <i class="fas fa-book float-animation"></i>
                             <span>Study Center</span>
                         </a>
                         <a href="exam-center/student/student_dashboard.php" class="action-btn">
-                            <i class="fas fa-pencil-alt"></i>
+                            <i class="fas fa-pencil-alt float-animation"></i>
                             <span>Exams</span>
                         </a>
                         <a href="video-portal/student/student_videos.php" class="action-btn">
-                            <i class="fas fa-video"></i>
+                            <i class="fas fa-video float-animation"></i>
                             <span>Classes</span>
                         </a>
                     </div>
@@ -1362,173 +1655,286 @@ $total_materials = $total_materials ?? 0;
     </nav>
 
     <script>
-        // Initialize Charts
+        // Live Clock Functionality
+        function updateLiveClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const clockElement = document.getElementById('liveClock');
+            if (clockElement) {
+                clockElement.textContent = timeString;
+                
+                // Add pulse animation every second
+                clockElement.classList.add('pulse-animation');
+                setTimeout(() => {
+                    clockElement.classList.remove('pulse-animation');
+                }, 300);
+            }
+        }
+
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu toggle
+            // Start live clock
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+
+            // Mobile menu functionality
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('overlay');
             
-            if (menuToggle) {
-                menuToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                });
-                
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
+            function toggleMobileMenu() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
             }
             
-            // Check screen width for menu toggle display
-            function checkScreenWidth() {
+            if (menuToggle) {
+                menuToggle.addEventListener('click', toggleMobileMenu);
+                overlay.addEventListener('click', toggleMobileMenu);
+            }
+            
+            // Close menu when clicking on mobile nav items
+            const mobileNavItems = document.querySelectorAll('.nav-item-mobile');
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+            
+            // Responsive checks
+            function checkResponsive() {
                 if (window.innerWidth <= 1024) {
                     menuToggle.style.display = 'block';
                 } else {
                     menuToggle.style.display = 'none';
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
+                    document.body.style.overflow = '';
                 }
             }
             
-            checkScreenWidth();
-            window.addEventListener('resize', checkScreenWidth);
-
-            // Attendance Chart (Pie)
-            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-            new Chart(attendanceCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Present', 'Absent', 'Leave'],
-                    datasets: [{
-                        data: [<?= $present ?>, <?= $absent ?>, <?= $leave ?>],
-                        backgroundColor: ['#34C759', '#FF3B30', '#FF9500'],
-                        borderWidth: 0,
-                        borderRadius: 6,
-                        spacing: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 12,
-                                usePointStyle: true,
-                                font: {
-                                    size: 10
-                                }
-                            }
-                        }
+            checkResponsive();
+            window.addEventListener('resize', checkResponsive);
+            
+            // Initialize Charts
+            // Attendance Chart
+            const attendanceCtx = document.getElementById('attendanceChart')?.getContext('2d');
+            if (attendanceCtx) {
+                new Chart(attendanceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Present', 'Absent', 'Leave'],
+                        datasets: [{
+                            data: [<?= $present ?>, <?= $absent ?>, <?= $leave ?>],
+                            backgroundColor: [
+                                'rgba(52, 199, 89, 0.8)',
+                                'rgba(255, 59, 48, 0.8)',
+                                'rgba(255, 149, 0, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(52, 199, 89, 1)',
+                                'rgba(255, 59, 48, 1)',
+                                'rgba(255, 149, 0, 1)'
+                            ],
+                            borderWidth: 1,
+                            borderRadius: 8,
+                            spacing: 2
+                        }]
                     },
-                    cutout: '70%'
-                }
-            });
-
-            // Performance Chart (Line)
-            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-            new Chart(performanceCtx, {
-                type: 'line',
-                data: {
-                    labels: <?= json_encode($labels) ?>,
-                    datasets: [{
-                        label: 'Score %',
-                        data: <?= json_encode($scores) ?>,
-                        borderColor: '#007AFF',
-                        backgroundColor: 'rgba(0, 122, 255, 0.08)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: '#007AFF',
-                        pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 1.5,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                drawBorder: false,
-                                color: 'rgba(0, 0, 0, 0.04)'
-                            },
-                            ticks: {
-                                font: {
-                                    size: 10
-                                },
-                                callback: function(value) {
-                                    return value + '%';
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: {
+                                        size: 11
+                                    }
                                 }
                             }
                         },
-                        x: {
-                            grid: {
+                        cutout: '75%'
+                    }
+                });
+            }
+            
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart')?.getContext('2d');
+            if (performanceCtx) {
+                new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: <?= json_encode($labels) ?>,
+                        datasets: [{
+                            label: 'Score %',
+                            data: <?= json_encode($scores) ?>,
+                            borderColor: '#007AFF',
+                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#007AFF',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
                                 display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    drawBorder: false,
+                                    color: 'rgba(0, 0, 0, 0.04)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
                             },
-                            ticks: {
-                                font: {
-                                    size: 10
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 45
                                 }
                             }
                         }
                     }
-                }
-            });
-
-            // Add hover effects to cards
-            const cards = document.querySelectorAll('.stat-card, .assignment-item, .exam-item, .attendance-stat, .action-btn');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = this.classList.contains('stat-card') ? 'translateY(-2px)' : 'translateY(-1px)';
                 });
-                card.addEventListener('mouseleave', function() {
+            }
+            
+            // Enhanced hover effects
+            const interactiveElements = document.querySelectorAll('.stat-card, .assignment-item, .exam-item, .attendance-stat, .action-btn, .material-item');
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    this.style.transform = this.classList.contains('stat-card') ? 
+                        'translateY(-8px)' : 'translateY(-4px)';
+                });
+                element.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                 });
             });
-
-            // Mobile navigation active state
-            const navItemsMobile = document.querySelectorAll('.nav-item-mobile');
-            navItemsMobile.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItemsMobile.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
+            
+            // Add touch feedback for mobile
+            interactiveElements.forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                element.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
                 });
             });
-        });
-
-        // Animate elements on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -20px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = 1;
-                    entry.target.style.transform = 'translateY(0)';
+            
+            // Mobile navigation active state
+            const currentPage = window.location.pathname.split('/').pop() || 'test.php';
+            mobileNavItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPage || (href === 'test.php' && currentPage === '')) {
+                    item.classList.add('active');
                 }
             });
-        }, observerOptions);
-
-        document.querySelectorAll('.animate-in').forEach(el => {
-            el.style.opacity = 0;
-            el.style.transform = 'translateY(8px)';
-            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-            observer.observe(el);
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Add loading animation to page elements
+            const animateElements = document.querySelectorAll('.animate-in');
+            animateElements.forEach((el, index) => {
+                el.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+            });
+            
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.animate-in').forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+            
+            // Add keyboard navigation support
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            });
+            
+            // Update date display with current date
+            function updateDateDisplay() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateString = now.toLocaleDateString('en-US', options);
+                const dateElement = document.getElementById('currentDate');
+                if (dateElement) {
+                    dateElement.textContent = dateString;
+                }
+            }
+            
+            updateDateDisplay();
+        });
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateLiveClock();
+            }
         });
     </script>
 </body>
