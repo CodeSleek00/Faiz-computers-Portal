@@ -2,15 +2,10 @@
 session_start();
 include 'database_connection/db_connect.php';
 
-/* ================= LOGIN CHECK ================= */
-if (!isset($_SESSION['enrollment_id'])) {
-    header("Location: login.php");
-    exit;
-}
+$enrollment_id = $_SESSION['enrollment_id'] ?? null;
+if (!$enrollment_id) die("Login required");
 
-$enrollment_id = $_SESSION['enrollment_id'];
-
-/* ================= FIND STUDENT TABLE ================= */
+/* ===== Detect Student Table ===== */
 $student = $conn->query("
     SELECT student_id, 'students' AS student_table 
     FROM students 
@@ -25,88 +20,96 @@ if (!$student) {
     ")->fetch_assoc();
 }
 
-if (!$student) {
-    die("Student not found");
-}
+if (!$student) die("Student not found");
 
 $student_id    = $student['student_id'];
 $student_table = $student['student_table'];
 
-/* ================= FETCH RESULT ================= */
-$stmt = $conn->prepare("
+/* ===== Fetch Declared Results ===== */
+$data = $conn->query("
     SELECT 
         e.exam_name,
-        e.total_questions,
-        e.marks_per_question,
-        es.score,
-        es.submitted_at
-    FROM exam_submissions es
-    INNER JOIN exams e ON e.exam_id = es.exam_id
+        s.score,
+        (e.total_questions * e.marks_per_question) AS total_marks,
+        s.submitted_at
+    FROM exam_submissions s
+    JOIN exams e ON e.exam_id = s.exam_id
     WHERE 
-        es.student_id = ?
-        AND es.student_table = ?
-        AND es.is_declared = 1
+        s.student_id = $student_id
+        AND s.student_table = '$student_table'
         AND e.result_declared = 1
-    ORDER BY es.score DESC
+    ORDER BY s.submitted_at ASC
 ");
 
-$stmt->bind_param("is", $student_id, $student_table);
-$stmt->execute();
-$result = $stmt->get_result();
+$labels = [];
+$scores = [];
+
+while($r = $data->fetch_assoc()){
+    $labels[] = $r['exam_name'];
+    $scores[] = round(($r['score'] / $r['total_marks']) * 100);
+}
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>My Result</title>
+<title>Performance Chart</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 body{font-family:Poppins;background:#f3f4f6;padding:20px}
-.box{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:10px}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{border:1px solid #ddd;padding:10px;text-align:center}
-th{background:#4f46e5;color:#fff}
-.pass{color:green;font-weight:600}
-.fail{color:red;font-weight:600}
+.box{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:10px
+}
+h2{text-align:center;margin-bottom:20px}
+.back{
+    display:inline-block;
+    margin-bottom:15px;
+    color:#4f46e5;
+    text-decoration:none;
+}
 </style>
 </head>
+
 <body>
 
 <div class="box">
-<h2>📄 My Exam Result</h2>
+<a class="back" href="result.php">⬅ Back to Results</a>
+<h2>📈 Performance Over Time</h2>
 
-<?php if($result->num_rows > 0): ?>
-<table>
-<tr>
-    <th>#</th>
-    <th>Exam</th>
-    <th>Score</th>
-    <th>Total Marks</th>
-    <th>Percentage</th>
-    <th>Status</th>
-</tr>
-
-<?php 
-$i=1;
-while($row=$result->fetch_assoc()):
-    $total_marks = $row['total_questions'] * $row['marks_per_question'];
-    $percentage  = round(($row['score'] / $total_marks) * 100);
-?>
-<tr>
-    <td><?= $i++ ?></td>
-    <td><?= htmlspecialchars($row['exam_name']) ?></td>
-    <td><?= $row['score'] ?></td>
-    <td><?= $total_marks ?></td>
-    <td><?= $percentage ?>%</td>
-    <td class="<?= $percentage>=35?'pass':'fail' ?>">
-        <?= $percentage>=35?'PASS':'FAIL' ?>
-    </td>
-</tr>
-<?php endwhile; ?>
-</table>
-
-<?php else: ?>
-<p>❌ Result not declared yet.</p>
-<?php endif; ?>
-
+<canvas id="chart" height="120"></canvas>
 </div>
+
+<script>
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: <?= json_encode($labels) ?>,
+        datasets: [{
+            label: 'Score (%)',
+            data: <?= json_encode($scores) ?>,
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+</script>
+
 </body>
 </html>
