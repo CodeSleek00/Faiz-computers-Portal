@@ -113,6 +113,25 @@ $assignments = $stmt->get_result();
 $course_stats['total_courses']          = $course_stats['total_courses'] ?? 0;
 $assignment_stats['total_assignments']  = $assignment_stats['total_assignments'] ?? 0;
 $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assignments'] ?? 0;
+/* =====================================================
+   7. ATTENDANCE STATS
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT 
+        SUM(status = 'Present') AS present_days,
+        SUM(status = 'Absent') AS absent_days,
+        SUM(status = 'Leave') AS leave_days
+    FROM attendance
+    WHERE student_id = ?
+");
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$attendance = $stmt->get_result()->fetch_assoc();
+
+$present = $attendance['present_days'] ?? 0;
+$absent  = $attendance['absent_days'] ?? 0;
+$leave   = $attendance['leave_days'] ?? 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -123,6 +142,8 @@ $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assign
     <link rel="icon" type="image/png" href="image.png">
   <link rel="apple-touch-icon" href="image.png">
     <title>Dashboard | Faiz Computer Institute</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -155,6 +176,50 @@ $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assign
             padding: 0;
             box-sizing: border-box;
         }
+        /* ================= ATTENDANCE PIE ================= */
+.attendance-section {
+    max-width: 350px;
+    margin-bottom: 2rem;
+}
+
+.attendance-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+.attendance-legend {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--dark-gray);
+}
+
+.attendance-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot.present { background: #4cc9f0; }
+.dot.absent  { background: #ef233c; }
+.dot.leave   { background: #f8961e; }
+
+@media (max-width: 768px) {
+    .attendance-section {
+        max-width: 100%;
+    }
+}
+
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -1147,6 +1212,24 @@ $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assign
         <span class="number n9">9</span>
     </div>
 </section>
+<!-- Attendance Pie Chart -->
+<section class="attendance-section animate-in">
+    <h3 class="section-title">
+        <i class="fas fa-chart-pie"></i>
+        Attendance Overview
+    </h3>
+
+    <div class="attendance-card">
+        <canvas id="attendanceChart"></canvas>
+
+        <div class="attendance-legend">
+            <span><i class="dot present"></i> Present</span>
+            <span><i class="dot absent"></i> Absent</span>
+            <span><i class="dot leave"></i> Leave</span>
+        </div>
+    </div>
+</section>
+
 
     </main>
 
