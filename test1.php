@@ -29,6 +29,15 @@ if ($result->num_rows === 0) {
 
 $student = $result->fetch_assoc();
 $student_name = $student['name'];
+$stmt = $conn->prepare("SELECT name, photo FROM $table WHERE enrollment_id = ? LIMIT 1");
+$stmt->bind_param("s", $enrollment_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$student = $result->fetch_assoc();
+
+$student_name  = $student['name'];
+$student_photo = $student['photo']; // 👈 photo ka path
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,8 +50,10 @@ $student_name = $student['name'];
 <body>
 
 <div class="card">
-    <h2>✅ Login Successful</h2>
-    <p>Welcome, <span class="name"><?= htmlspecialchars($student_name) ?></span></p>
+   <p>Welcome, <span class="name"><?= htmlspecialchars($student_name) ?></span></p>
+<img src="<?= htmlspecialchars($student_photo) ?>" 
+     alt="Student Photo" 
+     style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-top:10px;">
 
 </div>
 
