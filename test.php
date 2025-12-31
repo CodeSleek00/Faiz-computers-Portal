@@ -163,25 +163,30 @@ $stmt = $conn->prepare("
 $stmt->bind_param("is", $student_id, $student_table);
 $stmt->execute();
 $last_materials = $stmt->get_result();
-
 /* =====================================================
-   9. FEE STATUS (CURRENT MONTH)
+   THIS MONTH FEE STATUS (student_monthly_fee)
 ===================================================== */
-$currentMonth = date('Y-m');
 
 $stmt = $conn->prepare("
-    SELECT status
-    FROM fee_receipts
-    WHERE student_id = ?
-    AND DATE_FORMAT(payment_date, '%Y-%m') = ?
-    ORDER BY payment_date DESC
+    SELECT payment_status
+    FROM student_monthly_fee
+    WHERE enrollment_id = ?
+      AND fee_type = 'Monthly'
+      AND month_no = ?
     LIMIT 1
 ");
-$stmt->bind_param("is", $student_id, $currentMonth);
-$stmt->execute();
-$fee = $stmt->get_result()->fetch_assoc();
 
-$fee_status = $fee['status'] ?? 'Due';
+$stmt->bind_param("si", $enrollment_id, $currentMonthNo);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $feeStatus = $row['payment_status']; // Paid / Pending
+} else {
+    $feeStatus = 'Pending';
+}
 
 ?>
 
@@ -1301,17 +1306,21 @@ $fee_status = $fee['status'] ?? 'Due';
 
     <i class="fas fa-folder-open stat-icon"></i>
 </div>
-
-<!-- Fee Status -->
-<div class="stat-card <?= ($fee_status === 'Paid') ? 'submitted' : 'pending' ?> animate-in">
+<div class="stat-card fees animate-in">
     <div class="stat-title">
         <i class="fas fa-rupee-sign"></i>
-        <span>Fee Status (This Month)</span>
+        <span>This Month Fee</span>
     </div>
-    <div class="stat-value">
-        <?= ($fee_status === 'Paid') ? 'Paid' : 'Due' ?>
+
+    <div class="stat-value" style="font-size:22px;">
+        <?php if ($feeStatus === 'Paid'): ?>
+            <span style="color:green;">Paid ✅</span>
+        <?php else: ?>
+            <span style="color:red;">Pending ❌</span>
+        <?php endif; ?>
     </div>
-    <i class="fas fa-wallet stat-icon"></i>
+
+    <i class="fas fa-file-invoice stat-icon"></i>
 </div>
 
 
