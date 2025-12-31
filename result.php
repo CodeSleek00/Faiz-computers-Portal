@@ -3,114 +3,108 @@ session_start();
 include 'database_connection/db_connect.php';
 
 /* ================= LOGIN CHECK ================= */
-if (!isset($_SESSION['student_id'], $_SESSION['student_table'])) {
+if (!isset($_SESSION['enrollment_id'])) {
     header("Location: login.php");
     exit;
 }
 
-$student_id    = $_SESSION['student_id'];
-$student_table = $_SESSION['student_table'];
+$enrollment_id = $_SESSION['enrollment_id'];
 
-/* ================= FETCH DECLARED RESULTS ================= */
+/* ================= FIND STUDENT TABLE ================= */
+$student = $conn->query("
+    SELECT student_id, 'students' AS student_table 
+    FROM students 
+    WHERE enrollment_id='$enrollment_id'
+")->fetch_assoc();
+
+if (!$student) {
+    $student = $conn->query("
+        SELECT id AS student_id, 'students26' AS student_table 
+        FROM students26 
+        WHERE enrollment_id='$enrollment_id'
+    ")->fetch_assoc();
+}
+
+if (!$student) {
+    die("Student not found");
+}
+
+$student_id    = $student['student_id'];
+$student_table = $student['student_table'];
+
+/* ================= FETCH RESULT ================= */
 $stmt = $conn->prepare("
     SELECT 
-        es.exam_id,
-        es.score,
-        es.submitted_at,
-        es.is_declared,
         e.exam_name,
-        e.total_questions
+        e.total_questions,
+        e.marks_per_question,
+        es.score,
+        es.submitted_at
     FROM exam_submissions es
     INNER JOIN exams e ON e.exam_id = es.exam_id
     WHERE 
         es.student_id = ?
         AND es.student_table = ?
         AND es.is_declared = 1
-    ORDER BY es.submitted_at ASC
+        AND e.result_declared = 1
+    ORDER BY es.score DESC
 ");
 
 $stmt->bind_param("is", $student_id, $student_table);
 $stmt->execute();
 $result = $stmt->get_result();
-
-/* ================= DATA PREP ================= */
-$results = [];
-$labels  = [];
-$scores  = [];
-
-while ($row = $result->fetch_assoc()) {
-    $results[] = $row;
-    $labels[] = date("d M", strtotime($row['submitted_at']));
-
-    $percent = ($row['total_questions'] > 0)
-        ? round(($row['score'] / $row['total_questions']) * 100)
-        : 0;
-
-    $scores[] = $percent;
-}
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-<title>My Results</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>My Result</title>
 <style>
-body{font-family:Poppins;background:#f4f6fa;padding:20px}
-.box{max-width:1000px;margin:auto;background:#fff;padding:25px;border-radius:10px}
+body{font-family:Poppins;background:#f3f4f6;padding:20px}
+.box{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:10px}
 table{width:100%;border-collapse:collapse;margin-top:15px}
 th,td{border:1px solid #ddd;padding:10px;text-align:center}
 th{background:#4f46e5;color:#fff}
+.pass{color:green;font-weight:600}
+.fail{color:red;font-weight:600}
 </style>
 </head>
 <body>
 
 <div class="box">
-<h2>📊 My Exam Results</h2>
+<h2>📄 My Exam Result</h2>
 
-<?php if(count($results) > 0): ?>
+<?php if($result->num_rows > 0): ?>
 <table>
 <tr>
     <th>#</th>
     <th>Exam</th>
-    <th>Marks</th>
+    <th>Score</th>
+    <th>Total Marks</th>
     <th>Percentage</th>
-    <th>Date</th>
+    <th>Status</th>
 </tr>
 
-<?php foreach($results as $i=>$r):
-    $percent = round(($r['score']/$r['total_questions'])*100);
+<?php 
+$i=1;
+while($row=$result->fetch_assoc()):
+    $total_marks = $row['total_questions'] * $row['marks_per_question'];
+    $percentage  = round(($row['score'] / $total_marks) * 100);
 ?>
 <tr>
-    <td><?= $i+1 ?></td>
-    <td><?= htmlspecialchars($r['exam_name']) ?></td>
-    <td><?= $r['score'] ?> / <?= $r['total_questions'] ?></td>
-    <td><?= $percent ?>%</td>
-    <td><?= date("d M Y",strtotime($r['submitted_at'])) ?></td>
+    <td><?= $i++ ?></td>
+    <td><?= htmlspecialchars($row['exam_name']) ?></td>
+    <td><?= $row['score'] ?></td>
+    <td><?= $total_marks ?></td>
+    <td><?= $percentage ?>%</td>
+    <td class="<?= $percentage>=35?'pass':'fail' ?>">
+        <?= $percentage>=35?'PASS':'FAIL' ?>
+    </td>
 </tr>
-<?php endforeach; ?>
+<?php endwhile; ?>
 </table>
 
-<canvas id="chart" height="120"></canvas>
-
-<script>
-new Chart(document.getElementById('chart'),{
-    type:'line',
-    data:{
-        labels:<?= json_encode($labels) ?>,
-        datasets:[{
-            label:'Score %',
-            data:<?= json_encode($scores) ?>,
-            borderWidth:3,
-            tension:0.4,
-            fill:true
-        }]
-    },
-    options:{scales:{y:{beginAtZero:true,max:100}}}
-});
-</script>
-
 <?php else: ?>
-<p>No results declared yet.</p>
+<p>❌ Result not declared yet.</p>
 <?php endif; ?>
 
 </div>
