@@ -141,7 +141,7 @@ $student_table = $_SESSION['student_table'];
 // TOTAL assigned materials count
 $stmt = $conn->prepare("
     SELECT COUNT(*) AS total_materials
-    FROM study_materials_targets
+    FROM study_material_targets
     WHERE student_id = ?
       AND student_table = ?
 ");
@@ -153,7 +153,7 @@ $total_materials = $stmt->get_result()->fetch_assoc()['total_materials'] ?? 0;
 // LAST 5 assigned materials
 $stmt = $conn->prepare("
     SELECT sm.title
-    FROM study_materials_targets smt
+    FROM study_material_targets smt
     JOIN study_materials sm ON sm.id = smt.material_id
     WHERE smt.student_id = ?
       AND smt.student_table = ?
