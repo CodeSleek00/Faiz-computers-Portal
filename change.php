@@ -1359,10 +1359,7 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-video nav-icon"></i>
                 <span>Online Classes</span>
             </a>
-            <a href="library/student_library.php" class="nav-item">
-                <i class="fas fa-book-reader nav-icon"></i>
-                <span>Digital Library</span>
-            </a>
+           
         </div>
 
         <!-- Finance Section -->
@@ -1382,10 +1379,7 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-user nav-icon"></i>
                 <span>My Profile</span>
             </a>
-            <a href="settings/student_settings.php" class="nav-item">
-                <i class="fas fa-cog nav-icon"></i>
-                <span>Settings</span>
-            </a>
+           
         </div>
 
         <div class="sidebar-footer">
