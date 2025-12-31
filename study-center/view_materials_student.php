@@ -422,29 +422,7 @@ $data->data_seek(0); // Reset pointer
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-book"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-number"><?= $total_materials ?></div>
-                    <div class="stat-label">Total Materials</div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon recent">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-number">Latest</div>
-                    <div class="stat-label">Recently Added</div>
-                </div>
-            </div>
-        </div>
-
+       
         <!-- Materials Section -->
         <div class="materials-section">
             <div class="section-header">
