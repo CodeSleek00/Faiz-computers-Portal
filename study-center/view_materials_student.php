@@ -418,7 +418,7 @@ $data->data_seek(0); // Reset pointer
             </div>
             <div class="welcome-section">
                 <h1>Hi, <?= htmlspecialchars($student_name) ?></h1>
-                <p>Enrollment ID: <?= $enrollment ?> • Access your study materials</p>
+                <p>Enrollment ID: <?= $enrollment ?> </p>
             </div>
         </div>
 
