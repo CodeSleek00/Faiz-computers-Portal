@@ -1349,6 +1349,36 @@ function updateClock() {
 
 setInterval(updateClock, 1000);
 updateClock();
+/* ================= ATTENDANCE PIE CHART ================= */
+const ctx = document.getElementById('attendanceChart');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Present', 'Absent', 'Leave'],
+        datasets: [{
+            data: [
+                <?= $present ?>,
+                <?= $absent ?>,
+                <?= $leave ?>
+            ],
+            backgroundColor: [
+                '#4cc9f0',
+                '#ef233c',
+                '#f8961e'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
 
     </script>
 </body>
