@@ -30,7 +30,7 @@ while ($row = $attendance_result->fetch_assoc()) {
 $stmt_materials = $conn->prepare("
     SELECT sm.title, sm.file_name, sm.uploaded_at
     FROM study_materials sm
-    JOIN study_materials_targets smt ON sm.id = smt.material_id
+    JOIN study_material_targets smt ON sm.id = smt.material_id
     WHERE (smt.student_id = ? AND smt.student_table = ?)
        OR (smt.batch_id = ?)
     ORDER BY sm.uploaded_at DESC
