@@ -2,22 +2,23 @@
 session_start();
 
 /* ================= LOGIN CHECK ================= */
-$isLoggedIn = (
-    isset($_SESSION['enrollment_id']) &&
-    isset($_SESSION['student_table']) &&
-    isset($_SESSION['student_id'])
-);
-
-if (!$isLoggedIn) {
+if (
+    !isset($_SESSION['enrollment_id']) ||
+    !isset($_SESSION['student_table']) ||
+    !isset($_SESSION['student_id']) ||
+    !isset($_SESSION['student_name'])   // 👈 name session
+) {
     header("Location: login-system/login.php");
     exit;
 }
+
+$student_name = $_SESSION['student_name'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login Status</title>
+    <title>Student Login Status</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
@@ -42,8 +43,13 @@ if (!$isLoggedIn) {
             margin-bottom:10px;
         }
         .card p{
-            color:#555;
-            font-size:15px;
+            color:#333;
+            font-size:16px;
+            margin-top:5px;
+        }
+        .name{
+            font-weight:bold;
+            color:#007bff;
         }
         .btn{
             display:inline-block;
@@ -55,16 +61,13 @@ if (!$isLoggedIn) {
             border-radius:6px;
             font-size:14px;
         }
-        .btn:hover{
-            background:#0056b3;
-        }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h2>✅ Login Successful</h2>
-    <p>You are logged in as a student.</p>
+    <p>Welcome, <span class="name"><?php echo htmlspecialchars($student_name); ?></span></p>
 
     <a href="student_dashboard.php" class="btn">Go to Dashboard</a>
 </div>
