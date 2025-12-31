@@ -364,7 +364,7 @@ $result->data_seek(0);
             </div>
             <div class="welcome-section">
                 <h1>Fee Receipts</h1>
-                <p>Enrollment ID: <?= $enrollment_id ?> • View your fee payment history</p>
+                <p>Enrollment ID: <?= $enrollment_id ?> </p>
             </div>
         </div>
 
