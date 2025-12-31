@@ -37,38 +37,6 @@ $student_name = $student['name'];
     <title>Student Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body{
-            margin:0;
-            font-family: Arial, sans-serif;
-            background:#f4f6f9;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            height:100vh;
-        }
-        .card{
-            background:#fff;
-            padding:30px 40px;
-            border-radius:10px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.1);
-            text-align:center;
-        }
-        h2{ color:#28a745; }
-        .name{
-            font-weight:bold;
-            color:#007bff;
-        }
-        .btn{
-            display:inline-block;
-            margin-top:20px;
-            padding:10px 18px;
-            background:#007bff;
-            color:#fff;
-            text-decoration:none;
-            border-radius:6px;
-        }
-    </style>
 </head>
 <body>
 
@@ -76,7 +44,6 @@ $student_name = $student['name'];
     <h2>✅ Login Successful</h2>
     <p>Welcome, <span class="name"><?= htmlspecialchars($student_name) ?></span></p>
 
-    <a href="student_dashboard.php" class="btn">Go to Dashboard</a>
 </div>
 
 </body>
