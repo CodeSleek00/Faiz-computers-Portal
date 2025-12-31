@@ -439,32 +439,7 @@ $total_exams = $assigned->num_rows;
         $assigned->data_seek(0); // Reset pointer again
         ?>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon total">
-                    <i class="fas fa-clipboard-list"></i>
-                </div>
-                <div class="stat-number"><?= $total_exams ?></div>
-                <div class="stat-label">Total Exams</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon pending">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-number"><?= $pending_count ?></div>
-                <div class="stat-label">Pending</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon completed">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-number"><?= $completed_count ?></div>
-                <div class="stat-label">Completed</div>
-            </div>
-        </div>
+       
 
         <!-- Exams Section -->
         <div class="exams-section">
