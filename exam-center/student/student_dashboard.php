@@ -418,7 +418,7 @@ $total_exams = $assigned->num_rows;
             </div>
             <div class="welcome-section">
                 <h1>Hi, <?= htmlspecialchars($student['name']) ?></h1>
-                <p>Enrollment ID: <?= $enrollment_id ?> • Manage your exams</p>
+                <p>Enrollment ID: <?= $enrollment_id ?> </p>
             </div>
         </div>
 
