@@ -59,15 +59,14 @@ $stmt_exams = $conn->prepare("
     SELECT DISTINCT e.exam_id, e.exam_name, e.duration
     FROM exam_assignments ea
     JOIN exams e ON e.exam_id = ea.exam_id
-    WHERE ea.student_table = ?
+    WHERE e.status = 'Active'
+      AND ea.student_table = ?
       AND (ea.student_id = ? OR ea.batch_id = ?)
     ORDER BY e.exam_id DESC
 ");
-
 $stmt_exams->bind_param("sii", $student_table, $student_id, $batch_id);
 $stmt_exams->execute();
 $exams = $stmt_exams->get_result();
-
 ?>
 
 <!DOCTYPE html>
