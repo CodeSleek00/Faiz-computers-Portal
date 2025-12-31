@@ -1516,17 +1516,33 @@ $total_materials = $total_materials ?? 0;
                         <a href="exam-center/student/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
-                        <?php while ($exam = $exams->fetch_assoc()): ?>
-                        <div class="exam-item">
-                            <div class="exam-header">
-                                <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
-                                <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
-                            </div>
-                            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
-                                Start Exam <i class="fas fa-play ml-2"></i>
-                            </a>
-                        </div>
-                        <?php endwhile; ?>
+                       <?php while ($exam = $exams->fetch_assoc()): ?>
+    <?php
+        // Check if student already submitted this exam
+        $stmt2 = $conn->prepare("
+            SELECT COUNT(*) AS attempted
+            FROM exam_submissions
+            WHERE exam_id = ? AND student_id = ? AND student_table = ?
+        ");
+        $stmt2->bind_param("iis", $exam['exam_id'], $student_id, $table);
+        $stmt2->execute();
+        $attempted = $stmt2->get_result()->fetch_assoc()['attempted'];
+    ?>
+    <div class="exam-item">
+        <div class="exam-header">
+            <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
+            <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
+        </div>
+        <?php if ($attempted): ?>
+            <span class="exam-action" style="background:#8E8E93; cursor:default;">Attempted</span>
+        <?php else: ?>
+            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
+                Start Exam
+            </a>
+        <?php endif; ?>
+    </div>
+<?php endwhile; ?>
+
                     </div>
                 </div>
             </div>
