@@ -1204,12 +1204,7 @@ $total_materials = $total_materials ?? 0;
         }
 
         /* iPhone Notch Support */
-        @supports (padding: max(0px)) {
-            .mobile-nav {
-                padding-bottom: max(12px, env(safe-area-inset-bottom));
-            }
-        }
-
+       
         /* Animations */
         @keyframes fadeInUp {
             from {
