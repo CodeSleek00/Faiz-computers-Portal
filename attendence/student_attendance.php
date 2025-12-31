@@ -390,32 +390,6 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
             </div>
         <?php endif; ?>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon present">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-number"><?= $present ?></div>
-                <div class="stat-label">Present Days</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon absent">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="stat-number"><?= $absent ?></div>
-                <div class="stat-label">Absent Days</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon percentage">
-                    <i class="fas fa-percentage"></i>
-                </div>
-                <div class="stat-number"><?= $percentage ?>%</div>
-                <div class="stat-label">Attendance</div>
-            </div>
-        </div>
 
         <!-- Main Content -->
         <div class="content-grid">
