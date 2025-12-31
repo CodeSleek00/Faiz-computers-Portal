@@ -368,40 +368,6 @@ $result->data_seek(0);
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon total">
-                    <i class="fas fa-receipt"></i>
-                </div>
-                <div class="stat-number"><?= $total_records ?></div>
-                <div class="stat-label">Total Records</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon paid">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-number">₹<?= $total_paid ?></div>
-                <div class="stat-label">Total Paid</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon pending">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-number">₹<?= $total_pending ?></div>
-                <div class="stat-label">Total Pending</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon amount">
-                    <i class="fas fa-rupee-sign"></i>
-                </div>
-                <div class="stat-number">₹<?= $total_paid + $total_pending ?></div>
-                <div class="stat-label">Total Amount</div>
-            </div>
-        </div>
 
         <!-- Fee Section -->
         <div class="fee-section">
