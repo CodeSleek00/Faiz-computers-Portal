@@ -195,35 +195,41 @@ if ($result->num_rows > 0) {
     $feeStatus = 'Pending'; // no entry = not paid
 }
 /* =====================================================
-   ASSIGNED EXAMS FOR STUDENT
+   FETCH ASSIGNED EXAMS (student + batch)
 ===================================================== */
 
-$enrollment_id = $_SESSION['enrollment_id'];
+$student_id    = $_SESSION['student_id'];
 $student_table = $_SESSION['student_table'];
+$batch_id      = $_SESSION['batch_id']; // agar batch system hai
 
 $stmt = $conn->prepare("
-    SELECT e.id, e.exam_name, e.duration
-    FROM exam_targets et
-    JOIN exams e ON e.id = et.exam_id
-    WHERE et.enrollment_id = ?
-      AND et.student_table = ?
-      AND e.status = 'Active'
+    SELECT DISTINCT e.id, e.exam_name, e.duration
+    FROM exam_assignments ea
+    JOIN exams e ON e.id = ea.exam_id
+    WHERE e.status = 'Active'
+      AND ea.student_table = ?
+      AND (
+            ea.student_id = ?
+         OR ea.batch_id = ?
+      )
     ORDER BY e.id DESC
 ");
 
-$stmt->bind_param("ss", $enrollment_id, $student_table);
+$stmt->bind_param("sii", $student_table, $student_id, $batch_id);
 $stmt->execute();
 $exams = $stmt->get_result();
+function getExamStatus($conn, $exam_id, $student_id, $student_table) {
 
-function getExamStatus($conn, $exam_id, $enrollment_id) {
     $stmt = $conn->prepare("
         SELECT status
         FROM exam_attempts
         WHERE exam_id = ?
-          AND enrollment_id = ?
+          AND student_id = ?
+          AND student_table = ?
         LIMIT 1
     ");
-    $stmt->bind_param("is", $exam_id, $enrollment_id);
+
+    $stmt->bind_param("iis", $exam_id, $student_id, $student_table);
     $stmt->execute();
     $res = $stmt->get_result();
 
@@ -231,6 +237,7 @@ function getExamStatus($conn, $exam_id, $enrollment_id) {
         ? $res->fetch_assoc()['status']
         : 'Not Started';
 }
+
 
 ?>
 
@@ -1374,23 +1381,23 @@ function getExamStatus($conn, $exam_id, $enrollment_id) {
     </div>
 
     <?php if ($exams->num_rows > 0): ?>
-        <?php while($exam = $exams->fetch_assoc()): 
-            $examStatus = getExamStatus($conn, $exam['id'], $enrollment_id);
+        <?php while ($exam = $exams->fetch_assoc()): 
+            $status = getExamStatus($conn, $exam['id'], $student_id, $student_table);
         ?>
-            <div style="margin-top:10px; font-size:14px;">
+            <div style="margin-top:12px; font-size:14px;">
                 <strong><?= htmlspecialchars($exam['exam_name']) ?></strong><br>
                 Duration: <?= $exam['duration'] ?> mins<br>
 
                 Status:
-                <?php if ($examStatus === 'Completed'): ?>
+                <?php if ($status === 'Completed'): ?>
                     <span style="color:green;">Completed ✅</span>
-                <?php elseif ($examStatus === 'Started'): ?>
+                <?php elseif ($status === 'Started'): ?>
                     <span style="color:orange;">In Progress ⏳</span>
                 <?php else: ?>
                     <span style="color:red;">Not Started ❌</span>
                 <?php endif; ?>
 
-                <?php if ($examStatus === 'Not Started'): ?>
+                <?php if ($status === 'Not Started'): ?>
                     <form action="exam/start_exam.php" method="POST" style="margin-top:6px;">
                         <input type="hidden" name="exam_id" value="<?= $exam['id'] ?>">
                         <button class="btn btn-primary btn-sm">
