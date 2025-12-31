@@ -67,6 +67,37 @@ $stmt_exams = $conn->prepare("
 $stmt_exams->bind_param("sii", $student_table, $student_id, $batch_id);
 $stmt_exams->execute();
 $exams = $stmt_exams->get_result();
+
+$student_id = $_SESSION['student_id'];
+$table = $_SESSION['student_table'];
+
+// Fetch assigned exams and submission status
+$stmt = $conn->prepare("
+    SELECT ea.id as assign_id, e.exam_name, e.exam_date,
+           CASE 
+               WHEN er.submission_id IS NULL THEN 'Pending'
+               WHEN er.is_declared = 0 THEN 'Submitted (Not Declared)'
+               ELSE 'Declared'
+           END as status,
+           COALESCE(er.score, 0) as score
+    FROM exam_assignments ea
+    JOIN exams e ON e.exam_id = ea.exam_id
+    LEFT JOIN exam_results er 
+        ON er.exam_id = ea.exam_id 
+        AND er.student_id = ea.student_id
+        AND er.student_table = ea.student_table
+    WHERE ea.student_id = ? AND ea.student_table = ?
+    ORDER BY e.exam_date DESC
+");
+$stmt->bind_param("is", $student_id, $table);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$exam_status_list = [];
+while($row = $result->fetch_assoc()) {
+    $exam_status_list[] = $row;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -138,6 +169,31 @@ $exams = $stmt_exams->get_result();
         <?php endwhile; ?>
     </table>
 </div>
+<section class="exam-status">
+    <h3>📋 Exam Submission Status</h3>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Exam Name</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Score</th>
+        </tr>
+        <?php foreach($exam_status_list as $exam): ?>
+            <tr>
+                <td><?= htmlspecialchars($exam['exam_name']) ?></td>
+                <td><?= htmlspecialchars($exam['exam_date']) ?></td>
+                <td>
+                    <?php
+                        if($exam['status'] == 'Declared') echo "<span style='color:green;font-weight:bold;'>Declared</span>";
+                        elseif($exam['status'] == 'Submitted (Not Declared)') echo "<span style='color:orange;font-weight:bold;'>Submitted</span>";
+                        else echo "<span style='color:red;font-weight:bold;'>Pending</span>";
+                    ?>
+                </td>
+                <td><?= $exam['score'] ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</section>
 
 <script>
     const ctx = document.getElementById('attendanceChart').getContext('2d');
