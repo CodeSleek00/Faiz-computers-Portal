@@ -477,7 +477,7 @@ $data->data_seek(0); // Reset pointer
                         <h3>No Study Materials</h3>
                         <p>You haven't been assigned any study material yet.</p>
                         <a href="../test.php" class="btn" style="width: auto; max-width: 200px;">
-                            <i class="fas fa-home"></i>
+                           
                             Return to Dashboard
                         </a>
                     </div>
