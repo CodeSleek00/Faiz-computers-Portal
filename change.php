@@ -159,7 +159,7 @@ $currentMonthNo   = (int) date('n');
 $currentMonthName = date('F');
 
 $stmt = $conn->prepare("
-    SELECT payment_status
+    SELECT payment_status, fee_amount
     FROM student_monthly_fee
     WHERE enrollment_id = ?
       AND fee_type = 'Monthly'
@@ -171,10 +171,12 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $feeStatus = $row['payment_status'];
+    $fee = $result->fetch_assoc();
+    $feeStatus = $fee['payment_status'];
+    $feeAmount = $fee['fee_amount'] ?? 0;
 } else {
     $feeStatus = 'Pending';
+    $feeAmount = 0;
 }
 
 /* =====================================================
@@ -236,7 +238,7 @@ $total_materials = $total_materials ?? 0;
     <title>Dashboard | Faiz Computer Institute</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-blue: #007AFF;
@@ -252,9 +254,11 @@ $total_materials = $total_materials ?? 0;
             --light-gray: #F2F2F7;
             --card-gray: #F5F5F7;
             --white: #FFFFFF;
-            --card-radius: 16px;
-            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --sidebar-bg: #FFFFFF;
+            --sidebar-width: 260px;
+            --card-radius: 14px;
+            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -265,91 +269,227 @@ $total_materials = $total_materials ?? 0;
         }
 
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background-color: var(--light-gray);
             color: var(--dark);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-        }
-
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        .dashboard-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            padding: 24px 32px;
-            background: var(--white);
-            border-radius: var(--card-radius);
-            box-shadow: var(--card-shadow);
+            min-height: 100vh;
         }
 
-        .welcome-section h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px 0;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
         }
 
-        .welcome-section p {
-            color: var(--dark-gray);
-            font-size: 16px;
+        .sidebar-header {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 16px;
         }
 
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .profile-avatar {
-            width: 64px;
-            height: 64px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--white);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
         }
 
         .profile-info h3 {
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            color: var(--dark);
         }
 
         .profile-info p {
             color: var(--dark-gray);
-            font-size: 14px;
+            font-size: 12px;
+            font-weight: 400;
         }
 
-        /* Stats Grid */
+        .sidebar-section {
+            padding: 8px 0;
+            margin-bottom: 12px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 20px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: var(--dark-gray);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 10px;
+            margin: 0 12px 4px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(0, 122, 255, 0.08);
+            color: var(--primary-blue);
+            transform: translateX(2px);
+        }
+
+        .nav-item.active {
+            background: rgba(0, 122, 255, 0.12);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--primary-blue);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: inherit;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            margin-top: auto;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(255, 59, 48, 0.08);
+            color: var(--danger);
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 59, 48, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            background: var(--white);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome-section h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--dark);
+        }
+
+        .welcome-section p {
+            color: var(--dark-gray);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .date-display {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: var(--light-gray);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        /* Stats Grid - Compact */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .stat-card {
             background: var(--white);
             border-radius: var(--card-radius);
-            padding: 24px;
+            padding: 16px;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.03);
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-2px);
             box-shadow: var(--card-shadow-hover);
         }
 
@@ -358,7 +498,7 @@ $total_materials = $total_materials ?? 0;
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 3px;
             height: 100%;
             background: var(--primary-blue);
         }
@@ -366,37 +506,37 @@ $total_materials = $total_materials ?? 0;
         .stat-content {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
         }
 
         .stat-text h3 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
             color: var(--dark-gray);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .stat-number {
-            font-size: 36px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--dark);
             line-height: 1;
         }
 
         .stat-icon {
-            font-size: 40px;
+            font-size: 24px;
             color: var(--primary-blue);
             opacity: 0.8;
         }
 
-        /* Main Content Grid */
+        /* Content Grid */
         .content-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 32px;
-            margin-bottom: 32px;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
         }
 
         @media (max-width: 1024px) {
@@ -409,42 +549,47 @@ $total_materials = $total_materials ?? 0;
         .card {
             background: var(--white);
             border-radius: var(--card-radius);
-            padding: 24px;
+            padding: 20px;
             box-shadow: var(--card-shadow);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
             border-bottom: 1px solid var(--light-gray);
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
+            color: var(--dark);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .card-title i {
             color: var(--primary-blue);
+            font-size: 14px;
         }
 
         .view-all {
             color: var(--primary-blue);
             text-decoration: none;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 12px;
             transition: var(--transition);
+            padding: 4px 8px;
+            border-radius: 6px;
         }
 
         .view-all:hover {
-            color: var(--primary-blue-dark);
+            background: rgba(0, 122, 255, 0.08);
         }
 
         /* Assignment List */
@@ -452,57 +597,63 @@ $total_materials = $total_materials ?? 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
-            margin-bottom: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
             background: var(--card-gray);
-            border-radius: 12px;
+            border-radius: 10px;
             transition: var(--transition);
+            border: 1px solid transparent;
         }
 
         .assignment-item:hover {
             background: var(--light-gray);
-            transform: translateX(4px);
+            border-color: rgba(0, 122, 255, 0.1);
+            transform: translateX(2px);
         }
 
         .assignment-info h4 {
             font-weight: 600;
-            margin-bottom: 4px;
+            font-size: 13px;
+            margin-bottom: 2px;
+            color: var(--dark);
         }
 
         .assignment-info p {
             color: var(--dark-gray);
-            font-size: 14px;
+            font-size: 11px;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
         .assignment-status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
-            min-width: 80px;
+            min-width: 70px;
             text-align: center;
         }
 
         .status-submitted {
             background: rgba(52, 199, 89, 0.1);
             color: var(--success);
+            border: 1px solid rgba(52, 199, 89, 0.2);
         }
 
         .status-pending {
             background: rgba(255, 59, 48, 0.1);
             color: var(--danger);
+            border: 1px solid rgba(255, 59, 48, 0.2);
         }
 
         /* Materials List */
         .material-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 0;
+            gap: 10px;
+            padding: 10px 0;
             border-bottom: 1px solid var(--light-gray);
         }
 
@@ -511,71 +662,81 @@ $total_materials = $total_materials ?? 0;
         }
 
         .material-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 122, 255, 0.1);
-            border-radius: 10px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 122, 255, 0.08);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-blue);
+            font-size: 12px;
         }
 
         .material-info h4 {
             font-weight: 500;
-            font-size: 14px;
+            font-size: 12px;
             margin-bottom: 2px;
+            color: var(--dark);
         }
 
         /* Exam List */
         .exam-item {
             background: var(--card-gray);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
             transition: var(--transition);
+            border: 1px solid transparent;
         }
 
         .exam-item:hover {
             background: var(--light-gray);
+            border-color: rgba(0, 122, 255, 0.1);
         }
 
         .exam-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .exam-name {
             font-weight: 600;
+            font-size: 13px;
+            color: var(--dark);
         }
 
         .exam-duration {
             color: var(--dark-gray);
-            font-size: 14px;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 2px 6px;
+            border-radius: 8px;
         }
 
         .exam-action {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 6px 12px;
             background: var(--primary-blue);
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             transition: var(--transition);
         }
 
         .exam-action:hover {
             background: var(--primary-blue-dark);
+            transform: translateY(-1px);
         }
 
         /* Charts */
         .chart-container {
-            height: 200px;
-            margin-top: 16px;
+            height: 160px;
+            margin-top: 12px;
         }
 
         /* Fee Status */
@@ -583,63 +744,73 @@ $total_materials = $total_materials ?? 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 16px;
+            margin-top: 12px;
         }
 
         .fee-amount {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
+            color: var(--dark);
         }
 
         .fee-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .badge-paid {
             background: rgba(52, 199, 89, 0.1);
             color: var(--success);
+            border: 1px solid rgba(52, 199, 89, 0.2);
         }
 
         .badge-pending {
             background: rgba(255, 59, 48, 0.1);
             color: var(--danger);
+            border: 1px solid rgba(255, 59, 48, 0.2);
         }
 
         /* Attendance */
         .attendance-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .attendance-stat {
             text-align: center;
-            padding: 16px;
+            padding: 12px;
             background: var(--card-gray);
-            border-radius: 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+
+        .attendance-stat:hover {
+            border-color: rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
         }
 
         .attendance-number {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .attendance-label {
             color: var(--dark-gray);
-            font-size: 14px;
+            font-size: 11px;
+            font-weight: 500;
         }
 
         /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .action-btn {
@@ -647,27 +818,29 @@ $total_materials = $total_materials ?? 0;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
             background: var(--card-gray);
-            border-radius: 12px;
+            border-radius: 10px;
             text-decoration: none;
             color: var(--dark);
             transition: var(--transition);
+            border: 1px solid transparent;
         }
 
         .action-btn:hover {
             background: var(--light-gray);
+            border-color: rgba(0, 122, 255, 0.1);
             transform: translateY(-2px);
         }
 
         .action-btn i {
-            font-size: 24px;
+            font-size: 18px;
             color: var(--primary-blue);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .action-btn span {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 500;
         }
 
@@ -679,9 +852,10 @@ $total_materials = $total_materials ?? 0;
             left: 0;
             right: 0;
             background: var(--white);
-            padding: 12px 20px;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            padding: 10px 16px;
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
             z-index: 1000;
+            border-top: 1px solid var(--light-gray);
         }
 
         .nav-items {
@@ -690,77 +864,130 @@ $total_materials = $total_materials ?? 0;
             align-items: center;
         }
 
-        .nav-item {
+        .nav-item-mobile {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-decoration: none;
             color: var(--dark-gray);
-            font-size: 12px;
+            font-size: 11px;
             transition: var(--transition);
-            padding: 8px;
-            border-radius: 12px;
+            padding: 6px 8px;
+            border-radius: 10px;
+            min-width: 60px;
         }
 
-        .nav-item.active {
+        .nav-item-mobile.active {
             color: var(--primary-blue);
-            background: rgba(0, 122, 255, 0.1);
+            background: rgba(0, 122, 255, 0.08);
         }
 
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 4px;
+        .nav-item-mobile i {
+            font-size: 16px;
+            margin-bottom: 3px;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 16px;
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: var(--transition);
             }
             
-            .dashboard-header {
-                flex-direction: column;
-                gap: 20px;
-                padding: 20px;
-                text-align: center;
+            .sidebar.active {
+                transform: translateX(0);
             }
             
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .content-grid {
-                gap: 20px;
-            }
-            
-            .welcome-section h1 {
-                font-size: 24px;
+            .main-content {
+                margin-left: 0;
+                padding-bottom: 70px;
             }
             
             .mobile-nav {
                 display: block;
             }
             
-            .card {
-                padding: 20px;
+            .menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: var(--dark);
+                font-size: 20px;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+                transition: var(--transition);
+            }
+            
+            .menu-toggle:hover {
+                background: var(--light-gray);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-grid {
+                gap: 16px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 20px;
             }
         }
 
         @media (max-width: 480px) {
-            .attendance-stats {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
             
-            .quick-actions {
-                grid-template-columns: 1fr;
+            .attendance-stats {
+                grid-template-columns: repeat(3, 1fr);
             }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .card {
+                padding: 16px;
+            }
+        }
+
+        /* Overlay for mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+
+        .overlay.active {
+            display: block;
         }
 
         /* Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(8px);
             }
             to {
                 opacity: 1;
@@ -769,18 +996,14 @@ $total_materials = $total_materials ?? 0;
         }
 
         .animate-in {
-            animation: fadeIn 0.6s ease-out forwards;
+            animation: fadeIn 0.4s ease-out forwards;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header class="dashboard-header animate-in">
-            <div class="welcome-section">
-                <h1>Welcome back, <?= htmlspecialchars($student['name']) ?></h1>
-                <p>Track your progress and manage your learning journey</p>
-            </div>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
             <div class="user-profile">
                 <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="profile-avatar">
                 <div class="profile-info">
@@ -788,7 +1011,118 @@ $total_materials = $total_materials ?? 0;
                     <p><?= $student['enrollment_id'] ?></p>
                 </div>
             </div>
-        </header>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Dashboard</span>
+            <a href="test.php" class="nav-item active">
+                <i class="fas fa-tachometer-alt-alt nav-icon"></i>
+                <span>Overview</span>
+                <span class="nav-badge">Live</span>
+            </a>
+        </div>
+
+        <!-- Academics Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Academics</span>
+            <a href="assignment/student_dashboard.php" class="nav-item">
+                <i class="fas fa-tasks nav-icon"></i>
+                <span>Assignments</span>
+                <span class="nav-badge"><?= $assignment_stats['total_assignments'] - $assignment_stats['submitted_assignments'] ?></span>
+            </a>
+            <a href="study-center/view_materials_student.php" class="nav-item">
+                <i class="fas fa-book-open nav-icon"></i>
+                <span>Study Center</span>
+                <span class="nav-badge"><?= $total_materials ?></span>
+            </a>
+            <a href="attendence/student_attendance.php" class="nav-item">
+                <i class="fas fa-calendar-check nav-icon"></i>
+                <span>Attendance</span>
+                <span class="nav-badge"><?= $present ?>%</span>
+            </a>
+        </div>
+
+        <!-- Examination Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Examination</span>
+            <a href="exam-center/student/student_dashboard.php" class="nav-item">
+                <i class="fas fa-pencil-alt nav-icon"></i>
+                <span>Exam Center</span>
+                <span class="nav-badge"><?= $exams->num_rows ?></span>
+            </a>
+            <a href="exam-center/student/exam_result_student.php" class="nav-item">
+                <i class="fas fa-chart-line nav-icon"></i>
+                <span>Results</span>
+                <span class="nav-badge"><?= count($labels) ?></span>
+            </a>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Resources</span>
+            <a href="video-portal/student/student_videos.php" class="nav-item">
+                <i class="fas fa-video nav-icon"></i>
+                <span>Online Classes</span>
+            </a>
+            <a href="library/student_library.php" class="nav-item">
+                <i class="fas fa-book-reader nav-icon"></i>
+                <span>Digital Library</span>
+            </a>
+        </div>
+
+        <!-- Finance Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Finance</span>
+            <a href="fee/students/my_fee_receipts.php" class="nav-item">
+                <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                <span>Fee Center</span>
+                <span class="nav-badge"><?= $feeStatus ?></span>
+            </a>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Profile</span>
+            <a href="login-system/dashboard-user.php" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>My Profile</span>
+            </a>
+            <a href="settings/student_settings.php" class="nav-item">
+                <i class="fas fa-cog nav-icon"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="login-system/logout.php" style="text-decoration: none;">
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header animate-in">
+            <div class="welcome-section">
+                <h1>Welcome back, <?= htmlspecialchars($student['name']) ?></h1>
+                <p>Track your progress and manage your learning journey</p>
+            </div>
+            <div class="date-display">
+                <i class="fas fa-calendar-alt" style="margin-right: 6px;"></i>
+                <?= date('l, F j, Y') ?>
+            </div>
+            <button class="menu-toggle" id="menuToggle" style="display: none;">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
 
         <!-- Stats Grid -->
         <div class="stats-grid">
@@ -833,7 +1167,7 @@ $total_materials = $total_materials ?? 0;
             </div>
         </div>
 
-        <!-- Main Content -->
+        <!-- Main Content Grid -->
         <div class="content-grid">
             <!-- Left Column -->
             <div class="left-column">
@@ -848,7 +1182,7 @@ $total_materials = $total_materials ?? 0;
                         <div class="assignment-item">
                             <div class="assignment-info">
                                 <h4><?= htmlspecialchars($assignment['title']) ?></h4>
-                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 80)) ?>...</p>
+                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 60)) ?>...</p>
                             </div>
                             <span class="assignment-status <?= $assignment['submission_id'] ? 'status-submitted' : 'status-pending' ?>">
                                 <?= $assignment['submission_id'] ? 'Submitted' : 'Pending' ?>
@@ -924,8 +1258,8 @@ $total_materials = $total_materials ?? 0;
                     </div>
                     <div class="fee-status">
                         <div>
-                            <div style="color: var(--dark-gray); font-size: 14px;"><?= $currentMonthName ?> Fee</div>
-                            <div class="fee-amount">₹<?= $fee['fee_amount'] ?? '0' ?></div>
+                            <div style="color: var(--dark-gray); font-size: 12px;"><?= $currentMonthName ?> Fee</div>
+                            <div class="fee-amount">₹<?= $feeAmount ?></div>
                         </div>
                         <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?>">
                             <?= $feeStatus ?>
@@ -944,7 +1278,7 @@ $total_materials = $total_materials ?? 0;
                             <?php while($row = $last_materials->fetch_assoc()): ?>
                             <div class="material-item">
                                 <div class="material-icon">
-                                    <i class="fas fa-file-pdf"></i>
+                                    <i class="fas fa-file-alt"></i>
                                 </div>
                                 <div class="material-info">
                                     <h4><?= htmlspecialchars($row['title']) ?></h4>
@@ -952,7 +1286,7 @@ $total_materials = $total_materials ?? 0;
                             </div>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <p style="color: var(--dark-gray); text-align: center; padding: 20px;">No materials assigned</p>
+                            <p style="color: var(--dark-gray); text-align: center; padding: 16px; font-size: 12px;">No materials assigned</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -975,36 +1309,36 @@ $total_materials = $total_materials ?? 0;
                             <i class="fas fa-pencil-alt"></i>
                             <span>Exams</span>
                         </a>
-                        <a href="login-system/dashboard-user.php" class="action-btn">
-                            <i class="fas fa-user"></i>
-                            <span>Profile</span>
+                        <a href="video-portal/student/student_videos.php" class="action-btn">
+                            <i class="fas fa-video"></i>
+                            <span>Classes</span>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Mobile Navigation -->
     <nav class="mobile-nav">
         <div class="nav-items">
-            <a href="test.php" class="nav-item active">
+            <a href="test.php" class="nav-item-mobile active">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="assignment/student_dashboard.php" class="nav-item">
+            <a href="assignment/student_dashboard.php" class="nav-item-mobile">
                 <i class="fas fa-tasks"></i>
                 <span>Assignments</span>
             </a>
-            <a href="study-center/view_materials_student.php" class="nav-item">
+            <a href="study-center/view_materials_student.php" class="nav-item-mobile">
                 <i class="fas fa-book"></i>
                 <span>Study</span>
             </a>
-            <a href="exam-center/student/student_dashboard.php" class="nav-item">
+            <a href="exam-center/student/student_dashboard.php" class="nav-item-mobile">
                 <i class="fas fa-pencil-alt"></i>
                 <span>Exams</span>
             </a>
-            <a href="login-system/dashboard-user.php" class="nav-item">
+            <a href="login-system/dashboard-user.php" class="nav-item-mobile">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
@@ -1014,6 +1348,37 @@ $total_materials = $total_materials ?? 0;
     <script>
         // Initialize Charts
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+                
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+            
+            // Check screen width for menu toggle display
+            function checkScreenWidth() {
+                if (window.innerWidth <= 1024) {
+                    menuToggle.style.display = 'block';
+                } else {
+                    menuToggle.style.display = 'none';
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
+            
+            checkScreenWidth();
+            window.addEventListener('resize', checkScreenWidth);
+
             // Attendance Chart (Pie)
             const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
             new Chart(attendanceCtx, {
@@ -1024,7 +1389,8 @@ $total_materials = $total_materials ?? 0;
                         data: [<?= $present ?>, <?= $absent ?>, <?= $leave ?>],
                         backgroundColor: ['#34C759', '#FF3B30', '#FF9500'],
                         borderWidth: 0,
-                        borderRadius: 8
+                        borderRadius: 6,
+                        spacing: 2
                     }]
                 },
                 options: {
@@ -1034,12 +1400,15 @@ $total_materials = $total_materials ?? 0;
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 20,
-                                usePointStyle: true
+                                padding: 12,
+                                usePointStyle: true,
+                                font: {
+                                    size: 10
+                                }
                             }
                         }
                     },
-                    cutout: '65%'
+                    cutout: '70%'
                 }
             });
 
@@ -1053,14 +1422,15 @@ $total_materials = $total_materials ?? 0;
                         label: 'Score %',
                         data: <?= json_encode($scores) ?>,
                         borderColor: '#007AFF',
-                        backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4,
+                        backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                        borderWidth: 2,
+                        tension: 0.3,
                         fill: true,
                         pointBackgroundColor: '#007AFF',
                         pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 2,
-                        pointRadius: 6
+                        pointBorderWidth: 1.5,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
@@ -1076,9 +1446,13 @@ $total_materials = $total_materials ?? 0;
                             beginAtZero: true,
                             max: 100,
                             grid: {
-                                drawBorder: false
+                                drawBorder: false,
+                                color: 'rgba(0, 0, 0, 0.04)'
                             },
                             ticks: {
+                                font: {
+                                    size: 10
+                                },
                                 callback: function(value) {
                                     return value + '%';
                                 }
@@ -1087,6 +1461,11 @@ $total_materials = $total_materials ?? 0;
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
                             }
                         }
                     }
@@ -1094,10 +1473,10 @@ $total_materials = $total_materials ?? 0;
             });
 
             // Add hover effects to cards
-            const cards = document.querySelectorAll('.stat-card, .assignment-item, .exam-item');
+            const cards = document.querySelectorAll('.stat-card, .assignment-item, .exam-item, .attendance-stat, .action-btn');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-4px)';
+                    this.style.transform = this.classList.contains('stat-card') ? 'translateY(-2px)' : 'translateY(-1px)';
                 });
                 card.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
@@ -1105,10 +1484,10 @@ $total_materials = $total_materials ?? 0;
             });
 
             // Mobile navigation active state
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
+            const navItemsMobile = document.querySelectorAll('.nav-item-mobile');
+            navItemsMobile.forEach(item => {
                 item.addEventListener('click', function() {
-                    navItems.forEach(i => i.classList.remove('active'));
+                    navItemsMobile.forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
                 });
             });
@@ -1117,7 +1496,7 @@ $total_materials = $total_materials ?? 0;
         // Animate elements on scroll
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            rootMargin: '0px 0px -20px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -1131,8 +1510,8 @@ $total_materials = $total_materials ?? 0;
 
         document.querySelectorAll('.animate-in').forEach(el => {
             el.style.opacity = 0;
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            el.style.transform = 'translateY(8px)';
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
             observer.observe(el);
         });
     </script>
