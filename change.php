@@ -200,7 +200,7 @@ $labels = [];
 $scores = [];
 
 while ($r = $result->fetch_assoc()) {
-    $labels[] = substr($r['exam_name'], 0, 15) . (strlen($r['exam_name']) > 15 ? '...' : '');
+    $labels[] = substr($r['exam_name'], 0, 12) . (strlen($r['exam_name']) > 12 ? '...' : '');
     $scores[] = round(($r['score'] / $r['total_marks']) * 100);
 }
 
@@ -255,13 +255,13 @@ $total_materials = $total_materials ?? 0;
             --card-gray: #F5F5F7;
             --white: #FFFFFF;
             --sidebar-bg: #FFFFFF;
-            --sidebar-width: 260px;
-            --card-radius: 14px;
-            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            --card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 240px;
+            --card-radius: 12px;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            --card-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.15);
         }
 
         * {
@@ -272,7 +272,7 @@ $total_materials = $total_materials ?? 0;
 
         body {
             font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #f2f2f7 100%);
+            background: linear-gradient(135deg, #f8f9ff 0%, #f2f4ff 100%);
             color: var(--dark);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
@@ -282,12 +282,12 @@ $total_materials = $total_materials ?? 0;
             overflow-x: hidden;
         }
 
-        /* Sidebar Navigation - Enhanced */
+        /* Sidebar Navigation - More Compact */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-right: 1px solid var(--glass-border);
             position: fixed;
             top: 0;
@@ -295,34 +295,34 @@ $total_materials = $total_materials ?? 0;
             bottom: 0;
             z-index: 1000;
             overflow-y: auto;
-            padding: 20px 0;
-            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 16px 0;
+            box-shadow: 3px 0 25px rgba(0, 0, 0, 0.06);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-header {
-            padding: 0 20px 24px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            margin-bottom: 16px;
+            padding: 0 16px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            margin-bottom: 12px;
         }
 
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .profile-avatar {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--white);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+            box-shadow: 0 3px 10px rgba(0, 122, 255, 0.15);
         }
 
         .profile-info h3 {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             margin-bottom: 2px;
             color: var(--dark);
@@ -330,197 +330,218 @@ $total_materials = $total_materials ?? 0;
 
         .profile-info p {
             color: var(--dark-gray);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 400;
         }
 
         .sidebar-section {
-            padding: 8px 0;
-            margin-bottom: 12px;
+            padding: 6px 0;
+            margin-bottom: 10px;
         }
 
         .section-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: var(--dark-gray);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 0 20px;
-            margin-bottom: 8px;
+            letter-spacing: 0.4px;
+            padding: 0 16px;
+            margin-bottom: 6px;
             display: block;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
+            gap: 10px;
+            padding: 10px 16px;
             color: var(--dark-gray);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            border-radius: 12px;
-            margin: 0 12px 4px;
+            border-radius: 10px;
+            margin: 0 10px 4px;
             transition: var(--transition);
             position: relative;
             background: transparent;
         }
 
         .nav-item:hover {
-            background: rgba(0, 122, 255, 0.08);
+            background: rgba(0, 122, 255, 0.07);
             color: var(--primary-blue);
-            transform: translateX(4px);
+            transform: translateX(3px);
         }
 
         .nav-item.active {
-            background: rgba(0, 122, 255, 0.12);
+            background: rgba(0, 122, 255, 0.1);
             color: var(--primary-blue);
             font-weight: 600;
-            box-shadow: inset 2px 0 0 var(--primary-blue);
+            box-shadow: inset 3px 0 0 var(--primary-blue);
         }
 
         .nav-icon {
-            width: 20px;
+            width: 18px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             color: inherit;
         }
 
         .nav-badge {
             margin-left: auto;
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 10px;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 8px;
             background: rgba(0, 122, 255, 0.1);
             color: var(--primary-blue);
             font-weight: 600;
-            min-width: 24px;
+            min-width: 20px;
             text-align: center;
         }
 
         .sidebar-footer {
-            padding: 20px;
+            padding: 16px;
             margin-top: auto;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            border-top: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .logout-btn {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            padding: 12px 16px;
-            background: rgba(255, 59, 48, 0.08);
+            padding: 10px 14px;
+            background: rgba(255, 59, 48, 0.07);
             color: var(--danger);
             border: none;
-            border-radius: 12px;
-            font-size: 13px;
+            border-radius: 10px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
         }
 
         .logout-btn:hover {
-            background: rgba(255, 59, 48, 0.15);
-            transform: translateY(-2px);
+            background: rgba(255, 59, 48, 0.12);
+            transform: translateY(-1px);
         }
 
-        /* Main Content - Enhanced */
+        /* Main Content - More Compact */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
-            padding: 24px;
+            padding: 20px;
             min-height: 100vh;
-            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Dashboard Header - Enhanced */
+        /* Dashboard Header - More Compact */
         .dashboard-header {
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: var(--card-radius);
-            padding: 24px;
-            margin-bottom: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
             box-shadow: var(--card-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue));
         }
 
         .welcome-section h1 {
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--dark);
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
+        .institute-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
         .welcome-section p {
             color: var(--dark-gray);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 400;
-            max-width: 500px;
+            max-width: 450px;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
-        /* Live Clock - New */
+        /* Live Clock - Compact */
         .live-clock {
-            background: rgba(0, 122, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
+            background: rgba(0, 122, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(0, 122, 255, 0.2);
+            gap: 6px;
+            border: 1px solid rgba(0, 122, 255, 0.15);
         }
 
         .clock-icon {
             color: var(--primary-blue);
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .clock-time {
             font-family: 'SF Pro Display', monospace;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
             color: var(--dark);
         }
 
         .date-display {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--dark-gray);
-            background: rgba(0, 0, 0, 0.03);
-            padding: 8px 14px;
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.02);
+            padding: 6px 12px;
+            border-radius: 10px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        /* Stats Grid - Enhanced for Mobile */
+        /* Stats Grid - More Compact */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .stat-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: var(--card-radius);
-            padding: 20px;
+            padding: 16px;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             position: relative;
@@ -529,7 +550,7 @@ $total_materials = $total_materials ?? 0;
         }
 
         .stat-card:hover {
-            transform: translateY(-6px);
+            transform: translateY(-4px);
             box-shadow: var(--card-shadow-hover);
         }
 
@@ -538,10 +559,10 @@ $total_materials = $total_materials ?? 0;
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 3px;
             height: 100%;
             background: linear-gradient(to bottom, var(--primary-blue), var(--accent-blue));
-            border-radius: 4px 0 0 4px;
+            border-radius: 3px 0 0 3px;
         }
 
         .stat-content {
@@ -551,45 +572,44 @@ $total_materials = $total_materials ?? 0;
         }
 
         .stat-text h3 {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
             color: var(--dark-gray);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
 
         .stat-number {
-            font-size: 32px;
+            font-size: 26px;
             font-weight: 800;
             color: var(--dark);
             line-height: 1;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stat-icon {
-            font-size: 32px;
+            font-size: 26px;
             color: var(--primary-blue);
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
-        /* Content Grid - Enhanced */
+        /* Content Grid */
         .content-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
-            gap: 32px;
-            margin-bottom: 32px;
+            gap: 24px;
+            margin-bottom: 24px;
         }
 
-        /* Cards - Enhanced */
+        /* Cards - More Compact */
         .card {
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: var(--card-radius);
-            padding: 24px;
+            padding: 20px;
             box-shadow: var(--card-shadow);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border: 1px solid var(--glass-border);
             transition: var(--transition);
         }
@@ -602,34 +622,34 @@ $total_materials = $total_materials ?? 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .card-title {
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 600;
             color: var(--dark);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .card-title i {
             color: var(--primary-blue);
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .view-all {
             color: var(--primary-blue);
             text-decoration: none;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             transition: var(--transition);
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 8px;
-            background: rgba(0, 122, 255, 0.08);
+            background: rgba(0, 122, 255, 0.07);
         }
 
         .view-all:hover {
@@ -637,35 +657,35 @@ $total_materials = $total_materials ?? 0;
             transform: translateX(2px);
         }
 
-        /* Assignment List - Enhanced */
+        /* Assignment List - More Compact */
         .assignment-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
-            margin-bottom: 12px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 10px;
             transition: var(--transition);
             border: 1px solid transparent;
         }
 
         .assignment-item:hover {
-            background: rgba(0, 122, 255, 0.04);
-            border-color: rgba(0, 122, 255, 0.1);
-            transform: translateX(4px);
+            background: rgba(0, 122, 255, 0.03);
+            border-color: rgba(0, 122, 255, 0.08);
+            transform: translateX(3px);
         }
 
         .assignment-info h4 {
             font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
+            font-size: 13px;
+            margin-bottom: 3px;
             color: var(--dark);
         }
 
         .assignment-info p {
             color: var(--dark-gray);
-            font-size: 12px;
+            font-size: 11px;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
@@ -673,40 +693,40 @@ $total_materials = $total_materials ?? 0;
         }
 
         .assignment-status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 18px;
+            font-size: 11px;
             font-weight: 600;
-            min-width: 80px;
+            min-width: 70px;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
 
         .status-submitted {
-            background: rgba(52, 199, 89, 0.12);
+            background: rgba(52, 199, 89, 0.1);
             color: var(--success);
-            border: 1px solid rgba(52, 199, 89, 0.3);
+            border: 1px solid rgba(52, 199, 89, 0.2);
         }
 
         .status-pending {
-            background: rgba(255, 59, 48, 0.12);
+            background: rgba(255, 59, 48, 0.1);
             color: var(--danger);
-            border: 1px solid rgba(255, 59, 48, 0.3);
+            border: 1px solid rgba(255, 59, 48, 0.2);
         }
 
         /* Materials List */
         .material-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
             transition: var(--transition);
         }
 
         .material-item:hover {
-            transform: translateX(4px);
+            transform: translateX(3px);
         }
 
         .material-item:last-child {
@@ -714,71 +734,71 @@ $total_materials = $total_materials ?? 0;
         }
 
         .material-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(90, 200, 250, 0.1) 100%);
-            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(90, 200, 250, 0.08) 100%);
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-blue);
-            font-size: 14px;
-            border: 1px solid rgba(0, 122, 255, 0.1);
+            font-size: 13px;
+            border: 1px solid rgba(0, 122, 255, 0.08);
         }
 
         .material-info h4 {
             font-weight: 500;
-            font-size: 13px;
+            font-size: 12px;
             margin-bottom: 2px;
             color: var(--dark);
         }
 
         /* Exam List */
         .exam-item {
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
             transition: var(--transition);
             border: 1px solid transparent;
         }
 
         .exam-item:hover {
-            background: rgba(0, 122, 255, 0.04);
-            border-color: rgba(0, 122, 255, 0.1);
-            transform: translateY(-2px);
+            background: rgba(0, 122, 255, 0.03);
+            border-color: rgba(0, 122, 255, 0.08);
+            transform: translateY(-1px);
         }
 
         .exam-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .exam-name {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--dark);
         }
 
         .exam-duration {
             color: var(--dark-gray);
-            font-size: 12px;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 4px 8px;
-            border-radius: 8px;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 3px 7px;
+            border-radius: 7px;
             font-weight: 500;
         }
 
         .exam-action {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
             color: white;
             text-decoration: none;
-            border-radius: 10px;
-            font-size: 12px;
+            border-radius: 9px;
+            font-size: 11px;
             font-weight: 600;
             transition: var(--transition);
             border: none;
@@ -786,14 +806,14 @@ $total_materials = $total_materials ?? 0;
         }
 
         .exam-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.25);
         }
 
         /* Charts */
         .chart-container {
-            height: 180px;
-            margin-top: 16px;
+            height: 160px;
+            margin-top: 14px;
         }
 
         /* Fee Status */
@@ -801,83 +821,82 @@ $total_materials = $total_materials ?? 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-top: 14px;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .fee-amount {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             color: var(--dark);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .fee-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 14px;
+            border-radius: 18px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
 
         .badge-paid {
-            background: rgba(52, 199, 89, 0.15);
+            background: rgba(52, 199, 89, 0.12);
             color: var(--success);
-            border: 2px solid rgba(52, 199, 89, 0.3);
+            border: 2px solid rgba(52, 199, 89, 0.25);
         }
 
         .badge-pending {
-            background: rgba(255, 59, 48, 0.15);
+            background: rgba(255, 59, 48, 0.12);
             color: var(--danger);
-            border: 2px solid rgba(255, 59, 48, 0.3);
+            border: 2px solid rgba(255, 59, 48, 0.25);
         }
 
         /* Attendance */
         .attendance-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .attendance-stat {
             text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 10px;
             border: 1px solid transparent;
             transition: var(--transition);
         }
 
         .attendance-stat:hover {
-            border-color: rgba(0, 0, 0, 0.05);
-            transform: translateY(-4px);
+            border-color: rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
         }
 
         .attendance-number {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .attendance-label {
             color: var(--dark-gray);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
 
         /* Quick Actions */
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .action-btn {
@@ -885,9 +904,9 @@ $total_materials = $total_materials ?? 0;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 24px 16px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 16px;
+            padding: 20px 12px;
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 12px;
             text-decoration: none;
             color: var(--dark);
             transition: var(--transition);
@@ -895,24 +914,24 @@ $total_materials = $total_materials ?? 0;
         }
 
         .action-btn:hover {
-            background: rgba(0, 122, 255, 0.08);
-            border-color: rgba(0, 122, 255, 0.2);
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.15);
+            background: rgba(0, 122, 255, 0.07);
+            border-color: rgba(0, 122, 255, 0.15);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.12);
         }
 
         .action-btn i {
-            font-size: 24px;
+            font-size: 20px;
             color: var(--primary-blue);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .action-btn span {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
         }
 
-        /* Mobile Navigation - Enhanced */
+        /* Mobile Navigation - More Compact */
         .mobile-nav {
             display: none;
             position: fixed;
@@ -920,13 +939,13 @@ $total_materials = $total_materials ?? 0;
             left: 0;
             right: 0;
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 20px;
-            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 10px 16px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
             z-index: 1000;
             border-top: 1px solid var(--glass-border);
-            border-radius: 24px 24px 0 0;
+            border-radius: 20px 20px 0 0;
         }
 
         .nav-items {
@@ -941,24 +960,24 @@ $total_materials = $total_materials ?? 0;
             align-items: center;
             text-decoration: none;
             color: var(--dark-gray);
-            font-size: 11px;
+            font-size: 10px;
             transition: var(--transition);
-            padding: 10px 12px;
-            border-radius: 16px;
-            min-width: 64px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            min-width: 60px;
             background: transparent;
         }
 
         .nav-item-mobile.active {
             color: var(--primary-blue);
-            background: rgba(0, 122, 255, 0.12);
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+            background: rgba(0, 122, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.12);
         }
 
         .nav-item-mobile i {
-            font-size: 18px;
-            margin-bottom: 4px;
+            font-size: 16px;
+            margin-bottom: 3px;
         }
 
         .nav-item-mobile span {
@@ -969,21 +988,37 @@ $total_materials = $total_materials ?? 0;
         .menu-toggle {
             display: none;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
             color: var(--dark);
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px;
+            border-radius: 10px;
             transition: var(--transition);
             z-index: 1001;
         }
 
         .menu-toggle:hover {
-            background: rgba(0, 122, 255, 0.1);
+            background: rgba(0, 122, 255, 0.08);
             transform: rotate(90deg);
+        }
+
+        /* Mobile Institute Logo */
+        .mobile-institute-header {
+            display: none;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            color: white;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 1002;
+            box-shadow: 0 2px 10px rgba(0, 122, 255, 0.2);
         }
 
         /* Overlay for mobile */
@@ -994,10 +1029,10 @@ $total_materials = $total_materials ?? 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 999;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -1007,14 +1042,10 @@ $total_materials = $total_materials ?? 0;
             opacity: 1;
         }
 
-        /* Responsive Design - Fucking Amazing */
+        /* Responsive Design */
         @media (max-width: 1200px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .content-grid {
-                gap: 24px;
             }
         }
 
@@ -1029,168 +1060,132 @@ $total_materials = $total_materials ?? 0;
             
             .main-content {
                 margin-left: 0;
-                padding-bottom: 90px;
-                padding-top: 20px;
+                padding-bottom: 80px;
+                padding-top: 16px;
             }
             
             .mobile-nav {
+                display: block;
+            }
+            
+            .mobile-institute-header {
                 display: block;
             }
             
             .menu-toggle {
                 display: block;
                 position: fixed;
-                top: 20px;
-                left: 20px;
-                z-index: 1002;
+                top: 16px;
+                left: 16px;
+                z-index: 1003;
             }
             
             .dashboard-header {
                 flex-direction: column;
-                gap: 20px;
+                gap: 16px;
                 text-align: center;
-                padding: 20px;
-                margin-top: 60px;
+                padding: 16px;
+                margin-top: 56px;
+            }
+            
+            .institute-name {
+                display: none;
             }
             
             .header-right {
                 width: 100%;
                 justify-content: center;
                 flex-wrap: wrap;
-                gap: 12px;
+                gap: 10px;
             }
             
             .live-clock {
                 order: -1;
                 width: 100%;
                 justify-content: center;
+                background: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            .clock-time {
+                color: var(--primary-blue);
             }
             
             .date-display {
                 width: 100%;
                 justify-content: center;
+                background: rgba(0, 0, 0, 0.02);
             }
         }
 
         @media (max-width: 768px) {
             .main-content {
-                padding: 16px;
-                padding-bottom: 90px;
+                padding: 12px;
+                padding-bottom: 80px;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 16px;
-                margin-bottom: 24px;
+                gap: 12px;
+                margin-bottom: 20px;
             }
             
             .content-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 16px;
             }
             
             .card {
-                padding: 20px;
-                margin-bottom: 20px;
+                padding: 16px;
+                margin-bottom: 16px;
             }
             
             .welcome-section h1 {
-                font-size: 22px;
+                font-size: 20px;
             }
             
             .welcome-section p {
-                font-size: 13px;
+                font-size: 12px;
             }
             
             .stat-number {
-                font-size: 28px;
+                font-size: 24px;
             }
             
             .attendance-stats {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
+                gap: 10px;
             }
             
             .quick-actions {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+                gap: 10px;
             }
             
             .assignment-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
+                gap: 8px;
             }
             
             .assignment-status {
                 align-self: flex-end;
             }
+            
+            .exam-item {
+                padding: 12px;
+            }
         }
 
         @media (max-width: 480px) {
             .mobile-nav {
-                padding: 8px 16px;
+                padding: 8px 12px;
+                border-radius: 16px 16px 0 0;
             }
             
             .nav-item-mobile {
-                min-width: 56px;
-                padding: 8px;
-                font-size: 10px;
-            }
-            
-            .nav-item-mobile i {
-                font-size: 16px;
-            }
-            
-            .dashboard-header {
-                padding: 16px;
-            }
-            
-            .card {
-                padding: 16px;
-            }
-            
-            .stat-card {
-                padding: 16px;
-            }
-            
-            .stat-number {
-                font-size: 24px;
-            }
-            
-            .attendance-stat {
-                padding: 16px;
-            }
-            
-            .attendance-number {
-                font-size: 24px;
-            }
-            
-            .action-btn {
-                padding: 20px 12px;
-            }
-            
-            .action-btn i {
-                font-size: 20px;
-            }
-            
-            .chart-container {
-                height: 160px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .mobile-nav {
-                border-radius: 20px 20px 0 0;
-            }
-            
-            .nav-items {
-                gap: 4px;
-            }
-            
-            .nav-item-mobile {
-                min-width: 48px;
-                padding: 6px;
+                min-width: 52px;
+                padding: 6px 8px;
                 font-size: 9px;
             }
             
@@ -1198,15 +1193,77 @@ $total_materials = $total_materials ?? 0;
                 font-size: 14px;
             }
             
-            .stat-card::before {
-                width: 3px;
+            .dashboard-header {
+                padding: 14px;
+            }
+            
+            .card {
+                padding: 14px;
+            }
+            
+            .stat-card {
+                padding: 14px;
+            }
+            
+            .stat-number {
+                font-size: 22px;
+            }
+            
+            .attendance-stat {
+                padding: 14px;
+            }
+            
+            .attendance-number {
+                font-size: 22px;
+            }
+            
+            .action-btn {
+                padding: 16px 10px;
+            }
+            
+            .action-btn i {
+                font-size: 18px;
+            }
+            
+            .chart-container {
+                height: 140px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 18px;
+            }
+            
+            .mobile-institute-header {
+                font-size: 12px;
+                padding: 12px;
             }
         }
 
-        /* iPhone Notch Support */
-        @supports (padding: max(0px)) {
+        @media (max-width: 360px) {
             .mobile-nav {
-                padding-bottom: max(12px, env(safe-area-inset-bottom));
+                border-radius: 14px 14px 0 0;
+            }
+            
+            .nav-items {
+                gap: 2px;
+            }
+            
+            .nav-item-mobile {
+                min-width: 46px;
+                padding: 5px 6px;
+                font-size: 8px;
+            }
+            
+            .nav-item-mobile i {
+                font-size: 13px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 17px;
+            }
+            
+            .stat-card::before {
+                width: 2px;
             }
         }
 
@@ -1214,7 +1271,7 @@ $total_materials = $total_materials ?? 0;
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(15px);
             }
             to {
                 opacity: 1;
@@ -1227,7 +1284,7 @@ $total_materials = $total_materials ?? 0;
                 transform: translateY(0);
             }
             50% {
-                transform: translateY(-8px);
+                transform: translateY(-6px);
             }
         }
 
@@ -1236,12 +1293,23 @@ $total_materials = $total_materials ?? 0;
                 opacity: 1;
             }
             50% {
-                opacity: 0.7;
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
 
         .animate-in {
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         .float-animation {
@@ -1252,10 +1320,14 @@ $total_materials = $total_materials ?? 0;
             animation: pulse 2s ease-in-out infinite;
         }
 
+        .slide-in {
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
 
         ::-webkit-scrollbar-track {
@@ -1264,42 +1336,21 @@ $total_materials = $total_materials ?? 0;
 
         ::-webkit-scrollbar-thumb {
             background: var(--primary-blue);
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-blue-dark);
         }
-
-        /* Loading States */
-        .skeleton {
-            background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.05) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 8px;
-        }
-
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        /* Focus States for Accessibility */
-        *:focus {
-            outline: 2px solid var(--primary-blue);
-            outline-offset: 2px;
-        }
-
-        *:focus:not(:focus-visible) {
-            outline: none;
-        }
     </style>
 </head>
 <body>
+    <!-- Mobile Institute Header -->
+    <div class="mobile-institute-header">
+        <i class="fas fa-graduation-cap mr-2"></i>
+        Faiz Computer Institute
+    </div>
+
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
         <div class="sidebar-header">
@@ -1416,8 +1467,12 @@ $total_materials = $total_materials ?? 0;
         <!-- Dashboard Header -->
         <div class="dashboard-header animate-in" style="animation-delay: 0.1s">
             <div class="welcome-section">
+                <div class="institute-name">
+                    <i class="fas fa-graduation-cap mr-1"></i>
+                    Faiz Computer Institute
+                </div>
                 <h1>Welcome back, <?= htmlspecialchars($student['name']) ?> 👋</h1>
-                <p>Track your progress and manage your learning journey at Faiz Computer Institute</p>
+                <p>Track your progress and manage your learning journey</p>
             </div>
             <div class="header-right">
                 <div class="live-clock">
@@ -1486,10 +1541,10 @@ $total_materials = $total_materials ?? 0;
                     </div>
                     <div class="card-content">
                         <?php while($assignment = $assignments->fetch_assoc()): ?>
-                        <div class="assignment-item">
+                        <div class="assignment-item slide-in">
                             <div class="assignment-info">
                                 <h4><?= htmlspecialchars($assignment['title']) ?></h4>
-                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 80)) ?>...</p>
+                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 70)) ?>...</p>
                             </div>
                             <span class="assignment-status <?= $assignment['submission_id'] ? 'status-submitted' : 'status-pending' ?>">
                                 <?= $assignment['submission_id'] ? 'Submitted' : 'Pending' ?>
@@ -1516,33 +1571,17 @@ $total_materials = $total_materials ?? 0;
                         <a href="exam-center/student/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
-                       <?php while ($exam = $exams->fetch_assoc()): ?>
-    <?php
-        // Check if student already submitted this exam
-        $stmt2 = $conn->prepare("
-            SELECT COUNT(*) AS attempted
-            FROM exam_submissions
-            WHERE exam_id = ? AND student_id = ? AND student_table = ?
-        ");
-        $stmt2->bind_param("iis", $exam['exam_id'], $student_id, $table);
-        $stmt2->execute();
-        $attempted = $stmt2->get_result()->fetch_assoc()['attempted'];
-    ?>
-    <div class="exam-item">
-        <div class="exam-header">
-            <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
-            <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
-        </div>
-        <?php if ($attempted): ?>
-            <span class="exam-action" style="background:#8E8E93; cursor:default;">Attempted</span>
-        <?php else: ?>
-            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
-                Start Exam
-            </a>
-        <?php endif; ?>
-    </div>
-<?php endwhile; ?>
-
+                        <?php while ($exam = $exams->fetch_assoc()): ?>
+                        <div class="exam-item slide-in">
+                            <div class="exam-header">
+                                <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
+                                <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
+                            </div>
+                            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
+                                Start Exam
+                            </a>
+                        </div>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </div>
@@ -1556,15 +1595,15 @@ $total_materials = $total_materials ?? 0;
                         <a href="attendence/student_attendance.php" class="view-all">Details <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="attendance-stats">
-                        <div class="attendance-stat" style="border-color: rgba(52, 199, 89, 0.2);">
+                        <div class="attendance-stat" style="border-color: rgba(52, 199, 89, 0.15);">
                             <div class="attendance-number" style="color: #34C759;"><?= $present ?></div>
                             <div class="attendance-label">Present</div>
                         </div>
-                        <div class="attendance-stat" style="border-color: rgba(255, 59, 48, 0.2);">
+                        <div class="attendance-stat" style="border-color: rgba(255, 59, 48, 0.15);">
                             <div class="attendance-number" style="color: #FF3B30;"><?= $absent ?></div>
                             <div class="attendance-label">Absent</div>
                         </div>
-                        <div class="attendance-stat" style="border-color: rgba(255, 149, 0, 0.2);">
+                        <div class="attendance-stat" style="border-color: rgba(255, 149, 0, 0.15);">
                             <div class="attendance-number" style="color: #FF9500;"><?= $leave ?></div>
                             <div class="attendance-label">Leave</div>
                         </div>
@@ -1581,7 +1620,7 @@ $total_materials = $total_materials ?? 0;
                     </div>
                     <div class="fee-status">
                         <div>
-                            <div style="color: var(--dark-gray); font-size: 13px; font-weight: 500;"><?= $currentMonthName ?> Fee</div>
+                            <div style="color: var(--dark-gray); font-size: 12px; font-weight: 500;"><?= $currentMonthName ?> Fee</div>
                             <div class="fee-amount">₹<?= $feeAmount ?></div>
                         </div>
                         <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?> float-animation">
@@ -1599,7 +1638,7 @@ $total_materials = $total_materials ?? 0;
                     <div class="card-content">
                         <?php if ($last_materials->num_rows > 0): ?>
                             <?php while($row = $last_materials->fetch_assoc()): ?>
-                            <div class="material-item">
+                            <div class="material-item slide-in">
                                 <div class="material-icon">
                                     <i class="fas fa-file-alt"></i>
                                 </div>
@@ -1609,7 +1648,7 @@ $total_materials = $total_materials ?? 0;
                             </div>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <p style="color: var(--dark-gray); text-align: center; padding: 20px; font-size: 13px; background: rgba(0, 0, 0, 0.02); border-radius: 12px;">
+                            <p style="color: var(--dark-gray); text-align: center; padding: 16px; font-size: 12px; background: rgba(0, 0, 0, 0.015); border-radius: 10px;">
                                 <i class="fas fa-inbox mr-2"></i> No materials assigned
                             </p>
                         <?php endif; ?>
@@ -1683,12 +1722,8 @@ $total_materials = $total_materials ?? 0;
             const clockElement = document.getElementById('liveClock');
             if (clockElement) {
                 clockElement.textContent = timeString;
-                
-                // Add pulse animation every second
                 clockElement.classList.add('pulse-animation');
-                setTimeout(() => {
-                    clockElement.classList.remove('pulse-animation');
-                }, 300);
+                setTimeout(() => clockElement.classList.remove('pulse-animation'), 300);
             }
         }
 
@@ -1714,13 +1749,14 @@ $total_materials = $total_materials ?? 0;
                 overlay.addEventListener('click', toggleMobileMenu);
             }
             
-            // Close menu when clicking on mobile nav items
-            const mobileNavItems = document.querySelectorAll('.nav-item-mobile');
-            mobileNavItems.forEach(item => {
+            // Close menu when clicking nav items
+            document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(item => {
                 item.addEventListener('click', () => {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
+                    if (window.innerWidth <= 1024) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
                 });
             });
             
@@ -1754,14 +1790,9 @@ $total_materials = $total_materials ?? 0;
                                 'rgba(255, 59, 48, 0.8)',
                                 'rgba(255, 149, 0, 0.8)'
                             ],
-                            borderColor: [
-                                'rgba(52, 199, 89, 1)',
-                                'rgba(255, 59, 48, 1)',
-                                'rgba(255, 149, 0, 1)'
-                            ],
                             borderWidth: 1,
-                            borderRadius: 8,
-                            spacing: 2
+                            borderRadius: 6,
+                            spacing: 1
                         }]
                     },
                     options: {
@@ -1771,16 +1802,13 @@ $total_materials = $total_materials ?? 0;
                             legend: {
                                 position: 'bottom',
                                 labels: {
-                                    padding: 15,
+                                    padding: 12,
                                     usePointStyle: true,
-                                    pointStyle: 'circle',
-                                    font: {
-                                        size: 11
-                                    }
+                                    font: { size: 10 }
                                 }
                             }
                         },
-                        cutout: '75%'
+                        cutout: '72%'
                     }
                 });
             }
@@ -1796,50 +1824,34 @@ $total_materials = $total_materials ?? 0;
                             label: 'Score %',
                             data: <?= json_encode($scores) ?>,
                             borderColor: '#007AFF',
-                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                            borderWidth: 3,
-                            tension: 0.4,
+                            backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                            borderWidth: 2,
+                            tension: 0.3,
                             fill: true,
                             pointBackgroundColor: '#007AFF',
                             pointBorderColor: '#FFFFFF',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8
+                            pointBorderWidth: 1.5,
+                            pointRadius: 5
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 max: 100,
-                                grid: {
-                                    drawBorder: false,
-                                    color: 'rgba(0, 0, 0, 0.04)'
-                                },
+                                grid: { drawBorder: false, color: 'rgba(0, 0, 0, 0.03)' },
                                 ticks: {
-                                    font: {
-                                        size: 11
-                                    },
-                                    callback: function(value) {
-                                        return value + '%';
-                                    }
+                                    font: { size: 10 },
+                                    callback: value => value + '%'
                                 }
                             },
                             x: {
-                                grid: {
-                                    display: false
-                                },
+                                grid: { display: false },
                                 ticks: {
-                                    font: {
-                                        size: 11
-                                    },
+                                    font: { size: 10 },
                                     maxRotation: 45,
                                     minRotation: 45
                                 }
@@ -1854,7 +1866,7 @@ $total_materials = $total_materials ?? 0;
             interactiveElements.forEach(element => {
                 element.addEventListener('mouseenter', function() {
                     this.style.transform = this.classList.contains('stat-card') ? 
-                        'translateY(-8px)' : 'translateY(-4px)';
+                        'translateY(-6px)' : 'translateY(-2px)';
                 });
                 element.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
@@ -1871,44 +1883,12 @@ $total_materials = $total_materials ?? 0;
                 });
             });
             
-            // Mobile navigation active state
-            const currentPage = window.location.pathname.split('/').pop() || 'test.php';
-            mobileNavItems.forEach(item => {
-                const href = item.getAttribute('href');
-                if (href === currentPage || (href === 'test.php' && currentPage === '')) {
-                    item.classList.add('active');
-                }
-            });
-            
-            // Smooth scroll for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return;
-                    
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 20,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-            
-            // Add loading animation to page elements
-            const animateElements = document.querySelectorAll('.animate-in');
-            animateElements.forEach((el, index) => {
+            // Stagger animations
+            document.querySelectorAll('.slide-in').forEach((el, index) => {
                 el.style.animationDelay = `${0.1 + (index * 0.1)}s`;
             });
             
             // Intersection Observer for animations
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-            
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -1916,34 +1896,14 @@ $total_materials = $total_materials ?? 0;
                         entry.target.style.transform = 'translateY(0)';
                     }
                 });
-            }, observerOptions);
+            }, { threshold: 0.1 });
             
             document.querySelectorAll('.animate-in').forEach(el => {
                 el.style.opacity = 0;
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                el.style.transform = 'translateY(15px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
                 observer.observe(el);
             });
-            
-            // Add keyboard navigation support
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
-                    toggleMobileMenu();
-                }
-            });
-            
-            // Update date display with current date
-            function updateDateDisplay() {
-                const now = new Date();
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const dateString = now.toLocaleDateString('en-US', options);
-                const dateElement = document.getElementById('currentDate');
-                if (dateElement) {
-                    dateElement.textContent = dateString;
-                }
-            }
-            
-            updateDateDisplay();
         });
         
         // Handle page visibility changes
