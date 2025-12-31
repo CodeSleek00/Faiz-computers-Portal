@@ -475,41 +475,7 @@ $assignments->data_seek(0);
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon total">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="stat-number"><?= $total_assignments ?></div>
-                <div class="stat-label">Total</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon submitted">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-number"><?= $submitted_count ?></div>
-                <div class="stat-label">Submitted</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon graded">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="stat-number"><?= $graded_count ?></div>
-                <div class="stat-label">Graded</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon pending">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-number"><?= $total_assignments - $submitted_count ?></div>
-                <div class="stat-label">Pending</div>
-            </div>
-        </div>
-
+       
         <!-- Assignments Section -->
         <div class="assignments">
             <div class="assignments-header">
