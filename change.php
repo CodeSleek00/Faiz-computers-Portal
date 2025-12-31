@@ -132,7 +132,7 @@ $exams = $stmt_exams->get_result();
                 <td><?php echo htmlspecialchars($exam['exam_name']); ?></td>
                 <td><?php echo $exam['duration']; ?> mins</td>
                 <td>
-                    <a href="exam-centers/student/take_exam.php?exam_id=<?php echo $exam['exam_id']; ?>">Start Exam</a>
+                    <a href="exam-center/student/take_exam.php?exam_id=<?php echo $exam['exam_id']; ?>">Start Exam</a>
                 </td>
             </tr>
         <?php endwhile; ?>
