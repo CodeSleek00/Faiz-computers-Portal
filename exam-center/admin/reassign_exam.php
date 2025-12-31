@@ -8,14 +8,10 @@ if ($exam_id <= 0) {
 }
 
 /* ================= FETCH ALL STUDENTS (MERGED) ================= */
-/*
- We normalize data:
- enrollment_id = COMMON KEY
-*/
 $students = $conn->query("
-    SELECT enrollment_id, name FROM students
+    SELECT enrollment_id, name, 'students' AS student_table FROM students
     UNION
-    SELECT enrollment_id, name FROM students26
+    SELECT enrollment_id, name, 'students26' AS student_table FROM students26
     ORDER BY name ASC
 ");
 
@@ -36,16 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("i", $exam_id);
         $stmt->execute();
 
-        /* ========= ASSIGN TO STUDENTS ========= */
-        if ($assign_type === 'student' && !empty($_POST['enrollment_ids'])) {
+        /* ========= ASSIGN TO SPECIFIC STUDENTS ========= */
+        if ($assign_type === 'student' && !empty($_POST['students_assign'])) {
 
             $stmt = $conn->prepare("
-                INSERT INTO exam_assignments (exam_id, enrollment_id)
-                VALUES (?, ?)
+                INSERT INTO exam_assignments (exam_id, enrollment_id, student_table)
+                VALUES (?, ?, ?)
             ");
 
-            foreach ($_POST['enrollment_ids'] as $enroll) {
-                $stmt->bind_param("is", $exam_id, $enroll);
+            foreach ($_POST['students_assign'] as $val) {
+                list($enroll, $table) = explode('|', $val);
+                $stmt->bind_param("iss", $exam_id, $enroll, $table);
                 $stmt->execute();
                 $count++;
             }
@@ -54,15 +51,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* ========= ASSIGN TO BATCHES ========= */
         elseif ($assign_type === 'batch' && !empty($_POST['batch_ids'])) {
 
-            $stmt = $conn->prepare("
-                INSERT INTO exam_assignments (exam_id, batch_id)
-                VALUES (?, ?)
-            ");
-
+            // Fetch all students in the selected batches
             foreach ($_POST['batch_ids'] as $batch_id) {
-                $stmt->bind_param("ii", $exam_id, $batch_id);
-                $stmt->execute();
-                $count++;
+                $batch_students = $conn->query("
+                    SELECT enrollment_id, 'students' AS student_table FROM students WHERE batch_id = $batch_id
+                    UNION
+                    SELECT enrollment_id, 'students26' AS student_table FROM students26 WHERE batch_id = $batch_id
+                ");
+                $stmt = $conn->prepare("
+                    INSERT INTO exam_assignments (exam_id, enrollment_id, student_table)
+                    VALUES (?, ?, ?)
+                ");
+                while ($s = $batch_students->fetch_assoc()) {
+                    $stmt->bind_param("iss", $exam_id, $s['enrollment_id'], $s['student_table']);
+                    $stmt->execute();
+                    $count++;
+                }
             }
         }
 
@@ -70,10 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         elseif ($assign_type === 'all') {
 
             $conn->query("
-                INSERT INTO exam_assignments (exam_id, enrollment_id)
-                SELECT $exam_id, enrollment_id FROM students
+                INSERT INTO exam_assignments (exam_id, enrollment_id, student_table)
+                SELECT $exam_id, enrollment_id, 'students' FROM students
                 UNION
-                SELECT $exam_id, enrollment_id FROM students26
+                SELECT $exam_id, enrollment_id, 'students26' FROM students26
             ");
 
             $count = $conn->affected_rows;
@@ -126,9 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div id="students" style="display:none">
 <label>Select Students</label>
 <div class="list">
-<?php while($s=$students->fetch_assoc()): ?>
+<?php 
+$students->data_seek(0); // reset pointer
+while($s=$students->fetch_assoc()): ?>
 <div>
-<input type="checkbox" name="enrollment_ids[]" value="<?= $s['enrollment_id'] ?>">
+<input type="checkbox" name="students_assign[]" value="<?= $s['enrollment_id'] ?>|<?= $s['student_table'] ?>">
 <?= htmlspecialchars($s['name']) ?> (<?= $s['enrollment_id'] ?>)
 </div>
 <?php endwhile; ?>
