@@ -132,31 +132,37 @@ $present = $attendance['present_days'] ?? 0;
 $absent  = $attendance['absent_days'] ?? 0;
 $leave   = $attendance['leave_days'] ?? 0;
 /* =====================================================
-   8. STUDY MATERIAL STATS (NO created_at)
+   STUDY MATERIALS (LAST 5 ASSIGNED TO STUDENT)
 ===================================================== */
 
-// TOTAL materials
+$student_id    = $_SESSION['student_id'];
+$student_table = $_SESSION['student_table'];
+
+// TOTAL assigned materials count
 $stmt = $conn->prepare("
     SELECT COUNT(*) AS total_materials
-    FROM study_materials
+    FROM study_materials_targets
+    WHERE student_id = ?
+      AND student_table = ?
 ");
+$stmt->bind_param("is", $student_id, $student_table);
 $stmt->execute();
 $total_materials = $stmt->get_result()->fetch_assoc()['total_materials'] ?? 0;
 
 
-// RECENT uploads (last 5 uploads)
+// LAST 5 assigned materials
 $stmt = $conn->prepare("
-    SELECT COUNT(*) AS recent_materials
-    FROM (
-        SELECT material_id
-        FROM study_materials
-        ORDER BY material_id DESC
-        LIMIT 5
-    ) AS recent
+    SELECT sm.title
+    FROM study_materials_targets smt
+    JOIN study_materials sm ON sm.id = smt.material_id
+    WHERE smt.student_id = ?
+      AND smt.student_table = ?
+    ORDER BY smt.id DESC
+    LIMIT 5
 ");
+$stmt->bind_param("is", $student_id, $student_table);
 $stmt->execute();
-$recent_uploads = $stmt->get_result()->fetch_assoc()['recent_materials'] ?? 0;
-
+$last_materials = $stmt->get_result();
 
 /* =====================================================
    9. FEE STATUS (CURRENT MONTH)
@@ -1275,23 +1281,25 @@ $fee_status = $fee['status'] ?? 'Due';
     </div>
 </section>
 <!-- Study Materials -->
-<div class="stat-card courses animate-in">
-    <div class="stat-title">
-        <i class="fas fa-book-open"></i>
-        <span>Total Study Materials</span>
-    </div>
-    <div class="stat-value"><?= $total_materials ?></div>
-    <i class="fas fa-folder-open stat-icon"></i>
-</div>
-
-<!-- Recent Uploads -->
 <div class="stat-card assignments animate-in">
     <div class="stat-title">
-        <i class="fas fa-upload"></i>
-        <span>Recent Uploads (7 days)</span>
+        <i class="fas fa-book"></i>
+        <span>Last 5 Study Materials</span>
     </div>
-    <div class="stat-value"><?= $recent_uploads ?></div>
-    <i class="fas fa-cloud-upload-alt stat-icon"></i>
+
+    <div style="font-size:14px; margin-top:8px;">
+        <?php if ($last_materials->num_rows > 0): ?>
+            <ul style="padding-left:18px; margin:0;">
+                <?php while($row = $last_materials->fetch_assoc()): ?>
+                    <li><?= htmlspecialchars($row['title']) ?></li>
+                <?php endwhile; ?>
+            </ul>
+        <?php else: ?>
+            <span style="color:#888;">No materials assigned</span>
+        <?php endif; ?>
+    </div>
+
+    <i class="fas fa-folder-open stat-icon"></i>
 </div>
 
 <!-- Fee Status -->
