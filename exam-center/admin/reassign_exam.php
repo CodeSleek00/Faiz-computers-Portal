@@ -36,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($assign_type === 'student' && !empty($_POST['students_assign'])) {
 
             $stmt = $conn->prepare("
-                INSERT INTO exam_assignments (exam_id, enrollment_id, student_table)
-                VALUES (?, ?, ?)
+                INSERT INTO exam_assignments (exam_id, student_id, student_table) VALUES (?, ?, ?)
+       
             ");
 
             foreach ($_POST['students_assign'] as $val) {
