@@ -1410,7 +1410,7 @@ $total_materials = $total_materials ?? 0;
 
         <!-- Dashboard Header -->
         <div class="dashboard-header animate-in" style="animation-delay: 0.1s">
-            <h1 style="font-size: small;">FAIZ COMPUTER INSTITUTE</h1>
+            <h1 style="font-size: 24px">FAIZ COMPUTER INSTITUTE</h1>
             <div class="welcome-section">
                 <h1>Welcome back, <?= htmlspecialchars($student['name']) ?> 👋</h1>
                 <p>Track your progress and manage your learning journey at Faiz Computer Institute</p>
