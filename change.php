@@ -127,6 +127,7 @@ while($row = $result->fetch_assoc()) {
     $exam_status_list[] = $row;
 }
 
+?>
 
 
 ?>
@@ -200,32 +201,6 @@ while($row = $result->fetch_assoc()) {
         <?php endwhile; ?>
     </table>
 </div>
-<section class="exam-status">
-    <h3>📋 Exam Submission Status</h3>
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>Exam Name</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Score</th>
-        </tr>
-        <?php foreach($exam_status_list as $exam): ?>
-            <tr>
-                <td><?= htmlspecialchars($exam['exam_name']) ?></td>
-                <td><?= htmlspecialchars($exam['exam_date']) ?></td>
-                <td>
-                    <?php
-                        if($exam['status'] == 'Declared') echo "<span style='color:green;font-weight:bold;'>Declared</span>";
-                        elseif($exam['status'] == 'Submitted (Not Declared)') echo "<span style='color:orange;font-weight:bold;'>Submitted</span>";
-                        else echo "<span style='color:red;font-weight:bold;'>Pending</span>";
-                    ?>
-                </td>
-                <td><?= $exam['score'] ?></td>
-            </tr>
-        <?php endforeach; ?>
-    </table>
-</section>
-
 
 <script>
     const ctx = document.getElementById('attendanceChart').getContext('2d');
