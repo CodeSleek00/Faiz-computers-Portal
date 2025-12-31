@@ -1129,7 +1129,7 @@ $total_materials = $total_materials ?? 0;
 
         @media (max-width: 480px) {
             .mobile-nav {
-                padding: 8px 1px;
+                padding: 0px 16px;
             }
             
             .nav-item-mobile {
