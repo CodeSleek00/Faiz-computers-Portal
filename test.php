@@ -1221,44 +1221,6 @@ if ($result->num_rows > 0) {
             </div>
         </section>
 
-        <!-- Calendar Widget -->
-        <section class="calendar-widget animate-in">
-            <div class="calendar-header">
-                <h3 class="calendar-title"><?= date('F Y') ?></h3>
-                <div class="calendar-nav">
-                    <button class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
-                    <button class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-            
-            <div class="calendar-grid">
-                <div class="calendar-day-header">Sun</div>
-                <div class="calendar-day-header">Mon</div>
-                <div class="calendar-day-header">Tue</div>
-                <div class="calendar-day-header">Wed</div>
-                <div class="calendar-day-header">Thu</div>
-                <div class="calendar-day-header">Fri</div>
-                <div class="calendar-day-header">Sat</div>
-                
-                <!-- Calendar days would be dynamically generated in a real app -->
-                <?php
-                    $firstDay = date('w', strtotime(date('Y-m-01')));
-                    $daysInMonth = date('t');
-                    $currentDay = date('j');
-                    
-                    // Previous month days
-                    for ($i = 0; $i < $firstDay; $i++) {
-                        echo '<div class="calendar-day other-month"></div>';
-                    }
-                    
-                    // Current month days
-                    for ($i = 1; $i <= $daysInMonth; $i++) {
-                        $class = $i == $currentDay ? 'calendar-day today' : 'calendar-day';
-                        echo "<div class='$class'>$i</div>";
-                    }
-                ?>
-            </div>
-        </section>
         <!-- Analog Clock -->
 <section class="clock-section animate-in">
     <div class="analog-clock">
