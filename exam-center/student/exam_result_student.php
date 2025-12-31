@@ -408,32 +408,7 @@ $total_results = $results->num_rows;
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon total">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="stat-number"><?= $total_results ?></div>
-                <div class="stat-label">Results Declared</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon average">
-                    <i class="fas fa-percentage"></i>
-                </div>
-                <div class="stat-number"><?= $total_results ?></div>
-                <div class="stat-label">Exams Taken</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon score">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="stat-number"><?= $total_results ?></div>
-                <div class="stat-label">Total Results</div>
-            </div>
-        </div>
+       
 
         <!-- Results Section -->
         <div class="results-section">
