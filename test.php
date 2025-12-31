@@ -132,10 +132,10 @@ $present = $attendance['present_days'] ?? 0;
 $absent  = $attendance['absent_days'] ?? 0;
 $leave   = $attendance['leave_days'] ?? 0;
 /* =====================================================
-   8. STUDY MATERIAL STATS (NO material_targets)
+   8. STUDY MATERIAL STATS (NO created_at)
 ===================================================== */
 
-// TOTAL study materials
+// TOTAL materials
 $stmt = $conn->prepare("
     SELECT COUNT(*) AS total_materials
     FROM study_materials
@@ -144,14 +144,19 @@ $stmt->execute();
 $total_materials = $stmt->get_result()->fetch_assoc()['total_materials'] ?? 0;
 
 
-// RECENT uploads (last 7 days)
+// RECENT uploads (last 5 uploads)
 $stmt = $conn->prepare("
     SELECT COUNT(*) AS recent_materials
-    FROM study_materials
-    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    FROM (
+        SELECT material_id
+        FROM study_materials
+        ORDER BY material_id DESC
+        LIMIT 5
+    ) AS recent
 ");
 $stmt->execute();
 $recent_uploads = $stmt->get_result()->fetch_assoc()['recent_materials'] ?? 0;
+
 
 /* =====================================================
    9. FEE STATUS (CURRENT MONTH)
