@@ -12,9 +12,8 @@ $results = $conn->query("
         st.name, st.enrollment_id
     FROM exam_submissions s
     JOIN students st 
-        ON s.student_id = st.student_id 
-       AND s.student_table = 'students'
-    WHERE s.exam_id = $exam_id
+        ON s.student_id = st.student_id
+    WHERE s.exam_id = $exam_id AND s.student_table = 'students'
 
     UNION ALL
 
@@ -24,11 +23,11 @@ $results = $conn->query("
     FROM exam_submissions s
     JOIN students26 st26 
         ON s.student_id = st26.id
-       AND s.student_table = 'students26'
-    WHERE s.exam_id = $exam_id
+    WHERE s.exam_id = $exam_id AND s.student_table = 'students26'
 
     ORDER BY submitted_at DESC
 ");
+
 ?>
 
 <!DOCTYPE html>
