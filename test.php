@@ -131,6 +131,61 @@ $attendance = $stmt->get_result()->fetch_assoc();
 $present = $attendance['present_days'] ?? 0;
 $absent  = $attendance['absent_days'] ?? 0;
 $leave   = $attendance['leave_days'] ?? 0;
+/* =====================================================
+   8. STUDY MATERIAL STATS
+===================================================== */
+
+// Total study materials available to student
+$stmt = $conn->prepare("
+    SELECT COUNT(DISTINCT m.material_id) AS total_materials
+    FROM study_materials m
+    LEFT JOIN material_targets t ON m.material_id = t.material_id
+    WHERE 
+        t.student_id = ?
+        OR t.batch_id IN (
+            SELECT batch_id FROM student_batches WHERE student_id = ?
+        )
+");
+$stmt->bind_param("ii", $student_id, $student_id);
+$stmt->execute();
+$materials = $stmt->get_result()->fetch_assoc();
+
+// Recently uploaded (last 7 days)
+$stmt = $conn->prepare("
+    SELECT COUNT(DISTINCT m.material_id) AS recent_materials
+    FROM study_materials m
+    LEFT JOIN material_targets t ON m.material_id = t.material_id
+    WHERE 
+        (t.student_id = ?
+        OR t.batch_id IN (
+            SELECT batch_id FROM student_batches WHERE student_id = ?
+        ))
+        AND m.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+");
+$stmt->bind_param("ii", $student_id, $student_id);
+$stmt->execute();
+$recent_materials = $stmt->get_result()->fetch_assoc();
+
+$total_materials  = $materials['total_materials'] ?? 0;
+$recent_uploads   = $recent_materials['recent_materials'] ?? 0;
+/* =====================================================
+   9. FEE STATUS (CURRENT MONTH)
+===================================================== */
+$currentMonth = date('Y-m');
+
+$stmt = $conn->prepare("
+    SELECT status
+    FROM fee_receipts
+    WHERE student_id = ?
+    AND DATE_FORMAT(payment_date, '%Y-%m') = ?
+    ORDER BY payment_date DESC
+    LIMIT 1
+");
+$stmt->bind_param("is", $student_id, $currentMonth);
+$stmt->execute();
+$fee = $stmt->get_result()->fetch_assoc();
+
+$fee_status = $fee['status'] ?? 'Due';
 
 ?>
 
@@ -1229,6 +1284,37 @@ $leave   = $attendance['leave_days'] ?? 0;
         </div>
     </div>
 </section>
+<!-- Study Materials -->
+<div class="stat-card courses animate-in">
+    <div class="stat-title">
+        <i class="fas fa-book-open"></i>
+        <span>Total Study Materials</span>
+    </div>
+    <div class="stat-value"><?= $total_materials ?></div>
+    <i class="fas fa-folder-open stat-icon"></i>
+</div>
+
+<!-- Recent Uploads -->
+<div class="stat-card assignments animate-in">
+    <div class="stat-title">
+        <i class="fas fa-upload"></i>
+        <span>Recent Uploads (7 days)</span>
+    </div>
+    <div class="stat-value"><?= $recent_uploads ?></div>
+    <i class="fas fa-cloud-upload-alt stat-icon"></i>
+</div>
+
+<!-- Fee Status -->
+<div class="stat-card <?= ($fee_status === 'Paid') ? 'submitted' : 'pending' ?> animate-in">
+    <div class="stat-title">
+        <i class="fas fa-rupee-sign"></i>
+        <span>Fee Status (This Month)</span>
+    </div>
+    <div class="stat-value">
+        <?= ($fee_status === 'Paid') ? 'Paid' : 'Due' ?>
+    </div>
+    <i class="fas fa-wallet stat-icon"></i>
+</div>
 
 
     </main>
