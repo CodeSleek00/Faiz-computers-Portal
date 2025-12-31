@@ -440,10 +440,7 @@ if (!$student) {
                     </div>
 
                     <div class="actions">
-                        <a href="edit_profile.php" class="btn btn-primary">
-                            <i class="fas fa-edit"></i>
-                            Edit Profile
-                        </a>
+                       
                         <a href="../login-system/logout.php" class="btn btn-danger">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
