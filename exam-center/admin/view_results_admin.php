@@ -8,22 +8,28 @@ $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_asso
 /* ===================== FIXED RESULT QUERY ===================== */
 $results = $conn->query("
     SELECT 
-        s.score, s.submitted_at,
-        st.name, st.enrollment_id
+        s.score, 
+        s.submitted_at,
+        st.name AS student_name, 
+        st.enrollment_id AS enrollment_no
     FROM exam_submissions s
-    JOIN students st 
+    INNER JOIN students st 
         ON s.student_id = st.student_id
-    WHERE s.exam_id = $exam_id AND s.student_table = 'students'
+    WHERE s.exam_id = $exam_id 
+      AND s.student_table = 'students'
 
     UNION ALL
 
     SELECT 
-        s.score, s.submitted_at,
-        st26.name, st26.enrollment_id
+        s.score, 
+        s.submitted_at,
+        st26.name AS student_name, 
+        st26.enrollment_id AS enrollment_no
     FROM exam_submissions s
-    JOIN students26 st26 
+    INNER JOIN students26 st26 
         ON s.student_id = st26.id
-    WHERE s.exam_id = $exam_id AND s.student_table = 'students26'
+    WHERE s.exam_id = $exam_id 
+      AND s.student_table = 'students26'
 
     ORDER BY submitted_at DESC
 ");
@@ -129,8 +135,9 @@ tr:hover { background: #f9fafb; }
         ?>
             <tr>
                 <td><?= $i++ ?></td>
-                <td><?= htmlspecialchars($r['name']) ?></td>
-                <td><?= htmlspecialchars($r['enrollment_id']) ?></td>
+                <td><?= htmlspecialchars($r['student_name']) ?></td>
+<td><?= htmlspecialchars($r['enrollment_no']) ?></td>
+
                 <td class="score"><?= $r['score'] ?> / <?= $exam['total_questions'] ?></td>
                 <td><?= date('d M Y, h:i A', strtotime($r['submitted_at'])) ?></td>
             </tr>
