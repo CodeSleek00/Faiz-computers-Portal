@@ -194,50 +194,6 @@ if ($result->num_rows > 0) {
 } else {
     $feeStatus = 'Pending'; // no entry = not paid
 }
-/* =====================================================
-   FETCH ASSIGNED EXAMS (student + batch)
-===================================================== */
-
-$student_id    = $_SESSION['student_id'];
-$student_table = $_SESSION['student_table'];
-$batch_id      = $_SESSION['batch_id']; // agar batch system hai
-
-$stmt = $conn->prepare("
-    SELECT DISTINCT e.id, e.exam_name, e.duration
-    FROM exam_assignments ea
-    JOIN exams e ON e.id = ea.exam_id
-    WHERE e.status = 'Active'
-      AND ea.student_table = ?
-      AND (
-            ea.student_id = ?
-         OR ea.batch_id = ?
-      )
-    ORDER BY e.id DESC
-");
-
-$stmt->bind_param("sii", $student_table, $student_id, $batch_id);
-$stmt->execute();
-$exams = $stmt->get_result();
-function getExamStatus($conn, $exam_id, $student_id, $student_table) {
-
-    $stmt = $conn->prepare("
-        SELECT status
-        FROM exam_attempts
-        WHERE exam_id = ?
-          AND student_id = ?
-          AND student_table = ?
-        LIMIT 1
-    ");
-
-    $stmt->bind_param("iis", $exam_id, $student_id, $student_table);
-    $stmt->execute();
-    $res = $stmt->get_result();
-
-    return ($res->num_rows > 0)
-        ? $res->fetch_assoc()['status']
-        : 'Not Started';
-}
-
 
 ?>
 
@@ -1374,45 +1330,6 @@ function getExamStatus($conn, $exam_id, $student_id, $student_table) {
     <i class="fas fa-file-invoice stat-icon"></i>
 </div>
 
-<div class="stat-card exams animate-in">
-    <div class="stat-title">
-        <i class="fas fa-file-alt"></i>
-        <span>My Exams</span>
-    </div>
-
-    <?php if ($exams->num_rows > 0): ?>
-        <?php while ($exam = $exams->fetch_assoc()): 
-            $status = getExamStatus($conn, $exam['id'], $student_id, $student_table);
-        ?>
-            <div style="margin-top:12px; font-size:14px;">
-                <strong><?= htmlspecialchars($exam['exam_name']) ?></strong><br>
-                Duration: <?= $exam['duration'] ?> mins<br>
-
-                Status:
-                <?php if ($status === 'Completed'): ?>
-                    <span style="color:green;">Completed ✅</span>
-                <?php elseif ($status === 'Started'): ?>
-                    <span style="color:orange;">In Progress ⏳</span>
-                <?php else: ?>
-                    <span style="color:red;">Not Started ❌</span>
-                <?php endif; ?>
-
-                <?php if ($status === 'Not Started'): ?>
-                    <form action="exam/start_exam.php" method="POST" style="margin-top:6px;">
-                        <input type="hidden" name="exam_id" value="<?= $exam['id'] ?>">
-                        <button class="btn btn-primary btn-sm">
-                            Start Exam
-                        </button>
-                    </form>
-                <?php endif; ?>
-            </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <span style="color:#888;">No exams assigned</span>
-    <?php endif; ?>
-
-    <i class="fas fa-clipboard-check stat-icon"></i>
-</div>
 
     </main>
 
