@@ -49,13 +49,12 @@ $student_photo = $student['photo']; // 👈 photo ka path
 </head>
 <body>
 
-<div class="card">
-   <p>Welcome, <span class="name"><?= htmlspecialchars($student_name) ?></span></p>
-<img src="<?= htmlspecialchars($student_photo) ?>" 
-     alt="Student Photo" 
-     style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-top:10px;">
-
-</div>
+<div class="welcome-text">
+                <h2>Welcome back, <?= htmlspecialchars($student['name']) ?>!</h2>
+                <p>Ready to continue your learning journey?</p>
+            </div>
+            <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="user-profile-img">
+        </section>
 
 </body>
 </html>
