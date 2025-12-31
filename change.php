@@ -68,68 +68,6 @@ $stmt_exams->bind_param("sii", $student_table, $student_id, $batch_id);
 $stmt_exams->execute();
 $exams = $stmt_exams->get_result();
 
-$student_id = $_SESSION['student_id'];
-$table = $_SESSION['student_table'];
-
-// Fetch assigned exams and submission status
-$stmt = $conn->prepare("
-    SELECT ea.id as assign_id, e.exam_name, e.exam_date,
-           CASE 
-               WHEN er.submission_id IS NULL THEN 'Pending'
-               WHEN er.is_declared = 0 THEN 'Submitted (Not Declared)'
-               ELSE 'Declared'
-           END as status,
-           COALESCE(er.score, 0) as score
-    FROM exam_assignments ea
-    JOIN exams e ON e.exam_id = ea.exam_id
-    LEFT JOIN exam_results er 
-        ON er.exam_id = ea.exam_id 
-        AND er.student_id = ea.student_id
-        AND er.student_table = ea.student_table
-    WHERE ea.student_id = ? AND ea.student_table = ?
-    ORDER BY e.exam_date DESC
-");
-$stmt->bind_param("is", $student_id, $table);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$exam_status_list = [];
-while($row = $result->fetch_assoc()) {
-    $exam_status_list[] = $row;
-}
-$student_id = $_SESSION['student_id'];
-$table = $_SESSION['student_table'];
-
-// Fetch assigned exams and submission status
-$stmt = $conn->prepare("
-    SELECT ea.id as assign_id, e.exam_name, e.exam_date,
-           CASE 
-               WHEN es.submission_id IS NULL THEN 'Pending'
-               WHEN es.is_declared = 0 THEN 'Submitted (Not Declared)'
-               ELSE 'Declared'
-           END as status,
-           COALESCE(es.score, 0) as score
-    FROM exam_assignments ea
-    JOIN exams e ON e.exam_id = ea.exam_id
-    LEFT JOIN exam_submissions es 
-        ON es.exam_id = ea.exam_id 
-        AND es.student_id = ea.student_id
-        AND es.student_table = ea.student_table
-    WHERE ea.student_id = ? AND ea.student_table = ?
-    ORDER BY e.exam_date DESC
-");
-$stmt->bind_param("is", $student_id, $table);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$exam_status_list = [];
-while($row = $result->fetch_assoc()) {
-    $exam_status_list[] = $row;
-}
-
-?>
-
-
 ?>
 
 <!DOCTYPE html>
