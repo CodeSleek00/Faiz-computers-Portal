@@ -1416,10 +1416,7 @@ $total_materials = $total_materials ?? 0;
                 <p>Track your progress and manage your learning journey at Faiz Computer Institute</p>
             </div>
             <div class="header-right">
-                <div class="live-clock">
-                    <i class="fas fa-clock clock-icon"></i>
-                    <div class="clock-time" id="liveClock">--:--:--</div>
-                </div>
+              
                 <div class="date-display">
                     <i class="fas fa-calendar-alt"></i>
                     <span id="currentDate"><?= date('l, F j, Y') ?></span>
