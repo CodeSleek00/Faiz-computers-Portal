@@ -132,42 +132,27 @@ $present = $attendance['present_days'] ?? 0;
 $absent  = $attendance['absent_days'] ?? 0;
 $leave   = $attendance['leave_days'] ?? 0;
 /* =====================================================
-   8. STUDY MATERIAL STATS
+   8. STUDY MATERIAL STATS (NO material_targets)
 ===================================================== */
 
-// Total study materials available to student
+// TOTAL study materials
 $stmt = $conn->prepare("
-    SELECT COUNT(DISTINCT m.material_id) AS total_materials
-    FROM study_materials m
-    LEFT JOIN material_targets t ON m.material_id = t.material_id
-    WHERE 
-        t.student_id = ?
-        OR t.batch_id IN (
-            SELECT batch_id FROM student_batches WHERE student_id = ?
-        )
+    SELECT COUNT(*) AS total_materials
+    FROM study_materials
 ");
-$stmt->bind_param("ii", $student_id, $student_id);
 $stmt->execute();
-$materials = $stmt->get_result()->fetch_assoc();
+$total_materials = $stmt->get_result()->fetch_assoc()['total_materials'] ?? 0;
 
-// Recently uploaded (last 7 days)
+
+// RECENT uploads (last 7 days)
 $stmt = $conn->prepare("
-    SELECT COUNT(DISTINCT m.material_id) AS recent_materials
-    FROM study_materials m
-    LEFT JOIN material_targets t ON m.material_id = t.material_id
-    WHERE 
-        (t.student_id = ?
-        OR t.batch_id IN (
-            SELECT batch_id FROM student_batches WHERE student_id = ?
-        ))
-        AND m.created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    SELECT COUNT(*) AS recent_materials
+    FROM study_materials
+    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
 ");
-$stmt->bind_param("ii", $student_id, $student_id);
 $stmt->execute();
-$recent_materials = $stmt->get_result()->fetch_assoc();
+$recent_uploads = $stmt->get_result()->fetch_assoc()['recent_materials'] ?? 0;
 
-$total_materials  = $materials['total_materials'] ?? 0;
-$recent_uploads   = $recent_materials['recent_materials'] ?? 0;
 /* =====================================================
    9. FEE STATUS (CURRENT MONTH)
 ===================================================== */
