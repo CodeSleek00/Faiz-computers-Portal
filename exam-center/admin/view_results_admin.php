@@ -1,11 +1,12 @@
 <?php
 include '../../database_connection/db_connect.php';
 
-$exam_id = $_GET['exam_id'];
+$exam_id = $_GET['exam_id'] ?? 0;
 
+// Fetch exam details
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();
 
-/* ===================== FIXED RESULT QUERY ===================== */
+// Fetch results from both student tables
 $results = $conn->query("
     SELECT 
         s.score, 
@@ -33,7 +34,6 @@ $results = $conn->query("
 
     ORDER BY submitted_at DESC
 ");
-
 ?>
 
 <!DOCTYPE html>
@@ -43,7 +43,6 @@ $results = $conn->query("
 <title>Exam Results</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
 * { box-sizing: border-box; }
 body {
@@ -105,15 +104,14 @@ tr:hover { background: #f9fafb; }
 }
 </style>
 </head>
-
 <body>
 <div class="container">
 
     <div class="header">
         <h2>🧾 Exam Results</h2>
         <div class="exam-meta">
-            <strong><?= htmlspecialchars($exam['exam_name']) ?></strong><br>
-            Total Questions: <?= $exam['total_questions'] ?>
+            <strong><?= htmlspecialchars($exam['exam_name'] ?? 'N/A') ?></strong><br>
+            Total Questions: <?= $exam['total_questions'] ?? '0' ?>
         </div>
     </div>
 
@@ -129,16 +127,15 @@ tr:hover { background: #f9fafb; }
         </thead>
         <tbody>
         <?php
-        if ($results->num_rows > 0) {
+        if ($results && $results->num_rows > 0) {
             $i = 1;
             while ($r = $results->fetch_assoc()) {
         ?>
             <tr>
                 <td><?= $i++ ?></td>
                 <td><?= htmlspecialchars($r['student_name']) ?></td>
-<td><?= htmlspecialchars($r['enrollment_no']) ?></td>
-
-                <td class="score"><?= $r['score'] ?> / <?= $exam['total_questions'] ?></td>
+                <td><?= htmlspecialchars($r['enrollment_no']) ?></td>
+                <td class="score"><?= $r['score'] ?> / <?= $exam['total_questions'] ?? '0' ?></td>
                 <td><?= date('d M Y, h:i A', strtotime($r['submitted_at'])) ?></td>
             </tr>
         <?php } } else { ?>
@@ -150,7 +147,7 @@ tr:hover { background: #f9fafb; }
     </table>
 
     <div class="footer">
-        Generated on <?= date('d M Y ') ?>
+        Generated on <?= date('d M Y') ?>
     </div>
 
 </div>
