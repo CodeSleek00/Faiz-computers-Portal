@@ -27,13 +27,6 @@ $student_id   = $student['student_id'];
 $student_name = $student['name'];
 
 /* ================= FETCH STUDY MATERIALS ================= */
-
-/*
-IMPORTANT:
-study_material_targets table should have a student_table column (ENUM: 'students','students26')
-student_batches table should have student_table column (ENUM: 'students','students26')
-*/
-
 $query = "
     SELECT DISTINCT m.*
     FROM study_materials m
@@ -53,135 +46,477 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param("isis", $student_id, $studentTable, $student_id, $studentTable);
 $stmt->execute();
 $data = $stmt->get_result();
+
+// Count materials by type
+$total_materials = $data->num_rows;
+$data->data_seek(0); // Reset pointer
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Study Materials</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Materials | Student Dashboard</title>
     <link rel="icon" type="image/png" href="image.png">
     <link rel="apple-touch-icon" href="image.png">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4f46e5;
-            --light-bg: #f4f6fa;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --gray: #6c757d;
-            --radius: 10px;
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --light-gray: #f3f4f6;
+            --border: #e5e7eb;
+            --white: #ffffff;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        * { box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.5;
+            padding: 16px;
+            min-height: 100vh;
         }
 
-        .container { max-width: 900px; margin: auto; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
+        /* Header */
         .header {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            margin-bottom: 24px;
         }
 
-        .header a.back-btn {
-            text-decoration: none;
-            color: var(--primary);
-            font-size: 15px;
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .header h2 { margin: 0; font-size: 22px; }
-
-        .material {
-            background: var(--card-bg);
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: var(--radius);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .material-title { font-weight: 600; font-size: 18px; }
-
-        .download {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background-color: var(--primary);
-            color: white;
-            padding: 10px 16px;
-            border-radius: var(--radius);
+            padding: 8px 14px;
+            background: var(--white);
+            color: var(--primary);
             text-decoration: none;
+            border-radius: var(--radius);
+            font-size: 13px;
             font-weight: 500;
-            font-size: 14px;
-            width: fit-content;
-            transition: background 0.3s;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
         }
 
-        .download:hover { background-color: #3f3bd9; }
+        .back-btn:hover {
+            background: var(--light-gray);
+            border-color: var(--primary);
+        }
 
-        .no-data {
-            text-align: center;
-            padding: 60px 20px;
-            background: var(--card-bg);
+        .welcome-section h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .welcome-section p {
+            color: var(--gray);
+            font-size: 13px;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 16px;
             border-radius: var(--radius);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--white);
+            background: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .stat-icon.recent { background: var(--success); }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 12px;
             color: var(--gray);
         }
 
+        /* Materials Section */
+        .materials-section {
+            background: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header h2 i {
+            color: var(--primary);
+        }
+
+        .materials-count {
+            font-size: 12px;
+            color: var(--gray);
+            background: var(--light-gray);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .materials-list {
+            padding: 20px;
+        }
+
+        .material-item {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .material-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .material-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .material-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            flex: 1;
+        }
+
+        .material-meta {
+            font-size: 11px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 12px;
+            white-space: nowrap;
+        }
+
+        .material-body {
+            margin-bottom: 16px;
+        }
+
+        .material-desc {
+            color: var(--gray);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .material-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .file-info i {
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            font-size: 12px;
+        }
+
+        /* No Materials */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            color: var(--border);
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--gray);
+            font-size: 13px;
+            margin-bottom: 20px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .header { text-align: center; align-items: center; }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .material-header {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+            
+            .material-meta {
+                margin-left: 0;
+            }
+            
+            .material-actions {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            
+            .file-info {
+                justify-content: center;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .empty-state {
+                padding: 30px 16px;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-
-    <!-- Header -->
-    <div class="header">
-        <a href="../test.php" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
-        <h2>Hi, <?= htmlspecialchars($student_name) ?> 👋</h2>
-        <p style="color: var(--gray); font-size: 14px;">Here are your assigned study materials:</p>
-    </div>
-
-    <!-- Materials -->
-    <?php if ($data->num_rows > 0): ?>
-        <?php while ($row = $data->fetch_assoc()): ?>
-            <div class="material">
-                <div class="material-title">📘 <?= htmlspecialchars($row['title']) ?></div>
-                <a class="download" href="download.php?file=<?= urlencode($row['file_name']) ?>">
-                    <i class="fas fa-download"></i> Download PDF
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <a href="../test.php" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
                 </a>
             </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <div class="no-data">
-            <i class="fas fa-folder-open" style="font-size: 40px; margin-bottom: 10px;"></i>
-            <h3>No Study Materials Found</h3>
-            <p>You haven't been assigned any study material yet.</p>
+            <div class="welcome-section">
+                <h1>Hi, <?= htmlspecialchars($student_name) ?></h1>
+                <p>Enrollment ID: <?= $enrollment ?> • Access your study materials</p>
+            </div>
         </div>
-    <?php endif; ?>
 
-</div>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number"><?= $total_materials ?></div>
+                    <div class="stat-label">Total Materials</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon recent">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">Latest</div>
+                    <div class="stat-label">Recently Added</div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Materials Section -->
+        <div class="materials-section">
+            <div class="section-header">
+                <h2><i class="fas fa-file-alt"></i> Study Materials</h2>
+                <div class="materials-count"><?= $total_materials ?> materials</div>
+            </div>
+
+            <div class="materials-list">
+                <?php if ($data->num_rows > 0): ?>
+                    <?php 
+                    $counter = 0;
+                    while ($row = $data->fetch_assoc()): 
+                        $counter++;
+                        $upload_date = date('M d, Y', strtotime($row['uploaded_at']));
+                        $file_size = !empty($row['file_size']) ? formatFileSize($row['file_size']) : 'N/A';
+                    ?>
+                        <div class="material-item">
+                            <div class="material-header">
+                                <div class="material-title">
+                                    <?= htmlspecialchars($row['title']) ?>
+                                </div>
+                                <div class="material-meta">
+                                    <i class="far fa-calendar"></i>
+                                    <?= $upload_date ?>
+                                </div>
+                            </div>
+
+                            <div class="material-body">
+                                <?php if (!empty($row['description'])): ?>
+                                    <div class="material-desc">
+                                        <?= nl2br(htmlspecialchars(substr($row['description'], 0, 200))) ?>
+                                        <?= strlen($row['description']) > 200 ? '...' : '' ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="material-actions">
+                                    <div class="file-info">
+                                        <i class="fas fa-file-pdf"></i>
+                                        <span>PDF • <?= $file_size ?></span>
+                                    </div>
+                                    <a href="download.php?file=<?= urlencode($row['file_name']) ?>" class="btn">
+                                        <i class="fas fa-download"></i>
+                                        Download
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No Study Materials</h3>
+                        <p>You haven't been assigned any study material yet.</p>
+                        <a href="../test.php" class="btn" style="width: auto; max-width: 200px;">
+                            <i class="fas fa-home"></i>
+                            Return to Dashboard
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <?php
+    // Function to format file size
+    function formatFileSize($bytes) {
+        if ($bytes == 0) return '0 Bytes';
+        $k = 1024;
+        $sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        $i = floor(log($bytes) / log($k));
+        return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    }
+    ?>
 </body>
 </html>
