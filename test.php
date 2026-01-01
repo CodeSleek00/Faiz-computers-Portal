@@ -108,13 +108,7 @@ $stmt->execute();
 $assignments = $stmt->get_result();
 
 /* =====================================================
-   6. FALLBACK SAFETY (ZERO VALUES)
-===================================================== */
-$course_stats['total_courses']          = $course_stats['total_courses'] ?? 0;
-$assignment_stats['total_assignments']  = $assignment_stats['total_assignments'] ?? 0;
-$assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assignments'] ?? 0;
-/* =====================================================
-   7. ATTENDANCE STATS
+   6. ATTENDANCE STATS
 ===================================================== */
 $stmt = $conn->prepare("
     SELECT 
@@ -131,26 +125,20 @@ $attendance = $stmt->get_result()->fetch_assoc();
 $present = $attendance['present_days'] ?? 0;
 $absent  = $attendance['absent_days'] ?? 0;
 $leave   = $attendance['leave_days'] ?? 0;
+
 /* =====================================================
-   STUDY MATERIALS (LAST 5 ASSIGNED TO STUDENT)
+   7. STUDY MATERIALS (LAST 5 ASSIGNED TO STUDENT)
 ===================================================== */
-
-$student_id    = $_SESSION['student_id'];
-$student_table = $_SESSION['student_table'];
-
-// TOTAL assigned materials count
 $stmt = $conn->prepare("
     SELECT COUNT(*) AS total_materials
     FROM study_material_targets
     WHERE student_id = ?
       AND student_table = ?
 ");
-$stmt->bind_param("is", $student_id, $student_table);
+$stmt->bind_param("is", $student_id, $table);
 $stmt->execute();
 $total_materials = $stmt->get_result()->fetch_assoc()['total_materials'] ?? 0;
 
-
-// LAST 5 assigned materials
 $stmt = $conn->prepare("
     SELECT sm.title
     FROM study_material_targets smt
@@ -160,78 +148,120 @@ $stmt = $conn->prepare("
     ORDER BY smt.id DESC
     LIMIT 5
 ");
-$stmt->bind_param("is", $student_id, $student_table);
+$stmt->bind_param("is", $student_id, $table);
 $stmt->execute();
 $last_materials = $stmt->get_result();
+
 /* =====================================================
-   AUTO MONTH DETECT → CHECK FEE STATUS
+   8. FEE STATUS
 ===================================================== */
+$currentMonthNo   = (int) date('n');
+$currentMonthName = date('F');
 
-$enrollment_id = $_SESSION['enrollment_id'];
-
-// Step 1: current month
-$currentMonthNo   = (int) date('n');   // 1–12
-$currentMonthName = date('F');         // January, February...
-
-// Step 2: check fee for this month
 $stmt = $conn->prepare("
-    SELECT payment_status
+    SELECT payment_status, fee_amount
     FROM student_monthly_fee
     WHERE enrollment_id = ?
       AND fee_type = 'Monthly'
       AND month_no = ?
     LIMIT 1
 ");
-
 $stmt->bind_param("si", $enrollment_id, $currentMonthNo);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Step 3: decide status
 if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $feeStatus = $row['payment_status']; // Paid / Pending
+    $fee = $result->fetch_assoc();
+    $feeStatus = $fee['payment_status'];
+    $feeAmount = $fee['fee_amount'] ?? 0;
 } else {
-    $feeStatus = 'Pending'; // no entry = not paid
+    $feeStatus = 'Pending';
+    $feeAmount = 0;
 }
 
+/* =====================================================
+   9. EXAM PERFORMANCE
+===================================================== */
+$result = $conn->query("
+    SELECT 
+        e.exam_name,
+        s.score,
+        (e.total_questions * e.marks_per_question) AS total_marks
+    FROM exam_submissions s
+    JOIN exams e ON e.exam_id = s.exam_id
+    WHERE s.student_id = $student_id
+      AND s.student_table = '$table'
+      AND e.result_declared = 1
+    ORDER BY s.submitted_at ASC
+    LIMIT 6
+");
+
+$labels = [];
+$scores = [];
+
+while ($r = $result->fetch_assoc()) {
+    $labels[] = substr($r['exam_name'], 0, 15) . (strlen($r['exam_name']) > 15 ? '...' : '');
+    $scores[] = round(($r['score'] / $r['total_marks']) * 100);
+}
+
+/* =====================================================
+   10. ASSIGNED EXAMS
+===================================================== */
+$stmt = $conn->prepare("
+    SELECT e.exam_id, e.exam_name, e.duration
+    FROM exam_assignments ea
+    JOIN exams e ON e.exam_id = ea.exam_id
+    WHERE ea.student_id = ? AND ea.student_table = ?
+    ORDER BY e.exam_id DESC
+    LIMIT 3
+");
+$stmt->bind_param("is", $student_id, $table);
+$stmt->execute();
+$exams = $stmt->get_result();
+
+/* =====================================================
+   FALLBACK SAFETY (ZERO VALUES)
+===================================================== */
+$course_stats['total_courses']          = $course_stats['total_courses'] ?? 0;
+$assignment_stats['total_assignments']  = $assignment_stats['total_assignments'] ?? 0;
+$assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assignments'] ?? 0;
+$total_materials = $total_materials ?? 0;
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/png" href="image.png">
-  <link rel="apple-touch-icon" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
     <title>Dashboard | Faiz Computer Institute</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-light: #4cc9f0;
-            --primary-dark: #3a56d4;
-            --secondary: #7209b7;
-            --accent: #f72585;
-            --success: #4cc9f0;
-            --warning: #f8961e;
-            --danger: #ef233c;
-            --dark: #1a1a2e;
-            --dark-gray: #495057;
-            --medium-gray: #6c757d;
-            --light-gray: #e9ecef;
-            --light: #f8f9fa;
-            --white: #ffffff;
-            --sidebar-width: 280px;
-            --navbar-height: 70px;
-            --footer-height: 70px;
+            --primary-blue: #007AFF;
+            --primary-blue-light: #409CFF;
+            --primary-blue-dark: #0056CC;
+            --accent-blue: #5AC8FA;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --dark: #1D1D1F;
+            --dark-gray: #8E8E93;
+            --medium-gray: #C7C7CC;
+            --light-gray: #F2F2F7;
+            --card-gray: #F5F5F7;
+            --white: #FFFFFF;
+            --sidebar-bg: #FFFFFF;
+            --sidebar-width: 260px;
+            --card-radius: 14px;
+            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --border-radius: 12px;
-            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --box-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.2);
         }
 
         * {
@@ -239,898 +269,1119 @@ if ($result->num_rows > 0) {
             padding: 0;
             box-sizing: border-box;
         }
-        /* ================= ATTENDANCE PIE ================= */
-.attendance-section {
-    max-width: 350px;
-    margin-bottom: 2rem;
-}
-
-.attendance-card {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    box-shadow: var(--box-shadow);
-    text-align: center;
-}
-
-.attendance-legend {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: var(--dark-gray);
-}
-
-.attendance-legend span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-.dot.present { background: #4cc9f0; }
-.dot.absent  { background: #ef233c; }
-.dot.leave   { background: #f8961e; }
-
-@media (max-width: 768px) {
-    .attendance-section {
-        max-width: 100%;
-    }
-}
-
 
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f9fbfd;
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #f2f2f7 100%);
             color: var(--dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-            padding-bottom: var(--footer-height);
-            height:100%
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 600;
-            line-height: 1.3;
-            margin-bottom: 0.75rem;
-        }
-/* ================= ANALOG CLOCK ================= */
-.clock-section {
-    max-width: 260px;
-    margin-bottom: 2rem;
-}
-
-.analog-clock {
-    width: 240px;
-    height: 240px;
-    background: white;
-    border-radius: 50%;
-    position: relative;
-    box-shadow: var(--box-shadow);
-    border: 6px solid var(--primary);
-    margin: auto;
-}
-
-.clock-center {
-    width: 12px;
-    height: 12px;
-    background: var(--primary);
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-}
-
-.hand {
-    position: absolute;
-    bottom: 50%;
-    left: 50%;
-    transform-origin: bottom;
-    transform: translateX(-50%);
-    border-radius: 6px;
-}
-
-.hand.hour {
-    width: 6px;
-    height: 60px;
-    background: var(--dark);
-}
-
-.hand.minute {
-    width: 4px;
-    height: 80px;
-    background: var(--primary);
-}
-
-.hand.second {
-    width: 2px;
-    height: 95px;
-    background: var(--accent);
-}
-
-.number {
-    position: absolute;
-    font-weight: 600;
-    color: var(--dark-gray);
-}
-
-.n12 { top: 10px; left: 50%; transform: translateX(-50%); }
-.n3  { right: 15px; top: 50%; transform: translateY(-50%); }
-.n6  { bottom: 10px; left: 50%; transform: translateX(-50%); }
-.n9  { left: 15px; top: 50%; transform: translateY(-50%); }
-
-@media (max-width: 768px) {
-    .clock-section {
-        max-width: 100%;
-        display: flex;
-        justify-content: center;
-    }
-}
-
-        h1 { font-size: 2.5rem; }
-        h2 { font-size: 2rem; }
-        h3 { font-size: 1.75rem; }
-        h4 { font-size: 1.5rem; }
-        p { margin-bottom: 1rem; }
-
-        /* Layout */
-        .app-container {
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             display: flex;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Navbar */
-        .navbar {
+        /* Sidebar Navigation - Enhanced */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid var(--glass-border);
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            height: var(--navbar-height);
-            background-color: var(--white);
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
+            bottom: 0;
             z-index: 1000;
-            transition: var(--transition);
+            overflow-y: auto;
+            padding: 20px 0;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .navbar.scrolled {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .navbar-left {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 1.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        .navbar-brand span {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .navbar-toggler {
-            background: none;
-            border: none;
-            color: var(--medium-gray);
-            font-size: 1.4rem;
-            cursor: pointer;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .navbar-toggler:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
+        .sidebar-header {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 16px;
         }
 
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
+            gap: 12px;
         }
 
-        .user-info {
-            text-align: right;
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--white);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
         }
 
-        .user-name {
+        .profile-info h3 {
+            font-size: 15px;
             font-weight: 600;
-            font-size: 0.95rem;
+            margin-bottom: 2px;
             color: var(--dark);
         }
 
-        .user-role {
-            font-size: 0.8rem;
-            color: var(--medium-gray);
+        .profile-info p {
+            color: var(--dark-gray);
+            font-size: 12px;
+            font-weight: 400;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
-            transition: var(--transition);
+        .sidebar-section {
+            padding: 8px 0;
+            margin-bottom: 12px;
         }
 
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: var(--navbar-height);
-            left: 0;
-            width: var(--sidebar-width);
-            height: calc(100vh - var(--navbar-height));
-            background-color: var(--white);
-            transition: var(--transition);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--light-gray);
-            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
-            transform: translateX(-100%);
-        }
-
-        .sidebar.active {
-            transform: translateX(0);
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--light-gray);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(76, 201, 240, 0.1));
-        }
-
-        .sidebar-user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--white);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-user-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-            color: var(--dark);
-        }
-
-        .sidebar-user-info p {
-            font-size: 0.85rem;
-            color: var(--medium-gray);
-            margin-bottom: 0;
-        }
-
-        .sidebar-menu {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem 0;
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 20px;
+            margin-bottom: 8px;
+            display: block;
         }
 
         .nav-item {
-            margin-bottom: 0.25rem;
-        }
-
-        .nav-link {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.9rem 1.5rem;
+            gap: 12px;
+            padding: 12px 20px;
             color: var(--dark-gray);
             text-decoration: none;
+            font-size: 13px;
             font-weight: 500;
-            font-size: 0.95rem;
+            border-radius: 12px;
+            margin: 0 12px 4px;
             transition: var(--transition);
             position: relative;
+            background: transparent;
         }
 
-        .nav-link:hover,
-        .nav-link.active {
-            background-color: rgba(67, 97, 238, 0.05);
-            color: var(--primary);
+        .nav-item:hover {
+            background: rgba(0, 122, 255, 0.08);
+            color: var(--primary-blue);
+            transform: translateX(4px);
         }
 
-        .nav-link.active {
-            border-left: 4px solid var(--primary);
+        .nav-item.active {
+            background: rgba(0, 122, 255, 0.12);
+            color: var(--primary-blue);
+            font-weight: 600;
+            box-shadow: inset 2px 0 0 var(--primary-blue);
         }
 
-        .nav-link i {
+        .nav-icon {
             width: 20px;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 14px;
             color: inherit;
         }
 
+        .nav-badge {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary-blue);
+            font-weight: 600;
+            min-width: 24px;
+            text-align: center;
+        }
+
         .sidebar-footer {
-            padding: 1rem 1rem;
-            border-top: 1px solid var(--light-gray);
+            padding: 20px;
+            margin-top: auto;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .logout-btn {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            background: none;
-            border: none;
-            color: var(--medium-gray);
-            font-weight: 500;
-            font-size: 0.95rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
+            gap: 10px;
             width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 59, 48, 0.08);
+            color: var(--danger);
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
         }
 
         .logout-btn:hover {
-            color: var(--danger);
-            background-color: rgba(239, 35, 60, 0.05);
+            background: rgba(255, 59, 48, 0.15);
+            transform: translateY(-2px);
         }
 
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-            backdrop-filter: blur(3px);
-        }
-
-        .overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Main Content */
+        /* Main Content - Enhanced */
         .main-content {
-            padding: calc(var(--navbar-height) + 2rem) 2rem 2rem;
-            transition: var(--transition);
-            width: 100%;
-            min-height: calc(100vh - var(--navbar-height) - var(--footer-height));
-            margin-left: 0;
-        }
-
-        .sidebar.active + .main-content {
+            flex: 1;
             margin-left: var(--sidebar-width);
+            padding: 24px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Welcome Section */
-        .welcome-section {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
+        /* Dashboard Header - Enhanced */
+        .dashboard-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--box-shadow);
+            border: 1px solid var(--glass-border);
         }
 
-        .welcome-text h2 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+        .welcome-section h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--dark);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .welcome-text p {
-            opacity: 0.9;
-            margin-bottom: 0;
+        .welcome-section p {
+            color: var(--dark-gray);
+            font-size: 14px;
+            font-weight: 400;
+            max-width: 500px;
         }
 
-        .user-profile-img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        /* Stats Grid */
+        /* Live Clock - New */
+        .live-clock {
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(0, 122, 255, 0.2);
+        }
+
+        .clock-icon {
+            color: var(--primary-blue);
+            font-size: 14px;
+        }
+
+        .clock-time {
+            font-family: 'SF Pro Display', monospace;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        .date-display {
+            font-size: 14px;
+            color: var(--dark-gray);
+            background: rgba(0, 0, 0, 0.03);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Stats Grid - Enhanced for Mobile */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
         }
 
         .stat-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--box-shadow);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
             transition: var(--transition);
-            border-left: 4px solid var(--primary);
-            display: flex;
-            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-6px);
+            box-shadow: var(--card-shadow-hover);
         }
 
-        .stat-card.courses {
-            border-left-color: #7209b7;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-blue), var(--accent-blue));
+            border-radius: 4px 0 0 4px;
         }
 
-        .stat-card.assignments {
-            border-left-color: #f8961e;
-        }
-
-        .stat-card.submitted {
-            border-left-color: #4cc9f0;
-        }
-
-        .stat-card.pending {
-            border-left-color: #f72585;
-        }
-
-        .stat-title {
-            font-size: 0.9rem;
-            color: var(--medium-gray);
-            margin-bottom: 0.5rem;
+        .stat-content {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
         }
 
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+        .stat-text h3 {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .stat-card.courses .stat-value {
-            color: #7209b7;
-        }
-
-        .stat-card.assignments .stat-value {
-            color: #f8961e;
-        }
-
-        .stat-card.submitted .stat-value {
-            color: #4cc9f0;
-        }
-
-        .stat-card.pending .stat-value {
-            color: #f72585;
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark);
+            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .stat-icon {
-            font-size: 1.5rem;
-            margin-left: auto;
-            opacity: 0.8;
+            font-size: 32px;
+            color: var(--primary-blue);
+            opacity: 0.9;
         }
 
-        /* Assignments Section */
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+        /* Content Grid - Enhanced */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        /* Cards - Enhanced */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
             color: var(--dark);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 10px;
         }
 
-        .section-title i {
-            color: var(--primary);
+        .card-title i {
+            color: var(--primary-blue);
+            font-size: 16px;
         }
 
-        .assignments-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .assignment-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--box-shadow);
-            transition: var(--transition);
-            border-top: 4px solid var(--primary);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .assignment-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow-hover);
-        }
-
-        .assignment-title {
-            font-size: 1.2rem;
+        .view-all {
+            color: var(--primary-blue);
+            text-decoration: none;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            font-size: 13px;
+            transition: var(--transition);
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(0, 122, 255, 0.08);
+        }
+
+        .view-all:hover {
+            background: rgba(0, 122, 255, 0.12);
+            transform: translateX(2px);
+        }
+
+        /* Assignment List - Enhanced */
+        .assignment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .assignment-item:hover {
+            background: rgba(0, 122, 255, 0.04);
+            border-color: rgba(0, 122, 255, 0.1);
+            transform: translateX(4px);
+        }
+
+        .assignment-info h4 {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
             color: var(--dark);
         }
 
-        .assignment-details {
-            font-size: 0.9rem;
-            color: var(--medium-gray);
-            margin-bottom: 1rem;
-            flex-grow: 1;
-        }
-
-        .assignment-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--medium-gray);
-            margin-bottom: 1rem;
+        .assignment-info p {
+            color: var(--dark-gray);
+            font-size: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .assignment-status {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .status-submitted {
-            background-color: rgba(76, 201, 240, 0.1);
-            color: #4cc9f0;
+            background: rgba(52, 199, 89, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(52, 199, 89, 0.3);
         }
 
         .status-pending {
-            background-color: rgba(239, 35, 60, 0.1);
-            color: #ef233c;
+            background: rgba(255, 59, 48, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(255, 59, 48, 0.3);
         }
 
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: var(--border-radius);
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
+        /* Materials List */
+        .material-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             transition: var(--transition);
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
+        .material-item:hover {
+            transform: translateX(4px);
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        .material-item:last-child {
+            border-bottom: none;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-
-        .btn-outline:hover {
-            background: rgba(67, 97, 238, 0.1);
-        }
-
-        /* Calendar Widget */
-        .calendar-widget {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--box-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .calendar-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .calendar-nav {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .calendar-nav-btn {
-            background: none;
-            border: none;
-            color: var(--medium-gray);
-            cursor: pointer;
-            font-size: 1rem;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+        .material-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(90, 200, 250, 0.1) 100%);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--primary-blue);
+            font-size: 14px;
+            border: 1px solid rgba(0, 122, 255, 0.1);
+        }
+
+        .material-info h4 {
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 2px;
+            color: var(--dark);
+        }
+
+        /* Exam List */
+        .exam-item {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
             transition: var(--transition);
+            border: 1px solid transparent;
         }
 
-        .calendar-nav-btn:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-            color: var(--primary);
+        .exam-item:hover {
+            background: rgba(0, 122, 255, 0.04);
+            border-color: rgba(0, 122, 255, 0.1);
+            transform: translateY(-2px);
         }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
-        .calendar-day-header {
-            font-size: 0.8rem;
+        .exam-name {
             font-weight: 600;
-            color: var(--medium-gray);
-            text-align: center;
-            padding: 0.5rem 0;
+            font-size: 14px;
+            color: var(--dark);
         }
 
-        .calendar-day {
-            text-align: center;
-            padding: 0.5rem;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.9rem;
+        .exam-duration {
+            color: var(--dark-gray);
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
-        .calendar-day:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-        }
-
-        .calendar-day.today {
-            background-color: var(--primary);
+        .exam-action {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
             color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+
+        .exam-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 180px;
+            margin-top: 16px;
+        }
+
+        /* Fee Status */
+        .fee-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .fee-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--dark);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .fee-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-paid {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--success);
+            border: 2px solid rgba(52, 199, 89, 0.3);
+        }
+
+        .badge-pending {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--danger);
+            border: 2px solid rgba(255, 59, 48, 0.3);
+        }
+
+        /* Attendance */
+        .attendance-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .attendance-stat {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .attendance-stat:hover {
+            border-color: rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+        }
+
+        .attendance-number {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .attendance-label {
+            color: var(--dark-gray);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 122, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.2);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.15);
+        }
+
+        .action-btn i {
+            font-size: 24px;
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+        }
+
+        .action-btn span {
+            font-size: 13px;
             font-weight: 600;
         }
 
-        .calendar-day.other-month {
-            color: var(--light-gray);
-        }
-
-        /* Mobile Footer */
-        .mobile-footer {
+        /* Mobile Navigation - Enhanced */
+        .mobile-nav {
+            display: none;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: var(--footer-height);
-            background-color: var(--white);
-            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.1);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 20px;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            border-top: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+        }
+
+        .nav-items {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 990;
         }
 
-        .footer-item {
+        .nav-item-mobile {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             text-decoration: none;
-            color: var(--medium-gray);
-            font-size: 0.8rem;
-            padding: 0.5rem;
-            flex: 1;
+            color: var(--dark-gray);
+            font-size: 11px;
             transition: var(--transition);
-            position: relative;
+            padding: 10px 12px;
+            border-radius: 16px;
+            min-width: 64px;
+            background: transparent;
         }
 
-        .footer-item.active {
-            color: var(--primary);
+        .nav-item-mobile.active {
+            color: var(--primary-blue);
+            background: rgba(0, 122, 255, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
         }
 
-        .footer-item i {
-            font-size: 1.4rem;
-            margin-bottom: 0.25rem;
+        .nav-item-mobile i {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item-mobile span {
+            font-weight: 500;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--dark);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
             transition: var(--transition);
+            z-index: 1001;
         }
 
-        .footer-item.active i {
-            transform: translateY(-5px);
+        .menu-toggle:hover {
+            background: rgba(0, 122, 255, 0.1);
+            transform: rotate(90deg);
         }
 
-        .footer-item::after {
-            content: '';
-            position: absolute;
+        /* Overlay for mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            transition: var(--transition);
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .footer-item.active::after {
-            width: 60%;
+        .overlay.active {
+            display: block;
+            opacity: 1;
         }
 
-        @media (min-width: 991px) {
-            .mobile-footer {
-                display:none;
+        /* Responsive Design - Fucking Amazing */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-grid {
+                gap: 24px;
             }
         }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
             
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-bottom: 90px;
+                padding-top: 20px;
+            }
+            
+            .mobile-nav {
+                display: block;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1002;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+                padding: 20px;
+                margin-top: 60px;
+            }
+            
+            .header-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .live-clock {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .date-display {
+                width: 100%;
+                justify-content: center;
+            }
+        }
 
         @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+                padding-bottom: 90px;
+            }
+            
             .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .assignments-grid {
                 grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 24px;
             }
             
-            .welcome-text h2 {
-                font-size: 1.5rem;
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 22px;
+            }
+            
+            .welcome-section p {
+                font-size: 13px;
+            }
+            
+            .stat-number {
+                font-size: 28px;
+            }
+            
+            .attendance-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .assignment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .assignment-status {
+                align-self: flex-end;
             }
         }
 
         @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .mobile-nav {
+                padding: 0px 16px;
             }
             
-            .navbar {
-                padding: 0 1rem;
+            .nav-item-mobile {
+                min-width: 56px;
+                padding: 8px;
+                font-size: 10px;
+            }
+            
+            .nav-item-mobile i {
+                font-size: 16px;
+            }
+            
+            .dashboard-header {
+                padding: 16px;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .stat-card {
+                padding: 16px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+            }
+            
+            .attendance-stat {
+                padding: 16px;
+            }
+            
+            .attendance-number {
+                font-size: 24px;
+            }
+            
+            .action-btn {
+                padding: 20px 12px;
+            }
+            
+            .action-btn i {
+                font-size: 20px;
+            }
+            
+            .chart-container {
+                height: 160px;
             }
         }
 
+        @media (max-width: 360px) {
+            .mobile-nav {
+                border-radius: 20px 20px 0 0;
+            }
+            
+            .nav-items {
+                gap: 4px;
+            }
+            
+            .nav-item-mobile {
+                min-width: 48px;
+                padding: 6px;
+                font-size: 9px;
+            }
+            
+            .nav-item-mobile i {
+                font-size: 14px;
+            }
+            
+            .stat-card::before {
+                width: 3px;
+            }
+        }
+
+        /* iPhone Notch Support */
+       
         /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .animate-in {
-            animation: fadeIn 0.6s ease-out forwards;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue-dark);
+        }
+
+        /* Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Focus States for Accessibility */
+        *:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        *:focus:not(:focus-visible) {
+            outline: none;
+        }
     </style>
 </head>
 <body>
-    <!-- Overlay -->
-    <div class="overlay" id="overlay"></div>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="user-profile">
+                <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="profile-avatar float-animation">
+                <div class="profile-info">
+                    <h3><?= htmlspecialchars($student['name']) ?></h3>
+                    <p><?= $student['enrollment_id'] ?></p>
+                </div>
+            </div>
+        </div>
 
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
-        <div class="navbar-left">
-            <button class="navbar-toggler" id="navbarToggler">
-                <i class="fas fa-bars"></i>
-            </button>
-            <a href="#" class="navbar-brand">
-                <span>Faiz Computer Institute</span>
+        <!-- Dashboard Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Dashboard</span>
+            <a href="test.php" class="nav-item active">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                <span>Overview</span>
+                <span class="nav-badge pulse-animation">Live</span>
             </a>
         </div>
-        
-    </nav>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <img src="uploads/<?= $student['photo'] ?>" alt="User" class="sidebar-user-avatar">
-            <div class="sidebar-user-info">
-                <h4><?= htmlspecialchars($student['name']) ?></h4>
-                <p><?= $student['enrollment_id'] ?></p>
-            </div>
+        <!-- Academics Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Academics</span>
+            <a href="assignment/student_dashboard.php" class="nav-item">
+                <i class="fas fa-tasks nav-icon"></i>
+                <span>Assignments</span>
+                <span class="nav-badge"><?= $assignment_stats['total_assignments'] - $assignment_stats['submitted_assignments'] ?></span>
+            </a>
+            <a href="study-center/view_materials_student.php" class="nav-item">
+                <i class="fas fa-book-open nav-icon"></i>
+                <span>Study Center</span>
+                <span class="nav-badge"><?= $total_materials ?></span>
+            </a>
+            <a href="attendence/student_attendance.php" class="nav-item">
+                <i class="fas fa-calendar-check nav-icon"></i>
+                <span>Attendance</span>
+                <span class="nav-badge"><?= $present ?>%</span>
+            </a>
         </div>
-        
-        <div class="sidebar-menu">
-            <div class="nav-item">
-                <a href="test.php" class="nav-link active">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-            </div>
-            
-            <div class="nav-item">
-                <a href="assignment/student_dashboard.php" class="nav-link">
-                    <i class="fas fa-tasks"></i>
-                    <span>Assignments</span>
-                </a>    
-            </div>
-            
-            <div class="nav-item">
-                <a href="study-center/view_materials_student.php" class="nav-link">
-                    <i class="fas fa-book-open"></i>
-                    <span>Study Center</span>
-                </a>    
-            </div>
-            
-            <div class="nav-item">
-                <a href="exam-center/student/exam_result_student.php" class="nav-link">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Results</span>
-                </a>
-            </div>
-            
-            <div class="nav-item">
-                <a href="exam-center/student/student_dashboard.php" class="nav-link">
-                    <i class="fa-solid fa-pencil"></i>
-                    <span>Exam Center</span>
-                </a>
-            </div>
 
-             <div class="nav-item">
-                <a href="video-portal/student/student_videos.php" class="nav-link">
-                   <i class="fa-solid fa-video"></i>
-                    <span>Online Classes</span>
-                </a>
-            </div>
-             <div class="nav-item">
-                <a href="fee/students/my_fee_receipts.php" class="nav-link">
-                   <i class="fa-solid fa-video"></i>
-                    <span>Fee Center</span>
-                </a>
-            </div>
-             <div class="nav-item">
-                <a href="attendence/student_attendance.php" class="nav-link">
-                   <i class="fa-solid fa-video"></i>
-                    <span> Attendance</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="login-system/dashboard-user.php" class="nav-link">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-            </div>
+        <!-- Examination Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Examination</span>
+            <a href="exam-center/student/student_dashboard.php" class="nav-item">
+                <i class="fas fa-pencil-alt nav-icon"></i>
+                <span>Exam Center</span>
+                <span class="nav-badge"><?= $exams->num_rows ?></span>
+            </a>
+            <a href="exam-center/student/exam_result_student.php" class="nav-item">
+                <i class="fas fa-chart-line nav-icon"></i>
+                <span>Results</span>
+                <span class="nav-badge"><?= count($labels) ?></span>
+            </a>
         </div>
-        
+
+        <!-- Resources Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Resources</span>
+            <a href="video-portal/student/student_videos.php" class="nav-item">
+                <i class="fas fa-video nav-icon"></i>
+                <span>Online Classes</span>
+            </a>
+           
+        </div>
+
+        <!-- Finance Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Finance</span>
+            <a href="fee/students/my_fee_receipts.php" class="nav-item">
+                <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                <span>Fee Center</span>
+                <span class="nav-badge"><?= $feeStatus ?></span>
+            </a>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="sidebar-section">
+            <span class="section-label">Profile</span>
+            <a href="login-system/dashboard-user.php" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>My Profile</span>
+            </a>
+           
+        </div>
+
         <div class="sidebar-footer">
             <a href="login-system/logout.php" style="text-decoration: none;">
                 <button class="logout-btn">
@@ -1141,237 +1392,509 @@ if ($result->num_rows > 0) {
         </div>
     </aside>
 
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+
     <!-- Main Content -->
-    <main class="main-content" id="mainContent">
-        <!-- Welcome Section -->
-        <section class="welcome-section animate-in">
-            <div class="welcome-text">
-                <h2>Welcome back, <?= htmlspecialchars($student['name']) ?>!</h2>
-                <p>Ready to continue your learning journey?</p>
+    <main class="main-content">
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Dashboard Header -->
+        <div class="dashboard-header animate-in" style="animation-delay: 0.1s">
+            <h1 style="font-size: 24px;font-weight:bold">FAIZ COMPUTER INSTITUTE</h1>
+            <div class="welcome-section">
+                <h1>Welcome back, <?= htmlspecialchars($student['name']) ?> 👋</h1>
+                <p>Track your progress and manage your learning journey at Faiz Computer Institute</p>
             </div>
-            <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="user-profile-img">
-        </section>
+            <div class="header-right">
+              
+                <div class="date-display">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"><?= date('l, F j, Y') ?></span>
+                </div>
+            </div>
+        </div>
 
         <!-- Stats Grid -->
         <div class="stats-grid">
-            <div class="stat-card courses animate-in delay-1">
-                <div class="stat-title">
-                    <i class="fas fa-book"></i>
-                    <span>Enrolled Courses</span>
+            <div class="stat-card animate-in" style="animation-delay: 0.2s">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Enrolled Courses</h3>
+                        <div class="stat-number"><?= $course_stats['total_courses'] ?></div>
+                    </div>
+                    <i class="fas fa-graduation-cap stat-icon float-animation"></i>
                 </div>
-                <div class="stat-value"><?= $course_stats['total_courses'] ?></div>
-                <i class="fas fa-graduation-cap stat-icon"></i>
             </div>
-            
-            <div class="stat-card assignments animate-in delay-2">
-                <div class="stat-title">
-                    <i class="fas fa-tasks"></i>
-                    <span>Total Assignments</span>
+
+            <div class="stat-card animate-in" style="animation-delay: 0.3s">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Total Assignments</h3>
+                        <div class="stat-number"><?= $assignment_stats['total_assignments'] ?></div>
+                    </div>
+                    <i class="fas fa-tasks stat-icon float-animation"></i>
                 </div>
-                <div class="stat-value"><?= $assignment_stats['total_assignments'] ?></div>
-                <i class="fas fa-clipboard-list stat-icon"></i>
             </div>
-            
-            <div class="stat-card submitted animate-in delay-3">
-                <div class="stat-title">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Submitted</span>
+
+            <div class="stat-card animate-in" style="animation-delay: 0.4s">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Submitted</h3>
+                        <div class="stat-number"><?= $assignment_stats['submitted_assignments'] ?></div>
+                    </div>
+                    <i class="fas fa-check-circle stat-icon float-animation"></i>
                 </div>
-                <div class="stat-value"><?= $assignment_stats['submitted_assignments'] ?></div>
-                <i class="fas fa-check-double stat-icon"></i>
             </div>
-            
-            <div class="stat-card pending animate-in delay-4">
-                <div class="stat-title">
-                    <i class="fas fa-clock"></i>
-                    <span>Pending</span>
+
+            <div class="stat-card animate-in" style="animation-delay: 0.5s">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Study Materials</h3>
+                        <div class="stat-number"><?= $total_materials ?></div>
+                    </div>
+                    <i class="fas fa-book stat-icon float-animation"></i>
                 </div>
-                <div class="stat-value"><?= $assignment_stats['total_assignments'] - $assignment_stats['submitted_assignments'] ?></div>
-                <i class="fas fa-exclamation-circle stat-icon"></i>
             </div>
         </div>
 
-        <!-- Recent Assignments -->
-        <section>
-            <h3 class="section-title">
-                <i class="fas fa-tasks"></i>
-                Recent Assignments
-            </h3>
-            
-            <div class="assignments-grid">
-                <?php while($assignment = $assignments->fetch_assoc()): ?>
-                    <div class="assignment-card animate-in">
-                        <h4 class="assignment-title"><?= htmlspecialchars($assignment['title']) ?></h4>
-                        <p class="assignment-details"><?= htmlspecialchars(substr($assignment['question_text'], 0, 100)) ?>...</p>
-                        
-                        <div class="assignment-meta">
-                           
-                            <?php if ($assignment['submission_id']): ?>
-                                <span class="assignment-status status-submitted">Submitted</span>
-                            <?php else: ?>
-                                <span class="assignment-status status-pending">Pending</span>
-                            <?php endif; ?>
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Recent Assignments -->
+                <div class="card animate-in" style="animation-delay: 0.2s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-tasks"></i> Recent Assignments</h2>
+                        <a href="assignment/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="card-content">
+                        <?php while($assignment = $assignments->fetch_assoc()): ?>
+                        <div class="assignment-item">
+                            <div class="assignment-info">
+                                <h4><?= htmlspecialchars($assignment['title']) ?></h4>
+                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 80)) ?>...</p>
+                            </div>
+                            <span class="assignment-status <?= $assignment['submission_id'] ? 'status-submitted' : 'status-pending' ?>">
+                                <?= $assignment['submission_id'] ? 'Submitted' : 'Pending' ?>
+                            </span>
                         </div>
-                        
-                        <a href="assignment/student_dashboard.php" class="btn btn-primary">
-                            <i class="fas fa-eye"></i> View Details
+                        <?php endwhile; ?>
+                    </div>
+                </div>
+
+                <!-- Performance Chart -->
+                <div class="card animate-in" style="animation-delay: 0.3s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-line"></i> Performance Trend</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Assigned Exams -->
+                <div class="card animate-in" style="animation-delay: 0.4s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-pencil-alt"></i> Assigned Exams</h2>
+                        <a href="exam-center/student/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="card-content">
+                       <?php while ($exam = $exams->fetch_assoc()): ?>
+    <?php
+        // Check if student already submitted this exam
+        $stmt2 = $conn->prepare("
+            SELECT COUNT(*) AS attempted
+            FROM exam_submissions
+            WHERE exam_id = ? AND student_id = ? AND student_table = ?
+        ");
+        $stmt2->bind_param("iis", $exam['exam_id'], $student_id, $table);
+        $stmt2->execute();
+        $attempted = $stmt2->get_result()->fetch_assoc()['attempted'];
+    ?>
+    <div class="exam-item">
+        <div class="exam-header">
+            <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
+            <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
+        </div>
+        <?php if ($attempted): ?>
+            <span class="exam-action" style="background:#8E8E93; cursor:default;">Attempted</span>
+        <?php else: ?>
+            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
+                Start Exam
+            </a>
+        <?php endif; ?>
+    </div>
+<?php endwhile; ?>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Attendance -->
+                <div class="card animate-in" style="animation-delay: 0.2s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-calendar-check"></i> Attendance</h2>
+                        <a href="attendence/student_attendance.php" class="view-all">Details <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="attendance-stats">
+                        <div class="attendance-stat" style="border-color: rgba(52, 199, 89, 0.2);">
+                            <div class="attendance-number" style="color: #34C759;"><?= $present ?></div>
+                            <div class="attendance-label">Present</div>
+                        </div>
+                        <div class="attendance-stat" style="border-color: rgba(255, 59, 48, 0.2);">
+                            <div class="attendance-number" style="color: #FF3B30;"><?= $absent ?></div>
+                            <div class="attendance-label">Absent</div>
+                        </div>
+                        <div class="attendance-stat" style="border-color: rgba(255, 149, 0, 0.2);">
+                            <div class="attendance-number" style="color: #FF9500;"><?= $leave ?></div>
+                            <div class="attendance-label">Leave</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Fee Status -->
+                <div class="card animate-in" style="animation-delay: 0.3s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Fee Status</h2>
+                    </div>
+                    <div class="fee-status">
+                        <div>
+                            <div style="color: var(--dark-gray); font-size: 13px; font-weight: 500;"><?= $currentMonthName ?> Fee</div>
+                            <div class="fee-amount">₹<?= $feeAmount ?></div>
+                        </div>
+                        <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?> float-animation">
+                            <?= $feeStatus ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Materials -->
+                <div class="card animate-in" style="animation-delay: 0.4s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-book-open"></i> Recent Materials</h2>
+                        <a href="study-center/view_materials_student.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="card-content">
+                        <?php if ($last_materials->num_rows > 0): ?>
+                            <?php while($row = $last_materials->fetch_assoc()): ?>
+                            <div class="material-item">
+                                <div class="material-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="material-info">
+                                    <h4><?= htmlspecialchars($row['title']) ?></h4>
+                                </div>
+                            </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p style="color: var(--dark-gray); text-align: center; padding: 20px; font-size: 13px; background: rgba(0, 0, 0, 0.02); border-radius: 12px;">
+                                <i class="fas fa-inbox mr-2"></i> No materials assigned
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card animate-in" style="animation-delay: 0.5s">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <a href="assignment/student_dashboard.php" class="action-btn">
+                            <i class="fas fa-tasks float-animation"></i>
+                            <span>Assignments</span>
+                        </a>
+                        <a href="study-center/view_materials_student.php" class="action-btn">
+                            <i class="fas fa-book float-animation"></i>
+                            <span>Study Center</span>
+                        </a>
+                        <a href="exam-center/student/student_dashboard.php" class="action-btn">
+                            <i class="fas fa-pencil-alt float-animation"></i>
+                            <span>Exams</span>
+                        </a>
+                        <a href="video-portal/student/student_videos.php" class="action-btn">
+                            <i class="fas fa-video float-animation"></i>
+                            <span>Classes</span>
                         </a>
                     </div>
-                <?php endwhile; ?>
+                </div>
             </div>
-        </section>
-
-        <!-- Analog Clock -->
-<section class="clock-section animate-in">
-    <div class="analog-clock">
-        <div class="clock-center"></div>
-
-        <div class="hand hour" id="hour-hand"></div>
-        <div class="hand minute" id="minute-hand"></div>
-        <div class="hand second" id="second-hand"></div>
-
-        <!-- Clock numbers -->
-        <span class="number n12">12</span>
-        <span class="number n3">3</span>
-        <span class="number n6">6</span>
-        <span class="number n9">9</span>
-    </div>
-</section>
-<!-- Attendance Pie Chart -->
-<section class="attendance-section animate-in">
-    <h3 class="section-title">
-        <i class="fas fa-chart-pie"></i>
-        Attendance Overview
-    </h3>
-
-    <div class="attendance-card">
-        <canvas id="attendanceChart"></canvas>
-
-        <div class="attendance-legend">
-            <span><i class="dot present"></i> Present</span>
-            <span><i class="dot absent"></i> Absent</span>
-            <span><i class="dot leave"></i> Leave</span>
         </div>
-    </div>
-</section>
-<!-- Study Materials -->
-<div class="stat-card assignments animate-in">
-    <div class="stat-title">
-        <i class="fas fa-book"></i>
-        <span>Last 5 Study Materials</span>
-    </div>
-
-    <div style="font-size:14px; margin-top:8px;">
-        <?php if ($last_materials->num_rows > 0): ?>
-            <ul style="padding-left:18px; margin:0;">
-                <?php while($row = $last_materials->fetch_assoc()): ?>
-                    <li><?= htmlspecialchars($row['title']) ?></li>
-                <?php endwhile; ?>
-            </ul>
-        <?php else: ?>
-            <span style="color:#888;">No materials assigned</span>
-        <?php endif; ?>
-    </div>
-
-    <i class="fas fa-folder-open stat-icon"></i>
-</div>
-<div class="stat-card fees animate-in">
-    <div class="stat-title">
-        <i class="fas fa-calendar-alt"></i>
-        <span><?= $currentMonthName ?> Fee</span>
-    </div>
-
-    <div class="stat-value" style="font-size:22px;">
-        <?php if ($feeStatus === 'Paid'): ?>
-            <span style="color:green;">Paid ✅</span>
-        <?php else: ?>
-            <span style="color:red;">Pending ❌</span>
-        <?php endif; ?>
-    </div>
-
-    <i class="fas fa-file-invoice stat-icon"></i>
-</div>
-
-
     </main>
 
-    <!-- Mobile Footer -->
-    <footer class="mobile-footer">
-        <a href="test.php" class="footer-item active">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="assignment/student_dashboard.php" class="footer-item">
-            <i class="fas fa-tasks"></i>
-            <span>Assignments</span>
-        </a>
-        <a href="study-center/view_materials_student.php" class="footer-item">
-            <i class="fas fa-book"></i>
-            <span>Study</span>
-        </a>
-        <a href="login-system/dashboard-user.php" class="footer-item">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-        </a>
-    </footer>
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <div class="nav-items">
+            <a href="test.php" class="nav-item-mobile active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="assignment/student_dashboard.php" class="nav-item-mobile">
+                <i class="fas fa-tasks"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="study-center/view_materials_student.php" class="nav-item-mobile">
+                <i class="fas fa-book"></i>
+                <span>Study</span>
+            </a>
+            <a href="exam-center/student/student_dashboard.php" class="nav-item-mobile">
+                <i class="fas fa-pencil-alt"></i>
+                <span>Exams</span>
+            </a>
+            <a href="login-system/dashboard-user.php" class="nav-item-mobile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+    </nav>
 
     <script>
+        // Live Clock Functionality
+        function updateLiveClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const clockElement = document.getElementById('liveClock');
+            if (clockElement) {
+                clockElement.textContent = timeString;
+                
+                // Add pulse animation every second
+                clockElement.classList.add('pulse-animation');
+                setTimeout(() => {
+                    clockElement.classList.remove('pulse-animation');
+                }, 300);
+            }
+        }
+
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const navbarToggler = document.getElementById('navbarToggler');
-            const sidebar = document.getElementById('sidebar');
+            // Start live clock
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+
+            // Mobile menu functionality
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('overlay');
-            const mainContent = document.getElementById('mainContent');
             
-            // Toggle sidebar
-            function toggleSidebar() {
+            function toggleMobileMenu() {
                 sidebar.classList.toggle('active');
                 overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
             }
             
-            // Close sidebar when clicking on overlay
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', toggleMobileMenu);
+                overlay.addEventListener('click', toggleMobileMenu);
             }
             
-            // Event listeners
-            navbarToggler.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', closeSidebar);
+            // Close menu when clicking on mobile nav items
+            const mobileNavItems = document.querySelectorAll('.nav-item-mobile');
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
             
-            // Add scroll effect to navbar
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 10) {
-                    document.getElementById('navbar').classList.add('scrolled');
+            // Responsive checks
+            function checkResponsive() {
+                if (window.innerWidth <= 1024) {
+                    menuToggle.style.display = 'block';
                 } else {
-                    document.getElementById('navbar').classList.remove('scrolled');
+                    menuToggle.style.display = 'none';
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+            
+            checkResponsive();
+            window.addEventListener('resize', checkResponsive);
+            
+            // Initialize Charts
+            // Attendance Chart
+            const attendanceCtx = document.getElementById('attendanceChart')?.getContext('2d');
+            if (attendanceCtx) {
+                new Chart(attendanceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Present', 'Absent', 'Leave'],
+                        datasets: [{
+                            data: [<?= $present ?>, <?= $absent ?>, <?= $leave ?>],
+                            backgroundColor: [
+                                'rgba(52, 199, 89, 0.8)',
+                                'rgba(255, 59, 48, 0.8)',
+                                'rgba(255, 149, 0, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(52, 199, 89, 1)',
+                                'rgba(255, 59, 48, 1)',
+                                'rgba(255, 149, 0, 1)'
+                            ],
+                            borderWidth: 1,
+                            borderRadius: 8,
+                            spacing: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '75%'
+                    }
+                });
+            }
+            
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart')?.getContext('2d');
+            if (performanceCtx) {
+                new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: <?= json_encode($labels) ?>,
+                        datasets: [{
+                            label: 'Score %',
+                            data: <?= json_encode($scores) ?>,
+                            borderColor: '#007AFF',
+                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#007AFF',
+                            pointBorderColor: '#FFFFFF',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    drawBorder: false,
+                                    color: 'rgba(0, 0, 0, 0.04)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Enhanced hover effects
+            const interactiveElements = document.querySelectorAll('.stat-card, .assignment-item, .exam-item, .attendance-stat, .action-btn, .material-item');
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    this.style.transform = this.classList.contains('stat-card') ? 
+                        'translateY(-8px)' : 'translateY(-4px)';
+                });
+                element.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Add touch feedback for mobile
+            interactiveElements.forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                element.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+            
+            // Mobile navigation active state
+            const currentPage = window.location.pathname.split('/').pop() || 'test.php';
+            mobileNavItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPage || (href === 'test.php' && currentPage === '')) {
+                    item.classList.add('active');
                 }
             });
             
-            // Initialize calendar navigation (placeholder functionality)
-            document.querySelectorAll('.calendar-nav-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // In a real app, this would update the calendar view
-                    alert('Calendar navigation would be implemented here');
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }
                 });
             });
             
-            // Add click effect to calendar days
-            document.querySelectorAll('.calendar-day:not(.other-month)').forEach(day => {
-                day.addEventListener('click', function() {
-                    // In a real app, this would show events for the selected day
-                    alert('Day selected: ' + this.textContent);
-                });
-            });
-            
-            // Responsive adjustments
-            
-            // Initialize on load
-            handleResize();
-            window.addEventListener('resize', handleResize);
-            
-            // Add animation to elements as they come into view
+            // Add loading animation to page elements
             const animateElements = document.querySelectorAll('.animate-in');
+            animateElements.forEach((el, index) => {
+                el.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+            });
+            
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
             
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -1380,68 +1903,42 @@ if ($result->num_rows > 0) {
                         entry.target.style.transform = 'translateY(0)';
                     }
                 });
-            }, { threshold: 0.1 });
+            }, observerOptions);
             
-            animateElements.forEach(el => {
+            document.querySelectorAll('.animate-in').forEach(el => {
                 el.style.opacity = 0;
                 el.style.transform = 'translateY(20px)';
                 el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                 observer.observe(el);
             });
-        });
-        /* ================= ANALOG CLOCK LOGIC ================= */
-function updateClock() {
-    const now = new Date();
-
-    const seconds = now.getSeconds();
-    const minutes = now.getMinutes();
-    const hours = now.getHours();
-
-    const secondDeg = seconds * 6;
-    const minuteDeg = minutes * 6 + seconds * 0.1;
-    const hourDeg = hours * 30 + minutes * 0.5;
-
-    document.getElementById('second-hand').style.transform =
-        `translateX(-50%) rotate(${secondDeg}deg)`;
-    document.getElementById('minute-hand').style.transform =
-        `translateX(-50%) rotate(${minuteDeg}deg)`;
-    document.getElementById('hour-hand').style.transform =
-        `translateX(-50%) rotate(${hourDeg}deg)`;
-}
-
-setInterval(updateClock, 1000);
-updateClock();
-/* ================= ATTENDANCE PIE CHART ================= */
-const ctx = document.getElementById('attendanceChart');
-
-new Chart(ctx, {
-    type: 'pie',
-    data: {
-        labels: ['Present', 'Absent', 'Leave'],
-        datasets: [{
-            data: [
-                <?= $present ?>,
-                <?= $absent ?>,
-                <?= $leave ?>
-            ],
-            backgroundColor: [
-                '#4cc9f0',
-                '#ef233c',
-                '#f8961e'
-            ],
-            borderWidth: 0
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                display: false
+            
+            // Add keyboard navigation support
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            });
+            
+            // Update date display with current date
+            function updateDateDisplay() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateString = now.toLocaleDateString('en-US', options);
+                const dateElement = document.getElementById('currentDate');
+                if (dateElement) {
+                    dateElement.textContent = dateString;
+                }
             }
-        }
-    }
-});
-
+            
+            updateDateDisplay();
+        });
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateLiveClock();
+            }
+        });
     </script>
 </body>
 </html>
