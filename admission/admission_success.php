@@ -309,6 +309,10 @@ th {
 <div class="print-btn">
     <button onclick="window.print()">🖨 Print Admission Form</button>
 </div>
+<a href="admin26/admin_dashboard26.php" target="_blank">
+   Dashobard
+</a>
+
 
 <div class="a4">
 
