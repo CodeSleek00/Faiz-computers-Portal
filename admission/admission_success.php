@@ -252,7 +252,7 @@ th{
 <div class="section-title">Signatures</div>
 <table class="signature-table">
 <tr>
-<td><div class="sign-space"></div>Student</td>
+<td><div class="sign-space"></div>Student Signature</td>
 <td><div class="sign-space"></div>Left Thumb</td>
 <td><div class="sign-space"></div>Right Thumb</td>
 </tr>
