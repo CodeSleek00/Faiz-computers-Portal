@@ -108,6 +108,14 @@ img{
     font-size:12px;
     color:#374151;
 }
+.btn-view{
+    background:#16a34a;
+    margin-top:6px;
+}
+.btn-view:hover{
+    background:#15803d;
+}
+
 </style>
 </head>
 
@@ -168,8 +176,15 @@ img{
                 <td><?= htmlspecialchars($row['admission_date']) ?></td>
 
                 <td>
-                    <a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a>
-                </td>
+                <a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a><br>
+
+                <a class="btn btn-view"
+                href="../admission/admission_form.php?eid=<?= urlencode($row['enrollment_id']) ?>"
+                target="_blank">
+                View Form
+                </a>
+            </td>
+
             </tr>
             <?php endwhile; ?>
 
