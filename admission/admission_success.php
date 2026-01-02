@@ -41,7 +41,7 @@ body{
     min-height:297mm;
     background:#fff;
     margin:20px auto;
-    padding:20mm;
+    padding:5mm;
     position:relative;
 }
 
