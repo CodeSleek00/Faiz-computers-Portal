@@ -245,7 +245,7 @@ th{
 <table>
 <tr><td>Course</td><td><?= $data['course_name'] ?></td></tr>
 <tr><td>Duration</td><td><?= $data['duration'] ?> Months</td></tr>
-
+<tr><td>Admission Date</td><td><?= date('d/m/Y',strtotime($data['admission_date'])) ?></td></tr>
 </table>
 
 <div class="section-title">Signatures</div>
