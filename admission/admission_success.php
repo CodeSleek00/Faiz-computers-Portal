@@ -245,7 +245,7 @@ th{
 <table>
 <tr><td>Course</td><td><?= $data['course_name'] ?></td></tr>
 <tr><td>Duration</td><td><?= $data['duration'] ?> Months</td></tr>
-<tr><td>Monthly Fee</td><td>₹<?= $data['per_month_fee'] ?></td></tr>
+
 </table>
 
 <div class="section-title">Signatures</div>
