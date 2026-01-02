@@ -218,7 +218,7 @@ th{
 <div>
 <div class="section-title">Parent Details</div>
 <table>
-    <tr><td>Apaar</td><td><?= $data['apaar'] ?></td></tr>
+<tr><td>Apaar</td><td><?= $data['apaar'] ?></td></tr>
 <tr><td>Father</td><td><?= $data['father_name'] ?></td></tr>
 <tr><td>Mother</td><td><?= $data['mother_name'] ?></td></tr>
 <tr><td>Contact</td><td><?= $data['parent_contact'] ?></td></tr>
