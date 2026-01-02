@@ -232,6 +232,32 @@ th {
         color-adjust: exact;
     }
 }
+.signature-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+}
+
+.signature-table td {
+    border: 1px solid #2c3e50;
+    height: 90px;
+    vertical-align: bottom;
+    text-align: center;
+    padding: 8px;
+}
+
+.sign-space {
+    height: 45px;
+    border-bottom: 1px solid #000;
+    margin-bottom: 6px;
+}
+
+.sign-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
 
 /* Two-column layout for personal details */
 .two-column {
@@ -400,22 +426,25 @@ if($counter == 0){
 </tr>
 </table>
 
-<div class="signature-section page-break-avoid">
-    <div class="signature-box">
-        <div class="signature-space"></div>
-        <div class="signature-label">Student's Signature</div>
-    </div>
-    
-    <div class="signature-box">
-        <div class="signature-space"></div>
-        <div class="signature-label">Left Thumb Impression</div>
-    </div>
-    
-    <div class="signature-box">
-        <div class="signature-space"></div>
-        <div class="signature-label">Right Thumb Impression</div>
-    </div>
-</div>
+<div class="section-title page-break-avoid">Declaration & Signatures</div>
+
+<table class="signature-table page-break-avoid">
+    <tr>
+        <td>
+            <div class="sign-space"></div>
+            <div class="sign-label">Student Signature</div>
+        </td>
+        <td>
+            <div class="sign-space"></div>
+            <div class="sign-label">Left Thumb Impression</div>
+        </td>
+        <td>
+            <div class="sign-space"></div>
+            <div class="sign-label">Right Thumb Impression</div>
+        </td>
+    </tr>
+</table>
+
 
 <div class="footer-note">
     This is a computer generated document. No physical signature required.<br>
