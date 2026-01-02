@@ -179,7 +179,7 @@ img{
                 <a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a><br>
 
                 <a class="btn btn-view"
-                href="../admission/admission_form.php?eid=<?= urlencode($row['enrollment_id']) ?>"
+                href="../admission/admission_success.php?eid=<?= urlencode($row['enrollment_id']) ?>"
                 target="_blank">
                 View Form
                 </a>
