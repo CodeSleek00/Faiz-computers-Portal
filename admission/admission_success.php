@@ -142,7 +142,7 @@ th{
 }
 
 .sign-space{
-    height:45px;
+    height:95px;
     border-bottom:1px solid #000;
 }
 
