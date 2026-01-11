@@ -221,7 +221,7 @@ th{
 
 <tr><td>Address</td><td><?= nl2br($data['address']) ?></td></tr>
 </table>
-
+</div>
 
 <div>
 <div class="section-title">Parent Details</div>
