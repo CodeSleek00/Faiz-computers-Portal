@@ -211,9 +211,17 @@ th{
 <tr><td>Aadhar</td><td><?= $data['aadhar'] ?></td></tr>
 <tr><td>Religion</td><td><?= $data['religion'] ?></td></tr>
 <tr><td>Caste</td><td><?= $data['caste'] ?></td></tr>
+
+<?php if(!empty($data['identification_mark'])){ ?>
+<tr>
+    <td>Visible Identification Mark</td>
+    <td><?= $data['identification_mark'] ?></td>
+</tr>
+<?php } ?>
+
 <tr><td>Address</td><td><?= nl2br($data['address']) ?></td></tr>
 </table>
-</div>
+
 
 <div>
 <div class="section-title">Parent Details</div>
@@ -240,21 +248,6 @@ th{
 <td><?= $e['percentage'] ?></td>
 </tr>
 <?php } ?>
-</table>
-<div class="section-title">Personal Details</div>
-<table>
-<tr><td>Aadhar</td><td><?= $data['aadhar'] ?></td></tr>
-<tr><td>Religion</td><td><?= $data['religion'] ?></td></tr>
-<tr><td>Caste</td><td><?= $data['caste'] ?></td></tr>
-
-<?php if(!empty($data['identification_mark'])){ ?>
-<tr>
-    <td>Visible Identification Mark</td>
-    <td><?= $data['identification_mark'] ?></td>
-</tr>
-<?php } ?>
-
-<tr><td>Address</td><td><?= nl2br($data['address']) ?></td></tr>
 </table>
 
 
