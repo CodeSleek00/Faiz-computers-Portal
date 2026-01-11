@@ -199,7 +199,7 @@ th{
     <td><b>DOB</b></td><td><?= date('d/m/Y',strtotime($data['dob'])) ?></td>
 </tr>
 <tr>
-    <td><b>Phone</b></td><td><?= $data['phone'] ?></td>
+    <td><b>Student Phone</b></td><td><?= $data['phone'] ?></td>
     <td><b>Email</b></td><td><?= $data['email'] ?></td>
 </tr>
 </table>
@@ -221,7 +221,7 @@ th{
 <tr><td>Apaar</td><td><?= $data['apaar'] ?></td></tr>
 <tr><td>Father's Name</td><td><?= $data['father_name'] ?></td></tr>
 <tr><td>Mother's Name</td><td><?= $data['mother_name'] ?></td></tr>
-<tr><td>Contact</td><td><?= $data['parent_contact'] ?></td></tr>
+<tr><td>Parents Contact</td><td><?= $data['parent_contact'] ?></td></tr>
 </table>
 </div>
 </div>
@@ -241,6 +241,22 @@ th{
 </tr>
 <?php } ?>
 </table>
+<div class="section-title">Personal Details</div>
+<table>
+<tr><td>Aadhar</td><td><?= $data['aadhar'] ?></td></tr>
+<tr><td>Religion</td><td><?= $data['religion'] ?></td></tr>
+<tr><td>Caste</td><td><?= $data['caste'] ?></td></tr>
+
+<?php if(!empty($data['identification_mark'])){ ?>
+<tr>
+    <td>Visible Identification Mark</td>
+    <td><?= $data['identification_mark'] ?></td>
+</tr>
+<?php } ?>
+
+<tr><td>Address</td><td><?= nl2br($data['address']) ?></td></tr>
+</table>
+
 
 <div class="section-title">Course & Fees</div>
 <table>
