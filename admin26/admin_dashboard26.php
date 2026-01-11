@@ -67,7 +67,7 @@ h1{
 }
 /* Add scrollable container */
 .scrollable-table {
-    max-height: 100%;
+    max-height: 100vh;
     overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #e2e8f0;
