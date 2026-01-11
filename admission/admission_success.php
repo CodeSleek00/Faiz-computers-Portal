@@ -229,8 +229,17 @@ th{
 <tr><td>Apaar</td><td><?= $data['apaar'] ?></td></tr>
 <tr><td>Father's Name</td><td><?= $data['father_name'] ?></td></tr>
 <tr><td>Mother's Name</td><td><?= $data['mother_name'] ?></td></tr>
+
+<?php if(!empty($data['husband_name'])){ ?>
+<tr>
+    <td>Husband Name</td>
+    <td><?= $data['husband_name'] ?></td>
+</tr>
+<?php } ?>
+
 <tr><td>Parents Contact</td><td><?= $data['parent_contact'] ?></td></tr>
 </table>
+
 </div>
 </div>
 
