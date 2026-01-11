@@ -545,6 +545,13 @@
                             <label for="permanent_address">Permanent Address</label>
                             <textarea id="permanent_address" name="permanent_address" rows="3" placeholder="Enter your permanent address"></textarea>
                         </div>
+
+                        <div class="form-group full-width">
+                            <label for="identification_mark">Visible Identification Mark</label>
+                            <input type="text" id="identification_mark" name="identification_mark"
+                                placeholder="e.g., Mole on left cheek, Scar on right hand">
+                        </div>
+
                         
                         <div class="form-group full-width">
                             <label for="photo" class="required">Student Photograph</label>
@@ -576,6 +583,12 @@
                             <label for="mother_name">Mother's Name</label>
                             <input type="text" id="mother_name" name="mother_name" placeholder="Enter mother's full name">
                         </div>
+
+                        <div class="form-group">
+                            <label for="husband_name">Husband Name (if applicable)</label>
+                            <input type="text" id="husband_name" name="husband_name" placeholder="Enter husband's name">
+                        </div>
+
                         
                         <div class="form-group full-width">
                             <label for="parent_contact">Parent Contact Number</label>

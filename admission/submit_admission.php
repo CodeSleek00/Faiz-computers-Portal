@@ -16,6 +16,8 @@ $religion = strtoupper($_POST['religion'] ?? '');
 $caste    = strtoupper($_POST['caste'] ?? '');
 $address  = strtoupper($_POST['address'] ?? '');
 $permanent_address = strtoupper($_POST['permanent_address'] ?? '');
+$identification_mark = strtoupper($_POST['identification_mark'] ?? '');
+$husband_name = strtoupper($_POST['husband_name'] ?? '');
 
 $father_name = strtoupper($_POST['father_name'] ?? '');
 $mother_name = strtoupper($_POST['mother_name'] ?? '');
@@ -86,13 +88,21 @@ VALUES
 /* ================= ADMISSION TABLE ================= */
 $conn->query("
 INSERT INTO admission
-(name,aadhar,apaar,phone,email,religion,caste,address,permanent_address,
-dob,photo,father_name,mother_name,parent_contact,course_name,duration,
-registration_fee,per_month_fee,internal_fee,semester_exam_fee,additional_fee,enrollment_id)
+(
+ name,aadhar,apaar,phone,email,religion,caste,address,permanent_address,
+ dob,photo,father_name,mother_name,husband_name,parent_contact,
+ identification_mark,
+ course_name,duration,
+ registration_fee,per_month_fee,internal_fee,semester_exam_fee,additional_fee,enrollment_id
+)
 VALUES
-('$name','$aadhar','$apaar','$phone','$email','$religion','$caste','$address','$permanent_address',
-'$dob','$photo_name','$father_name','$mother_name','$parent_contact','$course_name','$duration_months',
-'$registration_fee','$per_month_fee','$internal_fee','$semester_exam_fee','$additional_fee','$enrollment_id')
+(
+ '$name','$aadhar','$apaar','$phone','$email','$religion','$caste','$address','$permanent_address',
+ '$dob','$photo_name','$father_name','$mother_name','$husband_name','$parent_contact',
+ '$identification_mark',
+ '$course_name','$duration_months',
+ '$registration_fee','$per_month_fee','$internal_fee','$semester_exam_fee','$additional_fee','$enrollment_id'
+)
 ");
 
 /* ================= EDUCATION QUALIFICATION ================= */
