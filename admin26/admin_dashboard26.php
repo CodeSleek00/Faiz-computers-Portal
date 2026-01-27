@@ -1,8 +1,9 @@
 <?php
+// admin_students.php
 session_start();
 include("../database_connection/db_connect.php");
 
-// FETCH STUDENTS WITH FULL DETAILS
+/* ================= FETCH STUDENTS WITH FULL DETAILS ================= */
 $sql = "
 SELECT 
     s.id,
@@ -10,22 +11,24 @@ SELECT
     s.name,
     s.contact,
     s.enrollment_id,
-    a.email,
+    s.course,
     a.aadhar,
     a.apaar,
+    a.email,
     a.religion,
     a.caste,
+    a.address,
+    a.permanent_address,
     a.dob,
     a.father_name,
     a.mother_name,
     a.parent_contact,
-    a.address,
-    a.permanent_address,
     a.course_name,
     a.duration,
     a.admission_date
 FROM students26 s
-LEFT JOIN admission a ON s.enrollment_id = a.enrollment_id
+LEFT JOIN admission a 
+ON s.enrollment_id = a.enrollment_id
 ORDER BY s.id DESC
 ";
 
@@ -37,26 +40,11 @@ $result = $conn->query($sql);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Management | Admin Dashboard</title>
+<title>Admin Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-:root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --secondary: #64748b;
-    --success: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --background: #f8fafc;
-    --surface: #ffffff;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --text-light: #64748b;
-    --shadow: 0 1px 3px rgba(0,0,0,0.1);
-    --radius: 8px;
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
+<style>
 * {
     margin: 0;
     padding: 0;
@@ -64,346 +52,407 @@ $result = $conn->query($sql);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    background: var(--background);
-    color: var(--text);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6f9;
+    color: #333;
 }
 
 .container {
-    padding: 1.5rem;
+    padding: 20px;
     max-width: 100%;
+    overflow: hidden;
 }
 
-/* HEADER */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 25px;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 15px;
 }
 
 .header h1 {
-    font-size: 1.5rem;
+    color: #2563eb;
+    font-size: 24px;
     font-weight: 600;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.header h1 i {
-    color: var(--primary);
 }
 
 .controls {
     display: flex;
-    gap: 0.75rem;
+    gap: 15px;
     align-items: center;
     flex-wrap: wrap;
 }
 
-.search-container {
+.search-box {
     position: relative;
-    min-width: 280px;
+    min-width: 250px;
 }
 
-.search-container input {
+.search-box input {
     width: 100%;
-    padding: 0.625rem 1rem 0.625rem 2.75rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    font-size: 0.875rem;
-    transition: var(--transition);
-    color: var(--text);
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s;
 }
 
-.search-container input:focus {
+.search-box input:focus {
     outline: none;
-    border-color: var(--primary);
+    border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.search-container i {
+.search-box i {
     position: absolute;
-    left: 1rem;
+    left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-light);
-    font-size: 0.875rem;
+    color: #6b7280;
 }
 
-.btn {
-    padding: 0.625rem 1rem;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 0.875rem;
-    font-weight: 500;
+.filter-btn {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    padding: 10px 15px;
+    border-radius: 8px;
     cursor: pointer;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: var(--transition);
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
+    gap: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #4b5563;
+    transition: all 0.3s;
 }
 
-.btn:hover {
-    background: #f8fafc;
-    border-color: var(--primary);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+.filter-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
 }
 
-.btn:active {
-    transform: translateY(0);
-}
-
-.btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-    border: 1px solid var(--primary);
-}
-
-.btn-primary:hover {
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
-}
-
-/* TABLE CONTAINER */
-.table-container {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 20px;
     overflow: hidden;
+}
+
+/* Table Styling */
+.table-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
 }
 
 .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     max-height: calc(100vh - 200px);
+    position: relative;
 }
 
+/* Custom scrollbar */
 .table-wrapper::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
+    height: 8px;
+    width: 8px;
 }
 
 .table-wrapper::-webkit-scrollbar-track {
-    background: var(--background);
+    background: #f1f1f1;
+    border-radius: 10px;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
+    background: #c1c1c1;
+    border-radius: 10px;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #a1a1a1;
 }
 
-/* TABLE */
 table {
-    width: 100%;
     border-collapse: collapse;
+    width: 100%;
     min-width: 1400px;
 }
 
-th {
-    background: var(--primary);
-    color: white;
-    font-weight: 600;
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.875rem 1rem;
+th, td {
+    padding: 12px 15px;
     text-align: left;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    white-space: nowrap;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+    white-space: normal;
+
+    position: relative;
 }
 
-th:first-child {
-    border-radius: var(--radius) 0 0 0;
-}
-
-th:last-child {
-    border-radius: 0 var(--radius) 0 0;
-}
-
-td {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.875rem;
-    vertical-align: middle;
-    background: var(--surface);
-}
-
-tbody tr {
-    transition: var(--transition);
-}
-
-tbody tr:hover {
-    background: #f8fafc;
-}
-
-/* FIXED COLUMNS */
+/* Fixed first column (Photo) */
 th:first-child,
 td:first-child {
     position: sticky;
     left: 0;
-    background: inherit;
+    background: white;
     z-index: 5;
+    border-right: 2px solid #e5e7eb;
+    min-width: 80px;
 }
 
+/* Fixed second column (Enrollment ID) */
+th:nth-child(2),
+td:nth-child(2) {
+    position: sticky;
+    left: 80px; /* Photo column width */
+    background: white;
+    z-index: 5;
+    border-right: 2px solid #e5e7eb;
+    min-width: 120px;
+}
+
+/* Fixed last column (Action) */
 th:last-child,
 td:last-child {
     position: sticky;
     right: 0;
-    background: inherit;
+    background: white;
     z-index: 5;
-    box-shadow: -1px 0 0 var(--border);
+    border-left: 2px solid #e5e7eb;
+    min-width: 100px;
 }
 
+/* Header background for fixed columns */
 th:first-child,
+th:nth-child(2),
 th:last-child {
-    z-index: 11;
+    background: #2563eb;
+    color: white;
+    z-index: 10;
 }
 
-/* CONTENT STYLES */
-.avatar {
-    width: 40px;
-    height: 40px;
+th {
+    background: #2563eb;
+    color: white;
+    font-weight: 500;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+}
+
+tr:hover {
+    background-color: #f8fafc;
+}
+
+tr:hover td:first-child,
+tr:hover td:nth-child(2),
+tr:hover td:last-child {
+    background-color: #f8fafc;
+}
+
+img {
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--border);
+    border: 2px solid #e5e7eb;
 }
 
-.badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: #f1f5f9;
-    color: var(--text-light);
-}
-
-.text-truncate {
-    max-width: 150px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.text-sm {
-    font-size: 0.8125rem;
-    color: var(--text-light);
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    min-width: 140px;
-}
-
-.action-btn {
-    padding: 0.5rem;
+.btn {
+    background: #2563eb;
+    color: white;
+    padding: 8px 14px;
     border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    display: inline-block;
     border: none;
-    background: transparent;
-    color: var(--text-light);
     cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.action-btn:hover {
-    background: #f1f5f9;
-    color: var(--text);
-}
-
-.action-btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.action-btn.edit:hover {
-    background: #dbeafe;
-    color: var(--primary);
-}
-
-.action-btn.view:hover {
-    background: #dcfce7;
-    color: var(--success);
-}
-
-/* EMPTY STATE */
-.empty-state {
-    padding: 4rem 2rem;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s;
     text-align: center;
-    color: var(--text-light);
+    margin: 2px;
+}
+
+.btn:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.small {
+    font-size: 12px;
+    color: #374151;
+    max-width: 150px;
+    line-height: 1.4;
+}
+
+.btn-view {
+    background: #16a34a;
+}
+
+.btn-view:hover {
+    background: #15803d;
+}
+
+.btn-delete {
+    background: #dc2626;
+}
+
+.btn-delete:hover {
+    background: #b91c1c;
+}
+
+/* Mobile responsive */
+@media (max-width: 1200px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .controls {
+        width: 100%;
+    }
+    
+    .search-box {
+        min-width: 100%;
+    }
+    
+    th, td {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 20px;
+    }
+    
+    th, td {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    
+    img {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    table {
+        min-width: 1200px;
+    }
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
 }
 
 .empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: #d1d5db;
 }
 
-/* LOADING SKELETON */
-.skeleton {
-    animation: pulse 2s infinite;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
+.empty-state p {
+    font-size: 16px;
 }
 
-@keyframes pulse {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* DROPDOWN */
-.dropdown {
-    position: relative;
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 0.5rem;
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    padding: 0.5rem;
-    min-width: 200px;
-    z-index: 1000;
+/* Column visibility toggle */
+.column-toggle {
     display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 100;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    right: 0;
+    top: 40px;
 }
 
-.dropdown-menu.show {
+.column-toggle.show {
     display: block;
-    animation: slideDown 0.2s ease;
 }
 
-@keyframes slideDown {
+.column-toggle label {
+    display: block;
+    padding: 8px 0;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.column-toggle label:last-child {
+    border-bottom: none;
+}
+
+.column-toggle input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Info badge for scroll hint */
+.scroll-hint {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2563eb;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50px;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -411,98 +460,9 @@ th:last-child {
     }
 }
 
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--text);
-    transition: var(--transition);
-}
-
-.dropdown-item:hover {
-    background: #f1f5f9;
-}
-
-.dropdown-item input[type="checkbox"] {
-    margin-right: 0.5rem;
-}
-
-/* ACCESSIBILITY */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* RESPONSIVE */
-@media (max-width: 1024px) {
-    .container {
-        padding: 1rem;
-    }
-    
-    .header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .controls {
-        width: 100%;
-    }
-    
-    .search-container {
-        min-width: 100%;
-    }
-}
-
-@media (max-width: 768px) {
-    .header h1 {
-        font-size: 1.25rem;
-    }
-    
-    .btn span {
-        display: none;
-    }
-    
-    .btn i {
-        margin: 0;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        min-width: auto;
-    }
-}
-
+/* Print styles */
 @media print {
-    .header,
-    .controls,
-    .action-buttons {
+    .header, .controls, .btn {
         display: none;
     }
     
@@ -516,309 +476,268 @@ th:last-child {
     
     th:first-child,
     td:first-child,
+    th:nth-child(2),
+    td:nth-child(2),
     th:last-child,
     td:last-child {
         position: static;
+        border: 1px solid #ddd;
     }
 }
 </style>
 </head>
 
 <body>
+
 <div class="container">
-    <!-- HEADER -->
-    <header class="header">
-        <h1>
-            <i class="fas fa-users"></i>
-            Student Management
-        </h1>
+    <div class="header">
+        <h1><i class="fas fa-users"></i> Student Dashboard (Full Details)</h1>
         
         <div class="controls">
-            <div class="search-container">
+            <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input 
-                    type="search" 
-                    id="searchInput" 
-                    placeholder="Search students..."
-                    aria-label="Search students"
-                >
+                <input type="text" id="searchInput" placeholder="Search students by name, enrollment ID, contact...">
             </div>
             
-            <div class="dropdown">
-                <button class="btn" id="filterBtn" aria-expanded="false" aria-haspopup="true">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>Columns</span>
-                </button>
-                
-                <div class="dropdown-menu" id="columnMenu" role="menu">
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-photo" data-column="0" checked>
-                        <label for="col-photo">Photo</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-enrollment" data-column="1" checked>
-                        <label for="col-enrollment">Enrollment ID</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-name" data-column="2" checked>
-                        <label for="col-name">Name</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-contact" data-column="3" checked>
-                        <label for="col-contact">Contact</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-email" data-column="4" checked>
-                        <label for="col-email">Email</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-aadhar" data-column="5">
-                        <label for="col-aadhar">Aadhar</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-apaar" data-column="6">
-                        <label for="col-apaar">Apaar</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-course" data-column="16" checked>
-                        <label for="col-course">Course</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="col-admission" data-column="18">
-                        <label for="col-admission">Admission Date</label>
-                    </div>
-                </div>
-            </div>
+            <button class="filter-btn" id="filterBtn">
+                <i class="fas fa-filter"></i> Filter Columns
+            </button>
             
-            <button class="btn btn-primary" onclick="window.print()" aria-label="Print table">
-                <i class="fas fa-print"></i>
-                <span>Print</span>
+            <button class="btn" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
             </button>
         </div>
-    </header>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="table-container">
-        <div class="table-wrapper" id="tableWrapper">
-            <table id="studentsTable" role="grid" aria-label="Students list">
-                <thead>
-                    <tr>
-                        <th scope="col">Photo</th>
-                        <th scope="col">Enrollment ID</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Contact</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Aadhar</th>
-                        <th scope="col">Apaar</th>
-                        <th scope="col">Religion</th>
-                        <th scope="col">Caste</th>
-                        <th scope="col">DOB</th>
-                        <th scope="col">Father</th>
-                        <th scope="col">Mother</th>
-                        <th scope="col">Parent Contact</th>
-                        <th scope="col">Address</th>
-                        <th scope="col">Permanent Address</th>
-                        <th scope="col">Course</th>
-                        <th scope="col">Duration</th>
-                        <th scope="col">Admission Date</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <?php if($result->num_rows > 0): ?>
-                        <?php while($row = $result->fetch_assoc()): ?>
-                        <tr role="row">
-                            <td>
-                                <img 
-                                    src="../uploads/<?= htmlspecialchars($row['photo']) ?>" 
-                                    alt="<?= htmlspecialchars($row['name']) ?>" 
-                                    class="avatar"
-                                    onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($row['name']) ?>&background=2563eb&color=fff'"
-                                >
-                            </td>
-                            <td>
-                                <span class="badge"><?= htmlspecialchars($row['enrollment_id']) ?></span>
-                            </td>
-                            <td><strong><?= htmlspecialchars($row['name']) ?></strong></td>
-                            <td><?= htmlspecialchars($row['contact']) ?></td>
-                            <td class="text-truncate"><?= htmlspecialchars($row['email']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['aadhar']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['apaar']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['religion']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['caste']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['dob']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['father_name']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['mother_name']) ?></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['parent_contact']) ?></td>
-                            <td class="text-sm text-truncate"><?= nl2br(htmlspecialchars($row['address'])) ?></td>
-                            <td class="text-sm text-truncate"><?= nl2br(htmlspecialchars($row['permanent_address'])) ?></td>
-                            <td><strong><?= htmlspecialchars($row['course_name']) ?></strong></td>
-                            <td class="text-sm"><?= htmlspecialchars($row['duration']) ?> months</td>
-                            <td class="text-sm"><?= htmlspecialchars($row['admission_date']) ?></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button 
-                                        class="action-btn edit"
-                                        onclick="window.location.href='edit_student.php?id=<?= $row['id'] ?>'"
-                                        aria-label="Edit <?= htmlspecialchars($row['name']) ?>"
-                                    >
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button 
-                                        class="action-btn view"
-                                        onclick="window.open('../admission/admission_success.php?eid=<?= urlencode($row['enrollment_id']) ?>', '_blank')"
-                                        aria-label="View form for <?= htmlspecialchars($row['name']) ?>"
-                                    >
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
+    <div class="card">
+        <div class="table-container">
+            <div class="table-wrapper" id="tableWrapper">
+                <table id="studentsTable">
+                    <thead>
                         <tr>
-                            <td colspan="19">
-                                <div class="empty-state">
-                                    <i class="fas fa-user-slash"></i>
-                                    <p>No students found</p>
-                                </div>
-                            </td>
+                            <th>Photo</th>
+                            <th>Enrollment ID</th>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Aadhar</th>
+                            <th>Apaar</th>
+                            <th>Religion</th>
+                            <th>Caste</th>
+                            <th>DOB</th>
+                            <th>Father</th>
+                            <th>Mother</th>
+                            <th>Parent Contact</th>
+                            <th>Address</th>
+                            <th>Permanent Address</th>
+                            <th>Course</th>
+                            <th>Duration (Months)</th>
+                            <th>Admission Date</th>
+                            <th>Action</th>
                         </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="tableBody">
+                        <?php if($result->num_rows > 0): ?>
+                            <?php while($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td>
+                                    <img src="../uploads/<?= htmlspecialchars($row['photo']) ?>" 
+                                         alt="<?= htmlspecialchars($row['name']) ?>'s photo"
+                                         onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($row['name']) ?>&background=2563eb&color=fff'">
+                                </td>
+
+                                <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
+                                <td><?= htmlspecialchars($row['name']) ?></td>
+                                <td><?= htmlspecialchars($row['contact']) ?></td>
+                                <td><?= htmlspecialchars($row['email']) ?></td>
+                                <td><?= htmlspecialchars($row['aadhar']) ?></td>
+                                <td><?= htmlspecialchars($row['apaar']) ?></td>
+                                <td><?= htmlspecialchars($row['religion']) ?></td>
+                                <td><?= htmlspecialchars($row['caste']) ?></td>
+                                <td><?= htmlspecialchars($row['dob']) ?></td>
+                                <td><?= htmlspecialchars($row['father_name']) ?></td>
+                                <td><?= htmlspecialchars($row['mother_name']) ?></td>
+                                <td><?= htmlspecialchars($row['parent_contact']) ?></td>
+
+                                <td class="small"><?= nl2br(htmlspecialchars($row['address'])) ?></td>
+                                <td class="small"><?= nl2br(htmlspecialchars($row['permanent_address'])) ?></td>
+
+                                <td><?= htmlspecialchars($row['course_name']) ?></td>
+                                <td><?= htmlspecialchars($row['duration']) ?></td>
+                                <td><?= htmlspecialchars($row['admission_date']) ?></td>
+
+                                <td>
+                                    <a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a class="btn btn-view" 
+                                       href="../admission/admission_success.php?eid=<?= urlencode($row['enrollment_id']) ?>"
+                                       target="_blank">
+                                        <i class="fas fa-eye"></i> View Form
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="19">
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-slash"></i>
+                                        <p>No students found. Please add some students first.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </main>
+    </div>
+</div>
+
+<!-- Column Toggle Menu -->
+<div class="column-toggle" id="columnToggle">
+    <h4 style="margin-bottom: 10px; color: #2563eb;">Show/Hide Columns</h4>
+    <label><input type="checkbox" checked data-column="0"> Photo</label>
+    <label><input type="checkbox" checked data-column="1"> Enrollment ID</label>
+    <label><input type="checkbox" checked data-column="2"> Name</label>
+    <label><input type="checkbox" checked data-column="3"> Contact</label>
+    <label><input type="checkbox" checked data-column="4"> Email</label>
+    <label><input type="checkbox" checked data-column="5"> Aadhar</label>
+    <label><input type="checkbox" checked data-column="6"> Apaar</label>
+    <label><input type="checkbox" checked data-column="7"> Religion</label>
+    <label><input type="checkbox" checked data-column="8"> Caste</label>
+    <label><input type="checkbox" checked data-column="9"> DOB</label>
+    <label><input type="checkbox" checked data-column="10"> Father</label>
+    <label><input type="checkbox" checked data-column="11"> Mother</label>
+    <label><input type="checkbox" checked data-column="12"> Parent Contact</label>
+    <label><input type="checkbox" checked data-column="13"> Address</label>
+    <label><input type="checkbox" checked data-column="14"> Permanent Address</label>
+    <label><input type="checkbox" checked data-column="15"> Course</label>
+    <label><input type="checkbox" checked data-column="16"> Duration</label>
+    <label><input type="checkbox" checked data-column="17"> Admission Date</label>
+    <label><input type="checkbox" checked data-column="18"> Action</label>
+</div>
+
+<!-- Scroll Hint -->
+<div class="scroll-hint" id="scrollHint">
+    <i class="fas fa-arrow-left-right"></i> Scroll horizontally to view more columns
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ELEMENTS
     const searchInput = document.getElementById('searchInput');
     const tableBody = document.getElementById('tableBody');
     const filterBtn = document.getElementById('filterBtn');
-    const columnMenu = document.getElementById('columnMenu');
-    const checkboxes = columnMenu.querySelectorAll('input[type="checkbox"]');
-    const rows = tableBody.querySelectorAll('tr');
+    const columnToggle = document.getElementById('columnToggle');
+    const scrollHint = document.getElementById('scrollHint');
+    const tableWrapper = document.getElementById('tableWrapper');
+    const rows = tableBody.getElementsByTagName('tr');
     
-    // SEARCH FUNCTIONALITY
-    searchInput.addEventListener('input', debounce(function() {
-        const searchTerm = this.value.toLowerCase().trim();
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
         
-        rows.forEach(row => {
-            if (row.querySelector('.empty-state')) return;
+        for(let row of rows) {
+            const cells = row.getElementsByTagName('td');
+            let found = false;
             
-            const cells = Array.from(row.querySelectorAll('td'));
-            const hasMatch = cells.some(cell => 
-                cell.textContent.toLowerCase().includes(searchTerm)
-            );
+            for(let cell of cells) {
+                if(cell.textContent.toLowerCase().includes(searchTerm)) {
+                    found = true;
+                    break;
+                }
+            }
             
-            row.style.display = hasMatch ? '' : 'none';
-        });
-    }, 300));
+            row.style.display = found ? '' : 'none';
+        }
+    });
     
-    // COLUMN TOGGLE
+    // Column toggle functionality
     filterBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        const isExpanded = this.getAttribute('aria-expanded') === 'true';
-        this.setAttribute('aria-expanded', !isExpanded);
-        columnMenu.classList.toggle('show');
+        columnToggle.classList.toggle('show');
     });
     
-    // CLOSE DROPDOWN
-    document.addEventListener('click', () => {
-        filterBtn.setAttribute('aria-expanded', 'false');
-        columnMenu.classList.remove('show');
+    // Close column toggle when clicking outside
+    document.addEventListener('click', function() {
+        columnToggle.classList.remove('show');
     });
     
-    columnMenu.addEventListener('click', (e) => e.stopPropagation());
+    // Prevent column toggle from closing when clicking inside
+    columnToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
     
-    // TOGGLE COLUMNS
+    // Handle column visibility
+    const checkboxes = columnToggle.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const columnIndex = parseInt(this.dataset.column);
+            const columnIndex = parseInt(this.getAttribute('data-column'));
             const ths = document.querySelectorAll('th');
             const tds = document.querySelectorAll('td');
             
             // Toggle header
-            if (ths[columnIndex]) {
+            if(ths[columnIndex]) {
                 ths[columnIndex].style.display = this.checked ? '' : 'none';
             }
             
             // Toggle cells
-            tds.forEach((td, index) => {
-                if (index % 19 === columnIndex) {
-                    td.style.display = this.checked ? '' : 'none';
+            for(let i = 0; i < tds.length; i++) {
+                if(i % 19 === columnIndex) { // 19 columns total
+                    tds[i].style.display = this.checked ? '' : 'none';
                 }
-            });
+            }
         });
     });
     
-    // KEYBOARD NAVIGATION
-    document.addEventListener('keydown', (e) => {
-        // Ctrl/Cmd + F for search
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    // Hide scroll hint after 5 seconds
+    setTimeout(() => {
+        scrollHint.style.opacity = '0';
+        setTimeout(() => {
+            scrollHint.style.display = 'none';
+        }, 500);
+    }, 5000);
+    
+    // Show scroll hint on horizontal scroll
+    let scrollHintTimeout;
+    tableWrapper.addEventListener('scroll', function() {
+        if(this.scrollLeft > 50) {
+            scrollHint.style.display = 'none';
+        }
+        
+        clearTimeout(scrollHintTimeout);
+        scrollHintTimeout = setTimeout(() => {
+            if(this.scrollLeft === 0) {
+                scrollHint.style.display = 'flex';
+                scrollHint.style.opacity = '1';
+            }
+        }, 10000);
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+F to focus search
+        if(e.ctrlKey && e.key === 'f') {
             e.preventDefault();
             searchInput.focus();
         }
         
-        // Escape closes dropdown
-        if (e.key === 'Escape') {
-            filterBtn.setAttribute('aria-expanded', 'false');
-            columnMenu.classList.remove('show');
+        // Escape to close column toggle
+        if(e.key === 'Escape') {
+            columnToggle.classList.remove('show');
         }
     });
     
-    // IMAGE ERROR HANDLING
-    document.querySelectorAll('.avatar').forEach(img => {
+    // Handle image errors
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
         img.addEventListener('error', function() {
-            const name = this.alt || 'Student';
-            this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff`;
+            this.src = 'https://ui-avatars.com/api/?name=Student&background=2563eb&color=fff';
         });
     });
-    
-    // ACCESSIBILITY: FOCUS TRAPPING IN DROPDOWN
-    columnMenu.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-            const focusableElements = columnMenu.querySelectorAll('input, label, button');
-            const firstElement = focusableElements[0];
-            const lastElement = focusableElements[focusableElements.length - 1];
-            
-            if (e.shiftKey) {
-                if (document.activeElement === firstElement) {
-                    e.preventDefault();
-                    filterBtn.focus();
-                }
-            } else {
-                if (document.activeElement === lastElement) {
-                    e.preventDefault();
-                    filterBtn.focus();
-                }
-            }
-        }
-    });
-    
-    // UTILITY: DEBOUNCE
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-    
-    // REDUCED MOTION PREFERENCE
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('*').forEach(el => {
-            el.style.animationDuration = '0.001ms';
-            el.style.transitionDuration = '0.001ms';
-        });
-    }
 });
 </script>
+
 </body>
 </html>
