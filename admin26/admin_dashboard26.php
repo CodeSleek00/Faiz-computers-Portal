@@ -190,7 +190,7 @@ th, td {
     border-bottom: 1px solid #e5e7eb;
     vertical-align: top;
     white-space: normal;
-    word-break: break-word;
+
     position: relative;
 }
 
