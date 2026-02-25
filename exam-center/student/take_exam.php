@@ -2,14 +2,20 @@
 include '../../database_connection/db_connect.php';
 session_start();
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 // Check if student is logged in
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
 if (!$enrollment_id) die("Login required.");
 
 // Fetch student from students or students26
 $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+$student_table = 'students';
 if (!$student) {
     $student = $conn->query("SELECT * FROM students26 WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
+    $student_table = 'students26';
 }
 
 if (!$student) die("Student not found.");
@@ -19,6 +25,20 @@ $student_id = $student['student_id'] ?? $student['id']; // id for students26
 // Get exam ID from GET
 $exam_id = $_GET['exam_id'] ?? 0;
 $exam_id = intval($exam_id);
+
+// If already submitted, do not allow returning to exam page
+$already_submitted = $conn->query("
+    SELECT 1
+    FROM exam_submissions
+    WHERE exam_id = $exam_id
+      AND student_id = $student_id
+      AND student_table = '$student_table'
+    LIMIT 1
+");
+if ($already_submitted && $already_submitted->num_rows > 0) {
+    header("Location: student_dashboard.php");
+    exit;
+}
 
 // Fetch exam
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();

@@ -28,6 +28,20 @@ if (!$exam_id || empty($answers)) {
     die("Invalid submission.");
 }
 
+// Prevent duplicate submissions for same student/exam
+$already_submitted = $conn->query("
+    SELECT 1
+    FROM exam_submissions
+    WHERE exam_id = $exam_id
+      AND student_id = $student_id
+      AND student_table = '$student_table'
+    LIMIT 1
+");
+if ($already_submitted && $already_submitted->num_rows > 0) {
+    header("Location: student_dashboard.php");
+    exit;
+}
+
 // Fetch correct answers
 $correct_q = $conn->query("SELECT question_id, correct_option FROM exam_questions WHERE exam_id = $exam_id");
 $correct_map = [];
