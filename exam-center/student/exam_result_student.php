@@ -27,6 +27,7 @@ if (!$student) die("Student not found.");
 
 $student_id    = $student['student_id'];
 $student_table = $student['student_table'];
+$submitted_exam_id = intval($_GET['exam_id'] ?? 0);
 
 /* ===================== FETCH DECLARED RESULTS ===================== */
 $sql = "
@@ -469,5 +470,18 @@ $total_results = $results->num_rows;
             </div>
         </div>
     </div>
+    <script>
+        (function () {
+            const submittedExamId = <?= $submitted_exam_id ?>;
+            if (submittedExamId > 0) {
+                sessionStorage.setItem(`submitted_exam_${submittedExamId}`, "1");
+            }
+
+            history.pushState({ noBack: true }, "", window.location.href);
+            window.addEventListener("popstate", function () {
+                window.location.replace("student_dashboard.php");
+            });
+        })();
+    </script>
 </body>
 </html>

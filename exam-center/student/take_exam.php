@@ -166,6 +166,21 @@ $total = count($questions);
     </form>
 </div>
 <script>
+const examIdForBackGuard = <?= $exam_id ?>;
+
+function redirectSubmittedExamFromHistory() {
+    if (sessionStorage.getItem(`submitted_exam_${examIdForBackGuard}`) === '1') {
+        window.location.replace('student_dashboard.php');
+    }
+}
+
+redirectSubmittedExamFromHistory();
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        redirectSubmittedExamFromHistory();
+    }
+});
+
 // Disable text selection
 document.addEventListener("selectstart", function(e) {
     e.preventDefault();
