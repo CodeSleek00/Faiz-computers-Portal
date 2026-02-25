@@ -42,6 +42,13 @@ $total = count($questions);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        body {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -webkit-touch-callout: none; /* Mobile long press disable */
+}
         body { font-family: 'Poppins', sans-serif; background: #f2f4f8; margin: 0; padding: 0; }
         .exam-container { max-width: 1000px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         .exam-header { display: flex; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
@@ -138,5 +145,23 @@ $total = count($questions);
         <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
+<script>
+// Disable text selection
+document.addEventListener("selectstart", function(e) {
+    e.preventDefault();
+});
+
+// Disable copy, cut, paste
+['copy', 'cut', 'paste'].forEach(function(event) {
+    document.addEventListener(event, function(e) {
+        e.preventDefault();
+    });
+});
+
+// Disable right click
+document.addEventListener("contextmenu", function(e) {
+    e.preventDefault();
+});
+</script>
 </body>
 </html>
