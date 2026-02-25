@@ -2,21 +2,23 @@
 include '../../database_connection/db_connect.php';
 session_start();
 
-// Check login
+// Check if student is logged in
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
 if (!$enrollment_id) die("Login required.");
 
-// Fetch student
+// Fetch student from students or students26
 $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
 if (!$student) {
     $student = $conn->query("SELECT * FROM students26 WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
 }
+
 if (!$student) die("Student not found.");
 
-$student_id = $student['student_id'] ?? $student['id'];
+$student_id = $student['student_id'] ?? $student['id']; // id for students26
 
-// Exam ID
-$exam_id = intval($_GET['exam_id'] ?? 0);
+// Get exam ID from GET
+$exam_id = $_GET['exam_id'] ?? 0;
+$exam_id = intval($exam_id);
 
 // Fetch exam
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();
@@ -35,291 +37,106 @@ $total = count($questions);
 <html>
 <head>
     <title><?= htmlspecialchars($exam['exam_name']) ?> - Exam</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="image.png">
+    <link rel="apple-touch-icon" href="image.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f2f4f8; margin: 0; padding: 0; }
+        .exam-container { max-width: 1000px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .exam-header { display: flex; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
+        .exam-info h2 { margin: 0; color: #2c3e50; }
+        .exam-info p { margin: 5px 0; color: #555; font-size: 15px; }
+        .exam-profile { text-align: right; }
+        .exam-profile img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; }
+        #timer { font-weight: bold; font-size: 16px; color: #e74c3c; }
+        .bubble-nav { margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .bubble { width: 36px; height: 36px; background: #ecf0f1; color: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .bubble.active { background: #4f46e5; color: #fff; }
+        .question-card { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 10px; background: #fafafa; margin-bottom: 20px; }
+        .question-card.active { display: block; }
+        .question-title { font-weight: 600; font-size: 17px; margin-bottom: 15px; color: #333; }
+        .option { margin: 10px 0; }
+        .btns { display: flex; justify-content: space-between; margin-top: 20px; }
+        .btn { background: #4f46e5; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .submit-btn { background: #28a745; width: 100%; margin-top: 25px; padding: 12px; }
+        @media (max-width: 768px) { .exam-header { flex-direction: column; align-items: flex-start; gap: 15px; } .exam-profile { text-align: left; } .bubble { width: 30px; height: 30px; font-size: 14px; } }
+    </style>
+    <script>
+        let current = 0;
+        let total = <?= $total ?>;
+        let duration = <?= intval($exam['duration']) ?> * 60; // in seconds
 
-<style>
-body {
-    font-family: 'Poppins', sans-serif;
-    background: #f2f4f8;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    -webkit-touch-callout: none;
-}
-
-.exam-container {
-    max-width: 1000px;
-    margin: 30px auto;
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-}
-
-.exam-header {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-
-.exam-info h2 { margin: 0; }
-.exam-profile img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-#timer { color: red; font-weight: bold; }
-
-.bubble-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.bubble {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.bubble.active {
-    background: #4f46e5;
-    color: white;
-}
-
-.question-card {
-    display: none;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    background: #fafafa;
-}
-
-.question-card.active { display: block; }
-
-.btn {
-    background: #4f46e5;
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.submit-btn {
-    background: green;
-    width: 100%;
-    margin-top: 15px;
-}
-
-@media(max-width:768px){
-    .exam-header{ flex-direction: column; gap: 10px; }
-}
-</style>
-</head>
-
-<body>
-
-<div class="exam-container">
-
-<div class="exam-header">
-    <div class="exam-info">
-        <h2><?= htmlspecialchars($exam['exam_name']) ?></h2>
-        <p><strong>Student:</strong> <?= htmlspecialchars($student['name']) ?></p>
-        <p><strong>Enrollment:</strong> <?= htmlspecialchars($student['enrollment_id']) ?></p>
-        <p><strong>Course:</strong> <?= htmlspecialchars($student['course']) ?></p>
-    </div>
-
-    <div class="exam-profile">
-        <img src="../../uploads/<?= htmlspecialchars($student['photo']) ?>">
-        <p>⏱ <span id="timer">--:--</span></p>
-    </div>
-</div>
-
-<div class="bubble-nav">
-<?php for($i=0;$i<$total;$i++): ?>
-    <div class="bubble" onclick="jumpTo(<?= $i ?>)"><?= $i+1 ?></div>
-<?php endfor; ?>
-</div>
-
-<form method="POST" action="submit_exam.php" id="examForm">
-<input type="hidden" name="exam_id" value="<?= $exam_id ?>">
-
-<?php foreach($questions as $index => $q): ?>
-<div class="question-card">
-    <div><strong>Q<?= $index+1 ?>.</strong> <?= htmlspecialchars($q['question']) ?></div>
-    <?php foreach(['a','b','c','d'] as $opt): ?>
-        <div>
-            <label>
-                <input type="radio" name="answers[<?= $q['question_id'] ?>]" value="<?= $opt ?>">
-                <?= strtoupper($opt) ?>. <?= htmlspecialchars($q["option_$opt"]) ?>
-            </label>
-        </div>
-    <?php endforeach; ?>
-</div>
-<?php endforeach; ?>
-
-<div style="display:flex; justify-content:space-between;">
-    <button type="button" class="btn" onclick="prevQuestion()" id="prevBtn">Previous</button>
-    <button type="button" class="btn" onclick="nextQuestion()" id="nextBtn">Next</button>
-</div>
-
-<button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">Submit Exam</button>
-
-</form>
-</div>
-
-<script>
-let current = 0;
-let total = <?= $total ?>;
-let duration = <?= intval($exam['duration']) ?> * 60;
-
-// Show Question
-function showQuestion(index){
-    let cards = document.querySelectorAll('.question-card');
-    let bubbles = document.querySelectorAll('.bubble');
-    cards.forEach((c,i)=>c.classList.toggle('active',i===index));
-    bubbles.forEach((b,i)=>b.classList.toggle('active',i===index));
-    document.getElementById('prevBtn').disabled = index===0;
-    document.getElementById('nextBtn').disabled = index===total-1;
-    document.getElementById('submitBtn').style.display = index===total-1?'block':'none';
-}
-
-function nextQuestion(){ if(current<total-1){current++; showQuestion(current);} }
-function prevQuestion(){ if(current>0){current--; showQuestion(current);} }
-function jumpTo(i){ current=i; showQuestion(i); }
-
-// Timer
-function startTimer(){
-    const timerEl=document.getElementById("timer");
-    const interval=setInterval(()=>{
-        if(duration<=0){
-            clearInterval(interval);
-            alert("Time up! Submitting...");
-            document.getElementById("examForm").submit();
+        function showQuestion(index) {
+            document.querySelectorAll('.question-card').forEach((el,i) => { el.classList.toggle('active', i===index); document.querySelectorAll('.bubble')[i].classList.toggle('active', i===index); });
+            document.getElementById('prevBtn').disabled = index===0;
+            document.getElementById('nextBtn').disabled = index===total-1;
+            document.getElementById('submitBtn').style.display = index===total-1 ? 'block' : 'none';
         }
-        let m=Math.floor(duration/60);
-        let s=duration%60;
-        timerEl.innerText=`${m}:${s<10?'0'+s:s}`;
-        duration--;
-    },1000);
-}
 
-// ================= SECURITY =================
+        function nextQuestion(){ if(current<total-1){ current++; showQuestion(current); } }
+        function prevQuestion(){ if(current>0){ current--; showQuestion(current); } }
+        function jumpTo(index){ current=index; showQuestion(current); }
 
-// Disable selection
-document.addEventListener("selectstart", e=>e.preventDefault());
+        function startTimer(){
+            const timerEl=document.getElementById("timer");
+            const interval=setInterval(()=>{
+                if(duration<=0){ clearInterval(interval); alert("Time's up! Submitting exam."); document.getElementById("examForm").submit(); }
+                let mins=Math.floor(duration/60);
+                let secs=duration%60;
+                timerEl.innerText=`${mins}:${secs<10?'0'+secs:secs}`;
+                duration--;
+            },1000);
+        }
 
-// Disable right click
-document.addEventListener("contextmenu", e=>e.preventDefault());
+        window.onload = ()=>{ showQuestion(0); startTimer(); }
+    </script>
+</head>
+<body>
+<div class="exam-container">
+    <div class="exam-header">
+        <div class="exam-info">
+            <h2><?= htmlspecialchars($exam['exam_name']) ?></h2>
+            <p><strong>Student:</strong> <?= htmlspecialchars($student['name']) ?></p>
+            <p><strong>Enrollment:</strong> <?= htmlspecialchars($student['enrollment_id']) ?></p>
+            <p><strong>Course:</strong> <?= htmlspecialchars($student['course']) ?></p>
+        </div>
+        <div class="exam-profile">
+            <img src="../../uploads/<?= htmlspecialchars($student['photo']) ?>" alt="Photo">
+            <p>⏱ <span id="timer">--:--</span></p>
+        </div>
+    </div>
 
-// Disable copy paste
-["copy","cut","paste"].forEach(e=>{
-    document.addEventListener(e,ev=>ev.preventDefault());
-});
+    <div class="bubble-nav">
+        <?php for($i=0;$i<$total;$i++): ?>
+            <div class="bubble" onclick="jumpTo(<?= $i ?>)"><?= $i+1 ?></div>
+        <?php endfor; ?>
+    </div>
 
-// Disable keys
-document.addEventListener("keydown",function(e){
-    if(e.ctrlKey && ['c','v','x','a','u','s','p'].includes(e.key.toLowerCase())) e.preventDefault();
-    if(e.key==="F12") e.preventDefault();
-});
+    <form method="POST" action="submit_exam.php" id="examForm">
+        <input type="hidden" name="exam_id" value="<?= $exam_id ?>">
 
-// Back button block
-history.pushState(null,null,location.href);
-window.onpopstate=function(){history.go(1);};
+        <?php foreach($questions as $index => $q): ?>
+            <div class="question-card" id="q<?= $index ?>">
+                <div class="question-title">Q<?= $index+1 ?>. <?= htmlspecialchars($q['question']) ?></div>
+                <?php foreach(['a','b','c','d'] as $opt): ?>
+                    <div class="option">
+                        <label>
+                            <input type="radio" name="answers[<?= $q['question_id'] ?>]" value="<?= $opt ?>"> <?= strtoupper($opt) ?>. <?= htmlspecialchars($q["option_$opt"]) ?>
+                        </label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endforeach; ?>
 
-// Tab/app switch auto submit
-document.addEventListener("visibilitychange",function(){
-    if(document.hidden){
-        alert("You left exam. Submitting...");
-        document.getElementById("examForm").submit();
-    }
-});
+        <div class="btns">
+            <button type="button" class="btn" onclick="prevQuestion()" id="prevBtn">⬅ Previous</button>
+            <button type="button" class="btn" onclick="nextQuestion()" id="nextBtn">Next ➡</button>
+        </div>
 
-window.onblur=function(){
-    alert("Exam minimized. Submitting...");
-    document.getElementById("examForm").submit();
-};
-
-// Fullscreen
-function openFullscreen(){
-    let elem=document.documentElement;
-    if(elem.requestFullscreen) elem.requestFullscreen();
-    else if(elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-}
-
-document.addEventListener("fullscreenchange",function(){
-    if(!document.fullscreenElement){
-        alert("Fullscreen required. Submitting...");
-        document.getElementById("examForm").submit();
-    }
-});
-
-// Disable long press mobile
-let t;
-document.addEventListener("touchstart",function(e){
-    t=setTimeout(()=>e.preventDefault(),500);
-});
-document.addEventListener("touchend",()=>clearTimeout(t));
-
-// Load
-window.onload=function(){
-    openFullscreen();
-    showQuestion(0);
-    startTimer();
-};
-// ================= TAB SWITCH CONTROL =================
-
-let tabSwitchCount = 0;
-const maxSwitch = 3;
-let warningShown = false;
-
-function handleTabSwitch() {
-    if (warningShown) return;
-    warningShown = true;
-
-    tabSwitchCount++;
-
-    if (tabSwitchCount >= maxSwitch) {
-        alert("You switched tabs 3 times. Exam will be submitted.");
-        document.getElementById("examForm").submit();
-    } else {
-        alert("Warning: Tab switch detected (" + tabSwitchCount + "/3)");
-    }
-
-    setTimeout(() => {
-        warningShown = false;
-    }, 1000);
-}
-
-// Tab hidden / mobile app switch
-document.addEventListener("visibilitychange", function () {
-    if (document.hidden) {
-        handleTabSwitch();
-    }
-});
-
-// Window blur (desktop)
-window.addEventListener("blur", function () {
-    handleTabSwitch();
-});
-</script>
-
+        <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
+    </form>
+</div>
 </body>
 </html>
