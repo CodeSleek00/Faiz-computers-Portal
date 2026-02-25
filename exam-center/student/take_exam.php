@@ -2,20 +2,14 @@
 include '../../database_connection/db_connect.php';
 session_start();
 
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-header("Expires: 0");
-
 // Check if student is logged in
 $enrollment_id = $_SESSION['enrollment_id'] ?? null;
 if (!$enrollment_id) die("Login required.");
 
 // Fetch student from students or students26
 $student = $conn->query("SELECT * FROM students WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
-$student_table = 'students';
 if (!$student) {
     $student = $conn->query("SELECT * FROM students26 WHERE enrollment_id = '$enrollment_id'")->fetch_assoc();
-    $student_table = 'students26';
 }
 
 if (!$student) die("Student not found.");
@@ -25,20 +19,6 @@ $student_id = $student['student_id'] ?? $student['id']; // id for students26
 // Get exam ID from GET
 $exam_id = $_GET['exam_id'] ?? 0;
 $exam_id = intval($exam_id);
-
-// If already submitted, do not allow returning to exam page
-$already_submitted = $conn->query("
-    SELECT 1
-    FROM exam_submissions
-    WHERE exam_id = $exam_id
-      AND student_id = $student_id
-      AND student_table = '$student_table'
-    LIMIT 1
-");
-if ($already_submitted && $already_submitted->num_rows > 0) {
-    header("Location: student_dashboard.php");
-    exit;
-}
 
 // Fetch exam
 $exam = $conn->query("SELECT * FROM exams WHERE exam_id = $exam_id")->fetch_assoc();
@@ -62,13 +42,6 @@ $total = count($questions);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    -moz-user-select: none;
-    -webkit-touch-callout: none; /* Mobile long press disable */
-}
         body { font-family: 'Poppins', sans-serif; background: #f2f4f8; margin: 0; padding: 0; }
         .exam-container { max-width: 1000px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         .exam-header { display: flex; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
@@ -165,38 +138,5 @@ $total = count($questions);
         <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
-<script>
-const examIdForBackGuard = <?= $exam_id ?>;
-
-function redirectSubmittedExamFromHistory() {
-    if (sessionStorage.getItem(`submitted_exam_${examIdForBackGuard}`) === '1') {
-        window.location.replace('student_dashboard.php');
-    }
-}
-
-redirectSubmittedExamFromHistory();
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        redirectSubmittedExamFromHistory();
-    }
-});
-
-// Disable text selection
-document.addEventListener("selectstart", function(e) {
-    e.preventDefault();
-});
-
-// Disable copy, cut, paste
-['copy', 'cut', 'paste'].forEach(function(event) {
-    document.addEventListener(event, function(e) {
-        e.preventDefault();
-    });
-});
-
-// Disable right click
-document.addEventListener("contextmenu", function(e) {
-    e.preventDefault();
-});
-</script>
 </body>
 </html>
