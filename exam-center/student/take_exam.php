@@ -284,6 +284,41 @@ window.onload=function(){
     showQuestion(0);
     startTimer();
 };
+// ================= TAB SWITCH CONTROL =================
+
+let tabSwitchCount = 0;
+const maxSwitch = 3;
+let warningShown = false;
+
+function handleTabSwitch() {
+    if (warningShown) return;
+    warningShown = true;
+
+    tabSwitchCount++;
+
+    if (tabSwitchCount >= maxSwitch) {
+        alert("You switched tabs 3 times. Exam will be submitted.");
+        document.getElementById("examForm").submit();
+    } else {
+        alert("Warning: Tab switch detected (" + tabSwitchCount + "/3)");
+    }
+
+    setTimeout(() => {
+        warningShown = false;
+    }, 1000);
+}
+
+// Tab hidden / mobile app switch
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        handleTabSwitch();
+    }
+});
+
+// Window blur (desktop)
+window.addEventListener("blur", function () {
+    handleTabSwitch();
+});
 </script>
 
 </body>
