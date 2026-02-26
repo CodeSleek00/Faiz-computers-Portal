@@ -24,7 +24,7 @@ $student_id = (int) $student['student_id'];
 $student_name = $student['name'];
 
 $stmt = $conn->prepare("
-    SELECT v.*
+    SELECT v.id, v.title, v.description, v.file_name, v.mime_type, v.uploaded_at
     FROM videos v
     INNER JOIN video_assignments a ON a.video_id = v.id
     WHERE a.student_id = ? AND a.student_table = ?
@@ -57,13 +57,38 @@ $videos = $stmt->get_result();
     .header { margin-bottom: 20px; }
     .header h1 { margin: 0 0 6px; font-size: 24px; }
     .header p { color: var(--muted); margin: 0; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
-    .card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); }
-    .card h3 { margin: 0 0 8px; font-size: 18px; }
-    .card p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
-    video { width: 100%; border-radius: 10px; background: #000; }
+    .list { display: grid; gap: 14px; }
+    .video-card {
+        background: var(--card);
+        border-radius: var(--radius);
+        padding: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        border: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: center;
+    }
+    .video-title { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+    .video-desc { margin: 0; color: var(--muted); font-size: 13px; }
     .meta { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .play-btn {
+        background: var(--primary);
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    .play-btn:hover { background: #1e40af; }
     .empty { background: var(--card); padding: 24px; border-radius: var(--radius); text-align: center; border: 1px dashed var(--border); color: var(--muted); }
+    @media (max-width: 640px) {
+        .video-card { grid-template-columns: 1fr; }
+        .play-btn { width: 100%; text-align: center; }
+    }
 </style>
 </head>
 <body>
@@ -74,18 +99,21 @@ $videos = $stmt->get_result();
     </div>
 
     <?php if ($videos && $videos->num_rows > 0) { ?>
-        <div class="grid">
+        <div class="list">
             <?php while ($v = $videos->fetch_assoc()) { ?>
-                <div class="card">
-                    <h3><?= htmlspecialchars($v['title']) ?></h3>
-                    <?php if (!empty($v['description'])) { ?>
-                        <p><?= nl2br(htmlspecialchars($v['description'])) ?></p>
-                    <?php } ?>
-                    <video controls preload="metadata">
-                        <source src="../../uploads/videos/<?= htmlspecialchars($v['file_name']) ?>" type="<?= htmlspecialchars($v['mime_type']) ?>">
-                        Your browser does not support the video tag.
-                    </video>
-                    <div class="meta">Uploaded on <?= date('d M Y, h:i A', strtotime($v['uploaded_at'])) ?></div>
+                <div class="video-card">
+                    <div>
+                        <div class="video-title"><?= htmlspecialchars($v['title']) ?></div>
+                        <?php if (!empty($v['description'])) { ?>
+                            <div class="video-desc"><?= nl2br(htmlspecialchars($v['description'])) ?></div>
+                        <?php } else { ?>
+                            <div class="video-desc">No description provided.</div>
+                        <?php } ?>
+                        <div class="meta">Uploaded on <?= date('d M Y, h:i A', strtotime($v['uploaded_at'])) ?></div>
+                    </div>
+                    <div>
+                        <a class="play-btn" href="play_video.php?id=<?= (int) $v['id'] ?>">Play Video</a>
+                    </div>
                 </div>
             <?php } ?>
         </div>
