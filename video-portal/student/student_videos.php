@@ -109,7 +109,7 @@ $videos = $stmt->get_result();
                         <?php } else { ?>
                             <div class="video-desc">No description provided.</div>
                         <?php } ?>
-                        <div class="meta">Uploaded on <?= date('d M Y, h:i A', strtotime($v['uploaded_at'])) ?></div>
+                        <div class="meta">Uploaded on <?= date('d M Y', strtotime($v['uploaded_at'])) ?></div>
                     </div>
                     <div>
                         <a class="play-btn" href="play_video.php?id=<?= (int) $v['id'] ?>">Play Video</a>
