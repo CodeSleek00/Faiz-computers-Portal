@@ -4,6 +4,13 @@ include '../database_connection/db_connect.php';
 $errors = [];
 $success = '';
 
+$manual_dir = __DIR__ . '/../uploads/videos/hostinger_uploads';
+if (!is_dir($manual_dir)) {
+    mkdir($manual_dir, 0777, true);
+}
+
+$allowed_ext = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
+
 // Fetch students safely
 $students1 = $conn->query("SELECT student_id, name, enrollment_id, course, photo, 'students' AS student_table FROM students ORDER BY name ASC");
 $students2 = $conn->query("SELECT id AS student_id, name, enrollment_id, course, photo, 'students26' AS student_table FROM students26 ORDER BY name ASC");
@@ -26,15 +33,82 @@ $courses = $conn->query("
     SELECT course FROM students26
 ");
 
-// NOTE: Chunked upload is handled by upload_video_chunk.php and upload_video_finalize.php
-// This page is now primarily for rendering the UI.
+// List files from manual upload folder
+$files = [];
+if (is_dir($manual_dir)) {
+    $dir_items = scandir($manual_dir);
+    foreach ($dir_items as $file) {
+        if ($file === '.' || $file === '..') continue;
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        if (in_array($ext, $allowed_ext, true)) {
+            $files[] = $file;
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $students = $_POST['students'] ?? [];
+    $selected_file = basename($_POST['existing_file'] ?? '');
+
+    if ($title === '') {
+        $errors[] = 'Title is required.';
+    }
+
+    if ($selected_file === '') {
+        $errors[] = 'Please select a video file from the folder.';
+    }
+
+    $file_path = $manual_dir . '/' . $selected_file;
+    if ($selected_file !== '' && !file_exists($file_path)) {
+        $errors[] = 'Selected file not found. Please upload to hostinger folder first.';
+    }
+
+    $ext = strtolower(pathinfo($selected_file, PATHINFO_EXTENSION));
+    if ($selected_file !== '' && !in_array($ext, $allowed_ext, true)) {
+        $errors[] = 'Invalid file type.';
+    }
+
+    if (empty($errors)) {
+        $mime_type = mime_content_type($file_path);
+        $file_size = filesize($file_path);
+
+        $stmt = $conn->prepare("INSERT INTO videos (title, description, file_name, mime_type, file_size, uploaded_at) VALUES (?, ?, ?, ?, ?, NOW())");
+        $stmt->bind_param('ssssi', $title, $description, $selected_file, $mime_type, $file_size);
+        if (!$stmt->execute()) {
+            $errors[] = 'Failed to save video details: ' . $stmt->error;
+        } else {
+            $video_id = $stmt->insert_id;
+            $stmt->close();
+
+            if (!empty($students)) {
+                $stmt2 = $conn->prepare("INSERT IGNORE INTO video_assignments (video_id, student_id, student_table) VALUES (?, ?, ?)");
+                foreach ($students as $student_value) {
+                    if (strpos($student_value, ':') === false) continue;
+                    list($table, $student_id) = explode(':', $student_value);
+                    $student_id = (int) $student_id;
+                    $table = trim($table);
+                    if ($student_id > 0 && $table !== '') {
+                        $stmt2->bind_param('iis', $video_id, $student_id, $table);
+                        $stmt2->execute();
+                    }
+                }
+                $stmt2->close();
+            }
+
+            header('Location: view_videos_admin.php?msg=uploaded');
+            exit;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upload Video</title>
+<title>Add Existing Video</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -50,88 +124,25 @@ $courses = $conn->query("
         --radius: 12px;
     }
     * { box-sizing: border-box; }
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: var(--bg);
-        margin: 0;
-        padding: 24px;
-        color: var(--text);
-    }
-    .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: var(--card);
-        padding: 28px;
-        border-radius: var(--radius);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.06);
-    }
-    h1 { margin: 0 0 20px; font-size: 24px; }
+    body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding: 24px; color: var(--text); }
+    .container { max-width: 1000px; margin: 0 auto; background: var(--card); padding: 28px; border-radius: var(--radius); box-shadow: 0 12px 24px rgba(0,0,0,0.06); }
+    h1 { margin: 0 0 12px; font-size: 24px; }
+    .note { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     label { font-weight: 600; margin-bottom: 8px; display: block; }
-    input[type="text"], textarea, select {
-        width: 100%;
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-    }
+    input[type="text"], textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
     textarea { min-height: 90px; resize: vertical; }
-    .student-list {
-        max-height: 360px;
-        overflow-y: auto;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: #fafafa;
-        padding: 10px;
-    }
-    .student-item {
-        display: flex;
-        align-items: center;
-        padding: 8px 6px;
-        border-bottom: 1px solid #eee;
-        gap: 10px;
-    }
-    .student-photo {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
+    .student-list { max-height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; background: #fafafa; padding: 10px; }
+    .student-item { display: flex; align-items: center; padding: 8px 6px; border-bottom: 1px solid #eee; gap: 10px; }
+    .student-photo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
     .actions { margin-top: 20px; }
-    button {
-        width: 100%;
-        padding: 14px;
-        background: var(--primary);
-        color: white;
-        font-weight: 600;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-    }
+    button { width: 100%; padding: 14px; background: var(--primary); color: white; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; }
     button:hover { background: var(--primary-dark); }
-    .progress-wrap {
-        margin-top: 12px;
-        background: #eef2ff;
-        border-radius: 10px;
-        overflow: hidden;
-        height: 14px;
-        display: none;
-    }
-    .progress-bar {
-        height: 100%;
-        width: 0%;
-        background: var(--success);
-        transition: width 0.2s ease;
-    }
-    .progress-text { font-size: 13px; color: var(--muted); margin-top: 6px; }
     .message { padding: 10px 12px; border-radius: 8px; margin-bottom: 16px; }
     .message.error { background: #fee2e2; color: #991b1b; }
-    .message.success { background: #dcfce7; color: #166534; }
     .filters { display: grid; gap: 10px; }
     .selected-count { font-size: 13px; color: var(--muted); margin-top: 8px; }
-
-    @media (max-width: 900px) {
-        .grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 </style>
 <script>
 function filterStudents() {
@@ -162,162 +173,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.student-checkbox').forEach(cb =>
         cb.addEventListener('change', updateSelectedCount)
     );
-
-    const form = document.getElementById('uploadForm');
-    const progressWrap = document.getElementById('progressWrap');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const errorBox = document.getElementById('errorBox');
-
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        errorBox.innerHTML = '';
-        errorBox.style.display = 'none';
-
-        const fileInput = form.querySelector('input[name="video_file"]');
-        const titleInput = form.querySelector('input[name="title"]');
-
-        if (!titleInput.value.trim()) {
-            errorBox.innerHTML = 'Title is required.';
-            errorBox.style.display = 'block';
-            return;
-        }
-        if (!fileInput.files || !fileInput.files.length) {
-            errorBox.innerHTML = 'Video file is required.';
-            errorBox.style.display = 'block';
-            return;
-        }
-
-        const file = fileInput.files[0];
-        const chunkSize = 8 * 1024 * 1024; // 8MB
-        const totalChunks = Math.ceil(file.size / chunkSize);
-        const uploadId = Date.now().toString(36) + Math.random().toString(36).slice(2);
-
-        progressWrap.style.display = 'block';
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Starting upload...';
-
-        let uploadedBytes = 0;
-
-        const uploadChunk = (chunk, chunkIndex) => {
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', 'upload_video_chunk.php', true);
-
-                xhr.upload.onprogress = function(event) {
-                    if (event.lengthComputable) {
-                        const currentLoaded = uploadedBytes + event.loaded;
-                        const percent = Math.min(100, Math.round((currentLoaded / file.size) * 100));
-                        progressBar.style.width = percent + '%';
-                        progressText.textContent = 'Uploading: ' + percent + '%';
-                    }
-                };
-
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        try {
-                            const res = JSON.parse(xhr.responseText);
-                            if (res.ok) {
-                                uploadedBytes += chunk.size;
-                                resolve();
-                            } else {
-                                reject(res.errors ? res.errors.join('<br>') : 'Chunk upload failed.');
-                            }
-                        } catch (err) {
-                            reject('Unexpected response while uploading.');
-                        }
-                    } else {
-                        reject('Chunk upload failed. Try again.');
-                    }
-                };
-
-                xhr.onerror = function() {
-                    reject('Network error during upload.');
-                };
-
-                const data = new FormData();
-                data.append('upload_id', uploadId);
-                data.append('chunk_index', chunkIndex);
-                data.append('total_chunks', totalChunks);
-                data.append('original_name', file.name);
-                data.append('chunk', chunk);
-
-                xhr.send(data);
-            });
-        };
-
-        try {
-            for (let i = 0; i < totalChunks; i++) {
-                const start = i * chunkSize;
-                const end = Math.min(start + chunkSize, file.size);
-                const chunk = file.slice(start, end);
-                await uploadChunk(chunk, i);
-            }
-
-            progressText.textContent = 'Finalizing upload...';
-
-            const finalizeData = new FormData(form);
-            finalizeData.append('upload_id', uploadId);
-            finalizeData.append('original_name', file.name);
-            finalizeData.append('total_chunks', totalChunks);
-            finalizeData.append('file_size', file.size);
-            finalizeData.append('mime_type', file.type || 'application/octet-stream');
-
-            const finalizeXhr = new XMLHttpRequest();
-            finalizeXhr.open('POST', 'upload_video_finalize.php', true);
-
-            finalizeXhr.onload = function() {
-                if (finalizeXhr.status === 200) {
-                    try {
-                        const res = JSON.parse(finalizeXhr.responseText);
-                        if (res.ok) {
-                            progressBar.style.width = '100%';
-                            progressText.textContent = 'Upload complete! Redirecting...';
-                            window.location.href = res.redirect;
-                        } else {
-                            progressText.textContent = 'Finalize failed.';
-                            if (res.errors && res.errors.length) {
-                                errorBox.innerHTML = res.errors.join('<br>');
-                                errorBox.style.display = 'block';
-                            }
-                        }
-                    } catch (err) {
-                        progressText.textContent = 'Unexpected response.';
-                    }
-                } else {
-                    progressText.textContent = 'Finalize failed. Try again.';
-                }
-            };
-
-            finalizeXhr.onerror = function() {
-                progressText.textContent = 'Network error on finalize.';
-            };
-
-            finalizeXhr.send(finalizeData);
-        } catch (err) {
-            progressText.textContent = 'Upload failed.';
-            errorBox.innerHTML = err;
-            errorBox.style.display = 'block';
-        }
-    });
 });
 </script>
 </head>
 <body>
 <div class="container">
-    <h1>Upload Video</h1>
+    <h1>Add Existing Video</h1>
+    <div class="note">Upload videos directly in Hostinger File Manager to: <strong>/uploads/videos/hostinger_uploads</strong></div>
 
     <?php if (!empty($errors)) { ?>
-        <div class="message error" id="errorBox"><?php echo implode('<br>', array_map('htmlspecialchars', $errors)); ?></div>
-    <?php } else { ?>
-        <div class="message error" id="errorBox" style="display:none"></div>
+        <div class="message error"><?php echo implode('<br>', array_map('htmlspecialchars', $errors)); ?></div>
     <?php } ?>
 
-    <?php if ($success) { ?>
-        <div class="message success"><?php echo htmlspecialchars($success); ?></div>
-    <?php } ?>
-
-    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+    <form method="POST">
         <div class="grid">
             <div>
                 <label>Video Title</label>
@@ -326,13 +194,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <label>Description</label>
                 <textarea name="description" placeholder="Optional"></textarea>
 
-                <label>Choose Video File</label>
-                <input type="file" name="video_file" accept="video/*" required>
-
-                <div class="progress-wrap" id="progressWrap">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                <div class="progress-text" id="progressText">Upload progress will appear here.</div>
+                <label>Select File from Folder</label>
+                <select name="existing_file" required>
+                    <option value="">-- Select File --</option>
+                    <?php foreach ($files as $file) { ?>
+                        <option value="<?= htmlspecialchars($file) ?>"><?= htmlspecialchars($file) ?></option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div>
@@ -378,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <div class="actions">
-            <button type="submit">Upload Video</button>
+            <button type="submit">Save & Assign Video</button>
         </div>
     </form>
 </div>
