@@ -26,87 +26,8 @@ $courses = $conn->query("
     SELECT course FROM students26
 ");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $students = $_POST['students'] ?? [];
-
-    if ($title === '') {
-        $errors[] = 'Title is required.';
-    }
-
-    if (!isset($_FILES['video_file']) || $_FILES['video_file']['error'] !== UPLOAD_ERR_OK) {
-        $errors[] = 'Video file is required.';
-    }
-
-    $allowed_ext = ['mp4', 'webm', 'ogg', 'mov', 'm4v'];
-
-    if (empty($errors)) {
-        $original = $_FILES['video_file']['name'];
-        $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-        if (!in_array($ext, $allowed_ext, true)) {
-            $errors[] = 'Only MP4, WEBM, OGG, MOV, or M4V files are allowed.';
-        }
-    }
-
-    if (empty($errors)) {
-        $upload_dir = __DIR__ . '/../uploads/videos';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-
-        $safe_name = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-        $target_path = $upload_dir . '/' . $safe_name;
-
-        if (!move_uploaded_file($_FILES['video_file']['tmp_name'], $target_path)) {
-            $errors[] = 'Failed to upload video.';
-        } else {
-            $mime_type = mime_content_type($target_path);
-            $file_size = filesize($target_path);
-
-            $stmt = $conn->prepare("INSERT INTO videos (title, description, file_name, mime_type, file_size, uploaded_at) VALUES (?, ?, ?, ?, ?, NOW())");
-            $stmt->bind_param('ssssi', $title, $description, $safe_name, $mime_type, $file_size);
-            if (!$stmt->execute()) {
-                $errors[] = 'Failed to save video details: ' . $stmt->error;
-            } else {
-                $video_id = $stmt->insert_id;
-                $stmt->close();
-
-                if (!empty($students)) {
-                    $stmt2 = $conn->prepare("INSERT IGNORE INTO video_assignments (video_id, student_id, student_table) VALUES (?, ?, ?)");
-                    foreach ($students as $student_value) {
-                        if (strpos($student_value, ':') === false) continue;
-                        list($table, $student_id) = explode(':', $student_value);
-                        $student_id = (int) $student_id;
-                        $table = trim($table);
-                        if ($student_id > 0 && $table !== '') {
-                            $stmt2->bind_param('iis', $video_id, $student_id, $table);
-                            $stmt2->execute();
-                        }
-                    }
-                    $stmt2->close();
-                }
-
-                $success = 'Video uploaded and assigned successfully.';
-
-                if (isset($_POST['ajax']) && $_POST['ajax'] === '1') {
-                    header('Content-Type: application/json');
-                    echo json_encode(['ok' => true, 'redirect' => 'view_videos_admin.php?msg=uploaded']);
-                    exit;
-                }
-
-                header('Location: view_videos_admin.php?msg=uploaded');
-                exit;
-            }
-        }
-    }
-
-    if (isset($_POST['ajax']) && $_POST['ajax'] === '1') {
-        header('Content-Type: application/json');
-        echo json_encode(['ok' => false, 'errors' => $errors]);
-        exit;
-    }
-}
+// NOTE: Chunked upload is handled by upload_video_chunk.php and upload_video_finalize.php
+// This page is now primarily for rendering the UI.
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -248,53 +169,136 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressText = document.getElementById('progressText');
     const errorBox = document.getElementById('errorBox');
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         errorBox.innerHTML = '';
         errorBox.style.display = 'none';
 
-        const formData = new FormData(form);
-        formData.append('ajax', '1');
+        const fileInput = form.querySelector('input[name="video_file"]');
+        const titleInput = form.querySelector('input[name="title"]');
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'upload_video.php', true);
+        if (!titleInput.value.trim()) {
+            errorBox.innerHTML = 'Title is required.';
+            errorBox.style.display = 'block';
+            return;
+        }
+        if (!fileInput.files || !fileInput.files.length) {
+            errorBox.innerHTML = 'Video file is required.';
+            errorBox.style.display = 'block';
+            return;
+        }
 
-        xhr.upload.onprogress = function(event) {
-            if (event.lengthComputable) {
-                const percent = Math.round((event.loaded / event.total) * 100);
-                progressWrap.style.display = 'block';
-                progressBar.style.width = percent + '%';
-                progressText.textContent = 'Uploading: ' + percent + '%';
-            }
-        };
+        const file = fileInput.files[0];
+        const chunkSize = 8 * 1024 * 1024; // 8MB
+        const totalChunks = Math.ceil(file.size / chunkSize);
+        const uploadId = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    const res = JSON.parse(xhr.responseText);
-                    if (res.ok) {
-                        progressText.textContent = 'Upload complete! Redirecting...';
-                        window.location.href = res.redirect;
-                    } else {
-                        progressText.textContent = 'Upload failed.';
-                        if (res.errors && res.errors.length) {
-                            errorBox.innerHTML = res.errors.join('<br>');
-                            errorBox.style.display = 'block';
-                        }
+        progressWrap.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Starting upload...';
+
+        let uploadedBytes = 0;
+
+        const uploadChunk = (chunk, chunkIndex) => {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'upload_video_chunk.php', true);
+
+                xhr.upload.onprogress = function(event) {
+                    if (event.lengthComputable) {
+                        const currentLoaded = uploadedBytes + event.loaded;
+                        const percent = Math.min(100, Math.round((currentLoaded / file.size) * 100));
+                        progressBar.style.width = percent + '%';
+                        progressText.textContent = 'Uploading: ' + percent + '%';
                     }
-                } catch (err) {
-                    progressText.textContent = 'Unexpected response.';
-                }
-            } else {
-                progressText.textContent = 'Upload failed. Try again.';
+                };
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.ok) {
+                                uploadedBytes += chunk.size;
+                                resolve();
+                            } else {
+                                reject(res.errors ? res.errors.join('<br>') : 'Chunk upload failed.');
+                            }
+                        } catch (err) {
+                            reject('Unexpected response while uploading.');
+                        }
+                    } else {
+                        reject('Chunk upload failed. Try again.');
+                    }
+                };
+
+                xhr.onerror = function() {
+                    reject('Network error during upload.');
+                };
+
+                const data = new FormData();
+                data.append('upload_id', uploadId);
+                data.append('chunk_index', chunkIndex);
+                data.append('total_chunks', totalChunks);
+                data.append('original_name', file.name);
+                data.append('chunk', chunk);
+
+                xhr.send(data);
+            });
+        };
+
+        try {
+            for (let i = 0; i < totalChunks; i++) {
+                const start = i * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+                await uploadChunk(chunk, i);
             }
-        };
 
-        xhr.onerror = function() {
-            progressText.textContent = 'Network error. Try again.';
-        };
+            progressText.textContent = 'Finalizing upload...';
 
-        xhr.send(formData);
+            const finalizeData = new FormData(form);
+            finalizeData.append('upload_id', uploadId);
+            finalizeData.append('original_name', file.name);
+            finalizeData.append('total_chunks', totalChunks);
+            finalizeData.append('file_size', file.size);
+            finalizeData.append('mime_type', file.type || 'application/octet-stream');
+
+            const finalizeXhr = new XMLHttpRequest();
+            finalizeXhr.open('POST', 'upload_video_finalize.php', true);
+
+            finalizeXhr.onload = function() {
+                if (finalizeXhr.status === 200) {
+                    try {
+                        const res = JSON.parse(finalizeXhr.responseText);
+                        if (res.ok) {
+                            progressBar.style.width = '100%';
+                            progressText.textContent = 'Upload complete! Redirecting...';
+                            window.location.href = res.redirect;
+                        } else {
+                            progressText.textContent = 'Finalize failed.';
+                            if (res.errors && res.errors.length) {
+                                errorBox.innerHTML = res.errors.join('<br>');
+                                errorBox.style.display = 'block';
+                            }
+                        }
+                    } catch (err) {
+                        progressText.textContent = 'Unexpected response.';
+                    }
+                } else {
+                    progressText.textContent = 'Finalize failed. Try again.';
+                }
+            };
+
+            finalizeXhr.onerror = function() {
+                progressText.textContent = 'Network error on finalize.';
+            };
+
+            finalizeXhr.send(finalizeData);
+        } catch (err) {
+            progressText.textContent = 'Upload failed.';
+            errorBox.innerHTML = err;
+            errorBox.style.display = 'block';
+        }
     });
 });
 </script>
