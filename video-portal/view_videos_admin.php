@@ -63,13 +63,23 @@ $videos = $conn->query("
             </thead>
             <tbody>
                 <?php while ($row = $videos->fetch_assoc()) { ?>
+                    <?php
+                        $viewPath = $row['file_name'];
+                        $candidate = __DIR__ . '/../uploads/videos/' . $viewPath;
+                        if (!file_exists($candidate)) {
+                            $fallback = __DIR__ . '/../uploads/videos/hostinger_uploads/' . $viewPath;
+                            if (file_exists($fallback)) {
+                                $viewPath = 'hostinger_uploads/' . $viewPath;
+                            }
+                        }
+                    ?>
                     <tr>
                         <td><?= htmlspecialchars($row['title']) ?></td>
                         <td><?= htmlspecialchars($row['file_name']) ?></td>
                         <td><?= (int) $row['assigned_count'] ?></td>
                         <td><?= date('d M Y, h:i A', strtotime($row['uploaded_at'])) ?></td>
                         <td>
-                            <a class="btn view" href="../uploads/videos/<?= urlencode($row['file_name']) ?>" target="_blank">View</a>
+                            <a class="btn view" href="../uploads/videos/<?= urlencode($viewPath) ?>" target="_blank">View</a>
                             <a class="btn assign" href="video_reassign.php?video_id=<?= (int) $row['id'] ?>">Assign</a>
                         </td>
                     </tr>

@@ -87,10 +87,20 @@ if (!$video) {
             <p class="desc"><?= nl2br(htmlspecialchars($video['description'])) ?></p>
         <?php } ?>
 
-        <video controls preload="metadata">
-            <source src="../../uploads/videos/<?= htmlspecialchars($video['file_name']) ?>" type="<?= htmlspecialchars($video['mime_type']) ?>">
-            Your browser does not support the video tag.
-        </video>
+<?php
+    $video_path = $video['file_name'];
+    $candidate = __DIR__ . '/../../uploads/videos/' . $video_path;
+    if (!file_exists($candidate)) {
+        $fallback = __DIR__ . '/../../uploads/videos/hostinger_uploads/' . $video_path;
+        if (file_exists($fallback)) {
+            $video_path = 'hostinger_uploads/' . $video_path;
+        }
+    }
+?>
+<video controls preload="metadata">
+    <source src="../../uploads/videos/<?= htmlspecialchars($video_path) ?>" type="<?= htmlspecialchars($video['mime_type']) ?>">
+    Your browser does not support the video tag.
+</video>
         <div class="meta">Uploaded on <?= date('d M Y, h:i A', strtotime($video['uploaded_at'])) ?></div>
     </div>
 </div>

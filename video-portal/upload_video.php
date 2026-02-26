@@ -73,9 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $mime_type = mime_content_type($file_path);
         $file_size = filesize($file_path);
+        $stored_name = 'hostinger_uploads/' . $selected_file;
 
         $stmt = $conn->prepare("INSERT INTO videos (title, description, file_name, mime_type, file_size, uploaded_at) VALUES (?, ?, ?, ?, ?, NOW())");
-        $stmt->bind_param('ssssi', $title, $description, $selected_file, $mime_type, $file_size);
+        $stmt->bind_param('ssssi', $title, $description, $stored_name, $mime_type, $file_size);
         if (!$stmt->execute()) {
             $errors[] = 'Failed to save video details: ' . $stmt->error;
         } else {
