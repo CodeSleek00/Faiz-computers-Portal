@@ -1,112 +1,97 @@
 <?php
-session_start();
 include '../../database_connection/db_connect.php';
+session_start();
 
-// ✅ Login check
-if (!isset($_SESSION['enrollment_id'])) {
-    header("Location: login.php");
-    exit;
+if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'])) {
+    die('Please login.');
 }
 
-$student_id    = $_SESSION['student_id'];
-$student_table = $_SESSION['student_table']; // 'students' or 'students26'
+$enrollment   = $_SESSION['enrollment_id'];
+$studentTable = $_SESSION['student_table'];
 
-// Fetch student details
-$stmt = $conn->prepare("SELECT * FROM $student_table WHERE " . ($student_table == 'students' ? "student_id" : "id") . "=?");
-$stmt->bind_param("i", $student_id);
+$idColumn = ($studentTable === 'students') ? 'student_id' : 'id';
+
+$stmt = $conn->prepare("SELECT $idColumn AS student_id, name FROM $studentTable WHERE enrollment_id = ? LIMIT 1");
+$stmt->bind_param('s', $enrollment);
 $stmt->execute();
 $student = $stmt->get_result()->fetch_assoc();
 
-// Fetch assigned videos (individual + batch)
-$sql = "SELECT v.* 
-        FROM videos v
-        JOIN video_assignments va ON v.video_id = va.video_id
-        LEFT JOIN student_batches sb 
-               ON va.batch_id = sb.batch_id 
-               AND sb.student_id=? AND sb.student_table=?
-        WHERE (va.student_id=? AND va.student_table=?) 
-           OR (va.batch_id IS NOT NULL AND sb.id IS NOT NULL)
-        ORDER BY v.upload_date DESC";
+if (!$student) {
+    die('Student not found.');
+}
 
-$stmt2 = $conn->prepare($sql);
-$stmt2->bind_param("isis",$student_id,$student_table,$student_id,$student_table);
-$stmt2->execute();
-$videos = $stmt2->get_result();
+$student_id = (int) $student['student_id'];
+$student_name = $student['name'];
+
+$stmt = $conn->prepare("
+    SELECT v.*
+    FROM videos v
+    INNER JOIN video_assignments a ON a.video_id = v.id
+    WHERE a.student_id = ? AND a.student_table = ?
+    ORDER BY v.uploaded_at DESC
+");
+$stmt->bind_param('is', $student_id, $studentTable);
+$stmt->execute();
+$videos = $stmt->get_result();
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title><?= htmlspecialchars($student['name']) ?> - Videos</title>
-    <link rel="stylesheet" href="../assets/style.css">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f8f9fa;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #4361ee;
-        }
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
-            gap: 1.5rem;
-        }
-        .video-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .video-card h3 {
-            margin: 0 0 0.5rem;
-            color: #3f37c9;
-        }
-        .video-card p {
-            font-size: 0.9rem;
-            color: #555;
-        }
-        .logout-btn {
-            display: inline-block;
-            margin-bottom: 1rem;
-            padding: 0.5rem 1rem;
-            background: #ff3333;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Videos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: #1d4ed8;
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding: 24px; color: var(--text); }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { margin-bottom: 20px; }
+    .header h1 { margin: 0 0 6px; font-size: 24px; }
+    .header p { color: var(--muted); margin: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); border: 1px solid var(--border); }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .card p { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+    video { width: 100%; border-radius: 10px; background: #000; }
+    .meta { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .empty { background: var(--card); padding: 24px; border-radius: var(--radius); text-align: center; border: 1px dashed var(--border); color: var(--muted); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <a href="logout.php" class="logout-btn">Logout</a>
-        <h1>Welcome, <?= htmlspecialchars($student['name']) ?></h1>
-
-        <?php if ($videos->num_rows > 0): ?>
-            <div class="video-grid">
-                <?php while($v = $videos->fetch_assoc()): ?>
-                    <div class="video-card">
-                        <h3><?= htmlspecialchars($v['title']) ?></h3>
-                        <video width="100%" controls>
-                            <source src="../videos/<?= htmlspecialchars($v['filename']) ?>" type="video/mp4">
-                        </video>
-                        <p><?= htmlspecialchars($v['description']) ?></p>
-                        <p>Uploaded on: <?= $v['upload_date'] ?></p>
-                    </div>
-                <?php endwhile; ?>
-            </div>
-        <?php else: ?>
-            <p style="text-align:center; margin-top:2rem;">No videos assigned to you yet.</p>
-        <?php endif; ?>
+<div class="container">
+    <div class="header">
+        <h1>Welcome, <?= htmlspecialchars($student_name) ?></h1>
+        <p>Here are the videos assigned to you.</p>
     </div>
+
+    <?php if ($videos && $videos->num_rows > 0) { ?>
+        <div class="grid">
+            <?php while ($v = $videos->fetch_assoc()) { ?>
+                <div class="card">
+                    <h3><?= htmlspecialchars($v['title']) ?></h3>
+                    <?php if (!empty($v['description'])) { ?>
+                        <p><?= nl2br(htmlspecialchars($v['description'])) ?></p>
+                    <?php } ?>
+                    <video controls preload="metadata">
+                        <source src="../../uploads/videos/<?= htmlspecialchars($v['file_name']) ?>" type="<?= htmlspecialchars($v['mime_type']) ?>">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="meta">Uploaded on <?= date('d M Y, h:i A', strtotime($v['uploaded_at'])) ?></div>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } else { ?>
+        <div class="empty">No videos assigned yet.</div>
+    <?php } ?>
+</div>
 </body>
 </html>
