@@ -485,6 +485,10 @@ $total = $row['total_students'];
                     <i class="fas fa-layer-group"></i>
                     <span>Batches</span>
                 </a>
+                <a href="attendence/view_attendance.php" class="menu-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Attendance</span>
+                </a>
                 <a href="fee/admin_fee_dashboard.php" class="menu-item">
                     <i class="fa-solid fa-receipt"></i>
                     <span>Fee</span>
@@ -657,6 +661,20 @@ $total = $row['total_students'];
                         <div class="action-links">
                             <a href="batch/create_batch.php" class="action-link">Create Batch</a>
                             <a href="batch/view_batch.php" class="action-link">View Batches</a>
+                        </div>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-card-header">
+                            <div class="action-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <h4>Attendance Management</h4>
+                        </div>
+                        <div class="action-links">
+                            <a href="attendence/mark_attendance.php" class="action-link">Mark Attendance</a>
+                            <a href="attendence/view_attendance.php" class="action-link">View Attendance</a>
+                            <a href="attendence/student_attendance.php" class="action-link">Student Attendance</a>
                         </div>
                     </div>
 
