@@ -107,6 +107,7 @@
             <b>Month:</b> <?= $f['month_name'] ?><br>
             <b>Amount:</b> ₹<?= $f['fee_amount'] ?><br>
             <b>Mode:</b> <?= $f['payment_mode'] ?><br>
+            <b>Phone:</b> <?= $f['phone'] ?><br>
             <b>Date:</b> <?= date('d-M-Y', strtotime($f['payment_date'])) ?>
         </div>
         <?php endwhile; ?>
