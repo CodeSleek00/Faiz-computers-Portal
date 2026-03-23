@@ -180,7 +180,6 @@ th{
 
 <div class="header">
     <div class="institute-name">FAIZ COMPUTER INSTITUTE</div>
-    <div class="institute-tagline">Quality Computer Education Since 2005</div>
     <div class="form-title">Student Admission Form</div>
 </div>
 
