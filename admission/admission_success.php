@@ -174,9 +174,6 @@ th{
 
 <div class="a4">
 
-<div class="enrollment-id">
-    Enrollment ID : <?= $data['enrollment_id'] ?>
-</div>
 
 <div class="header">
     <div class="institute-name">FAIZ COMPUTER INSTITUTE</div>
@@ -237,6 +234,7 @@ th{
 <?php } ?>
 
 <tr><td>Parents Contact</td><td><?= $data['parent_contact'] ?></td></tr>
+<tr><td>Enrollment ID : <?= $data['enrollment_id'] ?></td></tr>
 </table>
 
 </div>
