@@ -62,7 +62,6 @@ body{
 /* ===== HEADER ===== */
 .header{
     text-align:center;
-    margin-top:15mm;
     border-bottom:2px solid #2c3e50;
     padding-bottom:10px;
 }
@@ -234,7 +233,7 @@ th{
 <?php } ?>
 
 <tr><td>Parents Contact</td><td><?= $data['parent_contact'] ?></td></tr>
-<tr><td>Enrollment ID :</td><td><?= $data['enrollment_id'] ?></td></tr>
+<tr><td>Enrollment ID </td><td><?= $data['enrollment_id'] ?></td></tr>
 </table>
 
 </div>
