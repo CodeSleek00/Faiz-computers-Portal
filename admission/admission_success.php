@@ -234,7 +234,7 @@ th{
 <?php } ?>
 
 <tr><td>Parents Contact</td><td><?= $data['parent_contact'] ?></td></tr>
-<tr><td>Enrollment ID : <?= $data['enrollment_id'] ?></td></tr>
+<tr><td>Enrollment ID :</td><td><?= $data['enrollment_id'] ?></td></tr>
 </table>
 
 </div>
