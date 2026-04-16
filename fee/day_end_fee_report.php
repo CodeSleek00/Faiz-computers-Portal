@@ -1,4 +1,104 @@
 <?php
+session_start();
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+// Password protection
+$correct_password = "faiz123"; // Change this to your desired password
+
+if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
+        if ($_POST['password'] === $correct_password) {
+            $_SESSION['authenticated'] = true;
+        } else {
+            $error = "Incorrect password!";
+        }
+    }
+
+    if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+        // Show password form
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Access Restricted</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                    background: #f9fafb;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }
+                .login-container {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                    max-width: 400px;
+                    width: 100%;
+                }
+                h1 {
+                    color: #374151;
+                    margin-bottom: 8px;
+                }
+                p {
+                    color: #6b7280;
+                    margin-bottom: 24px;
+                }
+                input[type="password"] {
+                    width: 100%;
+                    padding: 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    margin-bottom: 16px;
+                }
+                button {
+                    background: #2563eb;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    width: 100%;
+                }
+                .error {
+                    color: #ef4444;
+                    margin-bottom: 16px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="login-container">
+                <h1>🔒 Access Restricted</h1>
+                <p>Enter the password to access the Day End Fee Report.</p>
+                <?php if (isset($error)): ?>
+                    <div class="error"><?php echo $error; ?></div>
+                <?php endif; ?>
+                <form method="POST">
+                    <input type="password" name="password" placeholder="Enter password" required>
+                    <button type="submit">Access Report</button>
+                </form>
+            </div>
+        </body>
+        </html>
+        <?php
+        exit;
+    }
+}
+
 include("db_connect.php");
 
 // Date select logic
@@ -109,7 +209,10 @@ $modes = $conn->query("
 
 <body>
 
-<h2>📅 Day End Fee Report</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>📅 Day End Fee Report</h2>
+    <a href="?logout=1" style="background: #e74c3c; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-weight: 600;">Logout</a>
+</div>
 
 <div class="filter-box">
     <form method="GET">
