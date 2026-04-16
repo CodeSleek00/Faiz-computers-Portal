@@ -82,12 +82,24 @@ $total = count($questions);
         function startTimer(){
             const timerEl=document.getElementById("timer");
             const interval=setInterval(()=>{
-                if(duration<=0){ clearInterval(interval); alert("Time's up! Submitting exam."); document.getElementById("examForm").submit(); }
+                if(duration<=0){ clearInterval(interval); alert("Time's up! Submitting exam."); submitExam(); }
                 let mins=Math.floor(duration/60);
                 let secs=duration%60;
                 timerEl.innerText=`${mins}:${secs<10?'0'+secs:secs}`;
                 duration--;
             },1000);
+        }
+
+        function submitExam(){
+            const form = document.getElementById("examForm");
+            const answers = document.querySelectorAll('input[type="radio"]:checked');
+            
+            if(answers.length === 0){
+                alert("Please answer at least one question before submitting!");
+                return false;
+            }
+            
+            form.submit();
         }
 
         window.onload = ()=>{ showQuestion(0); startTimer(); }
@@ -135,7 +147,7 @@ $total = count($questions);
             <button type="button" class="btn" onclick="nextQuestion()" id="nextBtn">Next ➡</button>
         </div>
 
-        <button type="submit" class="btn submit-btn" id="submitBtn" style="display:none;">✅ Submit Exam</button>
+        <button type="button" class="btn submit-btn" id="submitBtn" onclick="submitExam()" style="display:none;">✅ Submit Exam</button>
     </form>
 </div>
 </body>
