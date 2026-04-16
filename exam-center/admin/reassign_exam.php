@@ -9,9 +9,9 @@ if ($exam_id <= 0) {
 
 /* ================= FETCH ALL STUDENTS ================= */
 $students = $conn->query("
-    SELECT student_id AS sid, name, 'students' AS student_table FROM students
+    SELECT student_id AS sid, name, photo, 'students' AS student_table FROM students
     UNION ALL
-    SELECT id AS sid, name, 'students26' AS student_table FROM students26
+    SELECT id AS sid, name, photo, 'students26' AS student_table FROM students26
     ORDER BY name ASC
 ");
 
@@ -28,10 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
 
-        /* ===== DELETE OLD ASSIGNMENTS ===== */
-        $del = $conn->prepare("DELETE FROM exam_assignments WHERE exam_id=?");
-        $del->bind_param("i", $exam_id);
-        $del->execute();
+       
 
         /* ================= ASSIGN TO STUDENTS ================= */
         if ($assign_type === 'student' && !empty($_POST['students_assign'])) {
@@ -105,15 +102,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{font-family:Poppins;background:#f1f5f9;padding:20px}
-.box{background:#fff;padding:25px;border-radius:10px;max-width:800px;margin:auto}
-h2{text-align:center;color:#4f46e5}
-label{font-weight:600;margin-top:15px;display:block}
-select{width:100%;padding:10px;margin-top:5px}
-.list{border:1px solid #ddd;padding:10px;margin-top:10px;max-height:250px;overflow:auto}
-.btn{margin-top:20px;background:#4f46e5;color:#fff;padding:12px;border:none;width:100%;cursor:pointer}
-.msg{margin-bottom:15px;padding:10px;background:#dcfce7;color:#166534}
-.err{margin-bottom:15px;padding:10px;background:#fee2e2;color:#b91c1c}
+body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);padding:20px;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.box{background:#fff;padding:30px;border-radius:15px;max-width:900px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.1);border:1px solid #e5e7eb}
+h2{text-align:center;color:#4f46e5;margin-bottom:30px;font-size:28px;font-weight:600}
+label{font-weight:600;margin-top:20px;display:block;color:#374151;font-size:16px}
+select{width:100%;padding:12px;margin-top:8px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;background:#fff}
+.list{border:1px solid #ddd;padding:15px;margin-top:10px;max-height:300px;overflow:auto;border-radius:8px;background:#f9fafb}
+.student-item{display:flex;align-items:center;margin-bottom:10px;padding:10px;border-radius:8px;background:#fff;border:1px solid #e5e7eb;transition:background 0.2s}
+.student-item:hover{background:#f3f4f6}
+.student-photo{width:40px;height:40px;border-radius:50%;margin-right:15px;object-fit:cover;border:2px solid #e5e7eb}
+.student-info{flex:1}
+.student-name{font-weight:500;color:#111827}
+.student-table{color:#6b7280;font-size:14px}
+.btn{margin-top:25px;background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);color:#fff;padding:14px;border:none;width:100%;cursor:pointer;border-radius:8px;font-size:16px;font-weight:600;transition:transform 0.2s}
+.btn:hover{transform:translateY(-2px)}
+.msg{margin-bottom:20px;padding:12px;background:#dcfce7;color:#166534;border-radius:8px;border:1px solid #bbf7d0}
+.err{margin-bottom:20px;padding:12px;background:#fee2e2;color:#b91c1c;border-radius:8px;border:1px solid #fecaca}
+.search-bar{margin-top:15px}
+.search-bar input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:16px}
 </style>
 </head>
 
@@ -141,14 +147,22 @@ select{width:100%;padding:10px;margin-top:5px}
 <!-- STUDENTS -->
 <div id="students" style="display:none">
 <label>Select Students</label>
-<div class="list">
+<div class="search-bar">
+<input type="text" id="studentSearch" placeholder="Search students..." onkeyup="filterStudents()">
+</div>
+<div class="list" id="studentList">
 <?php while($s=$students->fetch_assoc()): ?>
-<div>
-<input type="checkbox"
-       name="students_assign[]"
-       value="<?= $s['sid'] ?>|<?= $s['student_table'] ?>">
-<?= htmlspecialchars($s['name']) ?>
-<span style="color:#6b7280">(<?= $s['student_table'] ?>)</span>
+<div class="student-item">
+<input type="checkbox" name="students_assign[]" value="<?= $s['sid'] ?>|<?= $s['student_table'] ?>" style="margin-right:15px">
+<?php if(!empty($s['photo'])): ?>
+<img src="../../uploads/<?= htmlspecialchars($s['photo']) ?>" alt="Photo" class="student-photo">
+<?php else: ?>
+<img src="https://via.placeholder.com/40" alt="No Photo" class="student-photo">
+<?php endif; ?>
+<div class="student-info">
+<div class="student-name"><?= htmlspecialchars($s['name']) ?></div>
+<div class="student-table">(<?= $s['student_table'] ?>)</div>
+</div>
 </div>
 <?php endwhile; ?>
 </div>
@@ -159,9 +173,11 @@ select{width:100%;padding:10px;margin-top:5px}
 <label>Select Batches</label>
 <div class="list">
 <?php while($b=$batches->fetch_assoc()): ?>
-<div>
-<input type="checkbox" name="batch_ids[]" value="<?= $b['batch_id'] ?>">
-<?= htmlspecialchars($b['batch_name']) ?>
+<div class="student-item" style="padding:15px;">
+<input type="checkbox" name="batch_ids[]" value="<?= $b['batch_id'] ?>" style="margin-right:15px">
+<div class="student-info">
+<div class="student-name"><?= htmlspecialchars($b['batch_name']) ?></div>
+</div>
 </div>
 <?php endwhile; ?>
 </div>
@@ -176,6 +192,15 @@ select{width:100%;padding:10px;margin-top:5px}
 function toggle(type){
     document.getElementById('students').style.display = (type==='student')?'block':'none';
     document.getElementById('batches').style.display = (type==='batch')?'block':'none';
+}
+
+function filterStudents() {
+    const search = document.getElementById('studentSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.student-item');
+    items.forEach(item => {
+        const name = item.querySelector('.student-name').textContent.toLowerCase();
+        item.style.display = name.includes(search) ? '' : 'none';
+    });
 }
 </script>
 
