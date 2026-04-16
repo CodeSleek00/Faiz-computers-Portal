@@ -1,22 +1,60 @@
 <?php
 include '../database_connection/db_connect.php';
 
-$batch_id = $_POST['batch_id'];
-$date     = $_POST['date'];
-$status   = $_POST['status'];
-foreach ($_POST['status'] as $table => $students) {
-    foreach ($students as $student_id => $status) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-        $conn->query("
-            INSERT INTO attendance 
-            (batch_id, student_id, student_table, attendance_date, status)
-            VALUES 
-            ($batch_id, $student_id, '$table', '$date', '$status')
-        ");
+    $date = $_POST['date'];
+    $statuses = $_POST['status'];
+
+    if (empty($statuses)) {
+        die("No attendance data received.");
     }
+
+    foreach ($statuses as $table_name => $students) {
+
+        foreach ($students as $student_id => $status) {
+
+            $student_id = intval($student_id);
+            $table_name = $conn->real_escape_string($table_name);
+            $status     = $conn->real_escape_string($status);
+
+            /*
+            =====================================
+            CHECK IF ALREADY EXISTS
+            =====================================
+            */
+            $check = $conn->query("
+                SELECT id FROM attendance 
+                WHERE student_id = $student_id 
+                AND table_name = '$table_name'
+                AND date = '$date'
+            ");
+
+            if ($check->num_rows > 0) {
+
+                // UPDATE
+                $conn->query("
+                    UPDATE attendance 
+                    SET status = '$status'
+                    WHERE student_id = $student_id 
+                    AND table_name = '$table_name'
+                    AND date = '$date'
+                ");
+
+            } else {
+
+                // INSERT
+                $conn->query("
+                    INSERT INTO attendance (student_id, table_name, date, status)
+                    VALUES ($student_id, '$table_name', '$date', '$status')
+                ");
+            }
+        }
+    }
+
+    echo "<script>
+        alert('Attendance Saved Successfully!');
+        window.location.href='mark_attendance.php';
+    </script>";
 }
-
-
-
-header("Location: mark_attendance.php?success=1");
-exit;
+?>
