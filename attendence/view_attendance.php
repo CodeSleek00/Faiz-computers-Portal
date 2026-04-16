@@ -3,24 +3,37 @@ include '../database_connection/db_connect.php';
 
 $data = $conn->query("
 SELECT
-    a.attendance_date,
-    b.batch_name,
+    a.date,
+
     CASE
-        WHEN a.student_table = 'students' THEN s.name
-        WHEN a.student_table = 'students26' THEN s26.name
+        WHEN a.table_name = 'students' THEN s.name
+        WHEN a.table_name = 'students26' THEN s26.name
         ELSE 'Unknown'
     END AS student_name,
+
+    CASE
+        WHEN a.table_name = 'students' THEN s.enrollment_id
+        WHEN a.table_name = 'students26' THEN s26.enrollment_id
+    END AS enrollment_id,
+
+    CASE
+        WHEN a.table_name = 'students' THEN s.photo
+        WHEN a.table_name = 'students26' THEN s26.photo
+    END AS photo,
+
     a.status
+
 FROM attendance a
-LEFT JOIN batches b
-    ON a.batch_id = b.batch_id
+
 LEFT JOIN students s
     ON a.student_id = s.student_id
-   AND a.student_table = 'students'
+   AND a.table_name = 'students'
+
 LEFT JOIN students26 s26
     ON a.student_id = s26.id
-   AND a.student_table = 'students26'
-ORDER BY a.attendance_date DESC
+   AND a.table_name = 'students26'
+
+ORDER BY a.date DESC
 ");
 
 if (!$data) {
@@ -28,16 +41,63 @@ if (!$data) {
 }
 ?>
 
-<table border="1" cellpadding="10">
+<!DOCTYPE html>
+<html>
+<head>
+<title>View Attendance</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f4f6f9;
+    padding:20px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+}
+th,td{
+    border:1px solid #ccc;
+    padding:10px;
+    text-align:center;
+}
+img{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    object-fit:cover;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>📊 Attendance Records</h2>
+
+<table>
 <tr>
-<th>Date</th><th>Batch</th><th>Student</th><th>Status</th>
+    <th>Date</th>
+    <th>Photo</th>
+    <th>Enrollment ID</th>
+    <th>Student Name</th>
+    <th>Status</th>
 </tr>
-<?php while($row=$data->fetch_assoc()){ ?>
+
+<?php while($row = $data->fetch_assoc()): ?>
 <tr>
-<td><?= $row['attendance_date'] ?></td>
-<td><?= $row['batch_name'] ?></td>
-<td><?= htmlspecialchars($row['student_name']) ?></td>
-<td><?= $row['status'] ?></td>
+    <td><?= $row['date'] ?></td>
+    <td>
+        <img src="../uploads/<?= !empty($row['photo']) ? $row['photo'] : 'default.png' ?>">
+    </td>
+    <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
+    <td><?= htmlspecialchars($row['student_name']) ?></td>
+    <td><?= $row['status'] ?></td>
 </tr>
-<?php } ?>
+<?php endwhile; ?>
+
 </table>
+
+</body>
+</html>
