@@ -59,8 +59,12 @@ input{
 <h2>📋 All Students Attendance</h2>
 
 <form method="GET">
-    <label>Select Date:</label>
+    <label>Date:</label>
     <input type="date" name="date" required>
+
+    <label>Search:</label>
+    <input type="text" name="search" placeholder="Name / Enrollment ID">
+
     <button type="submit">Load Students</button>
 </form>
 
@@ -68,19 +72,21 @@ input{
 if(isset($_GET['date'])):
 
 $date = $_GET['date'];
+$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
 /*
 ========================================
- FETCH ALL STUDENTS WITH PHOTO
+ FETCH WITH SEARCH + COURSE
 ========================================
 */
-$students = $conn->query("
+$query = "
 SELECT 
     student_id AS id,
     'students' AS table_name,
     name,
     enrollment_id,
-    photo
+    photo,
+    course
 FROM students
 
 UNION ALL
@@ -90,11 +96,22 @@ SELECT
     'students26' AS table_name,
     name,
     enrollment_id,
-    photo
+    photo,
+    course
 FROM students26
+";
 
-ORDER BY name
-");
+if(!empty($search)){
+    $query = "
+    SELECT * FROM ($query) AS all_students
+    WHERE name LIKE '%$search%' 
+       OR enrollment_id LIKE '%$search%'
+    ";
+}
+
+$query .= " ORDER BY name";
+
+$students = $conn->query($query);
 ?>
 
 <form action="save_attendance.php" method="POST">
@@ -106,6 +123,7 @@ ORDER BY name
     <th>Photo</th>
     <th>Enrollment ID</th>
     <th>Name</th>
+    <th>Course</th>
     <th>Status</th>
 </tr>
 
@@ -113,10 +131,11 @@ ORDER BY name
 <?php while($st = $students->fetch_assoc()): ?>
 <tr>
     <td>
-        <img src="../uploads/<?= htmlspecialchars($st['photo']) ?>" alt="photo">
+        <img src="../uploads/<?= !empty($st['photo']) ? $st['photo'] : 'default.png' ?>">
     </td>
     <td><?= htmlspecialchars($st['enrollment_id']) ?></td>
     <td><?= htmlspecialchars($st['name']) ?></td>
+    <td><?= htmlspecialchars($st['course']) ?></td>
     <td>
         <select name="status[<?= $st['table_name'] ?>][<?= $st['id'] ?>]">
             <option value="Present">Present</option>
@@ -128,7 +147,7 @@ ORDER BY name
 
 <?php else: ?>
 <tr>
-    <td colspan="4">No students found</td>
+    <td colspan="5">No students found</td>
 </tr>
 <?php endif; ?>
 
