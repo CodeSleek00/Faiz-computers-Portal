@@ -1,52 +1,54 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include("db_connect.php");
 
-/* ================= MONTH SET ================= */
+/* ================= MONTH ================= */
 $month_no = $_GET['month_no'] ?? date('n');
 $monthName = date('F', mktime(0,0,0,$month_no,1));
 
-/* ================= DEFAULTERS QUERY ================= */
-$defaulters = $conn->query("
+/* ================= QUERY ================= */
+$sql = "
 
-    /* STUDENTS TABLE */
-    SELECT 
-        s.student_id AS sid,
-        s.name,
-        s.enrollment_id,
-        s.course AS course_name,
-        s.photo,
-        'students' AS tbl
-    FROM students s
-    WHERE s.student_id NOT IN (
-        SELECT student_id 
-        FROM student_monthly_fee 
-        WHERE month_no='$month_no'
-        AND fee_type='Monthly'
-        AND payment_status='Paid'
-    )
+SELECT 
+    s.student_id AS sid,
+    s.name,
+    s.enrollment_id,
+    s.course AS course_name,
+    s.photo,
+    'students' AS tbl
+FROM students s
+LEFT JOIN student_monthly_fee f 
+    ON f.student_id = s.student_id 
+    AND f.month_no = '$month_no'
+    AND f.fee_type='Monthly'
+WHERE f.payment_status IS NULL OR f.payment_status != 'Paid'
 
-    UNION ALL
+UNION ALL
 
-    /* STUDENTS26 TABLE */
-    SELECT 
-        s2.id AS sid,
-        s2.name,
-        s2.enrollment_id,
-        s2.course AS course_name,
-        s2.photo,
-        'students26' AS tbl
-    FROM students26 s2
-    WHERE s2.id NOT IN (
-        SELECT student_id 
-        FROM student_monthly_fee 
-        WHERE month_no='$month_no'
-        AND fee_type='Monthly'
-        AND payment_status='Paid'
-    )
+SELECT 
+    s2.id AS sid,
+    s2.name,
+    s2.enrollment_id,
+    s2.course AS course_name,
+    s2.photo,
+    'students26' AS tbl
+FROM students26 s2
+LEFT JOIN student_monthly_fee f 
+    ON f.student_id = s2.id 
+    AND f.month_no = '$month_no'
+    AND f.fee_type='Monthly'
+WHERE f.payment_status IS NULL OR f.payment_status != 'Paid'
 
-    ORDER BY name ASC
+ORDER BY name ASC
+";
 
-");
+$defaulters = $conn->query($sql);
+
+if(!$defaulters){
+    die("SQL Error: " . $conn->error);
+}
 
 $total = $defaulters->num_rows;
 ?>
