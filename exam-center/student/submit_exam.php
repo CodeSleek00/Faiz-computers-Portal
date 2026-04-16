@@ -24,8 +24,13 @@ $student_id = $student['student_id'] ?? $student['id']; // students26 may have `
 $exam_id = intval($_POST['exam_id'] ?? 0);
 $answers = $_POST['answers'] ?? [];
 
-if (!$exam_id || empty($answers)) {
-    die("Invalid submission.");
+// Better error handling
+if (!$exam_id) {
+    die("Error: Exam ID not received. Please try again.");
+}
+
+if (empty($answers)) {
+    die("Error: You haven't answered any questions. Please answer at least one question before submitting.");
 }
 
 // Fetch correct answers
