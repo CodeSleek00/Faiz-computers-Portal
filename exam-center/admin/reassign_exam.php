@@ -100,26 +100,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <title>Re-Assign Exam</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<link rel="stylesheet" href="../../css/global-theme.css">
 <style>
-body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);padding:20px;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.box{background:#fff;padding:30px;border-radius:15px;max-width:900px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.1);border:1px solid #e5e7eb}
-h2{text-align:center;color:#4f46e5;margin-bottom:30px;font-size:28px;font-weight:600}
-label{font-weight:600;margin-top:20px;display:block;color:#374151;font-size:16px}
-select{width:100%;padding:12px;margin-top:8px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;background:#fff}
-.list{border:1px solid #ddd;padding:15px;margin-top:10px;max-height:300px;overflow:auto;border-radius:8px;background:#f9fafb}
-.student-item{display:flex;align-items:center;margin-bottom:10px;padding:10px;border-radius:8px;background:#fff;border:1px solid #e5e7eb;transition:background 0.2s}
-.student-item:hover{background:#f3f4f6}
-.student-photo{width:40px;height:40px;border-radius:50%;margin-right:15px;object-fit:cover;border:2px solid #e5e7eb}
-.student-info{flex:1}
-.student-name{font-weight:500;color:#111827}
-.student-table{color:#6b7280;font-size:14px}
-.btn{margin-top:25px;background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);color:#fff;padding:14px;border:none;width:100%;cursor:pointer;border-radius:8px;font-size:16px;font-weight:600;transition:transform 0.2s}
-.btn:hover{transform:translateY(-2px)}
-.msg{margin-bottom:20px;padding:12px;background:#dcfce7;color:#166534;border-radius:8px;border:1px solid #bbf7d0}
-.err{margin-bottom:20px;padding:12px;background:#fee2e2;color:#b91c1c;border-radius:8px;border:1px solid #fecaca}
-.search-bar{margin-top:15px}
-.search-bar input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:16px}
+body{background: var(--color-gray-50); padding:20px; display:flex; align-items:center; justify-content:center; min-height:100vh;}
+.box{background: var(--color-white); padding:30px; border-radius:12px; max-width:900px; width:100%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border: 1px solid var(--color-border);}
+h2{text-align:center; color: var(--color-blue-primary); margin-bottom:30px; font-size:28px; font-weight:600;}
+label{font-weight:600; margin-top:20px; display:block; color: var(--color-text-dark); font-size:16px;}
+select{width:100%; padding:12px; margin-top:8px; border:1px solid var(--color-border); border-radius:8px; font-size:16px; background: var(--color-white);}
+.list{border:1px solid var(--color-border); padding:15px; margin-top:10px; max-height:300px; overflow:auto; border-radius:8px; background: var(--color-gray-50);}
+.student-item{display:flex; align-items:center; margin-bottom:10px; padding:12px; border-radius:8px; background: var(--color-white); border:1px solid var(--color-gray-200); transition: background 0.2s;}
+.student-item:hover{background: var(--color-gray-100);}
+.student-photo{width:45px; height:45px; border-radius:50%; margin-right:15px; object-fit:cover; border:2px solid var(--color-blue-light);}
+.student-info{flex:1;}
+.student-name{font-weight:500; color: var(--color-text-dark);}
+.student-table{color: var(--color-text-light); font-size:14px;}
+.btn{margin-top:25px; background: var(--color-blue-primary); color: var(--color-white); padding:14px; border:none; width:100%; cursor:pointer; border-radius:8px; font-size:16px; font-weight:600; transition: background 0.2s;}
+.btn:hover{background: var(--color-blue-dark);}
+.msg{margin-bottom:20px; padding:12px; background: var(--color-success); color: var(--color-white); border-radius:8px; border:1px solid var(--color-success);}
+.err{margin-bottom:20px; padding:12px; background: var(--color-danger); color: var(--color-white); border-radius:8px; border:1px solid var(--color-danger);}
+.search-bar{margin-top:15px;}
+.search-bar input{width:100%; padding:12px; border:1px solid var(--color-border); border-radius:8px; font-size:16px;}
 </style>
 </head>
 
