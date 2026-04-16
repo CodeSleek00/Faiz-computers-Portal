@@ -1,14 +1,12 @@
 <?php
 include '../database_connection/db_connect.php';
-
-// Fetch batches
-$batches = $conn->query("SELECT * FROM batches ORDER BY batch_name");
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
 <title>Mark Attendance</title>
+
 <style>
 body{
     font-family: Arial;
@@ -19,6 +17,8 @@ body{
     background:#fff;
     padding:20px;
     border-radius:8px;
+    max-width:1100px;
+    margin:auto;
 }
 table{
     width:100%;
@@ -30,6 +30,12 @@ th,td{
     padding:10px;
     text-align:center;
 }
+img{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+}
 button{
     padding:10px 20px;
     background:#2ecc71;
@@ -38,81 +44,66 @@ button{
     border-radius:5px;
     cursor:pointer;
 }
+input{
+    padding:8px;
+    margin:5px;
+}
 </style>
+
 </head>
 
 <body>
 
 <div class="card">
-<h2>📋 Batch Wise Attendance</h2>
+
+<h2>📋 All Students Attendance</h2>
 
 <form method="GET">
-    <label>Date:</label>
+    <label>Select Date:</label>
     <input type="date" name="date" required>
-
-    <label>Batch:</label>
-    <select name="batch_id" required>
-        <option value="">Select Batch</option>
-        <?php while($b = $batches->fetch_assoc()){ ?>
-            <option value="<?= $b['batch_id'] ?>">
-                <?= htmlspecialchars($b['batch_name']) ?>
-            </option>
-        <?php } ?>
-    </select>
-
     <button type="submit">Load Students</button>
 </form>
 
 <?php
-if(isset($_GET['batch_id'], $_GET['date'])):
+if(isset($_GET['date'])):
 
-$batch_id = intval($_GET['batch_id']);
-$date     = $_GET['date'];
+$date = $_GET['date'];
 
 /*
-==================================================
- CORRECT JOIN (students.student_id & students26.id)
-==================================================
+========================================
+ FETCH ALL STUDENTS WITH PHOTO
+========================================
 */
 $students = $conn->query("
 SELECT 
-    sb.student_id,
-    sb.student_table,
+    student_id AS id,
+    'students' AS table_name,
+    name,
+    enrollment_id,
+    photo
+FROM students
 
-    CASE 
-        WHEN sb.student_table = 'students' 
-            THEN s.name
-        WHEN sb.student_table = 'students26' 
-            THEN s26.name
-    END AS name,
+UNION ALL
 
-    CASE 
-        WHEN sb.student_table = 'students' 
-            THEN s.enrollment_id
-        WHEN sb.student_table = 'students26' 
-            THEN s26.enrollment_id
-    END AS enrollment_id
+SELECT 
+    id AS id,
+    'students26' AS table_name,
+    name,
+    enrollment_id,
+    photo
+FROM students26
 
-FROM student_batches sb
-
-LEFT JOIN students s 
-    ON sb.student_id = s.student_id 
-   AND sb.student_table = 'students'
-
-LEFT JOIN students26 s26 
-    ON sb.student_id = s26.id 
-   AND sb.student_table = 'students26'
-
-WHERE sb.batch_id = $batch_id
+ORDER BY name
 ");
 ?>
 
 <form action="save_attendance.php" method="POST">
-<input type="hidden" name="batch_id" value="<?= $batch_id ?>">
+
 <input type="hidden" name="date" value="<?= $date ?>">
 
 <table>
 <tr>
+    <th>Photo</th>
     <th>Enrollment ID</th>
     <th>Name</th>
     <th>Status</th>
@@ -121,19 +112,23 @@ WHERE sb.batch_id = $batch_id
 <?php if($students->num_rows > 0): ?>
 <?php while($st = $students->fetch_assoc()): ?>
 <tr>
+    <td>
+        <img src="../uploads/<?= htmlspecialchars($st['photo']) ?>" alt="photo">
+    </td>
     <td><?= htmlspecialchars($st['enrollment_id']) ?></td>
     <td><?= htmlspecialchars($st['name']) ?></td>
     <td>
-        <select name="status[<?= $st['student_table'] ?>][<?= $st['student_id'] ?>]">
+        <select name="status[<?= $st['table_name'] ?>][<?= $st['id'] ?>]">
             <option value="Present">Present</option>
             <option value="Absent">Absent</option>
         </select>
     </td>
 </tr>
 <?php endwhile; ?>
+
 <?php else: ?>
 <tr>
-    <td colspan="3">No students found</td>
+    <td colspan="4">No students found</td>
 </tr>
 <?php endif; ?>
 
@@ -141,6 +136,7 @@ WHERE sb.batch_id = $batch_id
 
 <br>
 <button type="submit">Save Attendance</button>
+
 </form>
 
 <?php endif; ?>
