@@ -130,7 +130,7 @@ Total Defaulters: <?= $total ?>
 
 <td>
 <div class="student">
-<img src="<?= $d['photo'] ? $d['photo'] : 'default.png' ?>">
+<img src="../uploads/<?= htmlspecialchars($d['photo']) ?>" alt="<?= htmlspecialchars($d['name']) ?>" onerror="this.src='https://via.placeholder.com/40'">
 <div>
 <b><?= htmlspecialchars($d['name']) ?></b><br>
 <span class="badge"><?= $d['tbl'] ?></span>
