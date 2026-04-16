@@ -6,11 +6,14 @@ include '../database_connection/db_connect.php';
 <html>
 <head>
 <title>Mark Attendance</title>
+<link rel="stylesheet" href="../css/global-theme.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
 <style>
 body{
-    font-family: Arial;
-    background:#f4f6f9;
+    background:#ffffff;
     padding:20px;
 }
 .card{
@@ -26,7 +29,7 @@ table{
     margin-top:15px;
 }
 th,td{
-    border:1px solid #ccc;
+    border:1px solid #D1D5DB;
     padding:10px;
     text-align:center;
 }
@@ -38,7 +41,7 @@ img{
 }
 button{
     padding:10px 20px;
-    background:#2ecc71;
+    background:#2563EB;
     color:#fff;
     border:none;
     border-radius:5px;
