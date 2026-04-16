@@ -489,7 +489,7 @@ $total = $row['total_students'];
                     <i class="fas fa-user-check"></i>
                     <span>Attendance</span>
                 </a>
-                <a href="fee/admin_fee_dashboard.php" class="menu-item">
+                <a href="fee/dashboard.php" class="menu-item">
                     <i class="fa-solid fa-receipt"></i>
                     <span>Fee</span>
                 </a>
