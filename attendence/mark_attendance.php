@@ -141,8 +141,8 @@ $students = $conn->query($query);
     <td><?= htmlspecialchars($st['course']) ?></td>
     <td>
         <select name="status[<?= $st['table_name'] ?>][<?= $st['id'] ?>]">
-            <option value="Present">Present</option>
             <option value="Absent">Absent</option>
+            <option value="Present">Present</option>
         </select>
     </td>
 </tr>
