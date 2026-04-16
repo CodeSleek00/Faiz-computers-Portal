@@ -12,7 +12,6 @@ $monthName = date('F', mktime(0,0,0,$month_no,1));
 $sql = "
 
 SELECT 
-    s.student_id AS sid,
     s.name,
     s.enrollment_id,
     s.course AS course_name,
@@ -20,7 +19,7 @@ SELECT
     'students' AS tbl
 FROM students s
 LEFT JOIN student_monthly_fee f 
-    ON f.student_id = s.student_id 
+    ON f.enrollment_id = s.enrollment_id
     AND f.month_no = '$month_no'
     AND f.fee_type='Monthly'
 WHERE f.payment_status IS NULL OR f.payment_status != 'Paid'
@@ -28,7 +27,6 @@ WHERE f.payment_status IS NULL OR f.payment_status != 'Paid'
 UNION ALL
 
 SELECT 
-    s2.id AS sid,
     s2.name,
     s2.enrollment_id,
     s2.course AS course_name,
@@ -36,7 +34,7 @@ SELECT
     'students26' AS tbl
 FROM students26 s2
 LEFT JOIN student_monthly_fee f 
-    ON f.student_id = s2.id 
+    ON f.enrollment_id = s2.enrollment_id
     AND f.month_no = '$month_no'
     AND f.fee_type='Monthly'
 WHERE f.payment_status IS NULL OR f.payment_status != 'Paid'
