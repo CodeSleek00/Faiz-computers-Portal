@@ -12,21 +12,6 @@ $monthName = date('F', mktime(0,0,0,$month_no,1));
 $sql = "
 
 SELECT 
-    s.name,
-    s.enrollment_id,
-    s.course AS course_name,
-    s.photo,
-    'students' AS tbl
-FROM students s
-LEFT JOIN student_monthly_fee f 
-    ON f.enrollment_id = s.enrollment_id
-    AND f.month_no = '$month_no'
-    AND f.fee_type='Monthly'
-WHERE f.payment_status IS NULL OR f.payment_status != 'Paid'
-
-UNION ALL
-
-SELECT 
     s2.name,
     s2.enrollment_id,
     s2.course AS course_name,
