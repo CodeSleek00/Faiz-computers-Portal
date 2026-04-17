@@ -31,7 +31,7 @@ if (!$student_id) {
 
 /* ================= FETCH ATTENDANCE ================= */
 $attendanceData = $conn->query("
-    SELECT date as attendance_date, status
+    SELECT DISTINCT date as attendance_date, status
     FROM attendance
     WHERE student_id = $student_id
     ORDER BY date DESC
@@ -39,6 +39,12 @@ $attendanceData = $conn->query("
 
 if (!$attendanceData) {
     die("Database error: " . $conn->error);
+}
+
+// Create attendance array for calendar
+$attendanceMap = [];
+while ($row = $attendanceData->fetch_assoc()) {
+    $attendanceMap[$row['attendance_date']] = $row['status'];
 }
 
 /* ================= COUNT SUMMARY ================= */
@@ -249,64 +255,107 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
             position: relative;
         }
 
-        /* Attendance Table */
-        .table-container {
-            overflow-x: auto;
+        /* Calendar Styles */
+        .calendar-container {
+            max-width: 100%;
         }
 
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .attendance-table thead {
-            background: var(--light-gray);
+        .calendar-nav-btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
-        .attendance-table th {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 12px;
+        .calendar-nav-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+            color: var(--dark);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day-name {
+            text-align: center;
             font-weight: 600;
             color: var(--gray);
+            font-size: 12px;
+            padding: 8px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border);
         }
 
-        .attendance-table td {
-            padding: 12px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
+        .calendar-days {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
         }
 
-        .attendance-table tbody tr:hover {
-            background: var(--light-gray);
-        }
-
-        .status-badge {
-            display: inline-flex;
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
             font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            border: 2px solid transparent;
         }
 
-        .status-present {
-            background: #d1fae5;
+        .calendar-day.present {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
             color: var(--success);
         }
 
-        .status-absent {
-            background: #fee2e2;
+        .calendar-day.absent {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
             color: var(--danger);
         }
 
-        .status-leave {
-            background: #fef3c7;
-            color: #92400e;
+        .calendar-day.today {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .calendar-day.other-month {
+            color: var(--light-gray);
+            opacity: 0.5;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.1);
         }
 
         /* Alert Message */
@@ -369,6 +418,15 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
             .chart-container {
                 height: 180px;
             }
+
+            .calendar-day {
+                font-size: 12px;
+            }
+
+            .day-name {
+                font-size: 11px;
+                padding: 6px 0;
+            }
         }
 
         @media (max-width: 480px) {
@@ -380,10 +438,14 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
                 font-size: 20px;
             }
             
-            .attendance-table th,
-            .attendance-table td {
-                padding: 10px 12px;
-                font-size: 12px;
+            .calendar-nav-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            .calendar-header h3 {
+                font-size: 16px;
             }
         }
     </style>
@@ -433,50 +495,29 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
                 </div>
             </div>
 
-            <!-- Table Section -->
+            <!-- Calendar Section -->
             <div class="section-card">
                 <div class="section-header">
                     <i class="fas fa-calendar-alt"></i>
-                    <span>Attendance History</span>
+                    <span>Attendance Calendar</span>
                 </div>
                 <div class="section-body">
-                    <div class="table-container">
-                        <?php if ($attendanceData->num_rows > 0): ?>
-                            <table class="attendance-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php while($row = $attendanceData->fetch_assoc()): ?>
-                                        <tr>
-                                            <td><?= date("d M Y", strtotime($row['attendance_date'])) ?></td>
-                                            <td>
-                                                <?php
-                                                $status_class = '';
-                                                switch($row['status']) {
-                                                    case 'Present': $status_class = 'status-present'; break;
-                                                    case 'Absent': $status_class = 'status-absent'; break;
-                                                    case 'Leave': $status_class = 'status-leave'; break;
-                                                }
-                                                ?>
-                                                <span class="status-badge <?= $status_class ?>">
-                                                    <?= $row['status'] ?>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                            </table>
-                        <?php else: ?>
-                            <div class="empty-state">
-                                <i class="fas fa-calendar-times"></i>
-                                <h3>No Attendance Records</h3>
-                                <p>No attendance data found for your account.</p>
-                            </div>
-                        <?php endif; ?>
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button id="prevMonth" class="calendar-nav-btn">‹</button>
+                            <h3 id="calendarTitle"></h3>
+                            <button id="nextMonth" class="calendar-nav-btn">›</button>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="day-name">Sun</div>
+                            <div class="day-name">Mon</div>
+                            <div class="day-name">Tue</div>
+                            <div class="day-name">Wed</div>
+                            <div class="day-name">Thu</div>
+                            <div class="day-name">Fri</div>
+                            <div class="day-name">Sat</div>
+                            <div id="calendarDays" class="calendar-days"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -484,9 +525,81 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
     </div>
 
     <script>
+        // Attendance data from PHP
+        const attendanceData = <?php echo json_encode($attendanceMap); ?>;
+
+        // Calendar functionality
+        let currentDate = new Date();
+
+        function renderCalendar(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            // Update title
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarTitle').textContent = `${monthNames[month]} ${year}`;
+
+            // Get first day of month and last day
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+
+            // Generate calendar days
+            for (let i = 0; i < 42; i++) {
+                const day = new Date(startDate);
+                day.setDate(startDate.getDate() + i);
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.textContent = day.getDate();
+
+                // Check if day is in current month
+                if (day.getMonth() !== month) {
+                    dayDiv.classList.add('other-month');
+                }
+
+                // Check if it's today
+                const today = new Date();
+                if (day.toDateString() === today.toDateString()) {
+                    dayDiv.classList.add('today');
+                }
+
+                // Check attendance status
+                const dateKey = day.toISOString().split('T')[0];
+                if (attendanceData[dateKey]) {
+                    if (attendanceData[dateKey] === 'Present') {
+                        dayDiv.classList.add('present');
+                    } else if (attendanceData[dateKey] === 'Absent') {
+                        dayDiv.classList.add('absent');
+                    }
+                }
+
+                calendarDays.appendChild(dayDiv);
+            }
+        }
+
+        // Navigation
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(currentDate);
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(currentDate);
+        });
+
+        // Initialize calendar
+        renderCalendar(currentDate);
+
         // Attendance Chart
         const ctx = document.getElementById('attendanceChart').getContext('2d');
-        
+
         new Chart(ctx, {
             type: 'doughnut',
             data: {
