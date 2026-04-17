@@ -1350,6 +1350,10 @@ $total_materials = $total_materials ?? 0;
                 <span>Results</span>
                 <span class="nav-badge"><?= count($labels) ?></span>
             </a>
+            <a href="exam-center/student/student_exam_history.php" class="nav-item">
+                <i class="fas fa-history nav-icon"></i>
+                <span>Exam History</span>
+            </a>
         </div>
 
         <!-- Resources Section -->
