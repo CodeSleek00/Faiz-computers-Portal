@@ -32,12 +32,10 @@ if (!$exam) die("Exam not found.");
 
 // Fetch questions and student's answers
 $questions = $conn->query("
-    SELECT q.*, sa.selected_option, sa.is_correct
+    SELECT q.*, 
+        (SELECT selected_option FROM student_answers sa WHERE sa.question_id = q.question_id AND sa.exam_id = $exam_id AND sa.student_id = $student_id AND sa.student_table = '$student_table') as selected_option,
+        (SELECT is_correct FROM student_answers sa WHERE sa.question_id = q.question_id AND sa.exam_id = $exam_id AND sa.student_id = $student_id AND sa.student_table = '$student_table') as is_correct
     FROM exam_questions q
-    LEFT JOIN student_answers sa ON q.question_id = sa.question_id 
-        AND sa.exam_id = $exam_id 
-        AND sa.student_id = $student_id 
-        AND sa.student_table = '$student_table'
     WHERE q.exam_id = $exam_id
     ORDER BY q.question_id
 ");
@@ -149,6 +147,10 @@ $questions = $conn->query("
             color: var(--error-color);
         }
         
+        .status.not-attempted {
+            color: var(--dark-color);
+        }
+        
         .back-btn {
             display: block;
             text-align: center;
@@ -194,8 +196,10 @@ $questions = $conn->query("
                         <?php if ($q['correct_option'] == 'D') echo '<i class="fas fa-check"></i>'; ?>
                     </div>
                 </div>
-                <div class="status <?php echo $q['is_correct'] ? 'correct' : 'wrong'; ?>">
-                    <?php if ($q['is_correct']): ?>
+                <div class="status <?php echo $q['selected_option'] === null ? 'not-attempted' : ($q['is_correct'] ? 'correct' : 'wrong'); ?>">
+                    <?php if ($q['selected_option'] === null): ?>
+                        <i class="fas fa-question-circle"></i> Not Attempted
+                    <?php elseif ($q['is_correct']): ?>
                         <i class="fas fa-check-circle"></i> Correct Answer
                     <?php else: ?>
                         <i class="fas fa-times-circle"></i> Wrong Answer (Correct: <?php echo $q['correct_option']; ?>)
