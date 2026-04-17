@@ -11,6 +11,8 @@ $results = $conn->query("
     SELECT 
         s.score, 
         s.submitted_at,
+        s.student_id,
+        s.student_table,
         st.name AS student_name, 
         st.enrollment_id AS enrollment_no
     FROM exam_submissions s
@@ -24,6 +26,8 @@ $results = $conn->query("
     SELECT 
         s.score, 
         s.submitted_at,
+        s.student_id,
+        s.student_table,
         st26.name AS student_name, 
         st26.enrollment_id AS enrollment_no
     FROM exam_submissions s
@@ -91,6 +95,18 @@ tr:hover { background: #f9fafb; }
     font-weight: 600;
     color: #16a34a;
 }
+.btn {
+    background: #4f46e5;
+    color: white;
+    padding: 6px 12px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.btn:hover {
+    background: #3730a3;
+}
 .no-data {
     text-align: center;
     padding: 20px;
@@ -123,6 +139,7 @@ tr:hover { background: #f9fafb; }
             <th>Enrollment No</th>
             <th>Score</th>
             <th>Submitted On</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -137,10 +154,11 @@ tr:hover { background: #f9fafb; }
                 <td><?= htmlspecialchars($r['enrollment_no']) ?></td>
                 <td class="score"><?= $r['score'] ?> / <?= $exam['total_questions'] ?? '0' ?></td>
                 <td><?= date('d M Y, h:i A', strtotime($r['submitted_at'])) ?></td>
+                <td><a href="admin_view_student_answers.php?exam_id=<?= $exam_id ?>&student_id=<?= $r['student_id'] ?>&student_table=<?= $r['student_table'] ?>" class="btn">View Answers</a></td>
             </tr>
         <?php } } else { ?>
             <tr>
-                <td colspan="5" class="no-data">No submissions found</td>
+                <td colspan="6" class="no-data">No submissions found</td>
             </tr>
         <?php } ?>
         </tbody>
