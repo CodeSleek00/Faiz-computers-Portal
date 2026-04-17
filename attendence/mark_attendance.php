@@ -63,10 +63,10 @@ input{
 
 <form method="GET">
     <label>Date:</label>
-    <input type="date" name="date" required>
+    <input type="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>" required>
 
     <label>Search:</label>
-    <input type="text" name="search" placeholder="Name / Enrollment ID">
+    <input type="text" name="search" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" placeholder="Name / Enrollment ID">
 
     <button type="submit">Load Students</button>
 </form>
@@ -75,6 +75,13 @@ input{
 if(isset($_GET['date'])):
 
 $date = $_GET['date'];
+
+// Prevent future dates
+$today = date('Y-m-d');
+if ($date > $today) {
+    $date = $today;
+}
+
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
 /*
