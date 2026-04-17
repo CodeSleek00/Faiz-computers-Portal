@@ -297,7 +297,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <!-- Left Side with Illustration -->
         <div class="left-side">
-            <a href="javascript:history.back()" class="back-btn">
+            <a href="../index.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             
