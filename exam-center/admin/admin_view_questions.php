@@ -45,6 +45,7 @@ $questions = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id
                     <div class="option <?php if ($q['correct_option'] == 'C') echo 'correct'; ?>">C) <?php echo htmlspecialchars($q['option_c']); ?> <?php if ($q['correct_option'] == 'C') echo '<i class="fas fa-check"></i>'; ?></div>
                     <div class="option <?php if ($q['correct_option'] == 'D') echo 'correct'; ?>">D) <?php echo htmlspecialchars($q['option_d']); ?> <?php if ($q['correct_option'] == 'D') echo '<i class="fas fa-check"></i>'; ?></div>
                 </div>
+                <p><strong>Correct Answer: <?php echo $q['correct_option']; ?></strong></p>
             </div>
         <?php endwhile; ?>
         <div class="back-btn">
