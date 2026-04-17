@@ -48,6 +48,19 @@ foreach ($answers as $qid => $ans) {
     }
 }
 
+// Create student_answers table if not exists
+$conn->query("CREATE TABLE IF NOT EXISTS student_answers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    exam_id INT NOT NULL,
+    student_id INT NOT NULL,
+    student_table VARCHAR(20) NOT NULL,
+    question_id INT NOT NULL,
+    selected_option VARCHAR(1) NOT NULL,
+    is_correct TINYINT(1) NOT NULL,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_answer (exam_id, student_id, student_table, question_id)
+)");
+
 // Insert submission with student_table
 $stmt = $conn->prepare("
     INSERT INTO exam_submissions (exam_id, student_id, student_table, score, submitted_at) 
@@ -55,6 +68,18 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("iisi", $exam_id, $student_id, $student_table, $score);
 $stmt->execute();
+
+// Insert individual answers
+$stmt_answer = $conn->prepare("
+    INSERT INTO student_answers (exam_id, student_id, student_table, question_id, selected_option, is_correct)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE selected_option = VALUES(selected_option), is_correct = VALUES(is_correct)
+");
+foreach ($answers as $qid => $ans) {
+    $is_correct = (isset($correct_map[$qid]) && $correct_map[$qid] == $ans) ? 1 : 0;
+    $stmt_answer->bind_param("iisisi", $exam_id, $student_id, $student_table, $qid, $ans, $is_correct);
+    $stmt_answer->execute();
+}
 
 header("Location: exam_result_student.php?exam_id=$exam_id");
 exit;

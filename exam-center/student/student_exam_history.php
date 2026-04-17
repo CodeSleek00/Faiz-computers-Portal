@@ -153,7 +153,10 @@ $submitted_exams = $conn->query("
                             <h3><?php echo htmlspecialchars($exam['exam_name']); ?></h3>
                             <p>Questions: <?php echo $exam['total_questions']; ?> | Score: <?php echo $exam['score']; ?>/<?php echo $exam['total_questions']; ?></p>
                         </div>
-                        <a href="view_exam_questions.php?exam_id=<?php echo $exam['exam_id']; ?>" class="view-btn">View Questions</a>
+                        <div>
+                            <a href="view_exam_questions.php?exam_id=<?php echo $exam['exam_id']; ?>" class="view-btn" style="margin-right: 10px;">View Questions</a>
+                            <a href="student_view_answers.php?exam_id=<?php echo $exam['exam_id']; ?>" class="view-btn">My Answers</a>
+                        </div>
                     </li>
                 <?php endwhile; ?>
             </ul>
