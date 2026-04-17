@@ -43,16 +43,92 @@ $questions = $conn->query("SELECT * FROM exam_questions WHERE exam_id = $exam_id
     <link rel="icon" type="image/png" href="image.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #333; }
-        .question { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-        .question p { font-weight: bold; margin-bottom: 10px; }
-        .options { margin-left: 20px; }
-        .option { margin: 5px 0; }
-        .correct { color: green; font-weight: bold; }
-        .back-btn { display: block; text-align: center; margin-top: 20px; }
-        .back-btn a { color: #007bff; text-decoration: none; }
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4bb543;
+            --error-color: #ff3333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        
+        .question {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            border-radius: 10px;
+            background: rgba(67, 97, 238, 0.02);
+        }
+        
+        .question p {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .options {
+            margin-left: 1rem;
+        }
+        
+        .option {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+        
+        .correct {
+            background: rgba(75, 181, 67, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color);
+            font-weight: 500;
+        }
+        
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .back-btn a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-btn a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
