@@ -31,10 +31,10 @@ if (!$student_id) {
 
 /* ================= FETCH ATTENDANCE ================= */
 $attendanceData = $conn->query("
-    SELECT attendance_date, status
+    SELECT date as attendance_date, status
     FROM attendance
     WHERE student_id = $student_id
-    ORDER BY attendance_date DESC
+    ORDER BY date DESC
 ");
 
 if (!$attendanceData) {
