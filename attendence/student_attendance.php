@@ -29,11 +29,17 @@ if (!$student_id) {
     exit;
 }
 
-/* ================= FETCH ATTENDANCE ================= */
+/* ================= MONTH SELECTION ================= */
+$selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+$month_start = $selected_month . '-01';
+$month_end = date('Y-m-t', strtotime($month_start));
+
+/* ================= FETCH ATTENDANCE FOR SELECTED MONTH ================= */
 $attendanceData = $conn->query("
     SELECT DISTINCT date as attendance_date, status
     FROM attendance
     WHERE student_id = $student_id
+    AND date BETWEEN '$month_start' AND '$month_end'
     ORDER BY date DESC
 ");
 
@@ -47,13 +53,14 @@ while ($row = $attendanceData->fetch_assoc()) {
     $attendanceMap[$row['attendance_date']] = $row['status'];
 }
 
-/* ================= COUNT SUMMARY ================= */
+/* ================= COUNT SUMMARY FOR SELECTED MONTH ================= */
 $countQuery = $conn->query("
     SELECT
         SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS present_days,
         SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS absent_days
     FROM attendance
     WHERE student_id = $student_id
+    AND date BETWEEN '$month_start' AND '$month_end'
 ");
 
 if (!$countQuery) {
@@ -67,6 +74,21 @@ $absent  = $count['absent_days'] ?? 0;
 $total   = $present + $absent;
 
 $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
+
+/* ================= OVERALL ATTENDANCE ================= */
+$overallQuery = $conn->query("
+    SELECT
+        SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS total_present,
+        SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS total_absent
+    FROM attendance
+    WHERE student_id = $student_id
+");
+
+$overall = $overallQuery->fetch_assoc();
+$overall_present = $overall['total_present'] ?? 0;
+$overall_absent = $overall['total_absent'] ?? 0;
+$overall_total = $overall_present + $overall_absent;
+$overall_percentage = ($overall_total > 0) ? round(($overall_present / $overall_total) * 100, 2) : 0;
 ?>
 
 <!DOCTYPE html>
@@ -160,10 +182,20 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
             font-size: 13px;
         }
 
+        /* Month Selector */
+        .month-selector {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 24px;
         }
@@ -406,7 +438,7 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
             }
             
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .header-top {
@@ -447,6 +479,10 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
             .calendar-header h3 {
                 font-size: 16px;
             }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -464,21 +500,65 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
                 <h1>Attendance Record</h1>
                 <p>Track your class attendance and performance</p>
             </div>
+
+            <!-- Month Selector -->
+            <div class="month-selector">
+                <form method="GET" style="display: flex; gap: 12px; align-items: center;">
+                    <label for="month" style="font-weight: 500; color: var(--dark);">Select Month:</label>
+                    <input type="month" id="month" name="month" value="<?= $selected_month ?>" 
+                           style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;">
+                    <button type="submit" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">View</button>
+                </form>
+            </div>
         </div>
 
         <!-- Alert Message -->
         <?php if ($percentage < 75 && $total > 0): ?>
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-triangle"></i>
-                Attendance is below 75%. Please attend classes regularly.
+                Monthly attendance (<?= date('F Y', strtotime($selected_month . '-01')) ?>) is below 75%. Please attend classes regularly.
             </div>
         <?php elseif ($total > 0): ?>
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i>
-                Attendance is good. Keep it up!
+                Monthly attendance (<?= date('F Y', strtotime($selected_month . '-01')) ?>) is good. Keep it up!
             </div>
         <?php endif; ?>
 
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon present">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-number"><?= $present ?></div>
+                <div class="stat-label">Present (<?= date('M', strtotime($selected_month . '-01')) ?>)</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon absent">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <div class="stat-number"><?= $absent ?></div>
+                <div class="stat-label">Absent (<?= date('M', strtotime($selected_month . '-01')) ?>)</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon percentage">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-number"><?= $percentage ?>%</div>
+                <div class="stat-label">Monthly Attendance</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon percentage">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number"><?= $overall_percentage ?>%</div>
+                <div class="stat-label">Overall Attendance</div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <div class="content-grid">
@@ -527,9 +607,10 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
     <script>
         // Attendance data from PHP
         const attendanceData = <?php echo json_encode($attendanceMap); ?>;
+        const selectedMonth = '<?php echo $selected_month; ?>';
 
         // Calendar functionality
-        let currentDate = new Date();
+        let currentDate = selectedMonth ? new Date(selectedMonth + '-01') : new Date();
 
         function renderCalendar(date) {
             const year = date.getFullYear();
@@ -625,6 +706,13 @@ $percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
                             font: {
                                 size: 12
                             }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '<?= date('F Y', strtotime($selected_month . '-01')) ?> Attendance',
+                        font: {
+                            size: 14
                         }
                     }
                 },
