@@ -1,9 +1,7 @@
 <?php
-// admin_students.php
 session_start();
 include("../database_connection/db_connect.php");
 
-/* ================= FETCH STUDENTS WITH FULL DETAILS ================= */
 $sql = "
 SELECT 
     s.id,
@@ -42,6 +40,7 @@ $result = $conn->query($sql);
 <head>
 <meta charset="UTF-8">
 <title>Admin Student Dashboard</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -62,28 +61,45 @@ body{
 h1{
     margin-bottom:20px;
 }
-.table-wrapper{
+
+/* ✅ SCROLL FIX */
+.top-scroll{
     overflow-x:auto;
-}table{
+    height:12px;
+}
+.top-scroll div{
+    height:1px;
+}
+
+.table-wrapper{
+    overflow:auto;
+    max-height:600px;
+}
+
+/* TABLE */
+table{
     border-collapse:collapse;
-    width:max-content;       /* table jitni content utni wide */
-    min-width:100%;          /* but screen se chhoti na ho */
+    width:max-content;
+    min-width:100%;
 }
 
 th, td{
-    padding:12px 18px;       /* 👈 MORE SPACE */
+    padding:12px 18px;
     text-align:left;
     border-bottom:1px solid #e5e7eb;
     vertical-align:top;
-    white-space:normal;      /* 👈 TEXT WRAP */
-    word-break:break-word;  /* 👈 LONG WORDS BREAK */
+    white-space:normal;
+    word-break:break-word;
 }
 
+/* ✅ STICKY HEADER */
 th{
+    position:sticky;
+    top:0;
     background:#2563eb;
     color:#fff;
-    font-weight:500;
-    white-space:nowrap;     /* headings ek line me */
+    z-index:2;
+    white-space:nowrap;
 }
 
 img{
@@ -92,6 +108,8 @@ img{
     border-radius:50%;
     object-fit:cover;
 }
+
+/* BUTTON */
 .btn{
     background:#2563eb;
     color:#fff;
@@ -104,10 +122,7 @@ img{
 .btn:hover{
     background:#1e40af;
 }
-.small{
-    font-size:12px;
-    color:#374151;
-}
+
 .btn-view{
     background:#16a34a;
     margin-top:6px;
@@ -116,138 +131,168 @@ img{
     background:#15803d;
 }
 
-    .search-bar{
-        display:flex;
-        flex-wrap:wrap;
-        gap:10px;
-        margin-bottom:18px;
-    }
+.small{
+    font-size:12px;
+    color:#374151;
+}
 
-    .search-bar input{
-        flex:1 1 300px;
-        padding:10px 14px;
-        border:1px solid #d1d5db;
-        border-radius:8px;
-        font-size:14px;
-    }
-
-    .search-bar button{
-        background:#2563eb;
-        color:#fff;
-        border:none;
-        border-radius:8px;
-        padding:10px 18px;
-        cursor:pointer;
-        font-size:14px;
-    }
-
-    .search-bar button:hover{
-        background:#1e40af;
-    }
+/* SEARCH */
+.search-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:18px;
+}
+.search-bar input{
+    flex:1 1 300px;
+    padding:10px 14px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+}
+.search-bar button{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    cursor:pointer;
+}
+.search-bar button:hover{
+    background:#1e40af;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <div class="card">
-        <h1>Student Dashboard (Full Details)</h1>
+<div class="card">
 
-        <div class="search-bar">
-            <input id="searchInput" type="text" placeholder="Search by name, enrollment, contact, course...">
-            <button id="searchButton" type="button">Search</button>
-        </div>
+<h1>Student Dashboard (Full Details)</h1>
 
-        <div class="table-wrapper">
-        <table>
-            <tr>
-                <th>Photo</th>
-                <th>Enrollment ID</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Email</th>
-                <th>Aadhar</th>
-                <th>Apaar</th>
-                <th>Religion</th>
-                <th>Caste</th>
-                <th>DOB</th>
-                <th>Father</th>
-                <th>Mother</th>
-                <th>Parent Contact</th>
-                <th>Address</th>
-                <th>Permanent Address</th>
-                <th>Course</th>
-                <th>Duration (Months)</th>
-                <th>Admission Date</th>
-                <th>Action</th>
-            </tr>
+<div class="search-bar">
+    <input id="searchInput" type="text" placeholder="Search by name, enrollment, contact...">
+    <button id="searchButton">Search</button>
+</div>
 
-            <?php while($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td>
-                    <img src="../uploads/<?= htmlspecialchars($row['photo']) ?>">
-                </td>
+<!-- ✅ TOP SCROLLBAR -->
+<div class="top-scroll" id="topScroll">
+    <div id="topScrollInner"></div>
+</div>
 
-                <td><?= htmlspecialchars($row['enrollment_id']) ?></td>
-                <td><?= htmlspecialchars($row['name']) ?></td>
-                <td><?= htmlspecialchars($row['contact']) ?></td>
-                <td><?= htmlspecialchars($row['email']) ?></td>
-                <td><?= htmlspecialchars($row['aadhar']) ?></td>
-                <td><?= htmlspecialchars($row['apaar']) ?></td>
-                <td><?= htmlspecialchars($row['religion']) ?></td>
-                <td><?= htmlspecialchars($row['caste']) ?></td>
-                <td><?= htmlspecialchars($row['dob']) ?></td>
-                <td><?= htmlspecialchars($row['father_name']) ?></td>
-                <td><?= htmlspecialchars($row['mother_name']) ?></td>
-                <td><?= htmlspecialchars($row['parent_contact']) ?></td>
+<div class="table-wrapper" id="tableWrapper">
+<table id="mainTable">
+<tr>
+    <th>Photo</th>
+    <th>Enrollment ID</th>
+    <th>Name</th>
+    <th>Contact</th>
+    <th>Email</th>
+    <th>Aadhar</th>
+    <th>Apaar</th>
+    <th>Religion</th>
+    <th>Caste</th>
+    <th>DOB</th>
+    <th>Father</th>
+    <th>Mother</th>
+    <th>Parent Contact</th>
+    <th>Address</th>
+    <th>Permanent Address</th>
+    <th>Course</th>
+    <th>Duration</th>
+    <th>Admission Date</th>
+    <th>Action</th>
+</tr>
 
-                <td class="small"><?= nl2br(htmlspecialchars($row['address'])) ?></td>
-                <td class="small"><?= nl2br(htmlspecialchars($row['permanent_address'])) ?></td>
+<?php while($row = $result->fetch_assoc()): ?>
+<tr>
+<td>
+<img src="../uploads/<?= htmlspecialchars($row['photo']) ?>"
+     onerror="this.src='https://via.placeholder.com/50'">
+</td>
 
-                <td><?= htmlspecialchars($row['course_name']) ?></td>
-                <td><?= htmlspecialchars($row['duration']) ?></td>
-                <td><?= htmlspecialchars($row['admission_date']) ?></td>
+<td><?= htmlspecialchars($row['enrollment_id']) ?></td>
+<td><?= htmlspecialchars($row['name']) ?></td>
+<td><?= htmlspecialchars($row['contact']) ?></td>
+<td><?= htmlspecialchars($row['email']) ?></td>
+<td><?= htmlspecialchars($row['aadhar']) ?></td>
+<td><?= htmlspecialchars($row['apaar']) ?></td>
+<td><?= htmlspecialchars($row['religion']) ?></td>
+<td><?= htmlspecialchars($row['caste']) ?></td>
+<td><?= htmlspecialchars($row['dob']) ?></td>
+<td><?= htmlspecialchars($row['father_name']) ?></td>
+<td><?= htmlspecialchars($row['mother_name']) ?></td>
+<td><?= htmlspecialchars($row['parent_contact']) ?></td>
 
-                <td>
-                <a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a><br>
+<td class="small"><?= nl2br(htmlspecialchars($row['address'])) ?></td>
+<td class="small"><?= nl2br(htmlspecialchars($row['permanent_address'])) ?></td>
 
-                <a class="btn btn-view"
-                href="../admission/admission_success.php?eid=<?= urlencode($row['enrollment_id']) ?>"
-                target="_blank">
-                View Form
-                </a>
-            </td>
+<td><?= htmlspecialchars($row['course_name']) ?></td>
+<td><?= htmlspecialchars($row['duration']) ?></td>
+<td><?= htmlspecialchars($row['admission_date']) ?></td>
 
-            </tr>
-            <?php endwhile; ?>
+<td>
+<a class="btn" href="edit_student.php?id=<?= $row['id'] ?>">Edit</a><br>
 
-        </table>
-        </div>
-    </div>
+<a class="btn btn-view"
+href="../admission/admission_success.php?eid=<?= urlencode($row['enrollment_id']) ?>"
+target="_blank">
+View Form
+</a>
+</td>
+
+</tr>
+<?php endwhile; ?>
+
+</table>
+</div>
+
+</div>
 </div>
 
 <script>
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-    const tableRows = document.querySelectorAll('.table-wrapper table tr');
+const searchInput = document.getElementById('searchInput');
+const searchButton = document.getElementById('searchButton');
+const rows = document.querySelectorAll("#mainTable tr");
 
-    function filterStudents() {
-        const query = searchInput.value.trim().toLowerCase();
+function filterStudents(){
+    const query = searchInput.value.toLowerCase();
 
-        tableRows.forEach((row, index) => {
-            if (index === 0) return; // header row stays visible
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
-
-    searchButton.addEventListener('click', filterStudents);
-    searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            filterStudents();
-        }
+    rows.forEach((row, index)=>{
+        if(index === 0) return;
+        row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
     });
+}
+
+searchButton.onclick = filterStudents;
+searchInput.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){
+        e.preventDefault();
+        filterStudents();
+    }
+});
+
+/* ✅ SYNC TOP & BOTTOM SCROLL */
+const topScroll = document.getElementById("topScroll");
+const tableWrapper = document.getElementById("tableWrapper");
+const topInner = document.getElementById("topScrollInner");
+const table = document.getElementById("mainTable");
+
+function syncScroll(){
+    topInner.style.width = table.scrollWidth + "px";
+}
+
+syncScroll();
+window.onresize = syncScroll;
+
+topScroll.onscroll = ()=> {
+    tableWrapper.scrollLeft = topScroll.scrollLeft;
+};
+
+tableWrapper.onscroll = ()=> {
+    topScroll.scrollLeft = tableWrapper.scrollLeft;
+};
 </script>
+
 </body>
 </html>
