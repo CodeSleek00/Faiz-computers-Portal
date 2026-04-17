@@ -54,6 +54,7 @@ $total_results = $results->num_rows;
     <link rel="icon" type="image/png" href="image.png">
     <link rel="apple-touch-icon" href="image.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
@@ -78,7 +79,7 @@ $total_results = $results->num_rows;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: var(--light-gray);
             color: var(--dark);
             line-height: 1.5;
