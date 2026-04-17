@@ -115,22 +115,10 @@ $questions = $conn->query("
             transition: background 0.3s ease;
         }
         
-        .selected {
-            border-left: 4px solid var(--primary-color);
-            background: rgba(67, 97, 238, 0.1);
-        }
-        
         .correct {
             background: rgba(75, 181, 67, 0.1);
             border-left: 4px solid var(--success-color);
             color: var(--success-color);
-            font-weight: 500;
-        }
-        
-        .wrong {
-            background: rgba(255, 51, 51, 0.1);
-            border-left: 4px solid var(--error-color);
-            color: var(--error-color);
             font-weight: 500;
         }
         
@@ -175,35 +163,25 @@ $questions = $conn->query("
             <div class="question">
                 <p><?php echo htmlspecialchars($q['question']); ?></p>
                 <div class="options">
-                    <div class="option <?php if ($q['selected_option'] == 'A') echo 'selected'; ?> <?php if ($q['correct_option'] == 'A') echo 'correct'; else if ($q['selected_option'] == 'A' && $q['is_correct'] == 0) echo 'wrong'; ?>">
+                    <div class="option <?php if ($q['correct_option'] == 'A') echo 'correct'; ?>">
                         A) <?php echo htmlspecialchars($q['option_a']); ?> 
-                        <?php if ($q['selected_option'] == 'A') echo '<i class="fas fa-hand-point-right"></i>'; ?>
                         <?php if ($q['correct_option'] == 'A') echo '<i class="fas fa-check"></i>'; ?>
                     </div>
-                    <div class="option <?php if ($q['selected_option'] == 'B') echo 'selected'; ?> <?php if ($q['correct_option'] == 'B') echo 'correct'; else if ($q['selected_option'] == 'B' && $q['is_correct'] == 0) echo 'wrong'; ?>">
+                    <div class="option <?php if ($q['correct_option'] == 'B') echo 'correct'; ?>">
                         B) <?php echo htmlspecialchars($q['option_b']); ?> 
-                        <?php if ($q['selected_option'] == 'B') echo '<i class="fas fa-hand-point-right"></i>'; ?>
                         <?php if ($q['correct_option'] == 'B') echo '<i class="fas fa-check"></i>'; ?>
                     </div>
-                    <div class="option <?php if ($q['selected_option'] == 'C') echo 'selected'; ?> <?php if ($q['correct_option'] == 'C') echo 'correct'; else if ($q['selected_option'] == 'C' && $q['is_correct'] == 0) echo 'wrong'; ?>">
+                    <div class="option <?php if ($q['correct_option'] == 'C') echo 'correct'; ?>">
                         C) <?php echo htmlspecialchars($q['option_c']); ?> 
-                        <?php if ($q['selected_option'] == 'C') echo '<i class="fas fa-hand-point-right"></i>'; ?>
                         <?php if ($q['correct_option'] == 'C') echo '<i class="fas fa-check"></i>'; ?>
                     </div>
-                    <div class="option <?php if ($q['selected_option'] == 'D') echo 'selected'; ?> <?php if ($q['selected_option'] == 'D') echo 'correct'; else if ($q['selected_option'] == 'D' && $q['is_correct'] == 0) echo 'wrong'; ?>">
+                    <div class="option <?php if ($q['correct_option'] == 'D') echo 'correct'; ?>">
                         D) <?php echo htmlspecialchars($q['option_d']); ?> 
-                        <?php if ($q['selected_option'] == 'D') echo '<i class="fas fa-hand-point-right"></i>'; ?>
                         <?php if ($q['correct_option'] == 'D') echo '<i class="fas fa-check"></i>'; ?>
                     </div>
                 </div>
-                <div class="status <?php echo $q['selected_option'] === null ? 'not-attempted' : ($q['is_correct'] ? 'correct' : 'wrong'); ?>">
-                    <?php if ($q['selected_option'] === null): ?>
-                        <i class="fas fa-question-circle"></i> Not Attempted
-                    <?php elseif ($q['is_correct']): ?>
-                        <i class="fas fa-check-circle"></i> Correct Answer
-                    <?php else: ?>
-                        <i class="fas fa-times-circle"></i> Wrong Answer (Correct: <?php echo $q['correct_option']; ?>)
-                    <?php endif; ?>
+                <div class="status correct">
+                    <i class="fas fa-check-circle"></i> Correct Answer: <?php echo $q['correct_option']; ?>
                 </div>
             </div>
         <?php endwhile; ?>
