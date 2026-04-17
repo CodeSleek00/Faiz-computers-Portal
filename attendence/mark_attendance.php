@@ -47,6 +47,25 @@ button{
     border-radius:5px;
     cursor:pointer;
 }
+.bulk-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin:15px 0;
+}
+.bulk-actions button{
+    background:#10B981;
+}
+.bulk-actions button:hover{
+    background:#0F766E;
+}
+.bulk-actions label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-weight:500;
+}
 input{
     padding:8px;
     margin:5px;
@@ -128,8 +147,17 @@ $students = $conn->query($query);
 
 <input type="hidden" name="date" value="<?= $date ?>">
 
+<div class="bulk-actions">
+    <label><input type="checkbox" id="selectAll"> Select All</label>
+    <button type="button" id="markSelectedPresent">Mark Selected Present</button>
+    <button type="button" id="markSelectedAbsent">Mark Selected Absent</button>
+    <button type="button" id="markAllPresent">Mark All Present</button>
+    <button type="button" id="markAllAbsent">Mark All Absent</button>
+</div>
+
 <table>
 <tr>
+    <th>Select</th>
     <th>Photo</th>
     <th>Enrollment ID</th>
     <th>Name</th>
@@ -141,13 +169,16 @@ $students = $conn->query($query);
 <?php while($st = $students->fetch_assoc()): ?>
 <tr>
     <td>
+        <input type="checkbox" class="student-checkbox" name="selected[<?= $st['table_name'] ?>][<?= $st['id'] ?>]" value="1">
+    </td>
+    <td>
         <img src="../uploads/<?= !empty($st['photo']) ? $st['photo'] : 'default.png' ?>">
     </td>
     <td><?= htmlspecialchars($st['enrollment_id']) ?></td>
     <td><?= htmlspecialchars($st['name']) ?></td>
     <td><?= htmlspecialchars($st['course']) ?></td>
     <td>
-        <select name="status[<?= $st['table_name'] ?>][<?= $st['id'] ?>]">
+        <select class="status-select" name="status[<?= $st['table_name'] ?>][<?= $st['id'] ?>]">
             <option value="Absent">Absent</option>
             <option value="Present">Present</option>
         </select>
@@ -171,6 +202,56 @@ $students = $conn->query($query);
 <?php endif; ?>
 
 </div>
+
+<script>
+const selectAll = document.getElementById('selectAll');
+const markSelectedPresent = document.getElementById('markSelectedPresent');
+const markSelectedAbsent = document.getElementById('markSelectedAbsent');
+const markAllPresent = document.getElementById('markAllPresent');
+const markAllAbsent = document.getElementById('markAllAbsent');
+
+function getSelectedStatusElements() {
+    return Array.from(document.querySelectorAll('.student-checkbox'))
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.closest('tr').querySelector('.status-select'))
+        .filter(Boolean);
+}
+
+function setStatuses(status, elements) {
+    elements.forEach(select => select.value = status);
+}
+
+if (selectAll) {
+    selectAll.addEventListener('change', () => {
+        const allCheckboxes = document.querySelectorAll('.student-checkbox');
+        allCheckboxes.forEach(chk => chk.checked = selectAll.checked);
+    });
+}
+
+if (markSelectedPresent) {
+    markSelectedPresent.addEventListener('click', () => {
+        setStatuses('Present', getSelectedStatusElements());
+    });
+}
+
+if (markSelectedAbsent) {
+    markSelectedAbsent.addEventListener('click', () => {
+        setStatuses('Absent', getSelectedStatusElements());
+    });
+}
+
+if (markAllPresent) {
+    markAllPresent.addEventListener('click', () => {
+        setStatuses('Present', Array.from(document.querySelectorAll('.status-select')));
+    });
+}
+
+if (markAllAbsent) {
+    markAllAbsent.addEventListener('click', () => {
+        setStatuses('Absent', Array.from(document.querySelectorAll('.status-select')));
+    });
+}
+</script>
 
 </body>
 </html>
