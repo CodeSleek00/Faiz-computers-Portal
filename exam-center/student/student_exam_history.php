@@ -152,7 +152,6 @@ $submitted_exams = $conn->query("
                         <div class="exam-info">
                             <h3><?php echo htmlspecialchars($exam['exam_name']); ?></h3>
                             <p>Questions: <?php echo $exam['total_questions']; ?> | Score: <?php echo $exam['score']; ?>/<?php echo $exam['total_questions']; ?></p>
-                            <p>Submitted: <?php echo date('d M Y, H:i', strtotime($exam['submitted_at'])); ?></p>
                         </div>
                         <a href="view_exam_questions.php?exam_id=<?php echo $exam['exam_id']; ?>" class="view-btn">View Questions</a>
                     </li>
