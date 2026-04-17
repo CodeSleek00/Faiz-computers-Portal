@@ -3,29 +3,56 @@ session_start();
 include '../database_connection/db_connect.php';
 
 /* ================= LOGIN CHECK ================= */
-if (!isset($_SESSION['student_id'])) {
+if (!isset($_SESSION['student_id']) && !isset($_SESSION['enrollment_id'])) {
     header("Location: ../login-system/login.php");
     exit;
 }
 
-$student_id = $_SESSION['student_id'];
+// Determine student ID based on session
+$student_id = null;
+if (isset($_SESSION['student_id'])) {
+    $student_id = $_SESSION['student_id'];
+} elseif (isset($_SESSION['enrollment_id'])) {
+    // If enrollment_id is in session, fetch student_id from database
+    $enrollment_id = $_SESSION['enrollment_id'];
+    $student_query = $conn->query("SELECT student_id FROM students WHERE enrollment_id = '$enrollment_id'
+                                   UNION
+                                   SELECT id FROM students26 WHERE enrollment_id = '$enrollment_id'");
+    if ($student_query && $student_query->num_rows > 0) {
+        $student_data = $student_query->fetch_assoc();
+        $student_id = $student_data['student_id'] ?? $student_data['id'];
+    }
+}
+
+if (!$student_id) {
+    header("Location: ../login-system/login.php");
+    exit;
+}
 
 /* ================= FETCH ATTENDANCE ================= */
 $attendanceData = $conn->query("
-    SELECT attendance_date, status 
-    FROM attendance 
+    SELECT attendance_date, status
+    FROM attendance
     WHERE student_id = $student_id
     ORDER BY attendance_date DESC
 ");
 
+if (!$attendanceData) {
+    die("Database error: " . $conn->error);
+}
+
 /* ================= COUNT SUMMARY ================= */
 $countQuery = $conn->query("
-    SELECT 
+    SELECT
         SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS present_days,
         SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS absent_days
     FROM attendance
     WHERE student_id = $student_id
 ");
+
+if (!$countQuery) {
+    die("Database error: " . $conn->error);
+}
 
 $count = $countQuery->fetch_assoc();
 
