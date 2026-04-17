@@ -116,6 +116,34 @@ img{
     background:#15803d;
 }
 
+    .search-bar{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        margin-bottom:18px;
+    }
+
+    .search-bar input{
+        flex:1 1 300px;
+        padding:10px 14px;
+        border:1px solid #d1d5db;
+        border-radius:8px;
+        font-size:14px;
+    }
+
+    .search-bar button{
+        background:#2563eb;
+        color:#fff;
+        border:none;
+        border-radius:8px;
+        padding:10px 18px;
+        cursor:pointer;
+        font-size:14px;
+    }
+
+    .search-bar button:hover{
+        background:#1e40af;
+    }
 </style>
 </head>
 
@@ -124,6 +152,11 @@ img{
 <div class="container">
     <div class="card">
         <h1>Student Dashboard (Full Details)</h1>
+
+        <div class="search-bar">
+            <input id="searchInput" type="text" placeholder="Search by name, enrollment, contact, course...">
+            <button id="searchButton" type="button">Search</button>
+        </div>
 
         <div class="table-wrapper">
         <table>
@@ -193,5 +226,28 @@ img{
     </div>
 </div>
 
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const tableRows = document.querySelectorAll('.table-wrapper table tr');
+
+    function filterStudents() {
+        const query = searchInput.value.trim().toLowerCase();
+
+        tableRows.forEach((row, index) => {
+            if (index === 0) return; // header row stays visible
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    }
+
+    searchButton.addEventListener('click', filterStudents);
+    searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            filterStudents();
+        }
+    });
+</script>
 </body>
 </html>
