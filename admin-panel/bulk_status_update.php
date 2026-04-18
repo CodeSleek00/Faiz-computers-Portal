@@ -5,7 +5,6 @@ ini_set('display_errors', 1);
 include '../database_connection/db_connect.php';
 ?>
 
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,10 +41,10 @@ th{
     color:white;
 }
 select{
-    padding:5px;
+    padding:6px;
 }
 .btn{
-    padding:10px 20px;
+    padding:12px 25px;
     background:#27ae60;
     color:white;
     border:none;
@@ -53,6 +52,15 @@ select{
     cursor:pointer;
     display:block;
     margin:20px auto;
+    font-size:16px;
+}
+.success{
+    background:#2ecc71;
+    color:white;
+    padding:10px;
+    text-align:center;
+    border-radius:5px;
+    margin-bottom:10px;
 }
 </style>
 
@@ -60,7 +68,12 @@ select{
 <body>
 
 <div class="card">
+
 <h2>Bulk Student Status Declaration</h2>
+
+<?php if(isset($_GET['success'])){ ?>
+<div class="success">✅ Status Updated Successfully</div>
+<?php } ?>
 
 <form method="POST" action="save_bulk_status.php">
 
@@ -75,7 +88,7 @@ select{
 <?php
 $sql = "
 SELECT 
-    s.id,
+    s.student_id as id,
     s.name,
     s.enrollment_id,
     s.course,
@@ -84,12 +97,12 @@ SELECT
 
 FROM students s
 LEFT JOIN student_status ss 
-ON s.id = ss.student_id AND ss.table_name='students'
+ON s.student_id = ss.student_id AND ss.table_name='students'
 
 UNION ALL
 
 SELECT 
-    s26.id,
+    s26.id as id,
     s26.name,
     s26.enrollment_id,
     s26.course,
@@ -102,6 +115,10 @@ ON s26.id = ss.student_id AND ss.table_name='students26'
 ";
 
 $result = $conn->query($sql);
+
+if(!$result){
+    die("Query Error: " . $conn->error);
+}
 
 while($row = $result->fetch_assoc()){
 ?>
@@ -116,10 +133,10 @@ while($row = $result->fetch_assoc()){
 <input type="hidden" name="table_name[]" value="<?= $row['table_name'] ?>">
 
 <select name="status[]">
-<option <?= $row['status']=='Continue'?'selected':'' ?>>Continue</option>
-<option <?= $row['status']=='Completed'?'selected':'' ?>>Completed</option>
-<option <?= $row['status']=='Dropped'?'selected':'' ?>>Dropped</option>
-<option <?= $row['status']=='Hold'?'selected':'' ?>>Hold</option>
+<option value="Continue" <?= $row['status']=='Continue'?'selected':'' ?>>Continue</option>
+<option value="Completed" <?= $row['status']=='Completed'?'selected':'' ?>>Completed</option>
+<option value="Dropped" <?= $row['status']=='Dropped'?'selected':'' ?>>Dropped</option>
+<option value="Hold" <?= $row['status']=='Hold'?'selected':'' ?>>Hold</option>
 </select>
 </td>
 
@@ -129,7 +146,7 @@ while($row = $result->fetch_assoc()){
 
 </table>
 
-<button class="btn">Save All Status</button>
+<button class="btn">💾 Save All Status</button>
 
 </form>
 

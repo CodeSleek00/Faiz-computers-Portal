@@ -11,7 +11,6 @@ for($i=0; $i<count($ids); $i++){
     $table = $tables[$i];
     $status = $statuses[$i];
 
-    // check exist
     $check = $conn->query("SELECT id FROM student_status WHERE student_id='$id' AND table_name='$table'");
 
     if($check->num_rows > 0){
