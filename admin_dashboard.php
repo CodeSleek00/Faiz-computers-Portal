@@ -648,6 +648,7 @@ $total = $row['total_students'];
                         <div class="action-links">
                             <a href="admin-panel/manage_student.php" class="action-link">Manage Students</a>
                             <a href="admin-panel/add_student.php" class="action-link">Add Student</a>
+                            <a href="admin-panel/bulk_status_update.php" class="action-link">Student Status Update</a>
                         </div>
                     </div>
                     
