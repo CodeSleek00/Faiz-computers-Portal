@@ -2,8 +2,59 @@
 session_start();
 include 'sqlite_config.php';
 
+// Check if user is logged in
+$is_logged_in = isset($_SESSION['enrollment_id']);
 $is_admin = isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'staff']);
-if (!$is_admin) {
+$is_student = isset($_SESSION['enrollment_id']) && !$is_admin;
+
+// Student trying to access admin page - show error
+if ($is_student) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Access Denied</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+            .error-container { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); padding: 50px 40px; max-width: 500px; text-align: center; }
+            .error-icon { font-size: 60px; margin-bottom: 20px; }
+            h1 { color: #ef4444; font-size: 28px; margin-bottom: 15px; }
+            p { color: #666; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
+            .error-msg { background: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin-bottom: 30px; text-align: left; border-radius: 4px; }
+            .btn { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: all 0.3s; border: none; cursor: pointer; }
+            .btn:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); }
+            .btn-secondary { background: #999; margin-left: 10px; }
+            .btn-secondary:hover { background: #777; }
+        </style>
+    </head>
+    <body>
+        <div class="error-container">
+            <div class="error-icon">🚫</div>
+            <h1>Access Denied</h1>
+            <div class="error-msg">
+                <strong>Student Account Detected:</strong><br>
+                You are logged in as a Student. Only Admin/Staff can view all attendance records.
+            </div>
+            <p>👤 <strong>Your Login:</strong> <?php echo htmlspecialchars($_SESSION['enrollment_id']); ?></p>
+            <p>📝 <strong>Your Role:</strong> Student</p>
+            <p style="color: #999; font-size: 14px; margin-top: 20px;">You can view your own attendance using the Student Attendance page.</p>
+            <div style="margin-top: 30px;">
+                <a href="../test.php" class="btn">Go to Dashboard</a>
+                <a href="student_attendance.php" class="btn btn-secondary">View My Attendance</a>
+            </div>
+            <p style="color: #999; font-size: 13px; margin-top: 20px;">Contact Admin if you have questions about your attendance.</p>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+// Not logged in - redirect to login
+if (!$is_logged_in) {
     header('Location: ../login-system/login.php');
     exit;
 }
