@@ -78,7 +78,9 @@ input{
 
 <div class="card">
 
-<h2>📋 All Students Attendance</h2>
+<h2>📋 Students Attendance (Only Continuing Students)</h2>
+
+<p><a href="manage_student_status.php">Manage Student Status</a></p>
 
 <form method="GET">
     <label>Date:</label>
@@ -105,7 +107,7 @@ $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : 
 
 /*
 ========================================
- FETCH WITH SEARCH + COURSE
+ FETCH WITH SEARCH + COURSE + STATUS
 ========================================
 */
 $query = "
@@ -115,8 +117,10 @@ SELECT
     name,
     enrollment_id,
     photo,
-    course
+    course,
+    status
 FROM students
+WHERE status = 'continue'
 
 UNION ALL
 
@@ -126,8 +130,10 @@ SELECT
     name,
     enrollment_id,
     photo,
-    course
+    course,
+    status
 FROM students26
+WHERE status = 'continue'
 ";
 
 if(!empty($search)){
