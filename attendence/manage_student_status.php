@@ -17,7 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
         $sql = "UPDATE $table_name SET status = ? WHERE " . ($table_name == 'students' ? 'student_id' : 'id') . " = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $status, $student_id);
-        $stmt->execute();
+        if ($stmt->execute()) {
+            echo "<script>alert('Status updated successfully.');</script>";
+        } else {
+            echo "<script>alert('Error updating status: " . $stmt->error . "');</script>";
+        }
         $stmt->close();
     } else {
         echo "<script>alert('Status column not found. Please run add_status_column.php first.');</script>";
@@ -30,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['bulk_update'])) {
     $bulk_status = $_POST['bulk_status'];
 
     if (!empty($selected_students) && !empty($bulk_status)) {
+        $updated_count = 0;
         foreach ($selected_students as $student_data) {
             list($table_name, $student_id) = explode('|', $student_data);
             $status_exists = ($table_name == 'students') ? $status_exists_students : $status_exists_students26;
@@ -38,11 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['bulk_update'])) {
                 $sql = "UPDATE $table_name SET status = ? WHERE " . ($table_name == 'students' ? 'student_id' : 'id') . " = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("si", $bulk_status, $student_id);
-                $stmt->execute();
+                if ($stmt->execute()) {
+                    $updated_count++;
+                }
                 $stmt->close();
             }
         }
-        echo "<script>alert('Bulk update completed.');</script>";
+        echo "<script>alert('$updated_count students updated successfully.');</script>";
+    } else {
+        echo "<script>alert('Please select students and choose a status.');</script>";
     }
 }
 
