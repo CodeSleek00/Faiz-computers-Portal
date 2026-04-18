@@ -20,7 +20,7 @@ body{
     background:#fff;
     padding:20px;
     border-radius:10px;
-    max-width:1300px;
+    max-width:1400px;
     margin:auto;
 }
 h2{
@@ -54,6 +54,12 @@ select{
     margin:20px auto;
     font-size:16px;
 }
+img{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    object-fit:cover;
+}
 .success{
     background:#2ecc71;
     color:white;
@@ -79,6 +85,7 @@ select{
 
 <table>
 <tr>
+<th>Photo</th>
 <th>Name</th>
 <th>Enrollment</th>
 <th>Course</th>
@@ -86,9 +93,11 @@ select{
 </tr>
 
 <?php
+
 $sql = "
 SELECT 
     s.student_id as id,
+    s.photo,
     s.name,
     s.enrollment_id,
     s.course,
@@ -103,6 +112,7 @@ UNION ALL
 
 SELECT 
     s26.id as id,
+    s26.photo,
     s26.name,
     s26.enrollment_id,
     s26.course,
@@ -124,6 +134,15 @@ while($row = $result->fetch_assoc()){
 ?>
 
 <tr>
+
+<td>
+<?php if(!empty($row['photo'])){ ?>
+<img src="../uploads/<?= $row['photo'] ?>">
+<?php } else { ?>
+<img src="../uploads/default.png">
+<?php } ?>
+</td>
+
 <td><?= $row['name'] ?></td>
 <td><?= $row['enrollment_id'] ?></td>
 <td><?= $row['course'] ?></td>
