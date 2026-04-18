@@ -69,7 +69,7 @@ button { padding: 5px 10px; background: #2563EB; color: #fff; border: none; bord
 
 <div class="card">
 <h2>Manage Student Status</h2>
-<p>Classify students: <strong>continue</strong> (ongoing), <strong>completed</strong> (finished), <strong>hold</strong> (on hold)</p>
+<p>Classify students: <strong>continue</strong> (ongoing), <strong>completed</strong> (finished), <strong>hold</strong> (on hold), <strong>drop</strong> (dropped out)</p>
 
 <table>
 <tr>
@@ -92,6 +92,7 @@ button { padding: 5px 10px; background: #2563EB; color: #fff; border: none; bord
 <option value="continue" <?php if ($row['status'] == 'continue') echo 'selected'; ?>>Continue</option>
 <option value="completed" <?php if ($row['status'] == 'completed') echo 'selected'; ?>>Completed</option>
 <option value="hold" <?php if ($row['status'] == 'hold') echo 'selected'; ?>>Hold</option>
+<option value="drop" <?php if ($row['status'] == 'drop') echo 'selected'; ?>>Drop</option>
 </select>
 </td>
 <td>
