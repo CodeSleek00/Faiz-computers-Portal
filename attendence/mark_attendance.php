@@ -1,5 +1,9 @@
 <?php
 include '../database_connection/db_connect.php';
+
+// Check if status column exists
+$status_exists_students = $conn->query("SHOW COLUMNS FROM students LIKE 'status'")->num_rows > 0;
+$status_exists_students26 = $conn->query("SHOW COLUMNS FROM students26 LIKE 'status'")->num_rows > 0;
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +82,7 @@ input{
 
 <div class="card">
 
-<h2>📋 Students Attendance (Only Continuing Students)</h2>
+<h2>📋 Students Attendance<?php if (!$status_exists_students && !$status_exists_students26) echo ' (Status column not added yet - showing all students)'; else echo ' (Only Continuing Students)'; ?></h2>
 
 <p><a href="manage_student_status.php">Manage Student Status</a></p>
 
@@ -118,9 +122,9 @@ SELECT
     enrollment_id,
     photo,
     course,
-    status
+    COALESCE(status, 'continue') AS status
 FROM students
-WHERE status = 'continue'
+" . ($status_exists_students ? "WHERE status = 'continue'" : "") . "
 
 UNION ALL
 
@@ -131,9 +135,9 @@ SELECT
     enrollment_id,
     photo,
     course,
-    status
+    COALESCE(status, 'continue') AS status
 FROM students26
-WHERE status = 'continue'
+" . ($status_exists_students26 ? "WHERE status = 'continue'" : "") . "
 ";
 
 if(!empty($search)){

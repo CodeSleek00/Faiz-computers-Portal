@@ -1,17 +1,27 @@
 <?php
 include '../database_connection/db_connect.php';
 
+// Check if status column exists
+$status_exists_students = $conn->query("SHOW COLUMNS FROM students LIKE 'status'")->num_rows > 0;
+$status_exists_students26 = $conn->query("SHOW COLUMNS FROM students26 LIKE 'status'")->num_rows > 0;
+
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
     $student_id = $_POST['student_id'];
     $table_name = $_POST['table_name'];
     $status = $_POST['status'];
 
-    $sql = "UPDATE $table_name SET status = ? WHERE " . ($table_name == 'students' ? 'student_id' : 'id') . " = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $status, $student_id);
-    $stmt->execute();
-    $stmt->close();
+    $status_exists = ($table_name == 'students') ? $status_exists_students : $status_exists_students26;
+
+    if ($status_exists) {
+        $sql = "UPDATE $table_name SET status = ? WHERE " . ($table_name == 'students' ? 'student_id' : 'id') . " = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("si", $status, $student_id);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        echo "<script>alert('Status column not found. Please run add_status_column.php first.');</script>";
+    }
 }
 
 // Fetch all students
@@ -22,7 +32,7 @@ SELECT
     name,
     enrollment_id,
     course,
-    status
+    COALESCE(status, 'continue') AS status
 FROM students
 
 UNION ALL
@@ -33,7 +43,7 @@ SELECT
     name,
     enrollment_id,
     course,
-    status
+    COALESCE(status, 'continue') AS status
 FROM students26
 ORDER BY name
 ";
