@@ -32,6 +32,7 @@ SELECT
     name,
     enrollment_id,
     course,
+    photo,
     COALESCE(status, 'continue') AS status
 FROM students
 
@@ -43,6 +44,7 @@ SELECT
     name,
     enrollment_id,
     course,
+    photo,
     COALESCE(status, 'continue') AS status
 FROM students26
 ORDER BY name
