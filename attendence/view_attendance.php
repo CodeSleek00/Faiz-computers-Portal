@@ -5,10 +5,9 @@ include '../database_connection/db_connect.php';
 $from_date = $_GET['from_date'] ?? '';
 $to_date   = $_GET['to_date'] ?? '';
 
-$where = "";
-
+$dateFilter = '';
 if (!empty($from_date) && !empty($to_date)) {
-    $where = "WHERE DATE(a.date) BETWEEN '$from_date' AND '$to_date'";
+    $dateFilter = "AND DATE(a.date) BETWEEN '$from_date' AND '$to_date'";
 }
 
 /* ================= FETCH ATTENDANCE ================= */
@@ -44,13 +43,11 @@ LEFT JOIN students26 s26
     ON a.student_id = s26.id
    AND a.table_name = 'students26'
 
-WHERE
-    ($where IS NULL OR $where = '')
-    AND (
+WHERE (
         (a.table_name = 'students' AND s.status = 'continue')
         OR (a.table_name = 'students26' AND s26.status = 'continue')
     )
-" . (empty($where) ? "" : " AND DATE(a.date) BETWEEN '$from_date' AND '$to_date'") . "
+    $dateFilter
 ORDER BY a.date DESC
 ");
 
@@ -61,10 +58,23 @@ if (!$data) {
 /* ================= COUNT ================= */
 $countQuery = $conn->query("
 SELECT 
-    SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS present_count,
-    SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS absent_count
+    SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) AS present_count,
+    SUM(CASE WHEN a.status='Absent' THEN 1 ELSE 0 END) AS absent_count
 FROM attendance a
-$where
+
+LEFT JOIN students s
+    ON a.student_id = s.student_id
+   AND a.table_name = 'students'
+
+LEFT JOIN students26 s26
+    ON a.student_id = s26.id
+   AND a.table_name = 'students26'
+
+WHERE (
+        (a.table_name = 'students' AND s.status = 'continue')
+        OR (a.table_name = 'students26' AND s26.status = 'continue')
+    )
+    $dateFilter
 ");
 
 $countData = $countQuery->fetch_assoc();
