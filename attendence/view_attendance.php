@@ -44,8 +44,13 @@ LEFT JOIN students26 s26
     ON a.student_id = s26.id
    AND a.table_name = 'students26'
 
-$where
-
+WHERE
+    ($where IS NULL OR $where = '')
+    AND (
+        (a.table_name = 'students' AND s.status = 'continue')
+        OR (a.table_name = 'students26' AND s26.status = 'continue')
+    )
+" . (empty($where) ? "" : " AND DATE(a.date) BETWEEN '$from_date' AND '$to_date'") . "
 ORDER BY a.date DESC
 ");
 
