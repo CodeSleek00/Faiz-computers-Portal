@@ -1,267 +1,182 @@
 <?php
-include '../database_connection/db_connect.php';
+session_start();
+include 'sqlite_config.php';
 
-// Check if status column exists
-$status_exists_students = $conn->query("SHOW COLUMNS FROM students LIKE 'status'")->num_rows > 0;
-$status_exists_students26 = $conn->query("SHOW COLUMNS FROM students26 LIKE 'status'")->num_rows > 0;
+$is_admin = isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'staff']);
+if (!$is_admin) {
+    header('Location: ../login-system/login.php');
+    exit;
+}
+
+$marked_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+$search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
+$batch_filter = isset($_GET['batch']) ? trim($_GET['batch']) : '';
+
+if ($marked_date > date('Y-m-d')) {
+    $marked_date = date('Y-m-d');
+}
+
+$students = [];
+$batches = ['Batch 1', 'Batch 2', 'All Batches'];
+
+$existing_attendance = [];
+try {
+    $stmt = $db->prepare("SELECT student_id, status, remarks FROM attendance WHERE attendance_date = ?");
+    $stmt->execute([$marked_date]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($results as $row) {
+        $existing_attendance[$row['student_id']] = [
+            'status' => $row['status'],
+            'remarks' => $row['remarks']
+        ];
+    }
+} catch (PDOException $e) {
+    error_log('Error: ' . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Mark Attendance</title>
-<link rel="stylesheet" href="../css/global-theme.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-
-<style>
-body{
-    background:#ffffff;
-    padding:20px;
-}
-.card{
-    background:#fff;
-    padding:20px;
-    border-radius:8px;
-    max-width:1100px;
-    margin:auto;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:15px;
-}
-th,td{
-    border:1px solid #D1D5DB;
-    padding:10px;
-    text-align:center;
-}
-img{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    object-fit:cover;
-}
-button{
-    padding:10px 20px;
-    background:#2563EB;
-    color:#fff;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-.bulk-actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-    margin:15px 0;
-}
-.bulk-actions button{
-    background:#10B981;
-}
-.bulk-actions button:hover{
-    background:#0F766E;
-}
-.bulk-actions label{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-weight:500;
-}
-input{
-    padding:8px;
-    margin:5px;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .filters-section { padding: 25px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+        .filter-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: 600; margin-bottom: 8px; color: #333; font-size: 14px; }
+        .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .bulk-actions { padding: 15px; background: white; border-bottom: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .bulk-actions label { display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px; }
+        .bulk-actions input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .content { padding: 20px; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #f8f9fa; }
+        th { padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0; font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid #e0e0e0; }
+        tbody tr:hover { background: #f8f9fa; }
+        .student-checkbox { width: 18px; height: 18px; cursor: pointer; }
+        .student-photo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0; }
+        .status-select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; min-width: 120px; }
+        .remarks-input { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+        .submit-section { padding: 25px; background: #f8f9fa; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; justify-content: flex-end; }
+        .summary { padding: 20px; background: #f0f4ff; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .summary-item { text-align: center; }
+        .summary-item .label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; }
+        .summary-item .value { font-size: 24px; font-weight: 700; color: #667eea; }
+        @media (max-width: 768px) { .header h1 { font-size: 22px; } .filter-group { grid-template-columns: 1fr; } table { font-size: 12px; } th, td { padding: 10px 8px; } }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>Mark Attendance</h1>
+            <p>Date: <strong><?php echo date('l, F j, Y', strtotime($marked_date)); ?></strong></p>
+        </div>
 
-<div class="card">
+        <div class="filters-section">
+            <form method="GET" id="filterForm">
+                <div class="filter-group">
+                    <div class="form-group">
+                        <label for="date">Attendance Date:</label>
+                        <input type="date" id="date" name="date" value="<?php echo $marked_date; ?>" max="<?php echo date('Y-m-d'); ?>" required onchange="document.getElementById('filterForm').submit()">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
 
-<h2>📋 Students Attendance<?php if (!$status_exists_students && !$status_exists_students26) echo ' (Status column not added yet - showing all students)'; else echo ' (Only Continuing Students)'; ?></h2>
+        <div class="bulk-actions">
+            <label><input type="checkbox" id="selectAll"> Select All</label>
+            <button type="button" class="btn btn-success" onclick="bulkAction('Present')">Mark All Present</button>
+            <button type="button" class="btn btn-danger" onclick="bulkAction('Absent')">Mark All Absent</button>
+            <button type="button" class="btn" style="background: #f59e0b; color: white;" onclick="bulkAction('Leave')">Mark All Leave</button>
+        </div>
 
-<p><a href="manage_student_status.php">Manage Student Status</a></p>
+        <form method="POST" action="save_attendance.php" id="attendanceForm">
+            <div class="content">
+                <div class="summary">
+                    <div class="summary-item"><div class="label">Total Students</div><div class="value" id="totalStudents">0</div></div>
+                    <div class="summary-item"><div class="label">Present</div><div class="value" id="presentCount">0</div></div>
+                    <div class="summary-item"><div class="label">Absent</div><div class="value" id="absentCount">0</div></div>
+                    <div class="summary-item"><div class="label">Leave</div><div class="value" id="leaveCount">0</div></div>
+                </div>
 
-<form method="GET">
-    <label>Date:</label>
-    <input type="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>" required>
+                <input type="hidden" name="marked_date" value="<?php echo $marked_date; ?>">
+                <input type="hidden" name="marked_by" value="<?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1; ?>">
 
-    <label>Search:</label>
-    <input type="text" name="search" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" placeholder="Name / Enrollment ID">
+                <div class="table-wrapper">
+                    <table id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Select</th>
+                                <th>Enrollment ID</th>
+                                <th>Name</th>
+                                <th style="width: 120px;">Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" style="text-align: center; padding: 40px;">Load students by selecting a date above</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-    <button type="submit">Load Students</button>
-</form>
+            <div class="submit-section">
+                <button type="reset" class="btn" style="background: #999; color: white;">Reset</button>
+                <button type="submit" class="btn btn-success">Save Attendance</button>
+            </div>
+        </form>
+    </div>
 
-<?php
-if(isset($_GET['date'])):
+    <script>
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateSummary();
+        });
 
-$date = $_GET['date'];
+        function bulkAction(status) {
+            const selects = document.querySelectorAll('.status-select');
+            selects.forEach(select => select.value = status);
+            updateSummary();
+        }
 
-// Prevent future dates
-$today = date('Y-m-d');
-if ($date > $today) {
-    $date = $today;
-}
+        function updateSummary() {
+            const selects = document.querySelectorAll('.status-select');
+            let present = 0, absent = 0, leave = 0;
 
-$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+            selects.forEach(select => {
+                switch(select.value) {
+                    case 'Present': present++; break;
+                    case 'Absent': absent++; break;
+                    case 'Leave': leave++; break;
+                }
+            });
 
-/*
-========================================
- FETCH WITH SEARCH + COURSE + STATUS
-========================================
-*/
-$query = "
-SELECT 
-    student_id AS id,
-    'students' AS table_name,
-    name,
-    enrollment_id,
-    photo,
-    course,
-    COALESCE(status, 'continue') AS status
-FROM students
-" . ($status_exists_students ? "WHERE status = 'continue'" : "") . "
+            document.getElementById('totalStudents').textContent = selects.length;
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('absentCount').textContent = absent;
+            document.getElementById('leaveCount').textContent = leave;
+        }
 
-UNION ALL
-
-SELECT 
-    id AS id,
-    'students26' AS table_name,
-    name,
-    enrollment_id,
-    photo,
-    course,
-    COALESCE(status, 'continue') AS status
-FROM students26
-" . ($status_exists_students26 ? "WHERE status = 'continue'" : "") . "
-";
-
-if(!empty($search)){
-    $query = "
-    SELECT * FROM ($query) AS all_students
-    WHERE name LIKE '%$search%' 
-       OR enrollment_id LIKE '%$search%'
-    ";
-}
-
-$query .= " ORDER BY name";
-
-$students = $conn->query($query);
-?>
-
-<form action="save_attendance.php" method="POST">
-
-<input type="hidden" name="date" value="<?= $date ?>">
-
-<div class="bulk-actions">
-    <label><input type="checkbox" id="selectAll"> Select All</label>
-    <button type="button" id="markSelectedPresent">Mark Selected Present</button>
-    <button type="button" id="markSelectedAbsent">Mark Selected Absent</button>
-    <button type="button" id="markAllPresent">Mark All Present</button>
-    <button type="button" id="markAllAbsent">Mark All Absent</button>
-</div>
-
-<table>
-<tr>
-    <th>Select</th>
-    <th>Photo</th>
-    <th>Enrollment ID</th>
-    <th>Name</th>
-    <th>Course</th>
-    <th>Status</th>
-</tr>
-
-<?php if($students->num_rows > 0): ?>
-<?php while($st = $students->fetch_assoc()): ?>
-<tr>
-    <td>
-        <input type="checkbox" class="student-checkbox" name="selected[<?= $st['table_name'] ?>][<?= $st['id'] ?>]" value="1">
-    </td>
-    <td>
-        <img src="../uploads/<?= !empty($st['photo']) ? $st['photo'] : 'default.png' ?>">
-    </td>
-    <td><?= htmlspecialchars($st['enrollment_id']) ?></td>
-    <td><?= htmlspecialchars($st['name']) ?></td>
-    <td><?= htmlspecialchars($st['course']) ?></td>
-    <td>
-        <select class="status-select" name="status[<?= $st['table_name'] ?>][<?= $st['id'] ?>]">
-            <option value="Absent">Absent</option>
-            <option value="Present">Present</option>
-        </select>
-    </td>
-</tr>
-<?php endwhile; ?>
-
-<?php else: ?>
-<tr>
-    <td colspan="5">No students found</td>
-</tr>
-<?php endif; ?>
-
-</table>
-
-<br>
-<button type="submit">Save Attendance</button>
-
-</form>
-
-<?php endif; ?>
-
-</div>
-
-<script>
-const selectAll = document.getElementById('selectAll');
-const markSelectedPresent = document.getElementById('markSelectedPresent');
-const markSelectedAbsent = document.getElementById('markSelectedAbsent');
-const markAllPresent = document.getElementById('markAllPresent');
-const markAllAbsent = document.getElementById('markAllAbsent');
-
-function getSelectedStatusElements() {
-    return Array.from(document.querySelectorAll('.student-checkbox'))
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.closest('tr').querySelector('.status-select'))
-        .filter(Boolean);
-}
-
-function setStatuses(status, elements) {
-    elements.forEach(select => select.value = status);
-}
-
-if (selectAll) {
-    selectAll.addEventListener('change', () => {
-        const allCheckboxes = document.querySelectorAll('.student-checkbox');
-        allCheckboxes.forEach(chk => chk.checked = selectAll.checked);
-    });
-}
-
-if (markSelectedPresent) {
-    markSelectedPresent.addEventListener('click', () => {
-        setStatuses('Present', getSelectedStatusElements());
-    });
-}
-
-if (markSelectedAbsent) {
-    markSelectedAbsent.addEventListener('click', () => {
-        setStatuses('Absent', getSelectedStatusElements());
-    });
-}
-
-if (markAllPresent) {
-    markAllPresent.addEventListener('click', () => {
-        setStatuses('Present', Array.from(document.querySelectorAll('.status-select')));
-    });
-}
-
-if (markAllAbsent) {
-    markAllAbsent.addEventListener('click', () => {
-        setStatuses('Absent', Array.from(document.querySelectorAll('.status-select')));
-    });
-}
-</script>
-
+        updateSummary();
+    </script>
 </body>
 </html>

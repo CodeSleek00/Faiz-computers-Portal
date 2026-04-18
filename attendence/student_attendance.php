@@ -1,94 +1,69 @@
 <?php
 session_start();
-include '../database_connection/db_connect.php';
+include 'sqlite_config.php';
 
-/* ================= LOGIN CHECK ================= */
 if (!isset($_SESSION['student_id']) && !isset($_SESSION['enrollment_id'])) {
-    header("Location: ../login-system/login.php");
+    header('Location: ../login-system/login.php');
     exit;
 }
 
-// Determine student ID based on session
-$student_id = null;
-if (isset($_SESSION['student_id'])) {
-    $student_id = $_SESSION['student_id'];
-} elseif (isset($_SESSION['enrollment_id'])) {
-    // If enrollment_id is in session, fetch student_id from database
-    $enrollment_id = $_SESSION['enrollment_id'];
-    $student_query = $conn->query("SELECT student_id FROM students WHERE enrollment_id = '$enrollment_id'
-                                   UNION
-                                   SELECT id FROM students26 WHERE enrollment_id = '$enrollment_id'");
-    if ($student_query && $student_query->num_rows > 0) {
-        $student_data = $student_query->fetch_assoc();
-        $student_id = $student_data['student_id'] ?? $student_data['id'];
-    }
-}
-
-if (!$student_id) {
-    header("Location: ../login-system/login.php");
-    exit;
-}
-
-/* ================= MONTH SELECTION ================= */
+$student_id = isset($_SESSION['student_id']) ? intval($_SESSION['student_id']) : 1; // Default for demo
 $selected_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+
 $month_start = $selected_month . '-01';
 $month_end = date('Y-m-t', strtotime($month_start));
 
-/* ================= FETCH ATTENDANCE FOR SELECTED MONTH ================= */
-$attendanceData = $conn->query("
-    SELECT DISTINCT date as attendance_date, status
-    FROM attendance
-    WHERE student_id = $student_id
-    AND date BETWEEN '$month_start' AND '$month_end'
-    ORDER BY date DESC
-");
+try {
+    $stmt = $db->prepare("
+        SELECT attendance_date, status, remarks, marked_at
+        FROM attendance
+        WHERE student_id = ? AND attendance_date BETWEEN ? AND ?
+        ORDER BY attendance_date DESC
+    ");
+    $stmt->execute([$student_id, $month_start, $month_end]);
+    $attendance_records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if (!$attendanceData) {
-    die("Database error: " . $conn->error);
+    $summaryStmt = $db->prepare("
+        SELECT 
+            COUNT(*) as total_days,
+            SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_days,
+            SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END) as absent_days,
+            SUM(CASE WHEN status = 'Leave' THEN 1 ELSE 0 END) as leave_days
+        FROM attendance
+        WHERE student_id = ? AND attendance_date BETWEEN ? AND ?
+    ");
+    $summaryStmt->execute([$student_id, $month_start, $month_end]);
+    $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC);
+
+    $overallStmt = $db->prepare("
+        SELECT 
+            COUNT(*) as total_days,
+            SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_days
+        FROM attendance
+        WHERE student_id = ?
+    ");
+    $overallStmt->execute([$student_id]);
+    $overall = $overallStmt->fetch(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    $error_message = 'Error: ' . $e->getMessage();
+    $attendance_records = [];
+    $summary = null;
+    $overall = null;
 }
 
-// Create attendance array for calendar
-$attendanceMap = [];
-while ($row = $attendanceData->fetch_assoc()) {
-    $attendanceMap[$row['attendance_date']] = $row['status'];
-}
+$month_total = $summary['total_days'] ?? 0;
+$month_present = $summary['present_days'] ?? 0;
+$month_percentage = ($month_total > 0) ? round(($month_present / $month_total) * 100, 2) : 0;
 
-/* ================= COUNT SUMMARY FOR SELECTED MONTH ================= */
-$countQuery = $conn->query("
-    SELECT
-        SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS present_days,
-        SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS absent_days
-    FROM attendance
-    WHERE student_id = $student_id
-    AND date BETWEEN '$month_start' AND '$month_end'
-");
-
-if (!$countQuery) {
-    die("Database error: " . $conn->error);
-}
-
-$count = $countQuery->fetch_assoc();
-
-$present = $count['present_days'] ?? 0;
-$absent  = $count['absent_days'] ?? 0;
-$total   = $present + $absent;
-
-$percentage = ($total > 0) ? round(($present / $total) * 100, 2) : 0;
-
-/* ================= OVERALL ATTENDANCE ================= */
-$overallQuery = $conn->query("
-    SELECT
-        SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS total_present,
-        SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS total_absent
-    FROM attendance
-    WHERE student_id = $student_id
-");
-
-$overall = $overallQuery->fetch_assoc();
-$overall_present = $overall['total_present'] ?? 0;
-$overall_absent = $overall['total_absent'] ?? 0;
-$overall_total = $overall_present + $overall_absent;
+$overall_total = $overall['total_days'] ?? 0;
+$overall_present = $overall['present_days'] ?? 0;
 $overall_percentage = ($overall_total > 0) ? round(($overall_present / $overall_total) * 100, 2) : 0;
+
+$attendance_map = [];
+foreach ($attendance_records as $record) {
+    $attendance_map[$record['attendance_date']] = $record;
+}
 ?>
 
 <!DOCTYPE html>
@@ -96,629 +71,173 @@ $overall_percentage = ($overall_total > 0) ? round(($overall_present / $overall_
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance | Student Dashboard</title>
-    <link rel="icon" type="image/png" href="image.png">
-    <link rel="apple-touch-icon" href="image.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>My Attendance</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-light: #3b82f6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #1f2937;
-            --gray: #6b7280;
-            --light-gray: #f3f4f6;
-            --border: #e5e7eb;
-            --white: #ffffff;
-            --radius: 8px;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--light-gray);
-            color: var(--dark);
-            line-height: 1.5;
-            padding: 16px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            margin-bottom: 24px;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: var(--white);
-            color: var(--primary);
-            text-decoration: none;
-            border-radius: var(--radius);
-            font-size: 13px;
-            font-weight: 500;
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-        }
-
-        .back-btn:hover {
-            background: var(--light-gray);
-            border-color: var(--primary);
-        }
-
-        .welcome-section h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 4px;
-        }
-
-        .welcome-section p {
-            color: var(--gray);
-            font-size: 13px;
-        }
-
-        /* Month Selector */
-        .month-selector {
-            margin-top: 16px;
-            padding: 16px;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            padding: 20px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
-            font-size: 16px;
-            color: var(--white);
-        }
-
-        .stat-icon.present { background: var(--success); }
-        .stat-icon.absent { background: var(--danger); }
-        .stat-icon.percentage { background: var(--primary); }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
-
-        /* Main Content */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .section-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .section-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .section-header i {
-            color: var(--primary);
-        }
-
-        .section-body {
-            padding: 20px;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            height: 200px;
-            position: relative;
-        }
-
-        /* Calendar Styles */
-        .calendar-container {
-            max-width: 100%;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-nav-btn {
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .calendar-nav-btn:hover {
-            background: var(--primary-light);
-        }
-
-        .calendar-header h3 {
-            margin: 0;
-            color: var(--dark);
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-
-        .day-name {
-            text-align: center;
-            font-weight: 600;
-            color: var(--gray);
-            font-size: 12px;
-            padding: 8px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .calendar-days {
-            grid-column: 1 / -1;
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .calendar-day.present {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--success);
-            color: var(--success);
-        }
-
-        .calendar-day.absent {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        .calendar-day.today {
-            border-color: var(--primary);
-            background: rgba(37, 99, 235, 0.1);
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .calendar-day.other-month {
-            color: var(--light-gray);
-            opacity: 0.5;
-        }
-
-        .calendar-day:hover {
-            transform: scale(1.1);
-        }
-
-        /* Alert Message */
-        .alert {
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: var(--success);
-            border: 1px solid #a7f3d0;
-        }
-
-        .alert i {
-            font-size: 14px;
-        }
-
-        /* No Data */
-        .empty-state {
-            padding: 40px 20px;
-            text-align: center;
-            color: var(--gray);
-        }
-
-        .empty-state i {
-            font-size: 40px;
-            margin-bottom: 12px;
-            opacity: 0.5;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header-top {
-                flex-direction: column;
-                gap: 12px;
-                align-items: flex-start;
-            }
-            
-            .chart-container {
-                height: 180px;
-            }
-
-            .calendar-day {
-                font-size: 12px;
-            }
-
-            .day-name {
-                font-size: 11px;
-                padding: 6px 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stat-card {
-                padding: 16px;
-            }
-            
-            .stat-number {
-                font-size: 20px;
-            }
-            
-            .calendar-nav-btn {
-                width: 32px;
-                height: 32px;
-                font-size: 14px;
-            }
-
-            .calendar-header h3 {
-                font-size: 16px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .stats-section { padding: 30px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+        .stat-card .label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; }
+        .stat-card .value { font-size: 32px; font-weight: 700; color: #667eea; margin-top: 8px; }
+        .stat-card.present .value { color: #10b981; }
+        .stat-card.absent .value { color: #ef4444; }
+        .stat-card.percentage .value { color: #667eea; }
+        .progress-bar { background: #e0e0e0; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #10b981, #059669); height: 100%; border-radius: 4px; }
+        .filters-section { padding: 25px 30px; background: white; border-bottom: 1px solid #e0e0e0; display: flex; gap: 15px; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: 600; margin-bottom: 6px; color: #333; font-size: 14px; }
+        .form-group input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; background: #667eea; color: white; }
+        .content { padding: 30px; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .calendar-header h3 { font-size: 18px; color: #333; }
+        .calendar { width: 100%; }
+        .calendar-day-names { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 10px; }
+        .calendar-day-name { text-align: center; font-weight: 600; color: #667; font-size: 12px; text-transform: uppercase; padding: 10px; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 600; font-size: 12px; border: 1px solid #e0e0e0; }
+        .calendar-day.empty { background: #f5f5f5; border-color: transparent; }
+        .calendar-day.present { background: #d1fae5; color: #065f46; border-color: #10b981; }
+        .calendar-day.absent { background: #fee2e2; color: #991b1b; border-color: #ef4444; }
+        .calendar-day.leave { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #f8f9fa; }
+        th { padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0; font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid #e0e0e0; }
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-present { background: #d1fae5; color: #065f46; }
+        .badge-absent { background: #fee2e2; color: #991b1b; }
+        .badge-leave { background: #fef3c7; color: #92400e; }
+        .legend { display: flex; gap: 20px; flex-wrap: wrap; padding: 20px; background: #f8f9fa; border-radius: 8px; margin-top: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .legend-box { width: 20px; height: 20px; border-radius: 4px; }
+        .legend-box.present { background: #10b981; }
+        .legend-box.absent { background: #ef4444; }
+        .legend-box.leave { background: #f59e0b; }
+        @media (max-width: 768px) { .header h1 { font-size: 22px; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <div class="header-top">
-                <a href="../test.php" class="back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back
-                </a>
-            </div>
-            <div class="welcome-section">
-                <h1>Attendance Record</h1>
-                <p>Track your class attendance and performance</p>
+            <h1>My Attendance</h1>
+        </div>
+
+        <div class="stats-section">
+            <div style="font-size: 18px; font-weight: 700; color: #333; margin-bottom: 20px;">Current Month - <?php echo date('F Y', strtotime($selected_month . '-01')); ?></div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="label">Total Days</div><div class="value"><?php echo $month_total; ?></div></div>
+                <div class="stat-card present"><div class="label">Present</div><div class="value"><?php echo $month_present; ?></div></div>
+                <div class="stat-card absent"><div class="label">Absent</div><div class="value"><?php echo $summary['absent_days'] ?? 0; ?></div></div>
+                <div class="stat-card percentage"><div class="label">Attendance %</div><div class="value"><?php echo $month_percentage; ?>%</div><div class="progress-bar"><div class="progress-fill" style="width: <?php echo min($month_percentage, 100); ?>%"></div></div></div>
             </div>
 
-            <!-- Month Selector -->
-            <div class="month-selector">
-                <form method="GET" style="display: flex; gap: 12px; align-items: center;">
-                    <label for="month" style="font-weight: 500; color: var(--dark);">Select Month:</label>
-                    <input type="month" id="month" name="month" value="<?= $selected_month ?>" 
-                           style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;">
-                    <button type="submit" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">View</button>
-                </form>
+            <div style="padding: 20px 0; border-top: 1px solid #e0e0e0; margin-top: 20px; padding-top: 20px;">
+                <div style="font-size: 18px; font-weight: 700; color: #333; margin-bottom: 20px;">Overall Summary</div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="label">Total Days</div><div class="value"><?php echo $overall_total; ?></div></div>
+                    <div class="stat-card present"><div class="label">Present</div><div class="value"><?php echo $overall_present; ?></div></div>
+                    <div class="stat-card percentage"><div class="label">Overall %</div><div class="value"><?php echo $overall_percentage; ?>%</div><div class="progress-bar"><div class="progress-fill" style="width: <?php echo min($overall_percentage, 100); ?>%"></div></div></div>
+                </div>
             </div>
         </div>
 
-        <!-- Alert Message -->
-        <?php if ($percentage < 75 && $total > 0): ?>
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                Monthly attendance (<?= date('F Y', strtotime($selected_month . '-01')) ?>) is below 75%. Please attend classes regularly.
-            </div>
-        <?php elseif ($total > 0): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                Monthly attendance (<?= date('F Y', strtotime($selected_month . '-01')) ?>) is good. Keep it up!
-            </div>
-        <?php endif; ?>
-
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon present">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="stat-number"><?= $present ?></div>
-                <div class="stat-label">Present (<?= date('M', strtotime($selected_month . '-01')) ?>)</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon absent">
-                    <i class="fas fa-calendar-times"></i>
-                </div>
-                <div class="stat-number"><?= $absent ?></div>
-                <div class="stat-label">Absent (<?= date('M', strtotime($selected_month . '-01')) ?>)</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon percentage">
-                    <i class="fas fa-percentage"></i>
-                </div>
-                <div class="stat-number"><?= $percentage ?>%</div>
-                <div class="stat-label">Monthly Attendance</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon percentage">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="stat-number"><?= $overall_percentage ?>%</div>
-                <div class="stat-label">Overall Attendance</div>
+        <div class="filters-section">
+            <div class="form-group">
+                <label for="month">Month:</label>
+                <input type="month" id="month" value="<?php echo $selected_month; ?>" onchange="location.href='?month=' + this.value">
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="content-grid">
-            <!-- Chart Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Attendance Overview</span>
+        <div class="content">
+            <div class="calendar-header">
+                <h3>Calendar View</h3>
+            </div>
+
+            <div class="calendar">
+                <div class="calendar-day-names">
+                    <div class="calendar-day-name">Sun</div>
+                    <div class="calendar-day-name">Mon</div>
+                    <div class="calendar-day-name">Tue</div>
+                    <div class="calendar-day-name">Wed</div>
+                    <div class="calendar-day-name">Thu</div>
+                    <div class="calendar-day-name">Fri</div>
+                    <div class="calendar-day-name">Sat</div>
                 </div>
-                <div class="section-body">
-                    <div class="chart-container">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
+
+                <div class="calendar-days">
+                    <?php
+                    $first_day_of_week = date('w', strtotime($month_start));
+                    $days_in_month = date('t', strtotime($month_start));
+
+                    for ($i = 0; $i < $first_day_of_week; $i++) {
+                        echo '<div class="calendar-day empty"></div>';
+                    }
+
+                    for ($day = 1; $day <= $days_in_month; $day++) {
+                        $date_string = $selected_month . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                        $has_record = isset($attendance_map[$date_string]);
+                        $status = $has_record ? $attendance_map[$date_string]['status'] : '';
+                        $status_class = $has_record ? strtolower($status) : '';
+
+                        $is_future = (strtotime($date_string) > strtotime(date('Y-m-d')));
+
+                        if ($is_future) {
+                            echo '<div class="calendar-day empty"></div>';
+                        } else {
+                            echo '<div class="calendar-day ' . $status_class . '">' . $day . '</div>';
+                        }
+                    }
+
+                    $total_cells = $first_day_of_week + $days_in_month;
+                    $remaining_cells = (7 - ($total_cells % 7)) % 7;
+                    for ($i = 0; $i < $remaining_cells; $i++) {
+                        echo '<div class="calendar-day empty"></div>';
+                    }
+                    ?>
                 </div>
             </div>
 
-            <!-- Calendar Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Attendance Calendar</span>
-                </div>
-                <div class="section-body">
-                    <div class="calendar-container">
-                        <div class="calendar-header">
-                            <button id="prevMonth" class="calendar-nav-btn">‹</button>
-                            <h3 id="calendarTitle"></h3>
-                            <button id="nextMonth" class="calendar-nav-btn">›</button>
-                        </div>
-                        <div class="calendar-grid">
-                            <div class="day-name">Sun</div>
-                            <div class="day-name">Mon</div>
-                            <div class="day-name">Tue</div>
-                            <div class="day-name">Wed</div>
-                            <div class="day-name">Thu</div>
-                            <div class="day-name">Fri</div>
-                            <div class="day-name">Sat</div>
-                            <div id="calendarDays" class="calendar-days"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-box present"></div><span>Present</span></div>
+                <div class="legend-item"><div class="legend-box absent"></div><span>Absent</span></div>
+                <div class="legend-item"><div class="legend-box leave"></div><span>Leave</span></div>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 20px; color: #333;">Detailed Records</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Marked At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($attendance_records)): ?>
+                            <?php foreach ($attendance_records as $record): ?>
+                                <tr>
+                                    <td><strong><?php echo date('M d, Y (l)', strtotime($record['attendance_date'])); ?></strong></td>
+                                    <td><span class="badge badge-<?php echo strtolower($record['status']); ?>"><?php echo htmlspecialchars($record['status']); ?></span></td>
+                                    <td><?php echo !empty($record['remarks']) ? htmlspecialchars($record['remarks']) : '-'; ?></td>
+                                    <td><?php echo date('M d, Y H:i', strtotime($record['marked_at'])); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="4" style="text-align: center; padding: 40px;">No records found</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <script>
-        // Attendance data from PHP
-        const attendanceData = <?php echo json_encode($attendanceMap); ?>;
-        const selectedMonth = '<?php echo $selected_month; ?>';
-
-        // Calendar functionality
-        let currentDate = selectedMonth ? new Date(selectedMonth + '-01') : new Date();
-
-        function renderCalendar(date) {
-            const year = date.getFullYear();
-            const month = date.getMonth();
-
-            // Update title
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('calendarTitle').textContent = `${monthNames[month]} ${year}`;
-
-            // Get first day of month and last day
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-            const calendarDays = document.getElementById('calendarDays');
-            calendarDays.innerHTML = '';
-
-            // Generate calendar days
-            for (let i = 0; i < 42; i++) {
-                const day = new Date(startDate);
-                day.setDate(startDate.getDate() + i);
-
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'calendar-day';
-                dayDiv.textContent = day.getDate();
-
-                // Check if day is in current month
-                if (day.getMonth() !== month) {
-                    dayDiv.classList.add('other-month');
-                }
-
-                // Check if it's today
-                const today = new Date();
-                if (day.toDateString() === today.toDateString()) {
-                    dayDiv.classList.add('today');
-                }
-
-                // Check attendance status
-                const dateKey = day.toISOString().split('T')[0];
-                if (attendanceData[dateKey]) {
-                    if (attendanceData[dateKey] === 'Present') {
-                        dayDiv.classList.add('present');
-                    } else if (attendanceData[dateKey] === 'Absent') {
-                        dayDiv.classList.add('absent');
-                    }
-                }
-
-                calendarDays.appendChild(dayDiv);
-            }
-        }
-
-        // Navigation
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar(currentDate);
-        });
-
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar(currentDate);
-        });
-
-        // Initialize calendar
-        renderCalendar(currentDate);
-
-        // Attendance Chart
-        const ctx = document.getElementById('attendanceChart').getContext('2d');
-
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Present', 'Absent'],
-                datasets: [{
-                    data: [<?= $present ?>, <?= $absent ?>],
-                    backgroundColor: ['#10b981', '#ef4444'],
-                    borderWidth: 0,
-                    borderRadius: 4,
-                    spacing: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: '<?= date('F Y', strtotime($selected_month . '-01')) ?> Attendance',
-                        font: {
-                            size: 14
-                        }
-                    }
-                },
-                cutout: '75%'
-            }
-        });
-    </script>
 </body>
 </html>

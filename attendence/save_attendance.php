@@ -1,60 +1,70 @@
 <?php
-include '../database_connection/db_connect.php';
+session_start();
+include 'sqlite_config.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$is_admin = isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'staff']);
+if (!$is_admin) {
+    die(json_encode(['success' => false, 'message' => 'Unauthorized']));
+}
 
-    $date = $_POST['date'];
-    $statuses = $_POST['status'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $marked_date = isset($_POST['marked_date']) ? $_POST['marked_date'] : date('Y-m-d');
+    $students = isset($_POST['students']) ? $_POST['students'] : [];
+    $statuses = isset($_POST['status']) ? $_POST['status'] : [];
+    $remarks = isset($_POST['remarks']) ? $_POST['remarks'] : [];
+    $marked_by = isset($_POST['marked_by']) ? intval($_POST['marked_by']) : 0;
 
-    if (empty($statuses)) {
-        die("No attendance data received.");
+    if (empty($students) || empty($statuses)) {
+        $_SESSION['attendance_error'] = 'No attendance data received!';
+        header('Location: mark_attendance.php?date=' . $marked_date);
+        exit;
     }
 
-    foreach ($statuses as $table_name => $students) {
+    $success_count = 0;
+    $error_count = 0;
 
-        foreach ($students as $student_id => $status) {
+    try {
+        $db->beginTransaction();
 
-            $student_id = intval($student_id);
-            $table_name = $conn->real_escape_string($table_name);
-            $status     = $conn->real_escape_string($status);
+        foreach ($students as $student_id) {
+            try {
+                $student_id = intval($student_id);
+                if (!isset($statuses[$student_id])) continue;
 
-            /*
-            =====================================
-            CHECK IF ALREADY EXISTS
-            =====================================
-            */
-            $check = $conn->query("
-                SELECT id FROM attendance 
-                WHERE student_id = $student_id 
-                AND table_name = '$table_name'
-                AND date = '$date'
-            ");
+                $status = $statuses[$student_id];
+                $remark = isset($remarks[$student_id]) ? trim($remarks[$student_id]) : '';
 
-            if ($check->num_rows > 0) {
+                if (!in_array($status, ['Present', 'Absent', 'Leave'])) {
+                    $status = 'Absent';
+                }
 
-                // UPDATE
-                $conn->query("
-                    UPDATE attendance 
-                    SET status = '$status'
-                    WHERE student_id = $student_id 
-                    AND table_name = '$table_name'
-                    AND date = '$date'
-                ");
+                $checkStmt = $db->prepare("SELECT id FROM attendance WHERE student_id = ? AND attendance_date = ?");
+                $checkStmt->execute([$student_id, $marked_date]);
 
-            } else {
-
-                // INSERT
-                $conn->query("
-                    INSERT INTO attendance (student_id, table_name, date, status)
-                    VALUES ($student_id, '$table_name', '$date', '$status')
-                ");
+                if ($checkStmt->rowCount() > 0) {
+                    $updateStmt = $db->prepare("UPDATE attendance SET status = ?, remarks = ?, marked_by = ?, updated_at = CURRENT_TIMESTAMP WHERE student_id = ? AND attendance_date = ?");
+                    $updateStmt->execute([$status, $remark, $marked_by, $student_id, $marked_date]);
+                    $success_count++;
+                } else {
+                    $insertStmt = $db->prepare("INSERT INTO attendance (student_id, student_name, enrollment_id, attendance_date, status, remarks, marked_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $insertStmt->execute([$student_id, 'Student ' . $student_id, 'ENR' . $student_id, $marked_date, $status, $remark, $marked_by]);
+                    $success_count++;
+                }
+            } catch (PDOException $e) {
+                $error_count++;
+                error_log('Attendance save error: ' . $e->getMessage());
             }
         }
-    }
 
-    echo "<script>
-        alert('Attendance Saved Successfully!');
-        window.location.href='mark_attendance.php';
-    </script>";
+        $db->commit();
+        $_SESSION['attendance_success'] = "Attendance marked successfully! ($success_count records saved)";
+
+    } catch (Exception $e) {
+        $db->rollBack();
+        $_SESSION['attendance_error'] = 'Transaction failed: ' . $e->getMessage();
+        error_log('Attendance transaction error: ' . $e->getMessage());
+    }
 }
-?>
+
+header('Location: mark_attendance.php?date=' . (isset($marked_date) ? $marked_date : date('Y-m-d')));
+exit;
