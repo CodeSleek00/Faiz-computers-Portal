@@ -10,75 +10,64 @@ if (!empty($from_date) && !empty($to_date)) {
     $dateFilter = "AND DATE(a.date) BETWEEN '$from_date' AND '$to_date'";
 }
 
+/* ================= SQLITE SETUP ================= */
+$sqlitePath = __DIR__ . '/attendance.sqlite';
+$sqlite = new SQLite3($sqlitePath);
+$sqlite->exec('PRAGMA journal_mode = WAL');
+
+$sqlite->exec('BEGIN TRANSACTION');
+$sqlite->exec('CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY, student_id INTEGER, table_name TEXT, date TEXT, status TEXT)');
+$sqlite->exec('CREATE TABLE IF NOT EXISTS students (student_id INTEGER PRIMARY KEY, name TEXT, enrollment_id TEXT, photo TEXT, status TEXT)');
+$sqlite->exec('CREATE TABLE IF NOT EXISTS students26 (id INTEGER PRIMARY KEY, name TEXT, enrollment_id TEXT, photo TEXT, status TEXT)');
+$sqlite->exec('DELETE FROM attendance');
+$sqlite->exec('DELETE FROM students');
+$sqlite->exec('DELETE FROM students26');
+
+$insertAttendance = $sqlite->prepare('INSERT INTO attendance (id, student_id, table_name, date, status) VALUES (:id, :student_id, :table_name, :date, :status)');
+$attendanceResult = $conn->query('SELECT id, student_id, table_name, date, status FROM attendance');
+while ($row = $attendanceResult->fetch_assoc()) {
+    $insertAttendance->bindValue(':id', $row['id'], SQLITE3_INTEGER);
+    $insertAttendance->bindValue(':student_id', $row['student_id'], SQLITE3_INTEGER);
+    $insertAttendance->bindValue(':table_name', $row['table_name'], SQLITE3_TEXT);
+    $insertAttendance->bindValue(':date', $row['date'], SQLITE3_TEXT);
+    $insertAttendance->bindValue(':status', $row['status'], SQLITE3_TEXT);
+    $insertAttendance->execute();
+}
+
+$insertStudent = $sqlite->prepare('INSERT INTO students (student_id, name, enrollment_id, photo, status) VALUES (:student_id, :name, :enrollment_id, :photo, :status)');
+$studentResult = $conn->query('SELECT student_id, name, enrollment_id, photo, status FROM students');
+while ($row = $studentResult->fetch_assoc()) {
+    $insertStudent->bindValue(':student_id', $row['student_id'], SQLITE3_INTEGER);
+    $insertStudent->bindValue(':name', $row['name'], SQLITE3_TEXT);
+    $insertStudent->bindValue(':enrollment_id', $row['enrollment_id'], SQLITE3_TEXT);
+    $insertStudent->bindValue(':photo', $row['photo'], SQLITE3_TEXT);
+    $insertStudent->bindValue(':status', $row['status'], SQLITE3_TEXT);
+    $insertStudent->execute();
+}
+
+$insertStudent26 = $sqlite->prepare('INSERT INTO students26 (id, name, enrollment_id, photo, status) VALUES (:id, :name, :enrollment_id, :photo, :status)');
+$student26Result = $conn->query('SELECT id, name, enrollment_id, photo, status FROM students26');
+while ($row = $student26Result->fetch_assoc()) {
+    $insertStudent26->bindValue(':id', $row['id'], SQLITE3_INTEGER);
+    $insertStudent26->bindValue(':name', $row['name'], SQLITE3_TEXT);
+    $insertStudent26->bindValue(':enrollment_id', $row['enrollment_id'], SQLITE3_TEXT);
+    $insertStudent26->bindValue(':photo', $row['photo'], SQLITE3_TEXT);
+    $insertStudent26->bindValue(':status', $row['status'], SQLITE3_TEXT);
+    $insertStudent26->execute();
+}
+
+$sqlite->exec('COMMIT');
+
 /* ================= FETCH ATTENDANCE ================= */
-$data = $conn->query("
-SELECT
-    a.date,
-
-    CASE
-        WHEN a.table_name = 'students' THEN s.name
-        WHEN a.table_name = 'students26' THEN s26.name
-        ELSE 'Unknown'
-    END AS student_name,
-
-    CASE
-        WHEN a.table_name = 'students' THEN s.enrollment_id
-        WHEN a.table_name = 'students26' THEN s26.enrollment_id
-    END AS enrollment_id,
-
-    CASE
-        WHEN a.table_name = 'students' THEN s.photo
-        WHEN a.table_name = 'students26' THEN s26.photo
-    END AS photo,
-
-    a.status
-
-FROM attendance a
-
-LEFT JOIN students s
-    ON a.student_id = s.student_id
-   AND a.table_name = 'students'
-
-LEFT JOIN students26 s26
-    ON a.student_id = s26.id
-   AND a.table_name = 'students26'
-
-WHERE (
-        (a.table_name = 'students' AND s.status = 'continue')
-        OR (a.table_name = 'students26' AND s26.status = 'continue')
-    )
-    $dateFilter
-ORDER BY a.date DESC
-");
-
+$query = "SELECT a.date, CASE WHEN a.table_name = 'students' THEN s.name WHEN a.table_name = 'students26' THEN s26.name ELSE 'Unknown' END AS student_name, CASE WHEN a.table_name = 'students' THEN s.enrollment_id WHEN a.table_name = 'students26' THEN s26.enrollment_id END AS enrollment_id, CASE WHEN a.table_name = 'students' THEN s.photo WHEN a.table_name = 'students26' THEN s26.photo END AS photo, a.status FROM attendance a LEFT JOIN students s ON a.table_name = 'students' AND a.student_id = s.student_id LEFT JOIN students26 s26 ON a.table_name = 'students26' AND a.student_id = s26.id WHERE ((a.table_name = 'students' AND LOWER(TRIM(s.status)) = 'continue') OR (a.table_name = 'students26' AND LOWER(TRIM(s26.status)) = 'continue')) $dateFilter ORDER BY a.date DESC";
+$data = $sqlite->query($query);
 if (!$data) {
-    die("Attendance query failed: " . $conn->error);
+    die('Attendance query failed: ' . $sqlite->lastErrorMsg());
 }
 
 /* ================= COUNT ================= */
-$countQuery = $conn->query("
-SELECT 
-    SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) AS present_count,
-    SUM(CASE WHEN a.status='Absent' THEN 1 ELSE 0 END) AS absent_count
-FROM attendance a
-
-LEFT JOIN students s
-    ON a.student_id = s.student_id
-   AND a.table_name = 'students'
-
-LEFT JOIN students26 s26
-    ON a.student_id = s26.id
-   AND a.table_name = 'students26'
-
-WHERE (
-        (a.table_name = 'students' AND s.status = 'continue')
-        OR (a.table_name = 'students26' AND s26.status = 'continue')
-    )
-    $dateFilter
-");
-
-$countData = $countQuery->fetch_assoc();
-
+$countQuery = $sqlite->query("SELECT SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) AS present_count, SUM(CASE WHEN a.status='Absent' THEN 1 ELSE 0 END) AS absent_count FROM attendance a LEFT JOIN students s ON a.table_name = 'students' AND a.student_id = s.student_id LEFT JOIN students26 s26 ON a.table_name = 'students26' AND a.student_id = s26.id WHERE ((a.table_name = 'students' AND LOWER(TRIM(s.status)) = 'continue') OR (a.table_name = 'students26' AND LOWER(TRIM(s26.status)) = 'continue')) $dateFilter");
+$countData = $countQuery->fetchArray(SQLITE3_ASSOC);
 $present = $countData['present_count'] ?? 0;
 $absent  = $countData['absent_count'] ?? 0;
 ?>
