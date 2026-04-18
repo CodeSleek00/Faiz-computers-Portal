@@ -73,6 +73,7 @@ button { padding: 5px 10px; background: #2563EB; color: #fff; border: none; bord
 
 <table>
 <tr>
+<th>Photo</th>
 <th>Name</th>
 <th>Enrollment ID</th>
 <th>Course</th>
@@ -81,6 +82,7 @@ button { padding: 5px 10px; background: #2563EB; color: #fff; border: none; bord
 </tr>
 <?php while ($row = $result->fetch_assoc()): ?>
 <tr>
+<td><img src="../uploads/<?php echo htmlspecialchars($row['photo']); ?>" width="50" height="50" style="border-radius:50%; object-fit:cover;" alt="Photo"></td>
 <td><?php echo htmlspecialchars($row['name']); ?></td>
 <td><?php echo htmlspecialchars($row['enrollment_id']); ?></td>
 <td><?php echo htmlspecialchars($row['course']); ?></td>
