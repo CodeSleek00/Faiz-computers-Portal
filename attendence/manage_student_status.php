@@ -55,7 +55,7 @@ SELECT
     enrollment_id,
     course,
     photo,
-    COALESCE(status, 'continue') AS status
+    " . ($status_exists_students ? "status" : "'Not Set' AS status") . "
 FROM students
 
 UNION ALL
@@ -67,7 +67,7 @@ SELECT
     enrollment_id,
     course,
     photo,
-    COALESCE(status, 'continue') AS status
+    " . ($status_exists_students26 ? "status" : "'Not Set' AS status") . "
 FROM students26
 ORDER BY name
 ";
