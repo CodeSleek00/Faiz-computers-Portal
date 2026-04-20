@@ -160,7 +160,7 @@ while($row = $result->fetch_assoc()){
     WHERE student_id='$id' AND table_name='$table' AND date='$date'
     ");
 
-    $selectedStatus = "Present";
+    $selectedStatus = "Absent";
 
     if($checkRes->num_rows > 0){
         $selectedStatus = $checkRes->fetch_assoc()['status'];
