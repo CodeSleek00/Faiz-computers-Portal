@@ -1,5 +1,5 @@
-<?php
-include '../database_connection/db_connect.php';
+<?php 
+include '../database_connection/db_connect.php'; 
 ?>
 
 <!DOCTYPE html>
@@ -32,9 +32,15 @@ h2{
     justify-content:space-between;
     align-items:center;
     margin-bottom:15px;
+    flex-wrap:wrap;
+    gap:10px;
 }
 .date-box{
     font-weight:500;
+}
+.total-box{
+    font-weight:600;
+    color:#2980b9;
 }
 table{
     width:100%;
@@ -86,9 +92,50 @@ select{
 
 <form method="POST" action="save_attendance.php">
 
+<?php
+$date = date('Y-m-d');
+
+$sql = "
+SELECT 
+    s.student_id as id,
+    s.photo,
+    s.name,
+    s.enrollment_id,
+    s.course,
+    'students' as table_name
+FROM students s
+JOIN student_status ss 
+ON s.student_id = ss.student_id
+WHERE ss.status='Continue' AND ss.table_name='students'
+
+UNION ALL
+
+SELECT 
+    s26.id as id,
+    s26.photo,
+    s26.name,
+    s26.enrollment_id,
+    s26.course,
+    'students26' as table_name
+FROM students26 s26
+JOIN student_status ss 
+ON s26.id = ss.student_id
+WHERE ss.status='Continue' AND ss.table_name='students26'
+";
+
+$result = $conn->query($sql);
+
+/* ✅ TOTAL STUDENTS */
+$total_students = $result->num_rows;
+?>
+
 <div class="top-bar">
     <div class="date-box">
         📅 Today: <?= date('d M Y') ?>
+    </div>
+
+    <div class="total-box">
+        👨‍🎓 Total Students: <?= $total_students ?>
     </div>
 
     <div>
@@ -108,41 +155,7 @@ select{
 </tr>
 
 <?php
-
-$date = date('Y-m-d');
-
-$sql = "
-SELECT 
-    s.student_id as id,
-    s.photo,
-    s.name,
-    s.enrollment_id,
-    s.course,
-    'students' as table_name
-FROM students s
-JOIN student_status ss 
-ON s.student_id = ss.student_id 
-WHERE ss.status='Continue' AND ss.table_name='students'
-
-UNION ALL
-
-SELECT 
-    s26.id as id,
-    s26.photo,
-    s26.name,
-    s26.enrollment_id,
-    s26.course,
-    'students26' as table_name
-FROM students26 s26
-JOIN student_status ss 
-ON s26.id = ss.student_id 
-WHERE ss.status='Continue' AND ss.table_name='students26'
-";
-
-$result = $conn->query($sql);
-
 while($row = $result->fetch_assoc()){
-
     $id = $row['id'];
     $table = $row['table_name'];
 
@@ -154,7 +167,7 @@ while($row = $result->fetch_assoc()){
     ");
     $count = $countRes->fetch_assoc()['total'];
 
-    // 🔥 Already marked for selected date
+    // 🔥 Already marked today
     $checkRes = $conn->query("
     SELECT status FROM attendance 
     WHERE student_id='$id' AND table_name='$table' AND date='$date'
