@@ -411,7 +411,9 @@ $total_results = $results->num_rows;
         </div>
 
        
-
+<a href="exam_detail.php?exam_id=<?= $row['exam_id'] ?>">
+    View Answers
+</a>
         <!-- Results Section -->
         <div class="results-section">
             <div class="section-header">
