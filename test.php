@@ -1330,11 +1330,11 @@ $total_materials = $total_materials ?? 0;
                 <span>Study Center</span>
                 <span class="nav-badge"><?= $total_materials ?></span>
             </a>
-            <a href="attendence/student_attendance.php" class="nav-item">
+           <!-- <a href="attendence/student_attendance.php" class="nav-item">
                 <i class="fas fa-calendar-check nav-icon"></i>
                 <span>Attendance</span>
                 <span class="nav-badge"><?= $present ?>%</span>
-            </a>
+            </a>-->
         </div>
 
         <!-- Examination Section -->
