@@ -37,6 +37,7 @@ let streamRef = null;
 let timerRef = null;
 let locked = false;
 let errorStreak = 0;
+let modelsReady = false;
 
 function setStatus(text, cls){
     statusEl.className = 'status ' + (cls || '');
@@ -55,23 +56,50 @@ async function startAttendance(){
     setStatus('Camera started. Looking for a known face...', '');
 }
 
+async function loadFaceModels(){
+    if (modelsReady) return;
+    await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+    const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    modelsReady = true;
+}
+
 async function captureAndRecognize(){
     if (locked) return;
     if (!video.videoWidth || !video.videoHeight) return;
 
     locked = true;
     try {
+        await loadFaceModels();
+
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
-        const image = canvas.toDataURL('image/jpeg');
+        const det = await faceapi
+            .detectSingleFace(canvas)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+        if (!det || !det.descriptor) {
+            setStatus('No face detected. Try again...', '');
+            errorStreak = 0;
+            return;
+        }
+        const embedding = Array.from(det.descriptor);
 
         const resp = await fetch('recognize_frame.php', {
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
-            body: JSON.stringify({ image })
+            body: JSON.stringify({ embedding })
         });
         const recText = await resp.text();
         if (!resp.ok) {
