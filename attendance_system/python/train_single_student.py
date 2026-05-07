@@ -6,12 +6,20 @@ import sys
 student_id = sys.argv[1]
 table_name = sys.argv[2]
 
-folder = f"../dataset/{student_id}_{table_name}"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
 
-encodings_file = "../trainer/encodings.pkl"
+folder = os.path.join(APP_DIR, "dataset", f"{student_id}_{table_name}")
+
+encodings_file = os.path.join(APP_DIR, "trainer", "encodings.pkl")
 
 known_encodings = []
 known_names = []
+
+if not os.path.isdir(folder):
+    raise SystemExit(f"Dataset folder not found: {folder}")
+
+os.makedirs(os.path.dirname(encodings_file), exist_ok=True)
 
 if os.path.exists(encodings_file):
 

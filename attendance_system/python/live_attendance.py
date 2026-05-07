@@ -3,8 +3,20 @@ import face_recognition
 import pickle
 import requests
 from datetime import datetime
-with open("../trainer/encodings.pkl", "rb") as f:
+import os
+import sys
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+encodings_path = os.path.join(APP_DIR, "trainer", "encodings.pkl")
+if not os.path.exists(encodings_path):
+    raise SystemExit(f"Encodings not found. Train faces first: {encodings_path}")
+
+with open(encodings_path, "rb") as f:
     data = pickle.load(f)
+
+api_url = sys.argv[1] if len(sys.argv) > 1 else None
 
 video = cv2.VideoCapture(0)
 
@@ -47,7 +59,7 @@ while True:
                 table_name = parts[1]
 
                 requests.post(
-                    "https://yourdomain.com/api/attendance_api.php",
+                    api_url or "http://localhost/attendance_system/api/attendance_api.php",
                     data={
                         "student_id": student_id,
                         "table_name": table_name
