@@ -6,7 +6,7 @@ include 'db_connect.php';
 
 $fetchStudents = function(string $table) use ($conn): array {
     $rows = [];
-    $result = mysqli_query($conn, "SELECT id, name, enrollment_id FROM `$table` ORDER BY id DESC");
+    $result = mysqli_query($conn, "SELECT student_id, name, enrollment_id FROM `$table` ORDER BY id DESC");
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
             $row['table_name'] = $table;
