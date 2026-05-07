@@ -1,6 +1,6 @@
 
 <?php
-include '../db_connect.php';
+include 'db_connect.php';
 
 $students = mysqli_query($conn, "SELECT * FROM students");
 ?>
