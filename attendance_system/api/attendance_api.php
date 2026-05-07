@@ -59,15 +59,17 @@ if(isset($_POST['student_id'])){
             student_name,
             attendance_date,
             attendance_time,
-            status
+            status,
+            attendance_method
         ) VALUES(
-            '$student_id',
+            $student_id,
             '$table_name',
             '$enrollment_id',
             '$student_name',
             '$date',
             '$time',
-            'Present'
+            'Present',
+            'face'
         )");
 
         echo json_encode(["ok" => true, "marked" => true]);
