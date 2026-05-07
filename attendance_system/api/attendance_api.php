@@ -3,9 +3,29 @@
 include '../db_connect.php';
 
 ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/../logs/php-errors.log');
 error_reporting(E_ALL);
 
 header("Content-Type: application/json");
+
+if (!is_dir(__DIR__ . '/../logs')) {
+    mkdir(__DIR__ . '/../logs', 0777, true);
+}
+
+register_shutdown_function(function () {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        http_response_code(500);
+        echo json_encode([
+            "ok" => false,
+            "error" => "Fatal error",
+            "detail" => $err['message'],
+            "file" => basename($err['file']),
+            "line" => $err['line']
+        ]);
+    }
+});
 
 if(isset($_POST['student_id'])){
 
