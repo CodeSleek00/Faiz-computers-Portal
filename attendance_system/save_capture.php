@@ -47,10 +47,11 @@ if($count == 15){
         ]);
     }
 
+    $embedding = $data["embedding"] ?? null;
     $payload = json_encode([
         "student_id" => $student_id,
         "table_name" => $table_name,
-        "image" => $data["image"]
+        "embedding" => $embedding
     ]);
 
     $url = rtrim($NODE_API_URL, "/") . "/api/enroll";

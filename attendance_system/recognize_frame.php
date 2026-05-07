@@ -53,7 +53,7 @@ if ($NODE_API_URL === '') {
     exit;
 }
 
-$payload = json_encode(["image" => $data["image"]]);
+$payload = json_encode(["embedding" => ($data["embedding"] ?? null)]);
 $url = rtrim($NODE_API_URL, "/") . "/api/recognize";
 
 $ch = curl_init($url);
