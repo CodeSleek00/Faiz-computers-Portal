@@ -1538,9 +1538,9 @@ $total_materials = $total_materials ?? 0;
                 </div>
             </div>
 
-            <!-- Right Column -->
+           <!-- 
             <div class="right-column">
-                <!-- Attendance -->
+                
                 <div class="card animate-in" style="animation-delay: 0.2s">
                     <div class="card-header">
                         <h2 class="card-title"><i class="fas fa-calendar-check"></i> Attendance</h2>
@@ -1563,7 +1563,7 @@ $total_materials = $total_materials ?? 0;
                     <div class="chart-container">
                         <canvas id="attendanceChart"></canvas>
                     </div>
-                </div>
+                </div>-->
 
                 <!-- Fee Status -->
                 <div class="card animate-in" style="animation-delay: 0.3s">
