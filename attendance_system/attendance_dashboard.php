@@ -7,8 +7,10 @@ ini_set('display_errors', 1);
 <?php
 include 'db_connect.php';
 
-$attendance = mysqli_query($conn,
-"SELECT * FROM attendance ORDER BY id DESC");
+$attendance = mysqli_query($conn, "SELECT * FROM attendance ORDER BY id DESC");
+if (!$attendance) {
+    die("Attendance query failed: " . mysqli_error($conn));
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +52,14 @@ $attendance = mysqli_query($conn,
     <th>Time</th>
     <th>Status</th>
 </tr>
+
+<?php if (mysqli_num_rows($attendance) === 0) { ?>
+    <tr>
+        <td colspan="6" style="text-align:center; padding:20px; color:#cbd5e1;">
+            No attendance records found yet.
+        </td>
+    </tr>
+<?php } ?>
 
 <?php while($row = mysqli_fetch_assoc($attendance)){ ?>
 
