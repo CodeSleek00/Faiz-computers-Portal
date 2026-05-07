@@ -43,6 +43,16 @@ $image = preg_replace('#^data:image/\\w+;base64,#i', '', $image);
 $image = str_replace(' ', '+', $image);
 include __DIR__ . "/node_config.php";
 
+if ($NODE_API_URL === '') {
+    http_response_code(500);
+    echo json_encode([
+        "ok" => false,
+        "error" => "node_not_configured",
+        "detail" => "Set NODE_API_URL to your Node.js Web App public URL (no trailing slash)."
+    ]);
+    exit;
+}
+
 $payload = json_encode(["image" => $data["image"]]);
 $url = rtrim($NODE_API_URL, "/") . "/api/recognize";
 

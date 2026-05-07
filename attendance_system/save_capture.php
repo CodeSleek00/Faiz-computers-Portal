@@ -39,6 +39,14 @@ if($count == 15){
 
     include __DIR__ . "/node_config.php";
 
+    if ($NODE_API_URL === '') {
+        $respond(500, [
+            "ok" => false,
+            "error" => "node_not_configured",
+            "detail" => "Set NODE_API_URL to your Node.js Web App public URL (no trailing slash)."
+        ]);
+    }
+
     $payload = json_encode([
         "student_id" => $student_id,
         "table_name" => $table_name,
