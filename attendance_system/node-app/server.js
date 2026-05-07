@@ -33,7 +33,7 @@ async function ensureSchema(db) {
   await db.query(`
     CREATE TABLE IF NOT EXISTS face_embeddings (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      student_id BIGINT NOT NULL,
+      student_id VARCHAR(64) NOT NULL,
       table_name VARCHAR(64) NOT NULL,
       embedding JSON NOT NULL,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -69,7 +69,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 // Enrollment: expects embedding computed in browser (face-api.js)
 app.post("/api/enroll", async (req, res) => {
   try {
-    const student_id = String(req.body?.student_id || "").replace(/\D/g, "");
+    const student_id = String(req.body?.student_id || "").replace(/[^a-zA-Z0-9_]/g, "");
     const table_name = String(req.body?.table_name || "").replace(/[^a-zA-Z0-9_]/g, "");
     const embedding = normalizeEmbedding(req.body?.embedding);
 
@@ -78,7 +78,7 @@ app.post("/api/enroll", async (req, res) => {
 
     await dbPool.query(
       "INSERT INTO face_embeddings (student_id, table_name, embedding) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE embedding=VALUES(embedding)",
-      [Number(student_id), table_name, JSON.stringify(embedding)]
+      [student_id, table_name, JSON.stringify(embedding)]
     );
 
     res.json({ ok: true, enrolled: true });
@@ -130,4 +130,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-
