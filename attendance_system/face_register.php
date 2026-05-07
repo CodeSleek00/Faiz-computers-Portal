@@ -1,7 +1,16 @@
 <?php
-$id = $_GET['id'];
-$table = $_GET['table'];
+$id = $_GET['id'] ?? '';
+$table = $_GET['table'] ?? '';
 $id_col = $_GET['id_col'] ?? 'id';
+
+$id = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$id);
+$table = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$table);
+$id_col = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$id_col);
+
+if ($id === '' || $table === '') {
+    http_response_code(400);
+    die("Missing student id or table. Go back to index.php and click Record Face.");
+}
 ?>
 <!DOCTYPE html>
 <html>

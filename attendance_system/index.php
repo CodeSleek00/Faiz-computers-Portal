@@ -87,12 +87,12 @@ $students = array_merge(
 
     <?php foreach ($students as $row) { ?>
         <tr>
-            <td><?= (int)($row['row_id'] ?? 0); ?></td>
+            <td><?= htmlspecialchars((string)($row['row_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
             <td><?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
             <td><?= htmlspecialchars($row['enrollment_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
             <td><span class="tag"><?= htmlspecialchars($row['table_name'], ENT_QUOTES, 'UTF-8'); ?></span></td>
             <td>
-                <a class="btn" href="face_register.php?id=<?= (int)($row['row_id'] ?? 0); ?>&table=<?= urlencode($row['table_name']); ?>&id_col=<?= urlencode($row['id_col'] ?? 'id'); ?>">Record Face</a>
+                <a class="btn" href="face_register.php?id=<?= urlencode((string)($row['row_id'] ?? '')); ?>&table=<?= urlencode($row['table_name']); ?>&id_col=<?= urlencode($row['id_col'] ?? 'id'); ?>">Record Face</a>
             </td>
         </tr>
     <?php } ?>
