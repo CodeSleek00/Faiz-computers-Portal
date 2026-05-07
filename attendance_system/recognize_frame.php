@@ -57,13 +57,15 @@ $tmpFile = $tmpDir . "/frame_" . time() . "_" . bin2hex(random_bytes(4)) . ".jpg
 file_put_contents($tmpFile, $decoded);
 
 $disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
-if (!function_exists('shell_exec') || in_array('shell_exec', $disabled, true)) {
+$shellExecOk = function_exists('shell_exec') && !in_array('shell_exec', $disabled, true) && is_callable('shell_exec');
+$execOk = function_exists('exec') && !in_array('exec', $disabled, true) && is_callable('exec');
+if (!$shellExecOk && !$execOk) {
     @unlink($tmpFile);
     http_response_code(500);
     echo json_encode([
         "ok" => false,
-        "error" => "shell_exec disabled on hosting",
-        "detail" => "This server blocks running Python from PHP. Use VPS/local server or enable exec functions (shell_exec/exec)."
+        "error" => "exec disabled on hosting",
+        "detail" => "This server blocks running Python from PHP. Enable exec/shell_exec or use a separate Python service."
     ]);
     exit;
 }
@@ -71,7 +73,17 @@ if (!function_exists('shell_exec') || in_array('shell_exec', $disabled, true)) {
 $python = "python3";
 $script = __DIR__ . "/python/recognize_frame.py";
 $cmd = escapeshellcmd($python) . " " . escapeshellarg($script) . " " . escapeshellarg($tmpFile);
-$out = trim((string)shell_exec($cmd . " 2>&1"));
+
+$out = "";
+if ($shellExecOk) {
+    $out = (string)\shell_exec($cmd . " 2>&1");
+} else {
+    $lines = [];
+    $exitCode = 0;
+    \exec($cmd . " 2>&1", $lines, $exitCode);
+    $out = implode("\n", $lines);
+}
+$out = trim($out);
 
 @unlink($tmpFile);
 
