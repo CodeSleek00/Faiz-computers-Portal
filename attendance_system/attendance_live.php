@@ -100,7 +100,7 @@ async function captureAndRecognize(){
             }
         }
     } catch (e) {
-        setStatus('Error while recognizing. Check `trainer/encodings.pkl` and Python deps.', 'err');
+        setStatus('Error while recognizing: ' + (e && e.message ? e.message : 'unknown'), 'err');
     } finally {
         locked = false;
     }

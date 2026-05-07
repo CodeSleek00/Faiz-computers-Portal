@@ -1,6 +1,5 @@
-face_recognition
-# Needed by face_recognition; fixes "Please install face_recognition_models" error
-git+https://github.com/ageitgey/face_recognition_models
+dlib
+numpy
 opencv-python
 requests
 
