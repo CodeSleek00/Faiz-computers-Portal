@@ -36,6 +36,7 @@ const statusEl = document.getElementById('status');
 let streamRef = null;
 let timerRef = null;
 let locked = false;
+let errorStreak = 0;
 
 function setStatus(text, cls){
     statusEl.className = 'status ' + (cls || '');
@@ -67,11 +68,21 @@ async function captureAndRecognize(){
         ctx.drawImage(video, 0, 0);
         const image = canvas.toDataURL('image/jpeg');
 
-        const recText = await fetch('recognize_frame.php', {
+        const resp = await fetch('recognize_frame.php', {
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
             body: JSON.stringify({ image })
-        }).then(r => r.text());
+        });
+        const recText = await resp.text();
+        if (!resp.ok) {
+            errorStreak++;
+            setStatus(`recognize_frame.php failed (HTTP ${resp.status}). Check server/PHP logs.`, 'err');
+            if (errorStreak >= 3) {
+                // Stop spamming the server if it's failing.
+                cleanup();
+            }
+            return;
+        }
 
         let rec = null;
         try {
@@ -82,6 +93,7 @@ async function captureAndRecognize(){
         }
 
         if (rec.ok && rec.recognized) {
+            errorStreak = 0;
             setStatus(`Recognized: ${rec.student_id} (${rec.table_name}). Marking attendance...`, '');
 
             const markText = await fetch('api/attendance_api.php', {
@@ -110,6 +122,7 @@ async function captureAndRecognize(){
 
             setStatus('Attendance API failed. Check server logs.', 'err');
         } else if (rec && rec.ok && !rec.recognized) {
+            errorStreak = 0;
             // Show underlying reason to debug (missing encodings/deps/etc.)
             if (rec.result && rec.result !== 'UNKNOWN' && rec.result !== 'NOFACE') {
                 setStatus(`Not ready: ${rec.result}`, 'err');
