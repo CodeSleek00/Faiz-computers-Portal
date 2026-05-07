@@ -48,9 +48,11 @@ Start Face Capture
 <script>
 
 const video = document.getElementById('video');
+let streamRef = null;
 
 navigator.mediaDevices.getUserMedia({ video:true })
 .then(stream => {
+    streamRef = stream;
     video.srcObject = stream;
 });
 
@@ -71,7 +73,7 @@ function startCapture(){
 
         const image = canvas.toDataURL('image/jpeg');
 
-        fetch('save_capture.php', {
+        const request = fetch('save_capture.php', {
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -86,7 +88,21 @@ function startCapture(){
 
         if(count >= 15){
             clearInterval(interval);
-            alert('Face Registration Complete');
+            request
+                .then(r => r.json().catch(() => null))
+                .then(() => {
+                    if (streamRef) {
+                        streamRef.getTracks().forEach(t => t.stop());
+                    }
+                    // Redirect to attendance page after capture+training
+                    window.location.href = 'attendance_dashboard.php';
+                })
+                .catch(() => {
+                    if (streamRef) {
+                        streamRef.getTracks().forEach(t => t.stop());
+                    }
+                    window.location.href = 'attendance_dashboard.php';
+                });
         }
 
     },1000);
