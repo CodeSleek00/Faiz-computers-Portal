@@ -67,23 +67,39 @@ async function captureAndRecognize(){
         ctx.drawImage(video, 0, 0);
         const image = canvas.toDataURL('image/jpeg');
 
-        const rec = await fetch('recognize_frame.php', {
+        const recText = await fetch('recognize_frame.php', {
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
             body: JSON.stringify({ image })
-        }).then(r => r.json());
+        }).then(r => r.text());
+
+        let rec = null;
+        try {
+            rec = JSON.parse(recText);
+        } catch {
+            setStatus('Server error (non-JSON): ' + recText.slice(0, 120), 'err');
+            return;
+        }
 
         if (rec.ok && rec.recognized) {
             setStatus(`Recognized: ${rec.student_id} (${rec.table_name}). Marking attendance...`, '');
 
-            const mark = await fetch('api/attendance_api.php', {
+            const markText = await fetch('api/attendance_api.php', {
                 method:'POST',
                 headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
                     student_id: rec.student_id,
                     table_name: rec.table_name
                 })
-            }).then(r => r.json().catch(() => null));
+            }).then(r => r.text());
+
+            let mark = null;
+            try {
+                mark = JSON.parse(markText);
+            } catch {
+                setStatus('Attendance API error (non-JSON): ' + markText.slice(0, 120), 'err');
+                return;
+            }
 
             if (mark && mark.ok) {
                 setStatus('Attendance marked. Opening dashboard...', 'ok');

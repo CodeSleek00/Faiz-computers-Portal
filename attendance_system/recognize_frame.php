@@ -1,6 +1,7 @@
 <?php
+// JSON endpoint: never emit HTML warnings/notices into responses.
+ini_set('display_errors', '0');
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 header("Content-Type: application/json");
 
@@ -61,4 +62,3 @@ echo json_encode([
     "recognized" => false,
     "result" => $out
 ]);
-
