@@ -1,7 +1,6 @@
 import os
 import sys
 import pickle
-import cv2
 import dlib
 import numpy as np
 
@@ -34,12 +33,11 @@ def main() -> int:
     sp = dlib.shape_predictor(models["shape5"])
     facerec = dlib.face_recognition_model_v1(models["resnet"])
 
-    img_bgr = cv2.imread(image_path)
-    if img_bgr is None:
+    try:
+        img_rgb = dlib.load_rgb_image(image_path)
+    except Exception:
         print("ERR bad_image")
         return 6
-
-    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     dets = detector(img_rgb, 1)
     if len(dets) == 0:
         print("NOFACE")

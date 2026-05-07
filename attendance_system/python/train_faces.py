@@ -1,6 +1,5 @@
 import pickle
 import os
-import cv2
 import dlib
 import numpy as np
 
@@ -32,11 +31,10 @@ for folder in os.listdir(dataset_path):
 
             image_path = os.path.join(folder_path, image_name)
 
-            img_bgr = cv2.imread(image_path)
-            if img_bgr is None:
+            try:
+                img_rgb = dlib.load_rgb_image(image_path)
+            except Exception:
                 continue
-
-            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             dets = detector(img_rgb, 1)
             if len(dets) == 0:
                 continue
