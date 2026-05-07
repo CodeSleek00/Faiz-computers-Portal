@@ -1,6 +1,9 @@
 import os
 import sys
 import pickle
+import cv2
+import dlib
+import numpy as np
 
 
 def main() -> int:
@@ -21,26 +24,49 @@ def main() -> int:
     with open(encodings_path, "rb") as f:
         data = pickle.load(f)
 
-    try:
-        import face_recognition  # type: ignore
-    except Exception as e:
-        print(f"ERR face_recognition_import {e}")
-        return 5
+    # Load models locally (auto-download if missing)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, base_dir)
+    from models import ensure_models  # noqa
 
-    image = face_recognition.load_image_file(image_path)
-    encodings = face_recognition.face_encodings(image)
-    if len(encodings) == 0:
+    models = ensure_models()
+    detector = dlib.get_frontal_face_detector()
+    sp = dlib.shape_predictor(models["shape5"])
+    facerec = dlib.face_recognition_model_v1(models["resnet"])
+
+    img_bgr = cv2.imread(image_path)
+    if img_bgr is None:
+        print("ERR bad_image")
+        return 6
+
+    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    dets = detector(img_rgb, 1)
+    if len(dets) == 0:
         print("NOFACE")
         return 0
 
-    encoding = encodings[0]
-    matches = face_recognition.compare_faces(data.get("encodings", []), encoding)
-    if True not in matches:
+    shape = sp(img_rgb, dets[0])
+    face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
+    encoding = np.array(face_descriptor, dtype=np.float32)
+
+    known_encodings = data.get("encodings", [])
+    known_names = data.get("names", [])
+    if not known_encodings or not known_names:
+        print("ERR encodings_empty")
+        return 7
+
+    # Compute L2 distance to known encodings
+    enc_matrix = np.asarray(known_encodings, dtype=np.float32)
+    dists = np.linalg.norm(enc_matrix - encoding, axis=1)
+    best_idx = int(np.argmin(dists))
+    best_dist = float(dists[best_idx])
+
+    # Threshold similar to common face_recognition usage
+    if best_dist > 0.6:
         print("UNKNOWN")
         return 0
 
-    idx = matches.index(True)
-    name = data.get("names", [])[idx]
+    name = known_names[best_idx]
 
     # Expected format: "<student_id>_<table_name>"
     parts = str(name).split("_", 1)
