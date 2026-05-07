@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 ?>
 <?php
-include '../db_connect.php';
+include 'db_connect.php';
 
 $attendance = mysqli_query($conn,
 "SELECT * FROM attendance ORDER BY id DESC");
