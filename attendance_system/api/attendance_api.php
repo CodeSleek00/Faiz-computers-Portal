@@ -26,7 +26,8 @@ if(isset($_POST['student_id'])){
     $date = date("Y-m-d");
     $time = date("H:i:s");
 
-    $student_query = mysqli_query($conn, "SELECT * FROM `$table_name` WHERE id=$student_id");
+    $id_field = ($table_name === "students") ? "student_id" : "id";
+    $student_query = mysqli_query($conn, "SELECT * FROM `$table_name` WHERE `$id_field`=$student_id");
     if (!$student_query) {
         http_response_code(500);
         echo json_encode(["ok" => false, "error" => "Student query failed"]);

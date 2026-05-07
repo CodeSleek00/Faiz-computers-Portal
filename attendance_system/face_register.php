@@ -1,6 +1,7 @@
 <?php
 $id = $_GET['id'];
 $table = $_GET['table'];
+$id_col = $_GET['id_col'] ?? 'id';
 ?>
 <!DOCTYPE html>
 <html>
@@ -82,7 +83,8 @@ function startCapture(){
                 image:image,
                 count:count,
                 student_id:'<?= $id ?>',
-                table_name:'<?= $table ?>'
+                table_name:'<?= $table ?>',
+                id_col:'<?= $id_col ?>'
             })
         });
 

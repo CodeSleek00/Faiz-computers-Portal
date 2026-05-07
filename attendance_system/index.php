@@ -4,12 +4,32 @@ ini_set('display_errors', 1);
 
 include 'db_connect.php';
 
-$fetchStudents = function(string $table) use ($conn): array {
+$getIdColumn = function(string $table) use ($conn): string {
+    $result = mysqli_query($conn, "SHOW COLUMNS FROM `$table`");
+    if (!$result) {
+        return "id";
+    }
+    $columns = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $columns[] = $row["Field"];
+    }
+    if (in_array("student_id", $columns, true)) {
+        return "student_id";
+    }
+    if (in_array("id", $columns, true)) {
+        return "id";
+    }
+    return $columns[0] ?? "id";
+};
+
+$fetchStudents = function(string $table) use ($conn, $getIdColumn): array {
     $rows = [];
-    $result = mysqli_query($conn, "SELECT student_id, name, enrollment_id FROM `$table` ORDER BY id DESC");
+    $idCol = $getIdColumn($table);
+    $result = mysqli_query($conn, "SELECT `$idCol` AS row_id, name, enrollment_id FROM `$table` ORDER BY `$idCol` DESC");
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
             $row['table_name'] = $table;
+            $row['id_col'] = $idCol;
             $rows[] = $row;
         }
     }
@@ -67,12 +87,12 @@ $students = array_merge(
 
     <?php foreach ($students as $row) { ?>
         <tr>
-            <td><?= (int)$row['id']; ?></td>
+            <td><?= (int)($row['row_id'] ?? 0); ?></td>
             <td><?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
             <td><?= htmlspecialchars($row['enrollment_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
             <td><span class="tag"><?= htmlspecialchars($row['table_name'], ENT_QUOTES, 'UTF-8'); ?></span></td>
             <td>
-                <a class="btn" href="face_register.php?id=<?= (int)$row['id']; ?>&table=<?= urlencode($row['table_name']); ?>">Record Face</a>
+                <a class="btn" href="face_register.php?id=<?= (int)($row['row_id'] ?? 0); ?>&table=<?= urlencode($row['table_name']); ?>&id_col=<?= urlencode($row['id_col'] ?? 'id'); ?>">Record Face</a>
             </td>
         </tr>
     <?php } ?>
@@ -80,4 +100,3 @@ $students = array_merge(
 
 </body>
 </html>
-

@@ -30,16 +30,21 @@ $image = $data['image'];
 $count = $data['count'];
 $student_id = $data['student_id'];
 $table_name = $data['table_name'];
+$id_col = $data['id_col'] ?? 'id';
 
 $count = (int)$count;
 $student_id = preg_replace('/[^0-9]/', '', (string)$student_id);
 $table_name = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$table_name);
+$id_col = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$id_col);
 
 if ($count < 1 || $count > 50) {
     $respond(400, ["ok" => false, "error" => "Invalid capture count"]);
 }
 if ($student_id === "" || $table_name === "") {
     $respond(400, ["ok" => false, "error" => "Missing student_id or table_name"]);
+}
+if ($id_col === "") {
+    $id_col = "id";
 }
 
 $image = str_replace('data:image/jpeg;base64,', '', $image);
