@@ -94,14 +94,14 @@ function startCapture(){
                     if (streamRef) {
                         streamRef.getTracks().forEach(t => t.stop());
                     }
-                    // Redirect to attendance page after capture+training
-                    window.location.href = 'attendance_dashboard.php';
+                    // After capture+training, open live attendance camera
+                    window.location.href = 'attendance_live.php';
                 })
                 .catch(() => {
                     if (streamRef) {
                         streamRef.getTracks().forEach(t => t.stop());
                     }
-                    window.location.href = 'attendance_dashboard.php';
+                    window.location.href = 'attendance_live.php';
                 });
         }
 

@@ -16,7 +16,7 @@ if(isset($_POST['student_id'])){
     }
 
     // Safety: only allow known tables.
-    $allowed_tables = ["students"];
+    $allowed_tables = ["students", "students26"];
     if (!in_array($table_name, $allowed_tables, true)) {
         http_response_code(400);
         echo json_encode(["ok" => false, "error" => "Invalid table_name"]);
