@@ -50,6 +50,7 @@ Start Face Capture
 
 const video = document.getElementById('video');
 let streamRef = null;
+let embeddingRef = null;
 
 navigator.mediaDevices.getUserMedia({ video:true })
 .then(stream => {
@@ -57,9 +58,27 @@ navigator.mediaDevices.getUserMedia({ video:true })
     video.srcObject = stream;
 });
 
+async function loadFaceModels(){
+    if (window.faceapi) return;
+    await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+    });
+
+    // Load models from public CDN (weights are fetched by browser)
+    const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+}
+
 function startCapture(){
 
     let count = 0;
+    let modelsReady = false;
 
     const interval = setInterval(() => {
 
@@ -74,19 +93,36 @@ function startCapture(){
 
         const image = canvas.toDataURL('image/jpeg');
 
-        const request = fetch('save_capture.php', {
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({
-                image:image,
-                count:count,
-                student_id:'<?= $id ?>',
-                table_name:'<?= $table ?>',
-                id_col:'<?= $id_col ?>'
-            })
-        });
+        const request = (async () => {
+            if (!modelsReady) {
+                await loadFaceModels();
+                modelsReady = true;
+            }
+
+            let embedding = null;
+            if (count >= 15) {
+                const det = await faceapi
+                    .detectSingleFace(canvas)
+                    .withFaceLandmarks()
+                    .withFaceDescriptor();
+                if (det && det.descriptor) {
+                    embedding = Array.from(det.descriptor);
+                }
+            }
+
+            return fetch('save_capture.php', {
+                method:'POST',
+                headers:{ 'Content-Type':'application/json' },
+                body:JSON.stringify({
+                    image:image,
+                    count:count,
+                    student_id:'<?= $id ?>',
+                    table_name:'<?= $table ?>',
+                    id_col:'<?= $id_col ?>',
+                    embedding: embedding
+                })
+            });
+        })();
 
         if(count >= 15){
             clearInterval(interval);
