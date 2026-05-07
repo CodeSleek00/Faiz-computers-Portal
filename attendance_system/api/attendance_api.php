@@ -29,10 +29,10 @@ register_shutdown_function(function () {
 
 if(isset($_POST['student_id'])){
 
-    $student_id = (int)($_POST['student_id'] ?? 0);
+    $student_id = preg_replace('/[^a-zA-Z0-9_]/', '', (string)($_POST['student_id'] ?? ''));
     $table_name = preg_replace('/[^a-zA-Z0-9_]/', '', (string)($_POST['table_name'] ?? ''));
 
-    if ($student_id <= 0) {
+    if ($student_id === '') {
         http_response_code(400);
         echo json_encode(["ok" => false, "error" => "Invalid student_id"]);
         exit;
@@ -50,7 +50,8 @@ if(isset($_POST['student_id'])){
     $time = date("H:i:s");
 
     $id_field = ($table_name === "students") ? "student_id" : "id";
-    $student_query = mysqli_query($conn, "SELECT * FROM `$table_name` WHERE `$id_field`=$student_id");
+    $student_id_sql = "'" . mysqli_real_escape_string($conn, $student_id) . "'";
+    $student_query = mysqli_query($conn, "SELECT * FROM `$table_name` WHERE `$id_field`=$student_id_sql");
     if (!$student_query) {
         http_response_code(500);
         echo json_encode(["ok" => false, "error" => "Student query failed"]);
@@ -69,7 +70,7 @@ if(isset($_POST['student_id'])){
 
     $check = mysqli_query($conn,
     "SELECT * FROM attendance
-    WHERE student_id=$student_id
+    WHERE student_id='$student_id'
     AND table_name='$table_name'
     AND attendance_date='$date'");
 

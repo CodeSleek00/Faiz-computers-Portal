@@ -20,7 +20,7 @@ $table_name = $data['table_name'];
 $id_col = $data['id_col'] ?? 'id';
 
 $count = (int)$count;
-$student_id = preg_replace('/[^0-9]/', '', (string)$student_id);
+$student_id = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$student_id);
 $table_name = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$table_name);
 $id_col = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$id_col);
 
