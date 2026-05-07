@@ -56,6 +56,18 @@ if (!is_dir($tmpDir)) {
 $tmpFile = $tmpDir . "/frame_" . time() . "_" . bin2hex(random_bytes(4)) . ".jpg";
 file_put_contents($tmpFile, $decoded);
 
+$disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
+if (!function_exists('shell_exec') || in_array('shell_exec', $disabled, true)) {
+    @unlink($tmpFile);
+    http_response_code(500);
+    echo json_encode([
+        "ok" => false,
+        "error" => "shell_exec disabled on hosting",
+        "detail" => "This server blocks running Python from PHP. Use VPS/local server or enable exec functions (shell_exec/exec)."
+    ]);
+    exit;
+}
+
 $python = "python3";
 $script = __DIR__ . "/python/recognize_frame.py";
 $cmd = escapeshellcmd($python) . " " . escapeshellarg($script) . " " . escapeshellarg($tmpFile);

@@ -64,6 +64,15 @@ file_put_contents($file, $decoded);
 
 if($count == 15){
 
+    $disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
+    if (!function_exists('shell_exec') || in_array('shell_exec', $disabled, true)) {
+        $respond(500, [
+            "ok" => false,
+            "error" => "shell_exec disabled on hosting",
+            "detail" => "This server blocks running Python from PHP. Use VPS/local server or enable exec functions (shell_exec/exec)."
+        ]);
+    }
+
     $python = "python3";
     $script = $baseDir . "/python/train_single_student.py";
     $command = escapeshellcmd($python) . " " . escapeshellarg($script) . " " . escapeshellarg($student_id) . " " . escapeshellarg($table_name);
