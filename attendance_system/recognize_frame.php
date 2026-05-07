@@ -41,21 +41,6 @@ if ($image === "") {
 
 $image = preg_replace('#^data:image/\\w+;base64,#i', '', $image);
 $image = str_replace(' ', '+', $image);
-$decoded = base64_decode($image);
-if ($decoded === false) {
-    http_response_code(400);
-    echo json_encode(["ok" => false, "error" => "Invalid base64"]);
-    exit;
-}
-
-$tmpDir = __DIR__ . "/uploads/tmp";
-if (!is_dir($tmpDir)) {
-    mkdir($tmpDir, 0777, true);
-}
-
-$tmpFile = $tmpDir . "/frame_" . time() . "_" . bin2hex(random_bytes(4)) . ".jpg";
-file_put_contents($tmpFile, $decoded);
-
 include __DIR__ . "/node_config.php";
 
 $payload = json_encode(["image" => $data["image"]]);
@@ -71,8 +56,6 @@ $resp = curl_exec($ch);
 $err = curl_error($ch);
 $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
-
-@unlink($tmpFile);
 
 if ($resp === false) {
     http_response_code(500);

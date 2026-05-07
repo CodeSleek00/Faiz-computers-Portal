@@ -2,19 +2,6 @@
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$baseDir = __DIR__;
-$datasetDir = $baseDir . "/dataset";
-$trainerDir = $baseDir . "/trainer";
-
-$ensureDir = function(string $dir): void {
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
-};
-
-$ensureDir($datasetDir);
-$ensureDir($trainerDir);
-
 $respond = function(int $status, array $payload): void {
     http_response_code($status);
     header("Content-Type: application/json");
@@ -47,21 +34,7 @@ if ($id_col === "") {
     $id_col = "id";
 }
 
-$image = str_replace('data:image/jpeg;base64,', '', $image);
-$image = str_replace(' ', '+', $image);
-
-$decoded = base64_decode($image);
-
-$folder = $datasetDir . "/" . $student_id . "_" . $table_name;
-
-if(!file_exists($folder)){
-    mkdir($folder,0777,true);
-}
-
-$file = $folder . "/" . $count . ".jpg";
-
-file_put_contents($file, $decoded);
-
+// We only enroll on the final capture (15). Intermediate frames are ignored.
 if($count == 15){
 
     include __DIR__ . "/node_config.php";
@@ -95,6 +68,6 @@ if($count == 15){
     exit;
 }
 
-$respond(200, ["ok" => true, "trained" => false]);
+$respond(200, ["ok" => true, "enrolled" => false]);
 
 ?>
