@@ -1,7 +1,6 @@
 import os
 import sys
 import pickle
-import face_recognition
 
 
 def main() -> int:
@@ -21,6 +20,12 @@ def main() -> int:
 
     with open(encodings_path, "rb") as f:
         data = pickle.load(f)
+
+    try:
+        import face_recognition  # type: ignore
+    except Exception as e:
+        print(f"ERR face_recognition_import {e}")
+        return 5
 
     image = face_recognition.load_image_file(image_path)
     encodings = face_recognition.face_encodings(image)
@@ -50,4 +55,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

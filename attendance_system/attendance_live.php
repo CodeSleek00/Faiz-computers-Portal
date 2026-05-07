@@ -93,6 +93,11 @@ async function captureAndRecognize(){
             }
 
             setStatus('Attendance API failed. Check server logs.', 'err');
+        } else if (rec && rec.ok && !rec.recognized) {
+            // Show underlying reason to debug (missing encodings/deps/etc.)
+            if (rec.result && rec.result !== 'UNKNOWN' && rec.result !== 'NOFACE') {
+                setStatus(`Not ready: ${rec.result}`, 'err');
+            }
         }
     } catch (e) {
         setStatus('Error while recognizing. Check `trainer/encodings.pkl` and Python deps.', 'err');
@@ -113,4 +118,3 @@ window.addEventListener('beforeunload', cleanup);
 
 </body>
 </html>
-
