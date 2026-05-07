@@ -64,29 +64,35 @@ file_put_contents($file, $decoded);
 
 if($count == 15){
 
-    $disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
-    $shellExecOk = function_exists('shell_exec') && !in_array('shell_exec', $disabled, true) && is_callable('shell_exec');
-    $execOk = function_exists('exec') && !in_array('exec', $disabled, true) && is_callable('exec');
-    if (!$shellExecOk && !$execOk) {
-        $respond(500, [
-            "ok" => false,
-            "error" => "exec disabled on hosting",
-            "detail" => "This server blocks running Python from PHP. Enable exec/shell_exec or use a separate Python service."
-        ]);
+    include __DIR__ . "/node_config.php";
+
+    $payload = json_encode([
+        "student_id" => $student_id,
+        "table_name" => $table_name,
+        "image" => $data["image"]
+    ]);
+
+    $url = rtrim($NODE_API_URL, "/") . "/api/enroll";
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    $resp = curl_exec($ch);
+    $err = curl_error($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($resp === false) {
+        $respond(500, ["ok" => false, "error" => "node_unreachable", "detail" => $err]);
     }
 
-    $python = "python3";
-    $script = $baseDir . "/python/train_single_student.py";
-    $command = escapeshellcmd($python) . " " . escapeshellarg($script) . " " . escapeshellarg($student_id) . " " . escapeshellarg($table_name);
-    if ($shellExecOk) {
-        $output = (string)\shell_exec($command . " 2>&1");
-    } else {
-        $lines = [];
-        $exitCode = 0;
-        \exec($command . " 2>&1", $lines, $exitCode);
-        $output = implode("\n", $lines);
-    }
-    $respond(200, ["ok" => true, "trained" => true, "output" => $output]);
+    http_response_code($code ?: 200);
+    header("Content-Type: application/json");
+    echo $resp;
+    exit;
 }
 
 $respond(200, ["ok" => true, "trained" => false]);

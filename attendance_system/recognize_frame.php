@@ -56,53 +56,29 @@ if (!is_dir($tmpDir)) {
 $tmpFile = $tmpDir . "/frame_" . time() . "_" . bin2hex(random_bytes(4)) . ".jpg";
 file_put_contents($tmpFile, $decoded);
 
-$disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
-$shellExecOk = function_exists('shell_exec') && !in_array('shell_exec', $disabled, true) && is_callable('shell_exec');
-$execOk = function_exists('exec') && !in_array('exec', $disabled, true) && is_callable('exec');
-if (!$shellExecOk && !$execOk) {
-    @unlink($tmpFile);
-    http_response_code(500);
-    echo json_encode([
-        "ok" => false,
-        "error" => "exec disabled on hosting",
-        "detail" => "This server blocks running Python from PHP. Enable exec/shell_exec or use a separate Python service."
-    ]);
-    exit;
-}
+include __DIR__ . "/node_config.php";
 
-$python = "python3";
-$script = __DIR__ . "/python/recognize_frame.py";
-$cmd = escapeshellcmd($python) . " " . escapeshellarg($script) . " " . escapeshellarg($tmpFile);
+$payload = json_encode(["image" => $data["image"]]);
+$url = rtrim($NODE_API_URL, "/") . "/api/recognize";
 
-$out = "";
-if ($shellExecOk) {
-    $out = (string)\shell_exec($cmd . " 2>&1");
-} else {
-    $lines = [];
-    $exitCode = 0;
-    \exec($cmd . " 2>&1", $lines, $exitCode);
-    $out = implode("\n", $lines);
-}
-$out = trim($out);
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+$resp = curl_exec($ch);
+$err = curl_error($ch);
+$code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
 @unlink($tmpFile);
 
-if (str_starts_with($out, "OK ")) {
-    $parts = explode(" ", $out);
-    $student_id = $parts[1] ?? "";
-    $table_name = $parts[2] ?? "";
-
-    echo json_encode([
-        "ok" => true,
-        "recognized" => true,
-        "student_id" => $student_id,
-        "table_name" => $table_name
-    ]);
+if ($resp === false) {
+    http_response_code(500);
+    echo json_encode(["ok" => false, "error" => "node_unreachable", "detail" => $err]);
     exit;
 }
 
-echo json_encode([
-    "ok" => true,
-    "recognized" => false,
-    "result" => $out
-]);
+http_response_code($code ?: 200);
+echo $resp;
