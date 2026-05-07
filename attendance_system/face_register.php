@@ -96,11 +96,8 @@ function startCapture(){
                     if (streamRef) {
                         streamRef.getTracks().forEach(t => t.stop());
                     }
-                    if (res && res.ok && res.trained && res.output) {
-                        // If training failed due to missing deps, show output quickly.
-                        if (String(res.output).toLowerCase().includes('err') || String(res.output).toLowerCase().includes('install')) {
-                            alert(res.output);
-                        }
+                    if (res && res.ok === false && res.error) {
+                        alert(res.error + (res.detail ? (": " + res.detail) : ""));
                     }
                     // After capture+training, open live attendance camera
                     window.location.href = 'attendance_live.php';
