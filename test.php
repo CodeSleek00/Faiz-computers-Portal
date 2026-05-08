@@ -111,24 +111,6 @@ $stmt->bind_param("iii", $student_id, $student_id, $student_id);
 $stmt->execute();
 $assignments = $stmt->get_result();
 
-/* =====================================================
-   6. ATTENDANCE STATS
-===================================================== */
-$stmt = $conn->prepare("
-    SELECT 
-        SUM(status = 'Present') AS present_days,
-        SUM(status = 'Absent') AS absent_days,
-        SUM(status = 'Leave') AS leave_days
-    FROM attendance
-    WHERE student_id = ?
-");
-$stmt->bind_param("i", $student_id);
-$stmt->execute();
-$attendance = $stmt->get_result()->fetch_assoc();
-
-$present = $attendance['present_days'] ?? 0;
-$absent  = $attendance['absent_days'] ?? 0;
-$leave   = $attendance['leave_days'] ?? 0;
 
 /* =====================================================
    7. STUDY MATERIALS (LAST 5 ASSIGNED TO STUDENT)
