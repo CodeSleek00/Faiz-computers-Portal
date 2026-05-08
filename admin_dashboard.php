@@ -485,9 +485,9 @@ $total = $row['total_students'];
                     <i class="fas fa-layer-group"></i>
                     <span>Batches</span>
                 </a>
-                <a href="attendence/view_attendance.php" class="menu-item">
+                <a href="https://darkgrey-caterpillar-852042.hostingersite.com/" class="menu-item">
                     <i class="fas fa-user-check"></i>
-                    <span>Attendance</span>
+                    <span>Add Attendance</span>
                 </a>
                 <a href="fee/dashboard.php" class="menu-item">
                     <i class="fa-solid fa-receipt"></i>
@@ -673,9 +673,9 @@ $total = $row['total_students'];
                             <h4>Attendance Management</h4>
                         </div>
                         <div class="action-links">
-                            <a href="attendence/mark_attendance.php" class="action-link">Mark Attendance</a>
-                            <a href="attendence/view_attendance.php" class="action-link">View Attendance</a>
-                            <a href="attendence/student_attendance.php" class="action-link">Student Attendance</a>
+                            <a href="https://darkgrey-caterpillar-852042.hostingersite.com/attendance_scan.php" class="action-link">Mark Attendance</a>
+                            <a href="https://darkgrey-caterpillar-852042.hostingersite.com/summary.php" class="action-link">View Attendance</a>
+                            <a href="https://darkgrey-caterpillar-852042.hostingersite.com" class="action-link"> Register Student</a>
                         </div>
                     </div>
 
