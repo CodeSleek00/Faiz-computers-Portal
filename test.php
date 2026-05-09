@@ -458,29 +458,6 @@ $total_materials = $total_materials ?? 0;
             gap: 16px;
         }
 
-        /* Live Clock - New */
-        .live-clock {
-            background: rgba(0, 122, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(0, 122, 255, 0.2);
-        }
-
-        .clock-icon {
-            color: var(--primary-blue);
-            font-size: 14px;
-        }
-
-        .clock-time {
-            font-family: 'SF Pro Display', monospace;
-            font-weight: 600;
-            font-size: 16px;
-            color: var(--dark);
-        }
-
         .date-display {
             font-size: 14px;
             color: var(--dark-gray);
@@ -822,42 +799,6 @@ $total_materials = $total_materials ?? 0;
             border: 2px solid rgba(255, 59, 48, 0.3);
         }
 
-        /* Attendance */
-        .attendance-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .attendance-stat {
-            text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
-            border: 1px solid transparent;
-            transition: var(--transition);
-        }
-
-        .attendance-stat:hover {
-            border-color: rgba(0, 0, 0, 0.05);
-            transform: translateY(-4px);
-        }
-
-        .attendance-number {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-
-        .attendance-label {
-            color: var(--dark-gray);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
         /* Quick Actions */
         .quick-actions {
             display: grid;
@@ -910,7 +851,7 @@ $total_materials = $total_materials ?? 0;
             -webkit-backdrop-filter: blur(20px);
             padding: 12px 20px;
             box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            z-index: 1001;
             border-top: 1px solid var(--glass-border);
             border-radius: 24px 24px 0 0;
         }
@@ -964,7 +905,10 @@ $total_materials = $total_materials ?? 0;
             padding: 12px;
             border-radius: 12px;
             transition: var(--transition);
-            z-index: 1001;
+            z-index: 1002;
+            position: fixed;
+            top: 20px;
+            left: 20px;
         }
 
         .menu-toggle:hover {
@@ -993,7 +937,7 @@ $total_materials = $total_materials ?? 0;
             opacity: 1;
         }
 
-        /* Responsive Design - Fucking Amazing */
+        /* Responsive Design */
         @media (max-width: 1200px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1025,18 +969,13 @@ $total_materials = $total_materials ?? 0;
             
             .menu-toggle {
                 display: block;
-                position: fixed;
-                top: 20px;
-                left: 20px;
-                z-index: 1002;
             }
             
             .dashboard-header {
                 flex-direction: column;
                 gap: 20px;
                 text-align: center;
-                padding: 20px;
-                margin-top: 60px;
+                margin-top: 40px;
             }
             
             .header-right {
@@ -1044,12 +983,6 @@ $total_materials = $total_materials ?? 0;
                 justify-content: center;
                 flex-wrap: wrap;
                 gap: 12px;
-            }
-            
-            .live-clock {
-                order: -1;
-                width: 100%;
-                justify-content: center;
             }
             
             .date-display {
@@ -1090,11 +1023,6 @@ $total_materials = $total_materials ?? 0;
             
             .stat-number {
                 font-size: 28px;
-            }
-            
-            .attendance-stats {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
             }
             
             .quick-actions {
@@ -1144,14 +1072,6 @@ $total_materials = $total_materials ?? 0;
                 font-size: 24px;
             }
             
-            .attendance-stat {
-                padding: 16px;
-            }
-            
-            .attendance-number {
-                font-size: 24px;
-            }
-            
             .action-btn {
                 padding: 20px 12px;
             }
@@ -1189,8 +1109,6 @@ $total_materials = $total_materials ?? 0;
             }
         }
 
-        /* iPhone Notch Support */
-       
         /* Animations */
         @keyframes fadeInUp {
             from {
@@ -1282,13 +1200,13 @@ $total_materials = $total_materials ?? 0;
 </head>
 <body>
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="user-profile">
-                <img src="uploads/<?= $student['photo'] ?>" alt="Profile" class="profile-avatar float-animation">
+                <img src="uploads/<?= htmlspecialchars($student['photo'] ?? 'default-avatar.png') ?>" alt="Profile" class="profile-avatar float-animation">
                 <div class="profile-info">
                     <h3><?= htmlspecialchars($student['name']) ?></h3>
-                    <p><?= $student['enrollment_id'] ?></p>
+                    <p><?= htmlspecialchars($student['enrollment_id']) ?></p>
                 </div>
             </div>
         </div>
@@ -1315,11 +1233,6 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-book-open nav-icon"></i>
                 <span>Study Center</span>
                 <span class="nav-badge"><?= $total_materials ?></span>
-            </a>
-           <a href="attendence/student_attendance.php" class="nav-item">
-                <i class="fas fa-calendar-check nav-icon"></i>
-                <span>Attendance</span>
-                <span class="nav-badge"><?=$present?>%</span>
             </a>
         </div>
 
@@ -1349,7 +1262,6 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-video nav-icon"></i>
                 <span>Online Classes</span>
             </a>
-           
         </div>
 
         <!-- Finance Section -->
@@ -1369,7 +1281,6 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-user nav-icon"></i>
                 <span>My Profile</span>
             </a>
-           
         </div>
 
         <div class="sidebar-footer">
@@ -1394,13 +1305,11 @@ $total_materials = $total_materials ?? 0;
 
         <!-- Dashboard Header -->
         <div class="dashboard-header animate-in" style="animation-delay: 0.1s">
-            <h1 style="font-size: 24px;font-weight:bold">FAIZ COMPUTER INSTITUTE</h1>
             <div class="welcome-section">
                 <h1>Welcome back, <?= htmlspecialchars($student['name']) ?> 👋</h1>
                 <p>Track your progress and manage your learning journey at Faiz Computer Institute</p>
             </div>
             <div class="header-right">
-              
                 <div class="date-display">
                     <i class="fas fa-calendar-alt"></i>
                     <span id="currentDate"><?= date('l, F j, Y') ?></span>
@@ -1462,17 +1371,21 @@ $total_materials = $total_materials ?? 0;
                         <a href="assignment/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
-                        <?php while($assignment = $assignments->fetch_assoc()): ?>
-                        <div class="assignment-item">
-                            <div class="assignment-info">
-                                <h4><?= htmlspecialchars($assignment['title']) ?></h4>
-                                <p><?= htmlspecialchars(substr($assignment['question_text'], 0, 80)) ?>...</p>
+                        <?php if($assignments->num_rows > 0): ?>
+                            <?php while($assignment = $assignments->fetch_assoc()): ?>
+                            <div class="assignment-item">
+                                <div class="assignment-info">
+                                    <h4><?= htmlspecialchars($assignment['title']) ?></h4>
+                                    <p><?= htmlspecialchars(substr($assignment['question_text'] ?? '', 0, 80)) ?>...</p>
+                                </div>
+                                <span class="assignment-status <?= $assignment['submission_id'] ? 'status-submitted' : 'status-pending' ?>">
+                                    <?= $assignment['submission_id'] ? 'Submitted' : 'Pending' ?>
+                                </span>
                             </div>
-                            <span class="assignment-status <?= $assignment['submission_id'] ? 'status-submitted' : 'status-pending' ?>">
-                                <?= $assignment['submission_id'] ? 'Submitted' : 'Pending' ?>
-                            </span>
-                        </div>
-                        <?php endwhile; ?>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p style="color: var(--dark-gray); text-align: center; padding: 20px;">No assignments found.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -1493,64 +1406,41 @@ $total_materials = $total_materials ?? 0;
                         <a href="exam-center/student/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
-                       <?php while ($exam = $exams->fetch_assoc()): ?>
-    <?php
-        // Check if student already submitted this exam
-        $stmt2 = $conn->prepare("
-            SELECT COUNT(*) AS attempted
-            FROM exam_submissions
-            WHERE exam_id = ? AND student_id = ? AND student_table = ?
-        ");
-        $stmt2->bind_param("iis", $exam['exam_id'], $student_id, $table);
-        $stmt2->execute();
-        $attempted = $stmt2->get_result()->fetch_assoc()['attempted'];
-    ?>
-    <div class="exam-item">
-        <div class="exam-header">
-            <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
-            <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
-        </div>
-        <?php if ($attempted): ?>
-            <span class="exam-action" style="background:#8E8E93; cursor:default;">Attempted</span>
-        <?php else: ?>
-            <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
-                Start Exam
-            </a>
-        <?php endif; ?>
-    </div>
-<?php endwhile; ?>
-
+                       <?php if($exams->num_rows > 0): ?>
+                           <?php while ($exam = $exams->fetch_assoc()): ?>
+                                <?php
+                                    // Check if student already submitted this exam
+                                    $stmt2 = $conn->prepare("
+                                        SELECT COUNT(*) AS attempted
+                                        FROM exam_submissions
+                                        WHERE exam_id = ? AND student_id = ? AND student_table = ?
+                                    ");
+                                    $stmt2->bind_param("iis", $exam['exam_id'], $student_id, $table);
+                                    $stmt2->execute();
+                                    $attempted = $stmt2->get_result()->fetch_assoc()['attempted'];
+                                ?>
+                                <div class="exam-item">
+                                    <div class="exam-header">
+                                        <div class="exam-name"><?= htmlspecialchars($exam['exam_name']) ?></div>
+                                        <div class="exam-duration"><?= $exam['duration'] ?> mins</div>
+                                    </div>
+                                    <?php if ($attempted): ?>
+                                        <span class="exam-action" style="background:#8E8E93; cursor:default;">Attempted</span>
+                                    <?php else: ?>
+                                        <a href="exam-center/student/take_exam.php?exam_id=<?= $exam['exam_id'] ?>" class="exam-action">
+                                            Start Exam
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p style="color: var(--dark-gray); text-align: center; padding: 20px;">No exams assigned.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
 
-           <!-- 
             <div class="right-column">
-                
-                <div class="card animate-in" style="animation-delay: 0.2s">
-                    <div class="card-header">
-                        <h2 class="card-title"><i class="fas fa-calendar-check"></i> Attendance</h2>
-                        <a href="attendence/student_attendance.php" class="view-all">Details <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                    <div class="attendance-stats">
-                        <div class="attendance-stat" style="border-color: rgba(52, 199, 89, 0.2);">
-                            <div class="attendance-number" style="color: #34C759;"><?= $present ?></div>
-                            <div class="attendance-label">Present</div>
-                        </div>
-                        <div class="attendance-stat" style="border-color: rgba(255, 59, 48, 0.2);">
-                            <div class="attendance-number" style="color: #FF3B30;"><?= $absent ?></div>
-                            <div class="attendance-label">Absent</div>
-                        </div>
-                        <div class="attendance-stat" style="border-color: rgba(255, 149, 0, 0.2);">
-                            <div class="attendance-number" style="color: #FF9500;"><?= $leave ?></div>
-                            <div class="attendance-label">Leave</div>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="attendanceChart"></canvas>
-                    </div>
-                </div>-->
-
                 <!-- Fee Status -->
                 <div class="card animate-in" style="animation-delay: 0.3s">
                     <div class="card-header">
@@ -1559,7 +1449,7 @@ $total_materials = $total_materials ?? 0;
                     <div class="fee-status">
                         <div>
                             <div style="color: var(--dark-gray); font-size: 13px; font-weight: 500;"><?= $currentMonthName ?> Fee</div>
-                            <div class="fee-amount">₹<?= $feeAmount ?></div>
+                            <div class="fee-amount">₹<?= number_format($feeAmount, 2) ?></div>
                         </div>
                         <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?> float-animation">
                             <?= $feeStatus ?>
@@ -1648,130 +1538,98 @@ $total_materials = $total_materials ?? 0;
     </nav>
 
     <script>
-        // Live Clock Functionality
-        function updateLiveClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            const clockElement = document.getElementById('liveClock');
-            if (clockElement) {
-                clockElement.textContent = timeString;
-                
-                // Add pulse animation every second
-                clockElement.classList.add('pulse-animation');
-                setTimeout(() => {
-                    clockElement.classList.remove('pulse-animation');
-                }, 300);
-            }
-        }
-
-        // Initialize everything
+        // Mobile menu functionality - FIXED
         document.addEventListener('DOMContentLoaded', function() {
-            // Start live clock
-            updateLiveClock();
-            setInterval(updateLiveClock, 1000);
-
-            // Mobile menu functionality
             const menuToggle = document.getElementById('menuToggle');
-            const sidebar = document.querySelector('.sidebar');
+            const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             
+            function closeMobileMenu() {
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+                if (document.body) document.body.style.overflow = '';
+            }
+            
+            function openMobileMenu() {
+                if (sidebar) sidebar.classList.add('active');
+                if (overlay) overlay.classList.add('active');
+                if (document.body) document.body.style.overflow = 'hidden';
+            }
+            
             function toggleMobileMenu() {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+                if (sidebar && sidebar.classList.contains('active')) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
             }
             
             if (menuToggle) {
-                menuToggle.addEventListener('click', toggleMobileMenu);
-                overlay.addEventListener('click', toggleMobileMenu);
+                menuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleMobileMenu();
+                });
             }
             
-            // Close menu when clicking on mobile nav items
-            const mobileNavItems = document.querySelectorAll('.nav-item-mobile');
-            mobileNavItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
+            if (overlay) {
+                overlay.addEventListener('click', closeMobileMenu);
+            }
+            
+            // Close menu when clicking on any nav item in sidebar
+            const sidebarNavItems = document.querySelectorAll('.sidebar .nav-item');
+            sidebarNavItems.forEach(item => {
+                item.addEventListener('click', closeMobileMenu);
             });
             
-            // Responsive checks
+            // Close menu when clicking on mobile nav items (bottom bar)
+            const mobileNavItems = document.querySelectorAll('.nav-item-mobile');
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', closeMobileMenu);
+            });
+            
+            // Responsive checks - keep menu closed on resize to desktop
             function checkResponsive() {
-                if (window.innerWidth <= 1024) {
-                    menuToggle.style.display = 'block';
-                } else {
-                    menuToggle.style.display = 'none';
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
+                if (window.innerWidth > 1024) {
+                    closeMobileMenu();
                 }
             }
             
             checkResponsive();
             window.addEventListener('resize', checkResponsive);
             
-            // Initialize Charts
-            // Attendance Chart
-            const attendanceCtx = document.getElementById('attendanceChart')?.getContext('2d');
-            if (attendanceCtx) {
-                new Chart(attendanceCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Present', 'Absent', 'Leave'],
-                        datasets: [{
-                            data: [<?= $present ?>, <?= $absent ?>, <?= $leave ?>],
-                            backgroundColor: [
-                                'rgba(52, 199, 89, 0.8)',
-                                'rgba(255, 59, 48, 0.8)',
-                                'rgba(255, 149, 0, 0.8)'
-                            ],
-                            borderColor: [
-                                'rgba(52, 199, 89, 1)',
-                                'rgba(255, 59, 48, 1)',
-                                'rgba(255, 149, 0, 1)'
-                            ],
-                            borderWidth: 1,
-                            borderRadius: 8,
-                            spacing: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    padding: 15,
-                                    usePointStyle: true,
-                                    pointStyle: 'circle',
-                                    font: {
-                                        size: 11
-                                    }
-                                }
-                            }
-                        },
-                        cutout: '75%'
-                    }
-                });
+            // Close menu on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // Update date display
+            function updateDateDisplay() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateString = now.toLocaleDateString('en-US', options);
+                const dateElement = document.getElementById('currentDate');
+                if (dateElement) {
+                    dateElement.textContent = dateString;
+                }
             }
             
-            // Performance Chart
+            updateDateDisplay();
+            
+            // Initialize Performance Chart
+            const performanceLabels = <?= json_encode($labels) ?>;
+            const performanceScores = <?= json_encode($scores) ?>;
+            
             const performanceCtx = document.getElementById('performanceChart')?.getContext('2d');
-            if (performanceCtx) {
+            if (performanceCtx && performanceLabels.length > 0) {
                 new Chart(performanceCtx, {
                     type: 'line',
                     data: {
-                        labels: <?= json_encode($labels) ?>,
+                        labels: performanceLabels,
                         datasets: [{
                             label: 'Score %',
-                            data: <?= json_encode($scores) ?>,
+                            data: performanceScores,
                             borderColor: '#007AFF',
                             backgroundColor: 'rgba(0, 122, 255, 0.1)',
                             borderWidth: 3,
@@ -1824,10 +1682,16 @@ $total_materials = $total_materials ?? 0;
                         }
                     }
                 });
+            } else if (performanceCtx) {
+                // Show message when no data
+                performanceCtx.font = '12px sans-serif';
+                performanceCtx.fillStyle = '#8E8E93';
+                performanceCtx.textAlign = 'center';
+                performanceCtx.fillText('No exam data available', performanceCtx.canvas.width / 2, performanceCtx.canvas.height / 2);
             }
             
             // Enhanced hover effects
-            const interactiveElements = document.querySelectorAll('.stat-card, .assignment-item, .exam-item, .attendance-stat, .action-btn, .material-item');
+            const interactiveElements = document.querySelectorAll('.stat-card, .assignment-item, .exam-item, .action-btn, .material-item');
             interactiveElements.forEach(element => {
                 element.addEventListener('mouseenter', function() {
                     this.style.transform = this.classList.contains('stat-card') ? 
@@ -1853,6 +1717,7 @@ $total_materials = $total_materials ?? 0;
             mobileNavItems.forEach(item => {
                 const href = item.getAttribute('href');
                 if (href === currentPage || (href === 'test.php' && currentPage === '')) {
+                    document.querySelectorAll('.nav-item-mobile').forEach(nav => nav.classList.remove('active'));
                     item.classList.add('active');
                 }
             });
@@ -1872,12 +1737,6 @@ $total_materials = $total_materials ?? 0;
                         });
                     }
                 });
-            });
-            
-            // Add loading animation to page elements
-            const animateElements = document.querySelectorAll('.animate-in');
-            animateElements.forEach((el, index) => {
-                el.style.animationDelay = `${0.1 + (index * 0.1)}s`;
             });
             
             // Intersection Observer for animations
@@ -1901,33 +1760,6 @@ $total_materials = $total_materials ?? 0;
                 el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                 observer.observe(el);
             });
-            
-            // Add keyboard navigation support
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
-                    toggleMobileMenu();
-                }
-            });
-            
-            // Update date display with current date
-            function updateDateDisplay() {
-                const now = new Date();
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const dateString = now.toLocaleDateString('en-US', options);
-                const dateElement = document.getElementById('currentDate');
-                if (dateElement) {
-                    dateElement.textContent = dateString;
-                }
-            }
-            
-            updateDateDisplay();
-        });
-        
-        // Handle page visibility changes
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                updateLiveClock();
-            }
         });
     </script>
 </body>
