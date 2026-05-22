@@ -3,15 +3,15 @@ session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-include '../../database_connection/db_connect.php'; // adjust path if needed
 
+include '../../database_connection/db_connect.php';
 
 if (!isset($_SESSION['student_id'])) {
     die("Unauthorized access.");
 }
 
 $student_id = $_SESSION['student_id'];
-$exam_id = $_GET['exam_id'];
+$exam_id = $_GET['exam_id'] ?? 0;
 
 /*
 -------------------------
@@ -37,7 +37,7 @@ $questions = mysqli_query($conn, "
 
 /*
 -------------------------
-GET ANSWERS (IMPORTANT FIX)
+GET STUDENT ANSWERS
 -------------------------
 */
 $answers = [];
@@ -59,13 +59,84 @@ while ($row = mysqli_fetch_assoc($res)) {
 <title>Exam Review</title>
 
 <style>
-body{font-family:Arial;background:#f5f5f5;padding:20px}
-.container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:10px}
-.question-box{border:1px solid #ddd;padding:15px;margin-bottom:20px;border-radius:10px}
-.question{font-weight:bold;margin-bottom:10px}
-.option{padding:10px;margin:5px 0;border:1px solid #ccc;border-radius:6px}
-.correct{background:#c8f7c5;border:2px solid green}
-.wrong{background:#f8c5c5;border:2px solid red}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f0f4fa;
+    padding: 16px;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 950px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1a56db;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e8edf5;
+    padding-bottom: 10px;
+}
+
+.question-box {
+    border: 1px solid #e8edf5;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: #fff;
+}
+
+.question {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 14px;
+    background: #f8fafd;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.option {
+    padding: 10px 12px;
+    margin: 6px 0;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    border: 1px solid #e2e8f0;
+}
+
+/* correct answer */
+.correct {
+    background: #e8f5e9;
+    border-left: 4px solid #2e7d32;
+    color: #1b5e20;
+}
+
+/* wrong selected answer */
+.wrong {
+    background: #ffebee;
+    border-left: 4px solid #c62828;
+    color: #b71c1c;
+    text-decoration: line-through;
+}
+
+/* selected correct (same as correct) */
+.selected-correct {
+    background: #e8f5e9;
+    border-left: 4px solid #2e7d32;
+}
 </style>
 
 </head>
@@ -82,7 +153,8 @@ while ($q = mysqli_fetch_assoc($questions)) {
 
     $qid = $q['question_id'];
 
-    $selected = isset($answers[$qid]) ? strtoupper($answers[$qid]) : "";
+    $correct = strtoupper($q['correct_option']);
+    $selected = $answers[$qid] ?? "";
 ?>
 
 <div class="question-box">
@@ -103,19 +175,19 @@ while ($q = mysqli_fetch_assoc($questions)) {
 
         $class = "";
 
-        // 🟢 correct answer
-        if ($key == strtoupper($q['correct_option'])) {
+        // ✅ selected correct
+        if ($key == $selected && $key == $correct) {
+            $class = "selected-correct";
+        }
+
+        // 🟢 correct answer always
+        elseif ($key == $correct) {
             $class = "correct";
         }
 
-        // 🔴 selected wrong answer
-        if ($selected == $key && $selected != strtoupper($q['correct_option'])) {
+        // 🔴 wrong selected answer
+        elseif ($key == $selected) {
             $class = "wrong";
-        }
-
-        // 🟢 selected correct answer
-        if ($selected == $key && $selected == strtoupper($q['correct_option'])) {
-            $class = "correct";
         }
     ?>
 
