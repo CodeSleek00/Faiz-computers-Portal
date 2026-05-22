@@ -1,9 +1,5 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 include '../../database_connection/db_connect.php';
 
 if (!isset($_SESSION['student_id'])) {
@@ -11,28 +7,32 @@ if (!isset($_SESSION['student_id'])) {
 }
 
 $student_id = $_SESSION['student_id'];
+$student_type = $_SESSION['student_type'];
 
 /*
 ---------------------------------
-GET STUDENT NAME (COALESCE LOGIC)
+GET STUDENT NAME BASED ON TYPE
 ---------------------------------
 */
-$student = mysqli_fetch_assoc(mysqli_query(
-    $conn,
-    "
-    SELECT 
-        COALESCE(s.name, s26.name) AS name
-    FROM students s
-    LEFT JOIN students26 s26 
-        ON s26.id = s.student_id
-    WHERE s.student_id = '$student_id'
-    LIMIT 1
-    "
-));
+if ($student_type == 'students') {
+
+    $student = mysqli_fetch_assoc(mysqli_query(
+        $conn,
+        "SELECT name FROM students WHERE student_id = '$student_id'"
+    ));
+
+} else {
+
+    $student = mysqli_fetch_assoc(mysqli_query(
+        $conn,
+        "SELECT name FROM students26 WHERE id = '$student_id'"
+    ));
+
+}
 
 /*
 ---------------------------------
-GET EXAM REPORTS
+GET EXAMS (COMMON TABLE)
 ---------------------------------
 */
 $exams = mysqli_query($conn, "
@@ -43,7 +43,6 @@ $exams = mysqli_query($conn, "
     ORDER BY es.submission_id DESC
 ");
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
