@@ -13,7 +13,15 @@ $student_id = $_SESSION['student_id'];
 
 $student = mysqli_fetch_assoc(mysqli_query(
     $conn,
-    "SELECT * FROM students WHERE student_id = '$student_id'"
+    "
+    SELECT 
+        COALESCE(s.name, s26.name) AS name
+    FROM (
+        SELECT '$student_id' AS sid
+    ) temp
+    LEFT JOIN students s ON s.student_id = temp.sid
+    LEFT JOIN students26 s26 ON s26.id = temp.sid
+    "
 ));
 
 $exams = mysqli_query($conn, "
