@@ -13,7 +13,9 @@ if (!isset($_SESSION['student_id'])) {
 $student_id = $_SESSION['student_id'];
 
 /*
-  STEP 1: Get student details
+----------------------------
+STEP 1: GET STUDENT INFO
+----------------------------
 */
 $studentQuery = "SELECT * FROM students WHERE student_id = '$student_id'";
 $studentResult = mysqli_query($conn, $studentQuery);
@@ -25,13 +27,24 @@ if (!$studentResult || mysqli_num_rows($studentResult) == 0) {
 $student = mysqli_fetch_assoc($studentResult);
 
 /*
-  STEP 2: Fetch exam reports from correct table
-  IMPORTANT: your real table is exam_submissions
+----------------------------
+STEP 2: GET EXAM REPORTS
+----------------------------
 */
 $reportQuery = "
-    SELECT es.*, e.exam_name
+    SELECT 
+        es.id,
+        es.student_id,
+        es.exam_id,
+        es.marks,
+        es.total_marks,
+        es.created_at,
+        e.exam_name,
+        e.total_questions,
+        e.duration,
+        e.marks_per_question
     FROM exam_submissions es
-    LEFT JOIN exams e ON es.exam_id = e.id
+    LEFT JOIN exams e ON es.exam_id = e.exam_id
     WHERE es.student_id = '$student_id'
     ORDER BY es.id DESC
 ";
@@ -39,41 +52,46 @@ $reportQuery = "
 $reportResult = mysqli_query($conn, $reportQuery);
 
 if (!$reportResult) {
-    die("Query Failed: " . mysqli_error($conn));
+    die("Query Error: " . mysqli_error($conn));
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>All Exam Reports</title>
+
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             background: #f5f5f5;
             padding: 20px;
         }
 
         .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
             max-width: 1000px;
             margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
         }
 
         h2 {
             text-align: center;
+            margin-bottom: 20px;
         }
 
-        .info {
+        .student-info {
             margin-bottom: 20px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
 
         th, td {
@@ -83,29 +101,24 @@ if (!$reportResult) {
         }
 
         th {
-            background: #222;
+            background: #333;
             color: white;
+        }
+
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+
+        .fail {
+            color: red;
+            font-weight: bold;
         }
 
         .no-data {
             text-align: center;
             color: red;
             padding: 20px;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: white;
-            font-size: 12px;
-        }
-
-        .pass {
-            background: green;
-        }
-
-        .fail {
-            background: red;
         }
     </style>
 </head>
@@ -115,7 +128,7 @@ if (!$reportResult) {
 
     <h2>📊 My Exam Reports</h2>
 
-    <div class="info">
+    <div class="student-info">
         <p><b>Name:</b> <?php echo $student['name']; ?></p>
         <p><b>Student ID:</b> <?php echo $student['student_id']; ?></p>
     </div>
@@ -124,7 +137,7 @@ if (!$reportResult) {
         <tr>
             <th>Exam Name</th>
             <th>Marks</th>
-            <th>Total</th>
+            <th>Total Marks</th>
             <th>Percentage</th>
             <th>Status</th>
             <th>Date</th>
@@ -135,19 +148,20 @@ if (!$reportResult) {
             while ($row = mysqli_fetch_assoc($reportResult)) {
 
                 $marks = $row['marks'];
-                $total = $row['total_marks'] ?? $row['total'];
+                $total = $row['total_marks'];
+
                 $percentage = ($total > 0) ? round(($marks / $total) * 100, 2) : 0;
 
                 $status = ($percentage >= 33) ? "PASS" : "FAIL";
-                $badgeClass = ($percentage >= 33) ? "pass" : "fail";
+                $class = ($percentage >= 33) ? "pass" : "fail";
         ?>
             <tr>
                 <td><?php echo $row['exam_name']; ?></td>
                 <td><?php echo $marks; ?></td>
                 <td><?php echo $total; ?></td>
                 <td><?php echo $percentage; ?>%</td>
-                <td><span class="badge <?php echo $badgeClass; ?>"><?php echo $status; ?></span></td>
-                <td><?php echo $row['created_at'] ?? 'N/A'; ?></td>
+                <td class="<?php echo $class; ?>"><?php echo $status; ?></td>
+                <td><?php echo $row['created_at']; ?></td>
             </tr>
         <?php
             }
