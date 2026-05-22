@@ -14,22 +14,21 @@ $student_id = $_SESSION['student_id'];
 
 /*
 ---------------------------------
-GET STUDENT DATA (SAFE FIX)
-students26 contains ONLY id
-so we validate student exists in students table
+GET STUDENT NAME (COALESCE LOGIC)
 ---------------------------------
 */
-$student_check = mysqli_query($conn, "
-    SELECT * FROM students 
-    WHERE student_id = '$student_id'
+$student = mysqli_fetch_assoc(mysqli_query(
+    $conn,
+    "
+    SELECT 
+        COALESCE(s.name, s26.name) AS name
+    FROM students s
+    LEFT JOIN students26 s26 
+        ON s26.id = s.student_id
+    WHERE s.student_id = '$student_id'
     LIMIT 1
-");
-
-$student = mysqli_fetch_assoc($student_check);
-
-if (!$student) {
-    die("Student not found in students table.");
-}
+    "
+));
 
 /*
 ---------------------------------
@@ -63,23 +62,20 @@ body {
     font-family: 'Poppins', sans-serif;
     background: #f0f4fa;
     padding: 24px;
-    min-height: 100vh;
 }
 
 .container {
     max-width: 1200px;
-    margin: 0 auto;
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 32px 28px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    margin: auto;
+    background: #fff;
+    padding: 28px;
+    border-radius: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
 }
 
 h2 {
-    font-size: 1.6rem;
-    font-weight: 600;
     color: #1a56db;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 table {
@@ -90,44 +86,43 @@ table {
 
 th {
     background: #1a56db;
-    color: white;
-    padding: 14px;
-    font-size: 0.85rem;
+    color: #fff;
+    padding: 12px;
 }
 
 td {
-    padding: 12px;
     text-align: center;
-    border-bottom: 1px solid #e8edf5;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 .status-pass {
-    color: #1a56db;
-    font-weight: 700;
     background: #e8f0fe;
-    padding: 4px 12px;
+    color: #1a56db;
+    padding: 5px 12px;
     border-radius: 20px;
+    font-weight: 600;
     display: inline-block;
 }
 
 .status-fail {
-    color: #94a3b8;
-    font-weight: 600;
     background: #f1f5f9;
-    padding: 4px 12px;
+    color: #94a3b8;
+    padding: 5px 12px;
     border-radius: 20px;
+    font-weight: 600;
     display: inline-block;
 }
 
 .button {
-    background-color: #1a56db;
+    background: #1a56db;
     color: white;
     padding: 6px 14px;
     border-radius: 6px;
     text-decoration: none;
-    display: inline-block;
 }
 </style>
+
 </head>
 
 <body>
@@ -136,7 +131,7 @@ td {
 
 <h2>📊 All Exam Reports</h2>
 
-<p><b>Name:</b> <?php echo $student['name']; ?></p>
+<p><b>Name:</b> <?php echo $student['name'] ?? 'Unknown Student'; ?></p>
 
 <table>
 <tr>
@@ -170,7 +165,7 @@ if (mysqli_num_rows($exams) > 0) {
     <td><span class="<?php echo $class; ?>"><?php echo $status; ?></span></td>
     <td>
         <a class="button" href="exam_details.php?exam_id=<?php echo $row['exam_id']; ?>">
-            View
+            View Details
         </a>
     </td>
 </tr>
