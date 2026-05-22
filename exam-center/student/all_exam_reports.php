@@ -14,23 +14,26 @@ $student_id = $_SESSION['student_id'];
 
 /*
 ---------------------------------
-GET STUDENT INFO (FROM students + students26)
----------------------------------
-Assumption:
-students26 contains only: id (student_id reference)
+GET STUDENT DATA (SAFE FIX)
+students26 contains ONLY id
+so we validate student exists in students table
 ---------------------------------
 */
-$student = mysqli_fetch_assoc(mysqli_query(
-    $conn,
-    "SELECT s.*
-     FROM students s
-     INNER JOIN students26 s26 ON s.student_id = s26.id
-     WHERE s.student_id = '$student_id'"
-));
+$student_check = mysqli_query($conn, "
+    SELECT * FROM students 
+    WHERE student_id = '$student_id'
+    LIMIT 1
+");
+
+$student = mysqli_fetch_assoc($student_check);
+
+if (!$student) {
+    die("Student not found in students table.");
+}
 
 /*
 ---------------------------------
-GET EXAMS
+GET EXAM REPORTS
 ---------------------------------
 */
 $exams = mysqli_query($conn, "
@@ -48,16 +51,81 @@ $exams = mysqli_query($conn, "
 <title>My Exam Reports</title>
 
 <style>
-/* (YOUR SAME CSS - NO CHANGE NEEDED) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f0f4fa;
+    padding: 24px;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 32px 28px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1a56db;
+    margin-bottom: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th {
+    background: #1a56db;
+    color: white;
+    padding: 14px;
+    font-size: 0.85rem;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #e8edf5;
+}
+
+.status-pass {
+    color: #1a56db;
+    font-weight: 700;
+    background: #e8f0fe;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.status-fail {
+    color: #94a3b8;
+    font-weight: 600;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
 .button {
     background-color: #1a56db;
     color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    padding: 6px 14px;
+    border-radius: 6px;
     text-decoration: none;
+    display: inline-block;
 }
 </style>
 </head>
@@ -68,7 +136,7 @@ $exams = mysqli_query($conn, "
 
 <h2>📊 All Exam Reports</h2>
 
-<p><b>Name:</b> <?php echo $student['name'] ?? 'Not Found'; ?></p>
+<p><b>Name:</b> <?php echo $student['name']; ?></p>
 
 <table>
 <tr>
@@ -81,15 +149,17 @@ $exams = mysqli_query($conn, "
 </tr>
 
 <?php
-while ($row = mysqli_fetch_assoc($exams)) {
+if (mysqli_num_rows($exams) > 0) {
 
-    $score = $row['score'];
-    $total = $row['total_questions'];
+    while ($row = mysqli_fetch_assoc($exams)) {
 
-    $percent = ($total > 0) ? round(($score / $total) * 100, 2) : 0;
+        $score = $row['score'];
+        $total = $row['total_questions'];
 
-    $status = ($percent >= 33) ? "PASS" : "FAIL";
-    $class = ($percent >= 33) ? "status-pass" : "status-fail";
+        $percent = ($total > 0) ? round(($score / $total) * 100, 2) : 0;
+
+        $status = ($percent >= 33) ? "PASS" : "FAIL";
+        $class = ($percent >= 33) ? "status-pass" : "status-fail";
 ?>
 
 <tr>
@@ -97,15 +167,21 @@ while ($row = mysqli_fetch_assoc($exams)) {
     <td><?php echo $score; ?></td>
     <td><?php echo $total; ?></td>
     <td><?php echo $percent; ?>%</td>
-    <td class="<?php echo $class; ?>"><?php echo $status; ?></td>
+    <td><span class="<?php echo $class; ?>"><?php echo $status; ?></span></td>
     <td>
         <a class="button" href="exam_details.php?exam_id=<?php echo $row['exam_id']; ?>">
-            View Details
+            View
         </a>
     </td>
 </tr>
 
-<?php } ?>
+<?php
+    }
+
+} else {
+    echo "<tr><td colspan='6'>No exam records found</td></tr>";
+}
+?>
 
 </table>
 
