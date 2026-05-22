@@ -347,6 +347,15 @@ td:nth-child(4) {
     background: #1a56db;
     border-radius: 4px;
 }
+.button {
+    background-color: #1a56db;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 </style>
 </head>
 
@@ -386,7 +395,7 @@ while ($row = mysqli_fetch_assoc($exams)) {
     <td><?php echo $percent; ?>%</td>
     <td class="<?php echo $class; ?>"><?php echo $status; ?></td>
     <td>
-        <a href="exam_details.php?exam_id=<?php echo $row['exam_id']; ?>">
+        <a class="button" href="exam_details.php?exam_id=<?php echo $row['exam_id']; ?>">
             View Details
         </a>
     </td>
