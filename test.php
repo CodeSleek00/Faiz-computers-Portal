@@ -1253,7 +1253,7 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-history nav-icon"></i>
                 <span>Exam History</span>
             </a>
-            <a href="student_exam_report.php?exam_id=<?php echo $exam['id']; ?>&student_id=<?php echo $_SESSION['student_id']; ?>&student_table=<?php echo $_SESSION['student_table']; ?>" class="view-report-btn">
+            <a href="exam-center/student/student_exam_report.php?exam_id=<?php echo $exam['id']; ?>&student_id=<?php echo $_SESSION['student_id']; ?>&student_table=<?php echo $_SESSION['student_table']; ?>" class="view-report-btn">
 
                 <i class="fa fa-chart-line"></i>
                 View Report
