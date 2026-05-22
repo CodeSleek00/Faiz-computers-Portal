@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 include '../../database_connection/db_connect.php'; // adjust path if needed
 
@@ -14,32 +10,27 @@ if (!isset($_SESSION['student_id'])) {
 $student_id = $_SESSION['student_id'];
 
 /*
-  ✅ IMPORTANT FIX:
-  - students table → student_id
-  - students26 table → id
-  So we will use correct mapping below
+  STEP 1: Get student details
 */
-
-// 🧠 STEP 1: Get student info (choose correct table)
 $studentQuery = "SELECT * FROM students WHERE student_id = '$student_id'";
 $studentResult = mysqli_query($conn, $studentQuery);
 
 if (!$studentResult || mysqli_num_rows($studentResult) == 0) {
-    die("Student not found in students table.");
+    die("Student not found.");
 }
 
 $student = mysqli_fetch_assoc($studentResult);
 
 /*
-  🧠 STEP 2: Fetch exam reports
-  (CHANGE TABLE NAME if yours is different like exam_results / results / marks etc.)
+  STEP 2: Fetch exam reports from correct table
+  IMPORTANT: your real table is exam_submissions
 */
-
 $reportQuery = "
-    SELECT *
-    FROM exam_results
-    WHERE student_id = '$student_id'
-    ORDER BY id DESC
+    SELECT es.*, e.exam_name
+    FROM exam_submissions es
+    LEFT JOIN exams e ON es.exam_id = e.id
+    WHERE es.student_id = '$student_id'
+    ORDER BY es.id DESC
 ";
 
 $reportResult = mysqli_query($conn, $reportQuery);
@@ -56,7 +47,7 @@ if (!$reportResult) {
     <style>
         body {
             font-family: Arial;
-            background: #f4f4f4;
+            background: #f5f5f5;
             padding: 20px;
         }
 
@@ -64,35 +55,54 @@ if (!$reportResult) {
             background: white;
             padding: 20px;
             border-radius: 10px;
+            max-width: 1000px;
+            margin: auto;
         }
 
         h2 {
+            text-align: center;
+        }
+
+        .info {
             margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
+            margin-top: 20px;
         }
 
         th, td {
             padding: 10px;
+            border: 1px solid #ddd;
             text-align: center;
         }
 
         th {
-            background: #333;
+            background: #222;
             color: white;
         }
 
         .no-data {
             text-align: center;
-            padding: 20px;
             color: red;
+            padding: 20px;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .pass {
+            background: green;
+        }
+
+        .fail {
+            background: red;
         }
     </style>
 </head>
@@ -100,43 +110,46 @@ if (!$reportResult) {
 
 <div class="container">
 
-    <h2>📄 All Exam Reports</h2>
+    <h2>📊 My Exam Reports</h2>
 
-    <p><b>Name:</b> <?php echo $student['name']; ?></p>
-    <p><b>Student ID:</b> <?php echo $student['student_id']; ?></p>
-
-    <br>
+    <div class="info">
+        <p><b>Name:</b> <?php echo $student['name']; ?></p>
+        <p><b>Student ID:</b> <?php echo $student['student_id']; ?></p>
+    </div>
 
     <table>
         <tr>
-            <th>Exam ID</th>
+            <th>Exam Name</th>
             <th>Marks</th>
             <th>Total</th>
             <th>Percentage</th>
+            <th>Status</th>
             <th>Date</th>
         </tr>
 
         <?php
         if (mysqli_num_rows($reportResult) > 0) {
             while ($row = mysqli_fetch_assoc($reportResult)) {
+
+                $marks = $row['marks'];
+                $total = $row['total_marks'] ?? $row['total'];
+                $percentage = ($total > 0) ? round(($marks / $total) * 100, 2) : 0;
+
+                $status = ($percentage >= 33) ? "PASS" : "FAIL";
+                $badgeClass = ($percentage >= 33) ? "pass" : "fail";
         ?>
             <tr>
-                <td><?php echo $row['exam_id']; ?></td>
-                <td><?php echo $row['marks']; ?></td>
-                <td><?php echo $row['total']; ?></td>
-                <td>
-                    <?php 
-                        echo ($row['total'] > 0) 
-                            ? round(($row['marks'] / $row['total']) * 100, 2) . "%" 
-                            : "0%";
-                    ?>
-                </td>
-                <td><?php echo $row['created_at']; ?></td>
+                <td><?php echo $row['exam_name']; ?></td>
+                <td><?php echo $marks; ?></td>
+                <td><?php echo $total; ?></td>
+                <td><?php echo $percentage; ?>%</td>
+                <td><span class="badge <?php echo $badgeClass; ?>"><?php echo $status; ?></span></td>
+                <td><?php echo $row['created_at'] ?? 'N/A'; ?></td>
             </tr>
         <?php
             }
         } else {
-            echo "<tr><td colspan='5' class='no-data'>No exam reports found</td></tr>";
+            echo "<tr><td colspan='6' class='no-data'>No exam reports found</td></tr>";
         }
         ?>
 
