@@ -61,6 +61,7 @@ while ($row = mysqli_fetch_assoc($res)) {
 <style>
 /* ============================================
    MINIMAL WHITE & BLUE DESIGN - EXAM REVIEW
+   Correct: Green | Wrong: Red
    Font: Poppins | 100% Responsive
    ============================================ */
 
@@ -142,32 +143,32 @@ h2 {
     margin-right: 8px;
 }
 
-/* Correct Answer - Blue Themed (instead of green) */
+/* Correct Answer - Green */
 .correct {
-    background: #e8f0fe;
-    border-left: 4px solid #1a56db;
-    color: #1a56db;
+    background: #e8f5e9;
+    border-left: 4px solid #2e7d32;
+    color: #1b5e20;
 }
 
-/* Wrong Answer - Light Gray/Blue (subtle) */
+/* Wrong Answer - Red */
 .wrong {
-    background: #f1f5f9;
-    border-left: 4px solid #94a3b8;
-    color: #475569;
+    background: #ffebee;
+    border-left: 4px solid #c62828;
+    color: #b71c1c;
     text-decoration: line-through;
-    text-decoration-color: #94a3b8;
+    text-decoration-color: #c62828;
     text-decoration-thickness: 1.5px;
 }
 
-/* Override for when correct answer is also selected - keep blue */
+/* Override for when correct answer is also selected - keep green */
 .correct.wrong {
-    background: #e8f0fe;
-    border-left-color: #1a56db;
+    background: #e8f5e9;
+    border-left-color: #2e7d32;
     text-decoration: none;
-    color: #1a56db;
+    color: #1b5e20;
 }
 
-/* No class - default option */
+/* Default option - no class */
 .option:not(.correct):not(.wrong) {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -178,19 +179,7 @@ h2 {
     background: #f8fafd;
 }
 
-/* Question counter styling */
-.question-box:first-child .question {
-    font-weight: 700;
-}
-
-/* Empty state / no questions */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #94a3b8;
-}
-
-/* Back button / navigation (add if needed) */
+/* Back button / navigation */
 .back-link {
     display: inline-flex;
     align-items: center;
@@ -208,6 +197,13 @@ h2 {
 .back-link:hover {
     color: #0a3a8a;
     gap: 12px;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
 }
 
 /* ============================================
@@ -310,7 +306,7 @@ h2 {
     }
 }
 
-/* Print styles (if needed for review) */
+/* Print styles */
 @media print {
     body {
         background: white;
