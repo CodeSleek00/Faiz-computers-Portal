@@ -7,32 +7,31 @@ if (!isset($_SESSION['student_id'])) {
 }
 
 $student_id = $_SESSION['student_id'];
-$student_type = $_SESSION['student_type'];
 
 /*
 ---------------------------------
-GET STUDENT NAME BASED ON TYPE
+GET STUDENT NAME (ROBUST FIX)
+---------------------------------
+- Try students first
+- fallback to students26
+- safe even if session type missing
 ---------------------------------
 */
-if ($student_type == 'students') {
-
-    $student = mysqli_fetch_assoc(mysqli_query(
-        $conn,
-        "SELECT name FROM students WHERE student_id = '$student_id'"
-    ));
-
-} else {
-
-    $student = mysqli_fetch_assoc(mysqli_query(
-        $conn,
-        "SELECT name FROM students26 WHERE id = '$student_id'"
-    ));
-
-}
+$student = mysqli_fetch_assoc(mysqli_query(
+    $conn,
+    "
+    SELECT COALESCE(s.name, s26.name) AS name
+    FROM students s
+    LEFT JOIN students26 s26 
+        ON s26.id = s.student_id
+    WHERE s.student_id = '$student_id'
+    LIMIT 1
+    "
+));
 
 /*
 ---------------------------------
-GET EXAMS (COMMON TABLE)
+GET EXAMS
 ---------------------------------
 */
 $exams = mysqli_query($conn, "
@@ -43,6 +42,7 @@ $exams = mysqli_query($conn, "
     ORDER BY es.submission_id DESC
 ");
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
