@@ -3,27 +3,37 @@ session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-include '../../database_connection/db_connect.php'; // adjust path if needed
 
-if (!isset($_SESSION['student_id'])) {
+include '../../database_connection/db_connect.php';
+
+if (!isset($_SESSION['student_id']) || !isset($_SESSION['student_table'])) {
     die("Unauthorized access.");
 }
 
 $student_id = $_SESSION['student_id'];
+$table = $_SESSION['student_table'];
 
-$student = mysqli_fetch_assoc(mysqli_query(
-    $conn,
-    "
-    SELECT 
-        COALESCE(s.name, s26.name) AS name
-    FROM (
-        SELECT '$student_id' AS sid
-    ) temp
-    LEFT JOIN students s ON s.student_id = temp.sid
-    LEFT JOIN students26 s26 ON s26.id = temp.sid
-    "
-));
 
+// ================================
+// FETCH STUDENT DATA (BOTH TABLES)
+// ================================
+if ($table == 'students') {
+
+    $student = mysqli_fetch_assoc(mysqli_query($conn,
+        "SELECT * FROM students WHERE student_id = '$student_id'"
+    ));
+
+} else {
+
+    $student = mysqli_fetch_assoc(mysqli_query($conn,
+        "SELECT * FROM students26 WHERE id = '$student_id'"
+    ));
+}
+
+
+// ================================
+// FETCH EXAM REPORTS
+// ================================
 $exams = mysqli_query($conn, "
     SELECT es.*, e.exam_name, e.total_questions
     FROM exam_submissions es
@@ -32,6 +42,7 @@ $exams = mysqli_query($conn, "
     ORDER BY es.submission_id DESC
 ");
 ?>
+
 
 <!DOCTYPE html>
 <html>
