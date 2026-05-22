@@ -355,6 +355,7 @@ td:nth-child(4) {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    text-decoration: none;
 }
 </style>
 </head>
