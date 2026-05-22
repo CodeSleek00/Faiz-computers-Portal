@@ -1,6 +1,9 @@
 <?php
 session_start();
-include '../db.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+include '../../database_connection/db_connect.php'; // adjust path if needed
 
 if (!isset($_SESSION['student_id'])) {
     die("Unauthorized access.");
