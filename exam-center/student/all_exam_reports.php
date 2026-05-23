@@ -116,79 +116,367 @@ $total_results = mysqli_num_rows($results);
 <title>Exam Results</title>
 
 <style>
+/* ============================================
+   MINIMAL WHITE & BLUE DESIGN - EXAM RESULTS
+   Font: Poppins | Fully Responsive
+   ============================================ */
 
-body{
-    font-family:Arial, sans-serif;
-    background:#f4f7fb;
-    padding:20px;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container{
-    max-width:1100px;
-    margin:auto;
-    background:#fff;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f0f4fa;
+    padding: 20px;
+    min-height: 100vh;
 }
 
-h2{
-    color:#1a56db;
-    margin-bottom:10px;
+/* Main Container - Pure White */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
-.info{
-    margin-bottom:20px;
-    line-height:28px;
+/* Header */
+h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1a56db;
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e8edf5;
 }
 
-.info span{
-    color:#1a56db;
-    font-weight:bold;
+/* Info Cards */
+.info {
+    background: #f8fafd;
+    padding: 16px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
+.info div {
+    font-size: 0.9rem;
+    color: #475569;
 }
 
-th{
-    background:#1a56db;
-    color:#fff;
-    padding:12px;
+.info span {
+    color: #1a56db;
+    font-weight: 600;
+    margin-left: 6px;
 }
 
-td{
-    padding:12px;
-    text-align:center;
-    border-bottom:1px solid #eee;
+/* Table Wrapper - For horizontal scroll on mobile */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 16px;
 }
 
-.pass{
-    color:green;
-    font-weight:bold;
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    min-width: 700px;
 }
 
-.fail{
-    color:red;
-    font-weight:bold;
+/* Table Header - Blue */
+th {
+    background: #1a56db;
+    color: white;
+    font-weight: 600;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
 }
 
-.btn{
-    background:#1a56db;
-    color:white;
-    padding:7px 14px;
-    border-radius:6px;
-    text-decoration:none;
+th:first-child {
+    border-top-left-radius: 12px;
 }
 
-.no-data{
-    text-align:center;
-    padding:25px;
-    color:#777;
+th:last-child {
+    border-top-right-radius: 12px;
 }
 
+/* Table Cells */
+td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #e8edf5;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+/* Row Hover Effect */
+tr:hover td {
+    background-color: #f8fafd;
+}
+
+/* Score & Total Marks */
+td:nth-child(2),
+td:nth-child(3) {
+    font-weight: 600;
+    color: #1a56db;
+}
+
+/* Percentage */
+td:nth-child(4) {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Status Badges */
+.pass {
+    color: #2e7d32;
+    font-weight: 700;
+    background: #e8f5e9;
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+}
+
+.fail {
+    color: #c62828;
+    font-weight: 600;
+    background: #ffebee;
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+}
+
+/* View Button - Minimal Blue */
+.btn {
+    display: inline-block;
+    background: transparent;
+    color: #1a56db;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 6px 18px;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+    border: 1px solid #1a56db;
+}
+
+.btn:hover {
+    background: #1a56db;
+    color: white;
+}
+
+/* No Data Message */
+.no-data {
+    text-align: center;
+    padding: 50px 20px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Tablet (768px and below) */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 16px;
+    }
+
+    .container {
+        padding: 20px 18px;
+        border-radius: 20px;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+    }
+
+    .info {
+        padding: 14px 16px;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .info div {
+        font-size: 0.85rem;
+    }
+
+    th {
+        padding: 12px 10px;
+        font-size: 0.8rem;
+    }
+
+    td {
+        padding: 10px 8px;
+        font-size: 0.82rem;
+    }
+
+    .pass, .fail {
+        padding: 3px 12px;
+        font-size: 0.7rem;
+    }
+
+    .btn {
+        padding: 5px 14px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Mobile (550px and below) */
+@media screen and (max-width: 550px) {
+    body {
+        padding: 12px;
+    }
+
+    .container {
+        padding: 16px 14px;
+        border-radius: 18px;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+    }
+
+    .info {
+        padding: 12px 14px;
+        gap: 12px;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .info div {
+        font-size: 0.8rem;
+    }
+
+    th {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+    }
+
+    td {
+        padding: 8px 6px;
+        font-size: 0.75rem;
+    }
+
+    .pass, .fail {
+        padding: 2px 10px;
+        font-size: 0.65rem;
+    }
+
+    .btn {
+        padding: 4px 12px;
+        font-size: 0.65rem;
+    }
+}
+
+/* Small Mobile (400px and below) */
+@media screen and (max-width: 400px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 14px 12px;
+        border-radius: 16px;
+    }
+
+    h2 {
+        font-size: 1.15rem;
+    }
+
+    .info div {
+        font-size: 0.75rem;
+    }
+
+    th {
+        padding: 8px 6px;
+        font-size: 0.7rem;
+    }
+
+    td {
+        padding: 8px 4px;
+        font-size: 0.7rem;
+    }
+
+    .pass, .fail {
+        padding: 2px 8px;
+        font-size: 0.6rem;
+    }
+
+    .btn {
+        padding: 3px 10px;
+        font-size: 0.6rem;
+    }
+}
+
+/* Table scroll hint for very small screens */
+@media screen and (max-width: 550px) {
+    .table-wrapper {
+        position: relative;
+    }
+    
+    .table-wrapper::after {
+        content: "← scroll →";
+        display: block;
+        text-align: center;
+        font-size: 0.6rem;
+        color: #94a3b8;
+        margin-top: 10px;
+        padding-bottom: 4px;
+    }
+}
+
+/* Custom scrollbar */
+.table-wrapper::-webkit-scrollbar {
+    height: 5px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #e8edf5;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #1a56db;
+    border-radius: 10px;
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    .container {
+        box-shadow: none;
+        padding: 0;
+    }
+    .btn {
+        border: none;
+        text-decoration: underline;
+    }
+    .table-wrapper::after {
+        display: none;
+    }
+}
 </style>
 
 </head>
