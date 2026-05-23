@@ -7,28 +7,34 @@ error_reporting(E_ALL);
 
 include '../../database_connection/db_connect.php';
 
+/* =========================================
+CHECK LOGIN
+========================================= */
 if (!isset($_SESSION['student_id'])) {
     die("Unauthorized access.");
 }
 
 $student_id = $_SESSION['student_id'];
-$exam_id = intval($_GET['exam_id']);
+$exam_id = intval($_GET['exam_id'] ?? 0);
 
-/*
--------------------------
+/* =========================================
 GET EXAM INFO
--------------------------
-*/
-$exam = mysqli_fetch_assoc(mysqli_query(
-    $conn,
-    "SELECT * FROM exams WHERE exam_id = '$exam_id'"
-));
+========================================= */
+$exam_query = mysqli_query($conn, "
+    SELECT *
+    FROM exams
+    WHERE exam_id = '$exam_id'
+");
 
-/*
--------------------------
+$exam = mysqli_fetch_assoc($exam_query);
+
+if (!$exam) {
+    die("Exam not found.");
+}
+
+/* =========================================
 GET QUESTIONS
--------------------------
-*/
+========================================= */
 $questions = mysqli_query($conn, "
     SELECT *
     FROM exam_questions
@@ -36,11 +42,9 @@ $questions = mysqli_query($conn, "
     ORDER BY question_id ASC
 ");
 
-/*
--------------------------
+/* =========================================
 GET STUDENT ANSWERS
--------------------------
-*/
+========================================= */
 $answers = [];
 
 $res = mysqli_query($conn, "
@@ -52,8 +56,12 @@ $res = mysqli_query($conn, "
 
 while ($row = mysqli_fetch_assoc($res)) {
 
-    $answers[$row['question_id']] = strtoupper(trim($row['selected_option']));
+    $qid = trim($row['question_id']);
+
+    // DATABASE me small letters stored hain
+    $answers[$qid] = strtolower(trim($row['selected_option']));
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -64,9 +72,15 @@ while ($row = mysqli_fetch_assoc($res)) {
 
 <style>
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
 body{
-    font-family:Arial;
-    background:#f5f7fb;
+    font-family:Arial, sans-serif;
+    background:#f4f7fb;
     padding:20px;
 }
 
@@ -75,68 +89,116 @@ body{
     margin:auto;
     background:#fff;
     padding:25px;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    border-radius:15px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.08);
 }
 
-h2{
-    color:#1a56db;
+.header{
     margin-bottom:25px;
+}
+
+.header h2{
+    color:#1a56db;
+    margin-bottom:8px;
+}
+
+.header p{
+    color:#666;
 }
 
 .question-box{
     border:1px solid #ddd;
-    padding:18px;
+    border-radius:14px;
+    padding:20px;
     margin-bottom:25px;
-    border-radius:12px;
     background:#fafafa;
 }
 
 .question{
+    font-size:18px;
     font-weight:bold;
-    margin-bottom:15px;
-    font-size:17px;
+    margin-bottom:18px;
+    color:#111827;
 }
 
 .option{
-    padding:12px;
-    margin:8px 0;
-    border:1px solid #ccc;
-    border-radius:8px;
+    padding:14px;
+    margin:10px 0;
+    border:1px solid #d1d5db;
+    border-radius:10px;
     background:#fff;
+    transition:0.3s;
 }
 
 .correct{
-    background:#d4edda;
-    border:2px solid #28a745;
+    background:#dcfce7;
+    border:2px solid #16a34a;
 }
 
 .wrong{
-    background:#f8d7da;
-    border:2px solid #dc3545;
+    background:#fee2e2;
+    border:2px solid #dc2626;
 }
 
 .answer-info{
-    margin-top:15px;
-    padding:12px;
-    border-radius:8px;
+    margin-top:18px;
+    padding:14px;
+    border-radius:10px;
     background:#eef4ff;
-    line-height:28px;
+    line-height:30px;
+    font-size:15px;
 }
 
 .correct-text{
-    color:green;
+    color:#15803d;
     font-weight:bold;
 }
 
 .wrong-text{
-    color:red;
+    color:#dc2626;
     font-weight:bold;
 }
 
 .not-attempted{
-    color:#666;
+    color:#6b7280;
     font-weight:bold;
+}
+
+.badge{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:13px;
+    margin-left:10px;
+}
+
+.badge-correct{
+    background:#16a34a;
+    color:#fff;
+}
+
+.badge-wrong{
+    background:#dc2626;
+    color:#fff;
+}
+
+@media(max-width:768px){
+
+    body{
+        padding:10px;
+    }
+
+    .container{
+        padding:15px;
+    }
+
+    .question{
+        font-size:16px;
+    }
+
+    .option{
+        font-size:14px;
+    }
 }
 
 </style>
@@ -147,7 +209,10 @@ h2{
 
 <div class="container">
 
-<h2>📘 <?php echo htmlspecialchars($exam['exam_name']); ?> - Exam Review</h2>
+    <div class="header">
+        <h2>📘 <?php echo htmlspecialchars($exam['exam_name']); ?> - Exam Review</h2>
+        <p>Review your answers and check correct solutions.</p>
+    </div>
 
 <?php
 
@@ -155,13 +220,13 @@ $no = 1;
 
 while ($q = mysqli_fetch_assoc($questions)) {
 
-    $qid = $q['question_id'];
+    $qid = trim($q['question_id']);
 
-    $selected = isset($answers[$qid])
-        ? strtoupper($answers[$qid])
-        : "";
+    // selected answer
+    $selected = $answers[$qid] ?? "";
 
-    $correct_option = strtoupper($q['correct_option']);
+    // correct answer
+    $correct_option = strtolower(trim($q['correct_option']));
 
 ?>
 
@@ -171,102 +236,110 @@ while ($q = mysqli_fetch_assoc($questions)) {
         <?php echo $no . ". " . htmlspecialchars($q['question']); ?>
     </div>
 
+<?php
+
+$options = [
+    "a" => $q['option_a'],
+    "b" => $q['option_b'],
+    "c" => $q['option_c'],
+    "d" => $q['option_d']
+];
+
+foreach ($options as $key => $value) {
+
+    $class = "";
+
+    // Correct answer
+    if ($key == $correct_option) {
+        $class = "correct";
+    }
+
+    // Wrong selected answer
+    if ($selected == $key && $selected != $correct_option) {
+        $class = "wrong";
+    }
+
+?>
+
+<div class="option <?php echo $class; ?>">
+
+    <b><?php echo strtoupper($key); ?>.</b>
+
+    <?php echo htmlspecialchars($value); ?>
+
     <?php
 
-    $options = [
-        "A" => $q['option_a'],
-        "B" => $q['option_b'],
-        "C" => $q['option_c'],
-        "D" => $q['option_d']
-    ];
+    // STUDENT SELECTED
+    if ($selected == $key) {
 
-    foreach ($options as $key => $value) {
-
-        $class = "";
-
-        /* CORRECT ANSWER */
-        if ($key == $correct_option) {
-            $class = "correct";
-        }
-
-        /* WRONG SELECTED ANSWER */
-        if ($selected == $key && $selected != $correct_option) {
-            $class = "wrong";
-        }
-
-        /* SELECTED + CORRECT */
-        if ($selected == $key && $selected == $correct_option) {
-            $class = "correct";
-        }
-
-    ?>
-
-    <div class="option <?php echo $class; ?>">
-
-        <b><?php echo $key; ?>.</b>
-        <?php echo htmlspecialchars($value); ?>
-
-        <?php
-
-        // STUDENT SELECTED THIS OPTION
-        if ($selected == $key) {
-
-            if ($selected == $correct_option) {
-
-                echo " ✅ <b>(Your Answer)</b>";
-
-            } else {
-
-                echo " ❌ <b>(Your Selected Answer)</b>";
-            }
-        }
-
-        // SHOW CORRECT ANSWER LABEL
-        if ($key == $correct_option) {
-
-            echo " 🟢 <b>(Correct Answer)</b>";
-        }
-
-        ?>
-
-    </div>
-
-    <?php } ?>
-
-    <div class="answer-info">
-
-        <?php
-
-        if ($selected == "") {
+        if ($selected == $correct_option) {
 
             echo "
-            <span class='not-attempted'>
-                Not Attempted
-            </span>";
-
-        } elseif ($selected == $correct_option) {
-
-            echo "
-            <span class='correct-text'>
-                ✔ You selected the correct answer: $selected
+            <span class='badge badge-correct'>
+                Your Answer
             </span>";
 
         } else {
 
             echo "
-            <span class='wrong-text'>
-                ✘ You selected: $selected
-            </span>
-            <br>
-
-            <span class='correct-text'>
-                ✔ Correct Answer: $correct_option
+            <span class='badge badge-wrong'>
+                Your Selected Answer
             </span>";
         }
+    }
 
-        ?>
+    // CORRECT ANSWER LABEL
+    if ($key == $correct_option) {
 
-    </div>
+        echo "
+        <span class='badge badge-correct'>
+            Correct Answer
+        </span>";
+    }
+
+    ?>
+
+</div>
+
+<?php } ?>
+
+<div class="answer-info">
+
+<?php
+
+if ($selected == "") {
+
+    echo "
+    <span class='not-attempted'>
+        ⚪ Not Attempted
+    </span>";
+
+} elseif ($selected == $correct_option) {
+
+    echo "
+    <span class='correct-text'>
+        ✅ You selected the correct answer:
+        " . strtoupper($selected) . "
+    </span>";
+
+} else {
+
+    echo "
+    <span class='wrong-text'>
+        ❌ You selected:
+        " . strtoupper($selected) . "
+    </span>
+    <br>
+
+    <span class='correct-text'>
+        ✅ Correct Answer:
+        " . strtoupper($correct_option) . "
+    </span>";
+}
+
+?>
+
+</div>
 
 </div>
 
