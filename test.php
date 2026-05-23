@@ -1197,15 +1197,7 @@ $total_materials = $total_materials ?? 0;
             outline: none;
         }
     </style>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "a7ea0c3a-3097-4015-9838-e60486901b2a",
-    });
-  });
-</script>
+    
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -1549,7 +1541,15 @@ $total_materials = $total_materials ?? 0;
             </a>
         </div>
     </nav>
-
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "a7ea0c3a-3097-4015-9838-e60486901b2a",
+    });
+  });
+</script>
     <script>
         // Mobile menu functionality - FIXED
         document.addEventListener('DOMContentLoaded', function() {
