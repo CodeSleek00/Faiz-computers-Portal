@@ -1,215 +1,208 @@
 <?php
-session_start();
 include '../../database_connection/db_connect.php';
+session_start();
 
-if (!isset($_SESSION['student_id'])) {
-    die("Unauthorized access.");
+/* =====================================================
+CHECK LOGIN
+===================================================== */
+$enrollment_id = $_SESSION['enrollment_id'] ?? null;
+
+if (!$enrollment_id) {
+    header("Location: ../../login-system/login.php");
+    exit;
 }
 
-$student_id = $_SESSION['student_id'];
+/* =====================================================
+FETCH STUDENT FROM BOTH TABLES
+students      => student_id
+students26    => id
+===================================================== */
 
-/*
----------------------------------
-CHECK STUDENT TABLE
-- students26 uses id
-- students uses student_id
----------------------------------
-*/
+$student = null;
 
-$student_name = "Unknown Student";
-$student_table = "";
-
-/* CHECK IN students26 */
-$check_students26 = mysqli_query($conn, "
-    SELECT id, name 
-    FROM students26 
-    WHERE id = '$student_id' 
+/* CHECK students TABLE */
+$query1 = mysqli_query($conn, "
+    SELECT 
+        'students' AS student_table,
+        student_id,
+        enrollment_id,
+        name
+    FROM students
+    WHERE enrollment_id = '$enrollment_id'
     LIMIT 1
 ");
 
-if (mysqli_num_rows($check_students26) > 0) {
+if (mysqli_num_rows($query1) > 0) {
 
-    $student = mysqli_fetch_assoc($check_students26);
-    $student_name = $student['name'];
-    $student_table = "students26";
+    $student = mysqli_fetch_assoc($query1);
 
 } else {
 
-    /* CHECK IN students */
-    $check_students = mysqli_query($conn, "
-        SELECT student_id, name 
-        FROM students 
-        WHERE student_id = '$student_id' 
+    /* CHECK students26 TABLE */
+    $query2 = mysqli_query($conn, "
+        SELECT 
+            'students26' AS student_table,
+            id AS student_id,
+            enrollment_id,
+            name
+        FROM students26
+        WHERE enrollment_id = '$enrollment_id'
         LIMIT 1
     ");
 
-    if (mysqli_num_rows($check_students) > 0) {
-
-        $student = mysqli_fetch_assoc($check_students);
-        $student_name = $student['name'];
-        $student_table = "students";
+    if (mysqli_num_rows($query2) > 0) {
+        $student = mysqli_fetch_assoc($query2);
     }
 }
 
-/*
----------------------------------
-GET EXAMS
----------------------------------
-*/
-$exams = mysqli_query($conn, "
+/* STUDENT NOT FOUND */
+if (!$student) {
+    die("Student not found.");
+}
+
+/* =====================================================
+STORE STUDENT DATA
+===================================================== */
+
+$student_id       = $student['student_id'];
+$student_name     = $student['name'];
+$student_table    = $student['student_table'];
+
+$submitted_exam_id = intval($_GET['exam_id'] ?? 0);
+
+/* =====================================================
+FETCH DECLARED RESULTS ONLY
+===================================================== */
+
+$sql = "
     SELECT 
-        es.*,
+        s.submission_id,
+        s.exam_id,
+        s.score,
+        s.submitted_at,
+
         e.exam_name,
-        e.total_questions
-    FROM exam_submissions es
-    LEFT JOIN exams e 
-        ON es.exam_id = e.exam_id
-    WHERE es.student_id = '$student_id'
-    ORDER BY es.submission_id DESC
-");
+        e.total_questions,
+        e.marks_per_question,
+        e.created_at,
+        e.result_declared
+
+    FROM exam_submissions s
+
+    LEFT JOIN exams e
+        ON s.exam_id = e.exam_id
+
+    WHERE 
+        s.student_id = '$student_id'
+        AND s.student_table = '$student_table'
+        AND e.result_declared = 1
+
+    ORDER BY s.submission_id DESC
+";
+
+$results = mysqli_query($conn, $sql);
+
+if (!$results) {
+    die("SQL Error: " . mysqli_error($conn));
+}
+
+$total_results = mysqli_num_rows($results);
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-<title>My Exam Reports</title>
+<title>Exam Results</title>
 
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
 body{
-    font-family:'Poppins',sans-serif;
-    background:#f0f4fa;
-    padding:24px;
+    font-family:Arial, sans-serif;
+    background:#f4f7fb;
+    padding:20px;
 }
 
 .container{
-    max-width:1200px;
+    max-width:1100px;
     margin:auto;
     background:#fff;
-    padding:28px;
-    border-radius:20px;
-    box-shadow:0 2px 12px rgba(0,0,0,0.05);
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
 h2{
     color:#1a56db;
-    margin-bottom:12px;
+    margin-bottom:10px;
 }
 
-.student-info{
-    margin-top:10px;
-    line-height:30px;
-    font-size:15px;
+.info{
+    margin-bottom:20px;
+    line-height:28px;
 }
 
-.student-info span{
-    font-weight:600;
+.info span{
     color:#1a56db;
+    font-weight:bold;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
-    margin-top:25px;
-    overflow:hidden;
-    border-radius:12px;
+    margin-top:20px;
 }
 
 th{
     background:#1a56db;
     color:#fff;
-    padding:14px;
-    font-size:14px;
+    padding:12px;
 }
 
 td{
-    text-align:center;
     padding:12px;
+    text-align:center;
     border-bottom:1px solid #eee;
-    font-size:14px;
 }
 
-tr:hover{
-    background:#f8fbff;
+.pass{
+    color:green;
+    font-weight:bold;
 }
 
-.status-pass{
-    background:#dcfce7;
-    color:#15803d;
-    padding:5px 14px;
-    border-radius:20px;
-    font-weight:600;
-    display:inline-block;
+.fail{
+    color:red;
+    font-weight:bold;
 }
 
-.status-fail{
-    background:#fee2e2;
-    color:#dc2626;
-    padding:5px 14px;
-    border-radius:20px;
-    font-weight:600;
-    display:inline-block;
-}
-
-.button{
+.btn{
     background:#1a56db;
     color:white;
-    padding:7px 15px;
-    border-radius:8px;
+    padding:7px 14px;
+    border-radius:6px;
     text-decoration:none;
-    font-size:13px;
-    font-weight:500;
-    transition:0.3s;
-}
-
-.button:hover{
-    background:#1748b3;
 }
 
 .no-data{
-    padding:25px;
     text-align:center;
-    color:#64748b;
-    font-weight:500;
-}
-
-@media(max-width:768px){
-
-    body{
-        padding:12px;
-    }
-
-    .container{
-        padding:18px;
-        overflow-x:auto;
-    }
-
-    table{
-        min-width:700px;
-    }
+    padding:25px;
+    color:#777;
 }
 
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="container">
 
-    <h2>📊 All Exam Reports</h2>
+    <h2>📊 My Exam Results</h2>
 
-    <div class="student-info">
+    <div class="info">
         <div><b>Name:</b> <span><?php echo $student_name; ?></span></div>
-        <div><b>Student ID:</b> <span><?php echo $student_id; ?></span></div>
-        <div><b>Table:</b> <span><?php echo $student_table; ?></span></div>
+        <div><b>Enrollment:</b> <span><?php echo $enrollment_id; ?></span></div>
+        <div><b>Student Table:</b> <span><?php echo $student_table; ?></span></div>
+        <div><b>Total Results:</b> <span><?php echo $total_results; ?></span></div>
     </div>
 
     <table>
@@ -217,30 +210,34 @@ tr:hover{
         <tr>
             <th>Exam Name</th>
             <th>Score</th>
-            <th>Total Questions</th>
+            <th>Total Marks</th>
             <th>Percentage</th>
             <th>Status</th>
-            <th>Details</th>
+            <th>Submitted</th>
+            <th>Action</th>
         </tr>
 
         <?php
 
-        if(mysqli_num_rows($exams) > 0){
+        if ($total_results > 0) {
 
-            while($row = mysqli_fetch_assoc($exams)){
+            while ($row = mysqli_fetch_assoc($results)) {
 
                 $score = $row['score'];
-                $total = $row['total_questions'];
 
-                $percent = ($total > 0)
-                    ? round(($score / $total) * 100, 2)
+                $total_marks = $row['total_questions'] * $row['marks_per_question'];
+
+                $obtained_marks = $score * $row['marks_per_question'];
+
+                $percentage = ($total_marks > 0)
+                    ? round(($obtained_marks / $total_marks) * 100, 2)
                     : 0;
 
-                $status = ($percent >= 33) ? "PASS" : "FAIL";
+                $status = ($percentage >= 33) ? "PASS" : "FAIL";
 
-                $class = ($percent >= 33)
-                    ? "status-pass"
-                    : "status-fail";
+                $status_class = ($percentage >= 33)
+                    ? "pass"
+                    : "fail";
         ?>
 
         <tr>
@@ -250,27 +247,29 @@ tr:hover{
             </td>
 
             <td>
-                <?php echo $score; ?>
+                <?php echo $obtained_marks; ?>
             </td>
 
             <td>
-                <?php echo $total; ?>
+                <?php echo $total_marks; ?>
             </td>
 
             <td>
-                <?php echo $percent; ?>%
+                <?php echo $percentage; ?>%
+            </td>
+
+            <td class="<?php echo $status_class; ?>">
+                <?php echo $status; ?>
             </td>
 
             <td>
-                <span class="<?php echo $class; ?>">
-                    <?php echo $status; ?>
-                </span>
+                <?php echo date("d M Y h:i A", strtotime($row['submitted_at'])); ?>
             </td>
 
             <td>
-                <a class="button"
+                <a class="btn"
                    href="exam_details.php?exam_id=<?php echo $row['exam_id']; ?>">
-                   View Details
+                   View
                 </a>
             </td>
 
@@ -283,8 +282,8 @@ tr:hover{
 
             echo "
             <tr>
-                <td colspan='6' class='no-data'>
-                    No exam records found
+                <td colspan='7' class='no-data'>
+                    No declared results found.
                 </td>
             </tr>";
         }
