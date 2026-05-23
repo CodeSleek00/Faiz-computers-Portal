@@ -489,7 +489,6 @@ td:nth-child(4) {
     <div class="info">
         <div><b>Name:</b> <span><?php echo $student_name; ?></span></div>
         <div><b>Enrollment:</b> <span><?php echo $enrollment_id; ?></span></div>
-        <div><b>Student Table:</b> <span><?php echo $student_table; ?></span></div>
         <div><b>Total Results:</b> <span><?php echo $total_results; ?></span></div>
     </div>
 
@@ -551,7 +550,7 @@ td:nth-child(4) {
             </td>
 
             <td>
-                <?php echo date("d M Y h:i A", strtotime($row['submitted_at'])); ?>
+                <?php echo date("d M Y ", strtotime($row['submitted_at'])); ?>
             </td>
 
             <td>
