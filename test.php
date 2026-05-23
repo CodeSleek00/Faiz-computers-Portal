@@ -1766,5 +1766,14 @@ $total_materials = $total_materials ?? 0;
             });
         });
     </script>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "a7ea0c3a-3097-4015-9838-e60486901b2a",
+    });
+  });
+</script>
 </body>
 </html>
