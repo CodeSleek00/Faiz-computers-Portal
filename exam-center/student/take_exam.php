@@ -115,6 +115,36 @@ $total = count($questions);
             showQuestion(0);
             startTimer();
         }
+        let tabSwitchCount = 0;
+
+function handleViolation() {
+
+    tabSwitchCount++;
+
+    if (tabSwitchCount === 1) {
+
+        alert("Warning 1/2: Tab switching is not allowed.");
+
+    } else if (tabSwitchCount === 2) {
+
+        alert("Final Warning 2/2: One more violation will submit the exam.");
+
+    } else {
+
+        alert("Exam Submitted! You violated exam rules 3 times.");
+        submitExam();
+    }
+}
+
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        handleViolation();
+    }
+});
+
+window.addEventListener("blur", function () {
+    handleViolation();
+});
     </script>
 </head>
 
