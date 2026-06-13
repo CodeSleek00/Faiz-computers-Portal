@@ -115,35 +115,103 @@ $total = count($questions);
             showQuestion(0);
             startTimer();
         }
-        let tabSwitchCount = 0;
+        /* =========================
+   COPY / CUT / PASTE BLOCK
+   ========================= */
 
-function handleViolation() {
+// Copy Disable
+document.addEventListener("copy", function(e){
+    e.preventDefault();
+});
+
+// Cut Disable
+document.addEventListener("cut", function(e){
+    e.preventDefault();
+});
+
+// Paste Disable
+document.addEventListener("paste", function(e){
+    e.preventDefault();
+});
+
+// Ctrl + C, X, V, A Disable
+document.addEventListener("keydown", function(e){
+
+    if(e.ctrlKey){
+
+        let key = e.key.toLowerCase();
+
+        if(
+            key === "c" ||
+            key === "x" ||
+            key === "v" ||
+            key === "a"
+        ){
+            e.preventDefault();
+        }
+    }
+});
+
+
+/* =========================
+   TAB SWITCH DETECTION
+   ========================= */
+
+let tabSwitchCount = 0;
+let lastViolation = 0;
+
+function handleTabSwitch() {
+
+    // Double event firing se bachne ke liye
+    let now = Date.now();
+
+    if(now - lastViolation < 1500){
+        return;
+    }
+
+    lastViolation = now;
 
     tabSwitchCount++;
 
-    if (tabSwitchCount === 1) {
+    if(tabSwitchCount === 1){
 
-        alert("Warning 1/2: Tab switching is not allowed.");
+        alert(
+            "Warning 1/2\n\n" +
+            "Tab switching is not allowed during the exam."
+        );
 
-    } else if (tabSwitchCount === 2) {
+    }
+    else if(tabSwitchCount === 2){
 
-        alert("Final Warning 2/2: One more violation will submit the exam.");
+        alert(
+            "Final Warning 2/2\n\n" +
+            "One more tab switch will submit your exam automatically."
+        );
 
-    } else {
+    }
+    else if(tabSwitchCount >= 3){
 
-        alert("Exam Submitted! You violated exam rules 3 times.");
+        alert(
+            "Exam Submitted!\n\n" +
+            "You switched tabs 3 times."
+        );
+
         submitExam();
     }
 }
 
-document.addEventListener("visibilitychange", function () {
-    if (document.hidden) {
-        handleViolation();
+// Tab Change
+document.addEventListener("visibilitychange", function(){
+
+    if(document.hidden){
+        handleTabSwitch();
     }
+
 });
 
-window.addEventListener("blur", function () {
-    handleViolation();
+// Alt+Tab / Minimize Detection
+window.addEventListener("blur", function(){
+    handleTabSwitch();
 });
     </script>
 </head>
