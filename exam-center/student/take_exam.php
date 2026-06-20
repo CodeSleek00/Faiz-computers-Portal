@@ -153,16 +153,11 @@ document.addEventListener("keydown", function(e){
 });
 
 
-/* =========================
-   TAB SWITCH DETECTION
-   ========================= */
-
 let tabSwitchCount = 0;
 let lastViolation = 0;
 
 function handleTabSwitch() {
 
-    // Double event firing se bachne ke liye
     let now = Date.now();
 
     if(now - lastViolation < 1500){
