@@ -54,9 +54,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $students = $pdo->query(
-    "SELECT certificate_id, student_name, enrollment_no, course_name, issue_date, status
-     FROM certificates
-     ORDER BY id DESC"
+    "SELECT s.id, s.name, s.enrollment_id, s.course, s.photo,
+            a.course_name
+     FROM students26 s
+     LEFT JOIN admission a ON a.enrollment_id = s.enrollment_id
+     ORDER BY s.id DESC"
 )->fetchAll();
 ?>
 <!doctype html>
@@ -82,6 +84,7 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 .status{display:inline-block;padding:5px 8px;border-radius:999px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700;white-space:nowrap}
 .view-link{display:inline-block;padding:8px 11px;border-radius:7px;background:#4338ca;color:#fff;font-size:13px;font-weight:700;white-space:nowrap}
 .verify-link{display:inline-block;margin-left:6px;color:#4338ca;font-size:13px;font-weight:700;white-space:nowrap}
+.select-link{display:inline-block;padding:8px 11px;border:0;border-radius:7px;background:#0f766e;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
 </style>
 </head>
@@ -91,10 +94,10 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 <?php if($error): ?><div class="err"><?=htmlspecialchars($error)?></div><?php endif; ?>
 <form method="post" enctype="multipart/form-data">
 <div class="grid">
-<div class="full"><label>Student Name *</label><input name="student_name" required value="<?=htmlspecialchars($_POST['student_name'] ?? '')?>"></div>
-<div><label>Enrollment No. *</label><input name="enrollment_no" required value="<?=htmlspecialchars($_POST['enrollment_no'] ?? '')?>"></div>
+<div class="full"><label>Student Name *</label><input id="student_name" name="student_name" required value="<?=htmlspecialchars($_POST['student_name'] ?? '')?>"></div>
+<div><label>Enrollment No. *</label><input id="enrollment_no" name="enrollment_no" required value="<?=htmlspecialchars($_POST['enrollment_no'] ?? '')?>"></div>
 <div><label>Issue Date *</label><input type="date" name="issue_date" required value="<?=htmlspecialchars($_POST['issue_date'] ?? date('Y-m-d'))?>"></div>
-<div class="full"><label>Course Name *</label><input name="course_name" required value="<?=htmlspecialchars($_POST['course_name'] ?? 'DIPLOMA IN OFFICE AUTOMATION & PUBLISHING')?>"></div>
+<div class="full"><label>Course Name *</label><input id="course_name" name="course_name" required value="<?=htmlspecialchars($_POST['course_name'] ?? 'DIPLOMA IN OFFICE AUTOMATION & PUBLISHING')?>"></div>
 <div class="full"><label>Student Photo</label><input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp"><small>Recommended: passport-size portrait, JPG/PNG/WEBP, max 4 MB.</small></div>
 </div>
 <div class="actions"><a class="back" href="admin.php">Back</a><button type="submit">Generate Certificate</button></div>
@@ -103,22 +106,20 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 
 <section class="student-list" aria-labelledby="student-list-title">
 <h2 id="student-list-title">All Students</h2>
-<p><?=count($students)?> certificate<?=count($students) === 1 ? '' : 's'?> available</p>
+<p><?=count($students)?> student<?=count($students) === 1 ? '' : 's'?> available from students26</p>
 <?php if ($students): ?>
 <div class="table-wrap">
 <table>
-<thead><tr><th>Student</th><th>Enrollment</th><th>Course</th><th>Issue Date</th><th>Status</th><th>Actions</th></tr></thead>
+<thead><tr><th>Student</th><th>Enrollment</th><th>Course</th><th>Photo</th><th>Action</th></tr></thead>
 <tbody>
 <?php foreach ($students as $student): ?>
 <tr>
-<td class="student-name"><?=htmlspecialchars($student['student_name'])?></td>
-<td class="muted"><?=htmlspecialchars($student['enrollment_no'])?></td>
-<td><?=htmlspecialchars($student['course_name'])?></td>
-<td><?=htmlspecialchars(date('d/m/Y', strtotime($student['issue_date'])))?></td>
-<td><span class="status"><?=htmlspecialchars($student['status'])?></span></td>
+<td class="student-name"><?=htmlspecialchars($student['name'])?></td>
+<td class="muted"><?=htmlspecialchars($student['enrollment_id'])?></td>
+<td><?=htmlspecialchars($student['course_name'] ?: $student['course'])?></td>
+<td><?=empty($student['photo']) ? 'Not uploaded' : 'Available'?></td>
 <td>
-<a class="view-link" target="_blank" href="certificate.php?id=<?=urlencode($student['certificate_id'])?>">View Details</a>
-<a class="verify-link" target="_blank" href="verify.php?id=<?=urlencode($student['certificate_id'])?>">Verify</a>
+<button type="button" class="select-link" data-name="<?=htmlspecialchars($student['name'], ENT_QUOTES)?>" data-enrollment="<?=htmlspecialchars($student['enrollment_id'], ENT_QUOTES)?>" data-course="<?=htmlspecialchars($student['course'], ENT_QUOTES)?>" data-course-name="<?=htmlspecialchars($student['course_name'] ?: $student['course'], ENT_QUOTES)?>">Use Details</button>
 </td>
 </tr>
 <?php endforeach; ?>
@@ -129,4 +130,16 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 <p>No students have certificates yet.</p>
 <?php endif; ?>
 </section>
-</div></body></html>
+</div>
+<script>
+document.querySelectorAll('.select-link').forEach(function (button) {
+    button.addEventListener('click', function () {
+        document.getElementById('student_name').value = button.dataset.name || '';
+        document.getElementById('enrollment_no').value = button.dataset.enrollment || '';
+        document.getElementById('course_name').value = button.dataset.courseName || button.dataset.course || '';
+        document.getElementById('student_name').scrollIntoView({behavior: 'smooth', block: 'center'});
+        document.getElementById('student_name').focus();
+    });
+});
+</script>
+</body></html>
