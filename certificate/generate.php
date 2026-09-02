@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $studentName = trim((string)($_POST['student_name'] ?? ''));
     $enrollment = trim((string)($_POST['enrollment_no'] ?? ''));
     $course = trim((string)($_POST['course_name'] ?? ''));
+    $description = trim((string)($_POST['description'] ?? ''));
     $issueDate = (string)($_POST['issue_date'] ?? date('Y-m-d'));
 
     if ($studentName === '' || $enrollment === '' || $course === '') {
@@ -49,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $certificateId = 'CSF-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(4)));
             $stmt = $pdo->prepare(
                 "INSERT INTO certificates
-                (certificate_id,student_name,enrollment_no,course_name,photo,issue_date,status)
-                VALUES (?,?,?,?,?,?,'COURSE COMPLETED')"
+                (certificate_id,student_name,enrollment_no,course_name,description,photo,issue_date,status)
+                VALUES (?,?,?,?,?,?,?,'COURSE COMPLETED')"
             );
-            $stmt->execute([$certificateId,$studentName,$enrollment,$course,$photoPath,$issueDate]);
+            $stmt->execute([$certificateId,$studentName,$enrollment,$course,$description,$photoPath,$issueDate]);
             header('Location: certificate.php?id=' . urlencode($certificateId));
             exit;
         }
@@ -77,7 +78,7 @@ $students = $pdo->query(
 .wrap{width:min(760px,92%);margin:35px auto}.card{background:#fff;border-radius:18px;padding:28px;box-shadow:0 8px 30px #0001}
 h1{margin-top:0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .full{grid-column:1/-1}label{display:block;font-weight:700;margin-bottom:7px}
-input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:9px}
+input,textarea{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:9px;font:inherit;resize:vertical}
 button,.back{display:inline-block;padding:12px 18px;border:0;border-radius:9px;background:#4338ca;color:#fff;font-weight:700;cursor:pointer;text-decoration:none}
 .back{background:#e5e7eb;color:#111827;margin-right:8px}.err{background:#fee2e2;color:#991b1b;padding:10px;border-radius:9px;margin-bottom:16px}
 small{color:#6b7280}.actions{margin-top:20px}
@@ -104,6 +105,7 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 <div><label>Enrollment No. *</label><input id="enrollment_no" name="enrollment_no" required value="<?=htmlspecialchars($_POST['enrollment_no'] ?? '')?>"></div>
 <div><label>Issue Date *</label><input type="date" name="issue_date" required value="<?=htmlspecialchars($_POST['issue_date'] ?? date('Y-m-d'))?>"></div>
 <div class="full"><label>Course Name *</label><input id="course_name" name="course_name" required value="<?=htmlspecialchars($_POST['course_name'] ?? 'DIPLOMA IN OFFICE AUTOMATION & PUBLISHING')?>"></div>
+<div class="full"><label>Description</label><textarea id="description" name="description" maxlength="180" rows="3" placeholder="Write a short description for the certificate..."><?=htmlspecialchars($_POST['description'] ?? '')?></textarea><small>This description will be printed below the course name.</small></div>
 <div class="full"><label>Student Photo</label><input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp"><small>Recommended: passport-size portrait, JPG/PNG/WEBP, max 4 MB.</small></div>
 <input type="hidden" id="existing_photo" name="existing_photo" value="">
 </div>
@@ -144,6 +146,7 @@ document.querySelectorAll('.select-link').forEach(function (button) {
         document.getElementById('student_name').value = button.dataset.name || '';
         document.getElementById('enrollment_no').value = button.dataset.enrollment || '';
         document.getElementById('course_name').value = button.dataset.courseName || button.dataset.course || '';
+        document.getElementById('description').value = '';
         document.getElementById('existing_photo').value = button.dataset.photo || '';
         document.getElementById('student_name').scrollIntoView({behavior: 'smooth', block: 'center'});
         document.getElementById('student_name').focus();

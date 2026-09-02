@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS certificates (
     student_name VARCHAR(150) NOT NULL,
     enrollment_no VARCHAR(100) NOT NULL,
     course_name VARCHAR(255) NOT NULL,
+    description TEXT DEFAULT NULL,
     photo VARCHAR(255) DEFAULT NULL,
     issue_date DATE NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'COURSE COMPLETED',

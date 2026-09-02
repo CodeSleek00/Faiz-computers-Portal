@@ -38,6 +38,7 @@ try {
             student_name VARCHAR(150) NOT NULL,
             enrollment_no VARCHAR(100) NOT NULL,
             course_name VARCHAR(255) NOT NULL,
+            description TEXT DEFAULT NULL,
             photo VARCHAR(255) DEFAULT NULL,
             issue_date DATE NOT NULL,
             status VARCHAR(50) NOT NULL DEFAULT 'COURSE COMPLETED',
@@ -47,6 +48,14 @@ try {
             KEY idx_enrollment (enrollment_no)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     );
+    $columnCheck = $pdo->prepare(
+        "SELECT COUNT(*) FROM information_schema.columns
+         WHERE table_schema = DATABASE() AND table_name = 'certificates' AND column_name = 'description'"
+    );
+    $columnCheck->execute();
+    if (!(int)$columnCheck->fetchColumn()) {
+        $pdo->exec('ALTER TABLE certificates ADD COLUMN description TEXT DEFAULT NULL AFTER course_name');
+    }
 } catch (PDOException $e) {
     http_response_code(500);
     exit('Database connection failed. Please check config.php.');

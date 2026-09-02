@@ -562,6 +562,44 @@ body {
     padding: 0 25px;
 }
 
+.certificate-description {
+
+    position: absolute;
+
+    z-index: 10;
+
+    left: 90px;
+
+    top: 825px;
+
+    width: 686px;
+
+    height: 46px;
+
+    overflow: hidden;
+
+    text-align: center;
+
+    font-family:
+        "XB Niloofar",
+        "Niloofar",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 17px;
+
+    line-height: 23px;
+
+    color: #333333;
+
+    display: -webkit-box;
+
+    -webkit-box-orient: vertical;
+
+    -webkit-line-clamp: 2;
+}
+
 
 /* =========================================================
    ENROLLMENT NUMBER
@@ -1014,6 +1052,16 @@ body {
         <?= h($courseName) ?>
 
     </div>
+
+    <?php if (!empty($c['description'])): ?>
+
+        <div class="certificate-description">
+
+            <?= nl2br(h($c['description'])) ?>
+
+        </div>
+
+    <?php endif; ?>
 
 
 
