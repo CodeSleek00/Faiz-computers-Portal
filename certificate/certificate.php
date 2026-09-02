@@ -436,7 +436,7 @@ body {
 
     background: #ffffff;
 
-    border: 4px solid #7c3aed;
+    border: 4px solid #06010f;
 
     overflow: hidden;
 }
