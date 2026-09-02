@@ -374,7 +374,7 @@ body {
 
 .ngo-description {
 
-    top: 237px;
+    top: 217px;
 
     font-size: 20px;
 
