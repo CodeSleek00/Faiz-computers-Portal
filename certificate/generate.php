@@ -37,6 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
             }
+        } elseif (!empty($_POST['existing_photo'])) {
+            $existingPhoto = basename((string)$_POST['existing_photo']);
+            $existingPhotoFile = __DIR__ . '/../uploads/' . $existingPhoto;
+            if (is_file($existingPhotoFile)) {
+                $photoPath = '../uploads/' . $existingPhoto;
+            }
         }
 
         if ($error === '') {
@@ -99,6 +105,7 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 <div><label>Issue Date *</label><input type="date" name="issue_date" required value="<?=htmlspecialchars($_POST['issue_date'] ?? date('Y-m-d'))?>"></div>
 <div class="full"><label>Course Name *</label><input id="course_name" name="course_name" required value="<?=htmlspecialchars($_POST['course_name'] ?? 'DIPLOMA IN OFFICE AUTOMATION & PUBLISHING')?>"></div>
 <div class="full"><label>Student Photo</label><input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp"><small>Recommended: passport-size portrait, JPG/PNG/WEBP, max 4 MB.</small></div>
+<input type="hidden" id="existing_photo" name="existing_photo" value="">
 </div>
 <div class="actions"><a class="back" href="admin.php">Back</a><button type="submit">Generate Certificate</button></div>
 </form>
@@ -119,7 +126,7 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 <td><?=htmlspecialchars($student['course_name'] ?: $student['course'])?></td>
 <td><?=empty($student['photo']) ? 'Not uploaded' : 'Available'?></td>
 <td>
-<button type="button" class="select-link" data-name="<?=htmlspecialchars($student['name'], ENT_QUOTES)?>" data-enrollment="<?=htmlspecialchars($student['enrollment_id'], ENT_QUOTES)?>" data-course="<?=htmlspecialchars($student['course'], ENT_QUOTES)?>" data-course-name="<?=htmlspecialchars($student['course_name'] ?: $student['course'], ENT_QUOTES)?>">Use Details</button>
+<button type="button" class="select-link" data-name="<?=htmlspecialchars($student['name'], ENT_QUOTES)?>" data-enrollment="<?=htmlspecialchars($student['enrollment_id'], ENT_QUOTES)?>" data-course="<?=htmlspecialchars($student['course'], ENT_QUOTES)?>" data-course-name="<?=htmlspecialchars($student['course_name'] ?: $student['course'], ENT_QUOTES)?>" data-photo="<?=htmlspecialchars($student['photo'] ?? '', ENT_QUOTES)?>">Use Details</button>
 </td>
 </tr>
 <?php endforeach; ?>
@@ -137,6 +144,7 @@ document.querySelectorAll('.select-link').forEach(function (button) {
         document.getElementById('student_name').value = button.dataset.name || '';
         document.getElementById('enrollment_no').value = button.dataset.enrollment || '';
         document.getElementById('course_name').value = button.dataset.courseName || button.dataset.course || '';
+        document.getElementById('existing_photo').value = button.dataset.photo || '';
         document.getElementById('student_name').scrollIntoView({behavior: 'smooth', block: 'center'});
         document.getElementById('student_name').focus();
     });
