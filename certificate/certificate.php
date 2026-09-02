@@ -607,7 +607,7 @@ body {
 
 .enrollment-number {
 
-    top: 858px;
+    top: 878px;
 
     font-size: 25px;
 
@@ -625,7 +625,7 @@ body {
 
 .institute-name {
 
-    top: 896px;
+    top: 916px;
 
     font-size: 18px;
 
