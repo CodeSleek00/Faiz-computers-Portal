@@ -2,8 +2,15 @@
 require_once __DIR__ . '/config.php';
 
 $id = trim((string)($_GET['id'] ?? ''));
-$stmt = $pdo->prepare("SELECT * FROM certificates WHERE certificate_id = ? LIMIT 1");
+
+$stmt = $pdo->prepare("
+    SELECT *
+    FROM certificates
+    WHERE certificate_id = ?
+    LIMIT 1
+");
 $stmt->execute([$id]);
+
 $c = $stmt->fetch();
 
 if (!$c) {
@@ -11,102 +18,697 @@ if (!$c) {
     exit('Certificate not found.');
 }
 
-function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
-$verifyUrl = $siteUrl . '/verify.php?id=' . rawurlencode($c['certificate_id']);
-$qrUrl = 'https://quickchart.io/qr?size=260&margin=1&text=' . rawurlencode($verifyUrl);
+function h($v) {
+    return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+}
+
+/*
+|--------------------------------------------------------------------------
+| URLs
+|--------------------------------------------------------------------------
+*/
+
+$verifyUrl =
+    $siteUrl .
+    '/verify.php?id=' .
+    rawurlencode($c['certificate_id']);
+
+$qrUrl =
+    'https://quickchart.io/qr?size=300&margin=1&text=' .
+    rawurlencode($verifyUrl);
 
 $photoUrl = '';
+
 if (!empty($c['photo'])) {
-    $photoUrl = $siteUrl . '/' . ltrim($c['photo'], '/');
+    $photoUrl =
+        $siteUrl .
+        '/' .
+        ltrim($c['photo'], '/');
 }
 
-$displayDate = date('d/m/Y', strtotime($c['issue_date']));
+$displayDate = date(
+    'd/m/Y',
+    strtotime($c['issue_date'])
+);
+
+/*
+|--------------------------------------------------------------------------
+| SVG Helpers
+|--------------------------------------------------------------------------
+*/
+
+$studentName = strtoupper(trim($c['student_name'] ?? ''));
+$courseName  = strtoupper(trim($c['course_name'] ?? ''));
+$enrollment  = strtoupper(trim($c['enrollment_no'] ?? ''));
+$certificateId = $c['certificate_id'] ?? '';
+
+/*
+|--------------------------------------------------------------------------
+| Optional values
+|--------------------------------------------------------------------------
+*/
+
+$instituteName = 'FAIZ COMPUTER INSTITUTE , DIST:-LUCKNOW (UP)';
+
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?=h($c['certificate_id'])?> - Certificate</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#e5e7eb;font-family:Georgia,"Times New Roman",serif}
-.toolbar{position:fixed;z-index:10;top:14px;right:14px;display:flex;gap:8px;font-family:Arial,sans-serif}
-.toolbar button{border:0;border-radius:9px;padding:11px 15px;background:#4338ca;color:#fff;font-weight:700;cursor:pointer}
-.page{
-  width:848px;height:1224px;position:relative;margin:25px auto;
-  background:url("assets/template.png") center/100% 100% no-repeat;
-  overflow:hidden;
-}
-/* White masks remove the sample values printed in the supplied template. */
-.mask{position:absolute;background:rgba(255,255,255,.97)}
-.name-mask{left:120px;top:675px;width:610px;height:62px}
-.course-mask{left:35px;top:803px;width:780px;height:48px}
-.enroll-mask{left:110px;top:875px;width:630px;height:49px}
-.date-mask{left:205px;top:984px;width:440px;height:54px}
-.photo-mask{left:333px;top:443px;width:170px;height:194px}
-.qr-mask{left:619px;top:1018px;width:150px;height:145px}
-.dynamic-photo{
- position:absolute;left:337px;top:447px;width:162px;height:187px;
- object-fit:cover;border:2px solid #111;background:#fff;
-}
-.name{
- position:absolute;left:55px;top:681px;width:738px;text-align:center;
- font-size:42px;font-weight:700;text-transform:uppercase;line-height:1.1;
-}
-.course{
- position:absolute;left:45px;top:810px;width:758px;text-align:center;
- font-size:25px;font-weight:700;text-transform:uppercase;line-height:1.1;color:#0d086d;
-}
-.enroll{
- position:absolute;left:55px;top:882px;width:738px;text-align:center;
- font-size:27px;font-weight:700;line-height:1.1;
-}
-.date{
- position:absolute;left:205px;top:992px;width:440px;text-align:center;
- font-size:25px;font-weight:700;line-height:1.1;
-}
-.qr{
- position:absolute;left:628px;top:1026px;width:132px;height:132px;
- object-fit:contain;background:#fff;
-}
-.verify-id{
- position:absolute;left:40px;top:1165px;width:550px;text-align:left;
- font-family:Arial,sans-serif;font-size:10px;color:#666;
-}
-@media print{
- @page{size:848px 1224px;margin:0}
- body{background:#fff}.toolbar{display:none}.page{margin:0;box-shadow:none}
-}
-@media(max-width:900px){
- .page{transform-origin:top left;transform:scale(calc((100vw - 20px)/848));margin:10px;width:848px}
- body{height:calc(1224px * ((100vw - 20px)/848))}
-}
-</style>
-</head>
-<body>
-<div class="toolbar">
-<button onclick="window.print()">Print / Save PDF</button>
-</div>
-<div class="page">
-<div class="mask name-mask"></div>
-<div class="mask course-mask"></div>
-<div class="mask enroll-mask"></div>
-<div class="mask date-mask"></div>
-<div class="mask photo-mask"></div>
-<div class="mask qr-mask"></div>
 
-<?php if($photoUrl): ?>
-<img class="dynamic-photo" src="<?=h($photoUrl)?>" alt="Student Photo">
-<?php else: ?>
-<div class="dynamic-photo"></div>
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title><?= h($certificateId) ?> - Certificate</title>
+
+<style>
+
+/* -------------------------------------------------------
+   PAGE
+------------------------------------------------------- */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    background: #e5e7eb;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+/* -------------------------------------------------------
+   TOOLBAR
+------------------------------------------------------- */
+
+.toolbar {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 9999;
+
+    display: flex;
+    gap: 10px;
+
+    font-family: Arial, sans-serif;
+}
+
+.toolbar button {
+    border: 0;
+    border-radius: 8px;
+
+    padding: 11px 18px;
+
+    background: #4338ca;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.toolbar button:hover {
+    background: #312e81;
+}
+
+/* -------------------------------------------------------
+   CERTIFICATE WRAPPER
+------------------------------------------------------- */
+
+.certificate-wrapper {
+
+    width: 848px;
+    height: 1224px;
+
+    margin: 30px auto;
+
+    background: white;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.18);
+}
+
+/* -------------------------------------------------------
+   SVG
+------------------------------------------------------- */
+
+.certificate-svg {
+
+    display: block;
+
+    width: 848px;
+    height: 1224px;
+
+    overflow: hidden;
+}
+
+/* -------------------------------------------------------
+   PRINT
+------------------------------------------------------- */
+
+@media print {
+
+    @page {
+        size: 848px 1224px;
+        margin: 0;
+    }
+
+    html,
+    body {
+        width: 848px;
+        height: 1224px;
+        margin: 0;
+        padding: 0;
+
+        background: white !important;
+    }
+
+    .toolbar {
+        display: none !important;
+    }
+
+    .certificate-wrapper {
+
+        width: 848px;
+        height: 1224px;
+
+        margin: 0;
+
+        box-shadow: none;
+    }
+
+    .certificate-svg {
+
+        width: 848px;
+        height: 1224px;
+    }
+}
+
+/* -------------------------------------------------------
+   MOBILE VIEW
+------------------------------------------------------- */
+
+@media screen and (max-width: 880px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .certificate-wrapper {
+
+        transform-origin: top left;
+
+        transform:
+            scale(
+                calc((100vw - 20px) / 848)
+            );
+
+        margin-left: 10px;
+        margin-top: 15px;
+
+        margin-bottom:
+            calc(
+                -1224px +
+                (1224px * ((100vw - 20px) / 848))
+            );
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     TOOLBAR
+===================================================== -->
+
+<div class="toolbar">
+
+    <button onclick="printCertificate()">
+        Print / Save PDF
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     CERTIFICATE
+===================================================== -->
+
+<div class="certificate-wrapper">
+
+<svg
+    class="certificate-svg"
+    xmlns="http://www.w3.org/2000/svg"
+
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+
+    width="848"
+    height="1224"
+
+    viewBox="0 0 848 1224"
+
+    preserveAspectRatio="none"
+>
+
+
+<!-- =====================================================
+     BACKGROUND TEMPLATE
+===================================================== -->
+
+<image
+    href="assets/template.png"
+
+    x="0"
+    y="0"
+
+    width="848"
+    height="1224"
+
+    preserveAspectRatio="none"
+/>
+
+
+
+<!-- =====================================================
+     WHITE MASKS
+     
+     These hide dynamic/sample text from the template.
+===================================================== -->
+
+<rect
+    x="40"
+    y="665"
+    width="768"
+    height="70"
+
+    fill="#ffffff"
+    opacity="0.97"
+/>
+
+
+<rect
+    x="30"
+    y="795"
+    width="788"
+    height="55"
+
+    fill="#ffffff"
+    opacity="0.97"
+/>
+
+
+<rect
+    x="30"
+    y="860"
+    width="788"
+    height="48"
+
+    fill="#ffffff"
+    opacity="0.97"
+/>
+
+
+<rect
+    x="30"
+    y="910"
+    width="788"
+    height="45"
+
+    fill="#ffffff"
+    opacity="0.97"
+/>
+
+
+<rect
+    x="150"
+    y="970"
+    width="548"
+    height="60"
+
+    fill="#ffffff"
+    opacity="0.97"
+/>
+
+
+<!-- =====================================================
+     STUDENT PHOTO AREA
+===================================================== -->
+
+<rect
+    x="340"
+    y="425"
+    width="168"
+    height="190"
+
+    fill="white"
+/>
+
+<rect
+    x="343"
+    y="428"
+    width="162"
+    height="185"
+
+    fill="none"
+
+    stroke="#111111"
+    stroke-width="2"
+/>
+
+
+<?php if ($photoUrl): ?>
+
+<image
+
+    href="<?= h($photoUrl) ?>"
+
+    x="345"
+    y="430"
+
+    width="158"
+    height="181"
+
+    preserveAspectRatio="xMidYMid slice"
+
+/>
+
 <?php endif; ?>
 
-<div class="name"><?=h($c['student_name'])?></div>
-<div class="course"><?=h($c['course_name'])?></div>
-<div class="enroll">ENROLLMENT NO. : <?=h($c['enrollment_no'])?></div>
-<div class="date">Date of Issue:- <?=h($displayDate)?></div>
-<img class="qr" src="<?=h($qrUrl)?>" alt="Certificate verification QR">
-<div class="verify-id">Certificate ID: <?=h($c['certificate_id'])?></div>
+
+<!-- =====================================================
+     STUDENT NAME
+===================================================== -->
+
+<text
+
+    x="424"
+    y="708"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="40"
+
+    font-weight="700"
+
+    fill="#000000"
+
+>
+
+<?= h($studentName) ?>
+
+</text>
+
+
+
+<!-- =====================================================
+     PRESENTATION LINE
+===================================================== -->
+
+<text
+
+    x="424"
+    y="758"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="27"
+
+    fill="#000000"
+
+>
+
+THIS CERTIFICATE IS PROUDLY PRESENTED TO
+
+</text>
+
+
+
+<!-- =====================================================
+     STUDENT NAME SECOND / HIGHLIGHT
+===================================================== -->
+
+<text
+
+    x="424"
+    y="805"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="39"
+
+    font-weight="700"
+
+    fill="#000000"
+
+>
+
+<?= h($studentName) ?>
+
+</text>
+
+
+
+<!-- =====================================================
+     COMPLETION TEXT
+===================================================== -->
+
+<text
+
+    x="424"
+    y="855"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="23"
+
+    fill="#000000"
+
+>
+
+for successful completion of all required evaluation
+
+</text>
+
+
+<text
+
+    x="424"
+    y="889"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="23"
+
+    fill="#000000"
+
+>
+
+process for the course
+
+</text>
+
+
+
+<!-- =====================================================
+     COURSE
+===================================================== -->
+
+<text
+
+    x="424"
+    y="928"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="24"
+
+    font-weight="700"
+
+    fill="#0d086d"
+
+>
+
+<?= h($courseName) ?>
+
+</text>
+
+
+
+<!-- =====================================================
+     ENROLLMENT
+===================================================== -->
+
+<text
+
+    x="424"
+    y="978"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="26"
+
+    font-weight="700"
+
+    fill="#000000"
+
+>
+
+ENROLLMENT NO. : <?= h($enrollment) ?>
+
+</text>
+
+
+
+<!-- =====================================================
+     INSTITUTE
+===================================================== -->
+
+<text
+
+    x="424"
+    y="1015"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="18"
+
+    font-weight="700"
+
+    fill="#0d086d"
+
+>
+
+ASC NAME : <?= h($instituteName) ?>
+
+</text>
+
+
+
+<!-- =====================================================
+     ISSUE DATE
+===================================================== -->
+
+<text
+
+    x="424"
+    y="1060"
+
+    text-anchor="middle"
+
+    font-family="Georgia, Times New Roman, serif"
+
+    font-size="23"
+
+    font-weight="700"
+
+    fill="#000000"
+
+>
+
+Date of Issue:- <?= h($displayDate) ?>
+
+</text>
+
+
+
+<!-- =====================================================
+     QR CODE
+===================================================== -->
+
+<rect
+
+    x="628"
+    y="1005"
+
+    width="135"
+    height="135"
+
+    fill="#ffffff"
+
+/>
+
+
+<image
+
+    href="<?= h($qrUrl) ?>"
+
+    x="632"
+    y="1009"
+
+    width="127"
+    height="127"
+
+    preserveAspectRatio="none"
+
+/>
+
+
+
+<!-- =====================================================
+     CERTIFICATE ID
+===================================================== -->
+
+<text
+
+    x="40"
+    y="1195"
+
+    font-family="Arial, sans-serif"
+
+    font-size="10"
+
+    fill="#666666"
+
+>
+
+Certificate ID: <?= h($certificateId) ?>
+
+</text>
+
+
+</svg>
+
 </div>
-</body></html>
+
+
+
+<script>
+
+function printCertificate() {
+
+    window.print();
+
+}
+
+</script>
+
+</body>
+
+</html>
