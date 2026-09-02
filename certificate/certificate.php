@@ -285,7 +285,7 @@ body {
    BACKGROUND TEMPLATE
 
    IMPORTANT:
-   template.png should contain ONLY the background,
+    template1.png should contain ONLY the background,
    logos, watermark and signature/seal artwork.
 ========================================================= */
 
@@ -326,9 +326,13 @@ body {
     text-align: center;
 
     font-family:
+        "XB Niloofar",
+        "Niloofar",
         Georgia,
         "Times New Roman",
         serif;
+
+    letter-spacing: .2px;
 
     color: #000000;
 }
@@ -342,7 +346,14 @@ body {
 
     top: 160px;
 
-    font-size: 53px;
+    font-family:
+        "ITC Benguiat",
+        "Benguiat",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 50px;
 
     line-height: 1;
 
@@ -350,7 +361,7 @@ body {
 
     color: #c9a227;
 
-    letter-spacing: -1px;
+    letter-spacing: .8px;
 
     text-shadow:
         1px 1px 1px rgba(0,0,0,.25);
@@ -365,11 +376,11 @@ body {
 
     top: 237px;
 
-    font-size: 21px;
+    font-size: 20px;
 
     line-height: 30px;
 
-    font-weight: 700;
+    font-weight: 400;
 
     padding: 0 45px;
 }
@@ -383,7 +394,14 @@ body {
 
     top: 352px;
 
-    font-size: 42px;
+    font-family:
+        "ITC Benguiat",
+        "Benguiat",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 40px;
 
     line-height: 1;
 
@@ -391,7 +409,7 @@ body {
 
     color: #c9a227;
 
-    letter-spacing: 0;
+    letter-spacing: .6px;
 
     text-shadow:
         1px 1px 1px rgba(0,0,0,.20);
@@ -444,9 +462,9 @@ body {
 
 .presented-text {
 
-    top: 622px;
+    top: 625px;
 
-    font-size: 27px;
+    font-size: 25px;
 
     line-height: 1.1;
 
@@ -464,11 +482,20 @@ body {
 
     top: 664px;
 
-    font-size: 42px;
+    font-family:
+        "ITC Benguiat",
+        "Benguiat",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 40px;
 
     line-height: 1;
 
     font-weight: 700;
+
+    letter-spacing: .7px;
 
     white-space: nowrap;
 
@@ -484,9 +511,9 @@ body {
 
 .completion-line-1 {
 
-    top: 718px;
+    top: 723px;
 
-    font-size: 25px;
+    font-size: 23px;
 
     line-height: 1.1;
 
@@ -500,9 +527,9 @@ body {
 
 .completion-line-2 {
 
-    top: 752px;
+    top: 754px;
 
-    font-size: 25px;
+    font-size: 23px;
 
     line-height: 1.1;
 
@@ -516,9 +543,9 @@ body {
 
 .course-name {
 
-    top: 788px;
+    top: 790px;
 
-    font-size: 24px;
+    font-size: 23px;
 
     line-height: 1.1;
 
@@ -542,9 +569,9 @@ body {
 
 .enrollment-number {
 
-    top: 861px;
+    top: 858px;
 
-    font-size: 28px;
+    font-size: 25px;
 
     line-height: 1.1;
 
@@ -560,9 +587,9 @@ body {
 
 .institute-name {
 
-    top: 899px;
+    top: 896px;
 
-    font-size: 19px;
+    font-size: 18px;
 
     line-height: 1.1;
 
@@ -580,9 +607,9 @@ body {
 
 .issue-date {
 
-    top: 972px;
+    top: 968px;
 
-    font-size: 25px;
+    font-size: 23px;
 
     line-height: 1.1;
 
@@ -645,13 +672,17 @@ body {
     text-align: center;
 
     font-family:
+        "ITC Benguiat",
+        "Benguiat",
         Georgia,
         "Times New Roman",
         serif;
 
-    font-size: 25px;
+    font-size: 23px;
 
     font-weight: 400;
+
+    letter-spacing: .6px;
 
     color: #c9a227;
 
@@ -680,13 +711,17 @@ body {
     text-align: center;
 
     font-family:
+        "XB Niloofar",
+        "Niloofar",
         Georgia,
         "Times New Roman",
         serif;
 
-    font-size: 18px;
+    font-size: 16px;
 
     line-height: 1.1;
+
+    letter-spacing: .2px;
 
     color: #168b35;
 }
