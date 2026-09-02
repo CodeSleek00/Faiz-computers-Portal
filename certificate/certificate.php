@@ -761,7 +761,7 @@ body {
 
     letter-spacing: .2px;
 
-    color: #000c22;
+    color: #00389f;
 }
 
 
