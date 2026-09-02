@@ -860,7 +860,7 @@ body {
     ================================================== -->
 
     <img
-        src="assets/template.png"
+        src="assets/template1.png"
         class="certificate-background"
         alt=""
     >
