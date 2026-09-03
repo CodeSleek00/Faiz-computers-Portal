@@ -18,7 +18,7 @@ if ($configuredSiteUrl !== '') {
     $siteUrl = $scheme . '://' . $host . ($scriptDirectory ? '/' . ltrim($scriptDirectory, '/') : '');
 }
 
-$adminPassword = getenv('CERTIFICATE_ADMIN_PASSWORD') ?: 'admin123';
+$adminPassword = getenv('CERTIFICATE_ADMIN_PASSWORD') ?: 'faiz2912'; // Change this to a strong password in production.
 
 try {
     $pdo = new PDO(
