@@ -42,15 +42,17 @@ input{width:100%;box-sizing:border-box;padding:13px;border:1px solid #ddd;border
 button{width:100%;padding:13px;border:0;border-radius:10px;background:#4338ca;color:#fff;font-weight:700;cursor:pointer}
 .err{background:#fee2e2;color:#991b1b;padding:10px;border-radius:9px;margin-bottom:15px}
 </style>
+<link rel="stylesheet" href="assets/certificate.css">
 </head>
-<body><div class="card">
-<div class="logo">CODE SLEEK FOUNDATION</div>
+<body class="auth-page"><div class="card panel auth-card">
+<div class="brand"><span class="brand-mark">CSF</span><span>Code Sleek Foundation<small>Certificate portal</small></span></div>
 <h1>Certificate Admin</h1>
-<?php if($error): ?><div class="err"><?=htmlspecialchars($error)?></div><?php endif; ?>
+<p class="subtle">Sign in to create and manage verified credentials.</p>
+<?php if($error): ?><div class="alert"><?=htmlspecialchars($error)?></div><?php endif; ?>
 <form method="post">
 <label>Admin Password</label>
 <input type="password" name="password" required autofocus>
-<button name="login" value="1">Login</button>
+<button class="btn btn-primary" name="login" value="1">Sign In</button>
 </form>
 </div></body></html>
 <?php
@@ -81,14 +83,16 @@ th,td{padding:13px;text-align:left;border-bottom:1px solid #eee}th{background:#f
 .actions a{margin-right:6px}.muted{color:#6b7280}
 @media(max-width:700px){table{font-size:12px}.hide-sm{display:none}}
 </style>
+<link rel="stylesheet" href="assets/certificate.css">
 </head>
 <body>
-<header><strong>Code Sleek Foundation</strong><a class="danger" href="?logout=1">Logout</a></header>
-<div class="wrap">
-<div class="top">
-<div><h1>Certificate Dashboard</h1><div class="muted">Create and verify course-completion certificates.</div></div>
-<a class="btn primary" href="generate.php">+ Generate Certificate</a>
+<header class="site-header"><div class="header-inner"><div class="brand"><span class="brand-mark">CSF</span><span>Code Sleek Foundation<small>Certificate portal</small></span></div><a class="header-link" href="?logout=1">Logout</a></div></header>
+<main class="page-shell">
+<div class="page-heading">
+<div><p class="eyebrow">Credential management</p><h1>Certificate Dashboard</h1><div class="subtle">Create, review and verify course-completion certificates.</div></div>
+<a class="btn btn-primary" href="generate.php">+ Generate Certificate</a>
 </div>
+<section class="panel table-wrap">
 <table>
 <thead><tr><th>Certificate ID</th><th>Student</th><th>Enrollment</th><th class="hide-sm">Course</th><th>Status</th><th>Actions</th></tr></thead>
 <tbody>
@@ -105,8 +109,9 @@ th,td{padding:13px;text-align:left;border-bottom:1px solid #eee}th{background:#f
 </td>
 </tr>
 <?php endforeach; ?>
-<?php if(!$certificates): ?><tr><td colspan="6">No certificates created yet.</td></tr><?php endif; ?>
+<?php if(!$certificates): ?><tr><td class="empty-state" colspan="6">No certificates created yet.</td></tr><?php endif; ?>
 </tbody>
 </table>
-</div>
+</section>
+</main>
 </body></html>

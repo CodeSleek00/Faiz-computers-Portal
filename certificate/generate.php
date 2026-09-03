@@ -94,28 +94,27 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 .select-link{display:inline-block;padding:8px 11px;border:0;border-radius:7px;background:#0f766e;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
 </style>
+<link rel="stylesheet" href="assets/certificate.css">
 </head>
-<body><div class="wrap"><div class="card">
-<h1>Generate Certificate</h1>
-<p><small>Enter the student's details. A unique Certificate ID and QR verification link will be created automatically.</small></p>
-<?php if($error): ?><div class="err"><?=htmlspecialchars($error)?></div><?php endif; ?>
+<body><main class="page-shell"><div class="page-heading"><div><p class="eyebrow">New credential</p><h1>Generate Certificate</h1><p class="subtle">Enter the student's details to create a verified course-completion certificate.</p></div></div>
+<div class="form-layout"><section class="card panel panel-pad">
+<?php if($error): ?><div class="alert"><?=htmlspecialchars($error)?></div><?php endif; ?>
 <form method="post" enctype="multipart/form-data">
-<div class="grid">
+<div class="grid form-grid">
 <div class="full"><label>Student Name *</label><input id="student_name" name="student_name" required value="<?=htmlspecialchars($_POST['student_name'] ?? '')?>"></div>
 <div><label>Enrollment No. *</label><input id="enrollment_no" name="enrollment_no" required value="<?=htmlspecialchars($_POST['enrollment_no'] ?? '')?>"></div>
 <div><label>Issue Date *</label><input type="date" name="issue_date" required value="<?=htmlspecialchars($_POST['issue_date'] ?? date('Y-m-d'))?>"></div>
 <div class="full"><label>Course Name *</label><input id="course_name" name="course_name" required value="<?=htmlspecialchars($_POST['course_name'] ?? 'DIPLOMA IN OFFICE AUTOMATION & PUBLISHING')?>"></div>
-<div class="full"><label>Description</label><textarea id="description" name="description" maxlength="180" rows="3" placeholder="Write a short description for the certificate..."><?=htmlspecialchars($_POST['description'] ?? '')?></textarea><small>This description will be printed below the course name.</small></div>
-<div class="full"><label>Student Photo</label><input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp"><small>Recommended: passport-size portrait, JPG/PNG/WEBP, max 4 MB.</small></div>
+<div class="full"><label>Description</label><textarea id="description" name="description" maxlength="180" rows="3" placeholder="Write a short description for the certificate..."><?=htmlspecialchars($_POST['description'] ?? '')?></textarea><small class="field-help">This description will be printed below the course name.</small></div>
+<div class="full"><label>Student Photo</label><input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp"><small class="field-help">Recommended: passport-size portrait, JPG/PNG/WEBP, max 4 MB.</small></div>
 <input type="hidden" id="existing_photo" name="existing_photo" value="">
 </div>
-<div class="actions"><a class="back" href="admin.php">Back</a><button type="submit">Generate Certificate</button></div>
+<div class="actions form-actions"><a class="back btn btn-quiet" href="admin.php">Back</a><button class="btn btn-primary" type="submit">Generate Certificate</button></div>
 </form>
-</div>
+</section>
 
-<section class="student-list" aria-labelledby="student-list-title">
-<h2 id="student-list-title">All Students</h2>
-<p><?=count($students)?> student<?=count($students) === 1 ? '' : 's'?> available from students26</p>
+<section class="student-list panel panel-pad" aria-labelledby="student-list-title">
+<div class="student-list-header"><div><h2 id="student-list-title">Student directory</h2><p class="subtle"><?=count($students)?> student<?=count($students) === 1 ? '' : 's'?> available from students26</p></div></div>
 <?php if ($students): ?>
 <div class="table-wrap">
 <table>
@@ -128,7 +127,7 @@ td{font-size:14px}.student-name{font-weight:700;color:#111827}.muted{color:#6b72
 <td><?=htmlspecialchars($student['course_name'] ?: $student['course'])?></td>
 <td><?=empty($student['photo']) ? 'Not uploaded' : 'Available'?></td>
 <td>
-<button type="button" class="select-link" data-name="<?=htmlspecialchars($student['name'], ENT_QUOTES)?>" data-enrollment="<?=htmlspecialchars($student['enrollment_id'], ENT_QUOTES)?>" data-course="<?=htmlspecialchars($student['course'], ENT_QUOTES)?>" data-course-name="<?=htmlspecialchars($student['course_name'] ?: $student['course'], ENT_QUOTES)?>" data-photo="<?=htmlspecialchars($student['photo'] ?? '', ENT_QUOTES)?>">Use Details</button>
+<button type="button" class="select-link btn" data-name="<?=htmlspecialchars($student['name'], ENT_QUOTES)?>" data-enrollment="<?=htmlspecialchars($student['enrollment_id'], ENT_QUOTES)?>" data-course="<?=htmlspecialchars($student['course'], ENT_QUOTES)?>" data-course-name="<?=htmlspecialchars($student['course_name'] ?: $student['course'], ENT_QUOTES)?>" data-photo="<?=htmlspecialchars($student['photo'] ?? '', ENT_QUOTES)?>">Use Details</button>
 </td>
 </tr>
 <?php endforeach; ?>
@@ -153,4 +152,4 @@ document.querySelectorAll('.select-link').forEach(function (button) {
     });
 });
 </script>
-</body></html>
+</main></body></html>

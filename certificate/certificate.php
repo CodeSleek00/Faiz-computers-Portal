@@ -597,6 +597,8 @@ body {
 
     -webkit-box-orient: vertical;
 
+    line-clamp: 2;
+
     -webkit-line-clamp: 2;
 }
 
@@ -900,6 +902,7 @@ body {
 }
 
 </style>
+<link rel="stylesheet" href="assets/certificate.css">
 
 </head>
 
@@ -913,7 +916,7 @@ body {
 
 <div class="toolbar">
 
-    <button onclick="printCertificate()">
+    <button class="btn btn-primary" onclick="printCertificate()">
         Print / Save PDF
     </button>
 

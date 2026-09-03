@@ -24,26 +24,27 @@ h1{font-size:30px;margin:5px 0 25px}.photo{width:130px;height:155px;object-fit:c
 a{display:inline-block;margin-top:22px;padding:11px 16px;border-radius:9px;background:#4338ca;color:#fff;text-decoration:none;font-weight:700}
 .note{color:#6b7280;font-size:13px;margin-top:20px}
 </style>
+<link rel="stylesheet" href="assets/certificate.css">
 </head>
-<body><div class="wrap"><div class="card">
-<div class="brand">CODE SLEEK FOUNDATION</div>
+<body><main class="verify-shell"><div class="card panel verify-card">
+<div class="brand"><span class="brand-mark">CSF</span><span>Code Sleek Foundation<small>Credential verification</small></span></div>
 <?php if($c): ?>
-<div class="ok">✓ VERIFIED CERTIFICATE</div>
+<div class="verify-mark">✓</div>
 <h1>COURSE COMPLETED</h1>
 <?php if(!empty($c['photo'])): ?><img class="photo" src="<?=h($siteUrl . '/' . ltrim($c['photo'],'/'))?>" alt="Student Photo"><?php endif; ?>
 <div class="details">
-<div class="row"><span class="label">Student Name</span><span class="value"><?=h($c['student_name'])?></span></div>
-<div class="row"><span class="label">Enrollment No.</span><span class="value"><?=h($c['enrollment_no'])?></span></div>
-<div class="row"><span class="label">Course</span><span class="value"><?=h($c['course_name'])?></span></div>
-<div class="row"><span class="label">Date of Issue</span><span class="value"><?=h(date('d/m/Y',strtotime($c['issue_date'])))?></span></div>
-<div class="row"><span class="label">Certificate ID</span><span class="value"><?=h($c['certificate_id'])?></span></div>
-<div class="row"><span class="label">Status</span><span class="value completed"><?=h($c['status'])?></span></div>
+<div class="detail-row"><span class="detail-label">Student Name</span><span class="detail-value"><?=h($c['student_name'])?></span></div>
+<div class="detail-row"><span class="detail-label">Enrollment No.</span><span class="detail-value"><?=h($c['enrollment_no'])?></span></div>
+<div class="detail-row"><span class="detail-label">Course</span><span class="detail-value"><?=h($c['course_name'])?></span></div>
+<div class="detail-row"><span class="detail-label">Date of Issue</span><span class="detail-value"><?=h(date('d/m/Y',strtotime($c['issue_date'])))?></span></div>
+<div class="detail-row"><span class="detail-label">Certificate ID</span><span class="detail-value"><?=h($c['certificate_id'])?></span></div>
+<div class="detail-row"><span class="detail-label">Status</span><span class="detail-value completed"><?=h($c['status'])?></span></div>
 </div>
-<a target="_blank" href="certificate.php?id=<?=urlencode($c['certificate_id'])?>">View Certificate</a>
+<a class="btn btn-primary" target="_blank" href="certificate.php?id=<?=urlencode($c['certificate_id'])?>">View Certificate</a>
 <div class="note">This certificate was verified from the official Code Sleek Foundation certificate database.</div>
 <?php else: ?>
-<div class="ok invalid" style="background:#fee2e2">✕ CERTIFICATE NOT FOUND</div>
+<div class="verify-mark invalid">!</div>
 <h1>Invalid Certificate</h1>
 <p class="note">The certificate number supplied in this QR code does not exist in our verification database.</p>
 <?php endif; ?>
-</div></div></body></html>
+</div></main></body></html>
