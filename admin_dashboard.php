@@ -497,6 +497,10 @@ $total = $row['total_students'];
                    <i class="fa-solid fa-video"></i>
                     <span>Video Upload</span>
                 </a>
+                <a href="certificate/admin.php" class="menu-item">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certificates</span>
+                </a>
             </div>
         </div>
         
@@ -622,6 +626,19 @@ $total = $row['total_students'];
                         <div class="action-links">
                             <a href="assignment/admin_assignment_dashboard.php" class="action-link">New Assignment</a>
                             <a href="assignment/view_submissions.php" class="action-link">View Submissions</a>
+                        </div>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-card-header">
+                            <div class="action-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <h4>Certificates</h4>
+                        </div>
+                        <div class="action-links">
+                            <a href="certificate/admin.php" class="action-link">Generate Certificate</a>
+                            <a href="certificate/admin.php" class="action-link">Manage Certificates</a>
                         </div>
                     </div>
                     
