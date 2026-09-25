@@ -174,6 +174,22 @@ function submissionSource($row)
 }
 
 
+function submissionFileUrl($file)
+{
+    $file = ltrim(trim($file ?? ''), '/');
+
+    if ($file === '') {
+        return '';
+    }
+
+    if (strpos($file, '/') === false) {
+        return '../uploads/submissions/' . $file;
+    }
+
+    return '../' . $file;
+}
+
+
 function statusClass($status)
 {
     $status =
@@ -1036,18 +1052,7 @@ tr:hover td {
 
                                 <?php
 
-                                /*
-                                 * API upload location
-                                 *
-                                 * /api/assignment/uploads/
-                                 */
-
-                                $fileUrl =
-                                    '../' .
-                                    ltrim(
-                                        $file,
-                                        '/'
-                                    );
+                                $fileUrl = submissionFileUrl($file);
 
                                 ?>
 

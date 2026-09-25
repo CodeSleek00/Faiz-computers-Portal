@@ -30,6 +30,21 @@ if ($result->num_rows == 0) die("Submission not found.");
 
 $submission = $result->fetch_assoc();
 
+function submissionFileUrl($file)
+{
+    $file = ltrim(trim($file ?? ''), '/');
+
+    if ($file === '') {
+        return '';
+    }
+
+    if (strpos($file, '/') === false) {
+        return '../uploads/submissions/' . $file;
+    }
+
+    return '../' . $file;
+}
+
 // Handle grading submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $marks_awarded = intval($_POST['marks_awarded']);
@@ -96,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <?php if ($submission['submitted_file']) { ?>
         <div class="section">
             <h3>Attached File:</h3>
-            <a class="file-link" href="../uploads/submissions/<?= $submission['submitted_file'] ?>" target="_blank">📎 View Uploaded File</a>
+            <a class="file-link" href="<?= htmlspecialchars(submissionFileUrl($submission['submitted_file']), ENT_QUOTES, 'UTF-8') ?>" target="_blank">📎 View Uploaded File</a>
         </div>
     <?php } ?>
 
