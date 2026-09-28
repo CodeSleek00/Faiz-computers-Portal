@@ -78,7 +78,17 @@ if (!$mimeType || strpos($mimeType, 'video/') !== 0) {
 }
 
 if (isset($_GET['stream'])) {
+    @set_time_limit(0);
+    @ini_set('zlib.output_compression', '0');
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+    clearstatcache(true, $videoPath);
     $fileSize = filesize($videoPath);
+    if ($fileSize === false || $fileSize <= 0) {
+        http_response_code(404);
+        exit;
+    }
     $start = 0;
     $end = $fileSize - 1;
     $range = $_SERVER['HTTP_RANGE'] ?? '';
@@ -154,6 +164,8 @@ if (isset($_GET['stream'])) {
         p{color:var(--muted);margin:0 0 18px}
         .player{background:#101719;border-radius:8px;overflow:hidden;border:1px solid #263335}
         video{display:block;width:100%;max-height:72vh;background:#000}
+        .playback-status{font-size:13px;color:var(--muted);margin:10px 0 0}
+        .playback-status.error{color:#a32323}
         @media(max-width:600px){main{padding:16px}h1{font-size:21px}}
     </style>
 </head>
@@ -164,11 +176,30 @@ if (isset($_GET['stream'])) {
     <h1><?= htmlspecialchars($video['title'], ENT_QUOTES, 'UTF-8') ?></h1>
     <?php if ($video['description'] !== ''): ?><p><?= nl2br(htmlspecialchars($video['description'], ENT_QUOTES, 'UTF-8')) ?></p><?php endif; ?>
     <div class="player">
-        <video controls playsinline preload="metadata" controlslist="nodownload">
+        <video id="studyVideo" controls playsinline preload="metadata" controlslist="nodownload">
             <source src="student_video.php?id=<?= $contentId ?>&amp;stream=1" type="<?= htmlspecialchars($mimeType, ENT_QUOTES, 'UTF-8') ?>">
             Your browser cannot play this video format.
         </video>
     </div>
+    <p class="playback-status" id="playbackStatus" role="status">Loading video...</p>
 </main>
+<script>
+const studyVideo = document.getElementById('studyVideo');
+const playbackStatus = document.getElementById('playbackStatus');
+
+studyVideo.addEventListener('canplay', () => {
+    playbackStatus.hidden = true;
+});
+
+studyVideo.addEventListener('error', () => {
+    const errorCode = studyVideo.error?.code;
+    playbackStatus.classList.add('error');
+    if (errorCode === 3 || errorCode === 4) {
+        playbackStatus.textContent = 'This video format or codec is not supported by this browser. Convert the video to MP4 (H.264 video and AAC audio), then upload it again.';
+    } else {
+        playbackStatus.textContent = 'The video stream could not be loaded. Check that the video file exists and is assigned to your account.';
+    }
+});
+</script>
 </body>
 </html>
