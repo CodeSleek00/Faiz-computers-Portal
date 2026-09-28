@@ -477,6 +477,10 @@ $total = $row['total_students'];
                     <i class="fas fa-book"></i>
                     <span>Study Materials</span>
                 </a>
+                <a href="study_admin/index.php" class="menu-item">
+                    <i class="fas fa-book-open"></i>
+                    <span>Study Admin</span>
+                </a>
                 <a href="admin-panel/manage_student.php" class="menu-item">
                     <i class="fas fa-users"></i>
                     <span>Students</span>
@@ -652,6 +656,18 @@ $total = $row['total_students'];
                         <div class="action-links">
                             <a href="study-center/assign_material.php" class="action-link">Upload PDF</a>
                             <a href="study-center/view_materials_admin.php" class="action-link">Manage Materials</a>
+                        </div>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-card-header">
+                            <div class="action-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h4>Study Admin</h4>
+                        </div>
+                        <div class="action-links">
+                            <a href="study_admin/index.php" class="action-link">Open Study Dashboard</a>
                         </div>
                     </div>
                     
