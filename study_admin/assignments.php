@@ -51,6 +51,7 @@ $assignments=$conn->query("
 <div class="card">
 <h2>Assign Content</h2>
 <div class="actions">
+<a class="btn orange" href="assign_course.php">Assign Course / Topic</a>
 <a class="btn orange" href="assign_student.php">Assign to Student</a>
 <a class="btn" href="assign_batch.php">Assign to Batch</a>
 </div>

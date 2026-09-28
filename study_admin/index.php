@@ -32,6 +32,7 @@ if ($r = $conn->query("SELECT COUNT(*) c FROM students26")) {
         <a class="btn orange" href="course_add.php">+ Add Course</a>
         <a class="btn" href="topic_add.php">+ Add Topic</a>
         <a class="btn" href="content_add.php">+ Add Content</a>
+        <a class="btn orange" href="assign_course.php">Assign Course / Topic</a>
         <a class="btn" href="assignments.php">Manage Assignments</a>
     </div>
 </div>
