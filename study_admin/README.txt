@@ -25,8 +25,8 @@ INSTALLATION
 IMPORTANT
 - No demo/sample data is inserted by this package.
 - Students are read ONLY from students26.
-- Batch membership is read ONLY from students_batch where student_table='students26'.
-- Batch assignment uses the batch_id values already present in students_batch.
+- Batch membership is read ONLY from student_batches where student_table='students26'.
+- Batch assignment uses the batch_id values already present in student_batches.
 - No students or batches are created by this module.
 - Existing admin authentication can be enforced from includes/auth.php.
 

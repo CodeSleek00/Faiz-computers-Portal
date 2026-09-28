@@ -41,7 +41,7 @@ if ($r = $conn->query("SELECT COUNT(*) c FROM students26")) {
     <p class="muted">
         This module reads students only from <strong>students26</strong>.
         Current students26 rows: <strong><?= $studentCount ?></strong>.
-        Batch membership is read from <strong>students_batch</strong> with
+        Batch membership is read from <strong>student_batches</strong> with
         <strong>student_table = 'students26'</strong>.
     </p>
 </div>

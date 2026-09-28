@@ -39,7 +39,7 @@ $assignments=$conn->query("
        AND sct.target_id=s.id
     LEFT JOIN (
         SELECT batch_id, COUNT(*) AS student_count
-        FROM students_batch
+        FROM student_batches
         WHERE student_table='students26'
         GROUP BY batch_id
     ) sbc

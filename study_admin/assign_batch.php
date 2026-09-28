@@ -13,11 +13,11 @@ ORDER BY c.course_name,t.sort_order,sc.sort_order,sc.id
 
 /*
  * No assumption about a separate batch master table.
- * Existing batch IDs are read directly from students_batch.
+ * Existing batch IDs are read directly from student_batches.
  */
 $batches=$conn->query("
 SELECT batch_id, COUNT(*) AS student_count
-FROM students_batch
+FROM student_batches
 WHERE student_table='students26'
 GROUP BY batch_id
 ORDER BY batch_id DESC
@@ -32,7 +32,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     }else{
         $check=$conn->prepare("
             SELECT COUNT(*) AS c
-            FROM students_batch
+            FROM student_batches
             WHERE student_table='students26' AND batch_id=?
         ");
         $check->bind_param('i',$batchId);$check->execute();

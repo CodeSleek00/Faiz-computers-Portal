@@ -43,7 +43,7 @@ if ($studentTable === 'students26') {
         JOIN study_contents sc ON sc.id = sct.content_id
         JOIN study_topics t ON t.id = sc.topic_id
         JOIN study_courses c ON c.id = t.course_id
-        LEFT JOIN students_batch sb
+        LEFT JOIN student_batches sb
             ON sct.target_type = 'batch'
            AND sb.batch_id = sct.target_id
            AND sb.student_table = 'students26'
