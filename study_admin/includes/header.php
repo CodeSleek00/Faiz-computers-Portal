@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/config.php';
 $flash = get_flash();
 $pageTitle = $pageTitle ?? 'Study Material';
 ?>
