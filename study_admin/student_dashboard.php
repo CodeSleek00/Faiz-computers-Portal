@@ -37,7 +37,7 @@ if ($studentTable === 'students26') {
         SELECT
             sc.id, sc.title, sc.content_type, sc.description, sc.content_body,
             sc.file_url, sc.video_url, sc.thumbnail_url,
-            t.topic_name, c.course_name,
+            t.id AS topic_id, t.topic_name, c.id AS course_id, c.course_name,
             MAX(sct.assigned_at) AS assigned_at
         FROM study_content_targets sct
         JOIN study_contents sc ON sc.id = sct.content_id
@@ -57,7 +57,7 @@ if ($studentTable === 'students26') {
         GROUP BY
             sc.id, sc.title, sc.content_type, sc.description, sc.content_body,
             sc.file_url, sc.video_url, sc.thumbnail_url,
-            t.topic_name, c.course_name
+            t.id, t.topic_name, c.id, c.course_name
         ORDER BY assigned_at DESC, c.course_name, t.topic_name, sc.sort_order, sc.title
     ");
     $stmt->bind_param('ii', $studentId, $studentId);
@@ -69,7 +69,24 @@ if ($studentTable === 'students26') {
     $stmt->close();
 }
 
-$courseCount = count(array_unique(array_column($studyContents, 'course_name')));
+$courseFolders = [];
+foreach ($studyContents as $content) {
+    $courseId = (int)$content['course_id'];
+    $topicId = (int)$content['topic_id'];
+    if (!isset($courseFolders[$courseId])) {
+        $courseFolders[$courseId] = ['name' => $content['course_name'], 'topics' => [], 'lessons' => 0, 'videos' => 0];
+    }
+    if (!isset($courseFolders[$courseId]['topics'][$topicId])) {
+        $courseFolders[$courseId]['topics'][$topicId] = ['name' => $content['topic_name'], 'contents' => []];
+    }
+    $courseFolders[$courseId]['topics'][$topicId]['contents'][] = $content;
+    $courseFolders[$courseId]['lessons']++;
+    if ($content['content_type'] === 'video') {
+        $courseFolders[$courseId]['videos']++;
+    }
+}
+
+$courseCount = count($courseFolders);
 $videoCount = count(array_filter($studyContents, static fn($item) => $item['content_type'] === 'video'));
 
 function study_escape($value): string {
@@ -107,25 +124,39 @@ function study_escape($value): string {
         .filters input,.filters select{min-width:0;border:1px solid var(--line);border-radius:6px;background:#fff;padding:10px 12px;font:inherit;color:var(--ink)}
         .filters input{flex:1}
         .filters select{width:155px}
-        .lessons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-        .lesson{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:19px;box-shadow:var(--shadow);min-width:0}
-        .lesson-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
-        .type{font-size:11px;text-transform:uppercase;font-weight:700;color:var(--green);background:var(--green-soft);padding:4px 8px;border-radius:4px}
-        .assigned{font-size:11px;color:var(--muted)}
-        .path{font-size:12px;color:var(--muted);margin-bottom:4px}
-        .lesson h3{font-size:17px;line-height:1.3;margin:0 0 8px;overflow-wrap:anywhere}
-        .description{font-size:13px;color:#475761;margin:0 0 14px;white-space:pre-line}
-        .lesson-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-        .open{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:6px;background:var(--green);color:#fff;text-decoration:none;font-size:13px;font-weight:700}
+        .course-list{display:grid;gap:12px}
+        .course-folder,.topic-folder{background:var(--white);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+        .folder-summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:13px;padding:17px 19px}
+        .folder-summary::-webkit-details-marker{display:none}
+        .folder-icon{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);border-radius:7px}
+        .folder-label{min-width:0;flex:1}
+        .folder-label strong{display:block;font-size:15px;overflow-wrap:anywhere}
+        .folder-label small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+        .chevron{color:var(--muted);transition:transform .18s ease}
+        details[open]>.folder-summary .chevron{transform:rotate(180deg)}
+        .topic-list{padding:0 13px 13px;display:grid;gap:9px}
+        .topic-folder{box-shadow:none;background:#fbfcfb}
+        .topic-folder .folder-summary{padding:13px 15px}
+        .topic-folder .folder-icon{width:32px;height:32px;flex-basis:32px;background:#eef2ef;color:#53665f}
+        .content-list{padding:0 14px 8px}
+        .lesson{display:flex;align-items:flex-start;gap:13px;padding:13px 0;border-top:1px solid var(--line)}
+        .lesson[hidden],.topic-folder[hidden],.course-folder[hidden]{display:none}
+        .lesson-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:6px;background:#f1f4f2;color:var(--green)}
+        .lesson-info{min-width:0;flex:1}
+        .lesson-title{font-size:14px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+        .lesson-description{font-size:12px;color:var(--muted);margin-top:3px;white-space:pre-line}
+        .type{display:inline-block;font-size:10px;text-transform:uppercase;font-weight:700;color:var(--green);background:var(--green-soft);padding:3px 7px;border-radius:4px;margin-top:6px}
+        .open{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;padding:8px 10px;border-radius:6px;background:var(--green);color:#fff;text-decoration:none;font-size:12px;font-weight:700}
         .open:hover{background:#105743}
-        details{margin-top:13px;border-top:1px solid var(--line);padding-top:10px}
-        summary{cursor:pointer;color:var(--green);font-size:13px;font-weight:700}
-        .body-copy{font-size:13px;color:#475761;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:9px;max-height:300px;overflow:auto}
+        .open.material{background:#eef2f7;color:var(--ink)}
+        .body-copy{font-size:13px;color:#475761;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:8px;max-height:300px;overflow:auto}
+        .lesson details{margin-top:6px}
+        .lesson details summary{cursor:pointer;color:var(--green);font-size:12px;font-weight:700}
         .empty{background:#fff;border:1px dashed #bdcec6;border-radius:8px;text-align:center;padding:42px 20px;color:var(--muted)}
         .empty i{font-size:26px;color:var(--green);margin-bottom:10px}
         .empty h2{font-size:18px;color:var(--ink);margin:0 0 5px}
         .empty p{margin:0}
-        @media(max-width:700px){.shell{padding:16px}.hero{padding:23px 20px}.hero-mark{font-size:32px}.toolbar{align-items:stretch;flex-direction:column}.filters{flex-basis:auto}.lessons{grid-template-columns:1fr}}
+        @media(max-width:700px){.shell{padding:16px}.hero{padding:23px 20px}.hero-mark{font-size:32px}.toolbar{align-items:stretch;flex-direction:column}.filters{flex-basis:auto}.folder-summary{padding:14px}.topic-list{padding:0 8px 8px}.content-list{padding:0 10px 6px}.lesson{gap:9px}.open{padding:8px;font-size:11px}}
         @media(max-width:450px){.stats{gap:8px}.stat{padding:13px 10px}.stat strong{font-size:20px}.stat span{font-size:11px}.filters{flex-direction:column}.filters select{width:100%}.identity{font-size:12px}.hero h1{font-size:23px}}
     </style>
 </head>
@@ -174,40 +205,54 @@ function study_escape($value): string {
             <p>When your instructor assigns lessons or course material, it will appear here.</p>
         </div>
         <?php else: ?>
-        <div class="lessons" id="lessons">
-            <?php foreach ($studyContents as $content): ?>
-            <?php
-                $resourceUrl = $content['video_url'] ?: $content['file_url'];
-                $description = trim(strip_tags((string)$content['description']));
-                if ($description === '') {
-                    $description = trim(strip_tags((string)$content['content_body']));
-                }
-                $description = strlen($description) > 180 ? substr($description, 0, 177) . '...' : $description;
-                $searchText = strtolower($content['title'] . ' ' . $content['course_name'] . ' ' . $content['topic_name'] . ' ' . $content['content_type']);
-            ?>
-            <article class="lesson" data-type="<?= study_escape(strtolower($content['content_type'])) ?>" data-search="<?= study_escape($searchText) ?>">
-                <div class="lesson-meta">
-                    <span class="type"><?= study_escape($content['content_type']) ?></span>
-                    <span class="assigned"><?= study_escape(date('M j, Y', strtotime($content['assigned_at']))) ?></span>
+        <div class="course-list" id="courseList">
+            <?php foreach ($courseFolders as $courseId => $course): ?>
+            <details class="course-folder" open>
+                <summary class="folder-summary">
+                    <span class="folder-icon"><i class="fa-solid fa-folder-open"></i></span>
+                    <span class="folder-label"><strong><?= study_escape($course['name']) ?></strong><small><?= $course['lessons'] ?> lessons · <?= $course['videos'] ?> videos</small></span>
+                    <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+                </summary>
+                <div class="topic-list">
+                    <?php foreach ($course['topics'] as $topic): ?>
+                    <details class="topic-folder" open>
+                        <summary class="folder-summary">
+                            <span class="folder-icon"><i class="fa-solid fa-folder"></i></span>
+                            <span class="folder-label"><strong><?= study_escape($topic['name']) ?></strong><small><?= count($topic['contents']) ?> items</small></span>
+                            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+                        </summary>
+                        <div class="content-list">
+                            <?php foreach ($topic['contents'] as $content): ?>
+                            <?php
+                                $description = trim(strip_tags((string)$content['description']));
+                                $searchText = strtolower($content['title'] . ' ' . $course['name'] . ' ' . $topic['name'] . ' ' . $content['content_type'] . ' ' . $description);
+                                $materialUrl = $content['file_url'];
+                            ?>
+                            <article class="lesson" data-type="<?= study_escape(strtolower($content['content_type'])) ?>" data-search="<?= study_escape($searchText) ?>">
+                                <span class="lesson-icon"><i class="fa-solid <?= $content['content_type'] === 'video' ? 'fa-circle-play' : 'fa-file-lines' ?>"></i></span>
+                                <div class="lesson-info">
+                                    <div class="lesson-title"><?= study_escape($content['title']) ?></div>
+                                    <?php if ($description !== ''): ?><div class="lesson-description"><?= study_escape($description) ?></div><?php endif; ?>
+                                    <span class="type"><?= study_escape($content['content_type']) ?></span>
+                                    <?php if (trim((string)$content['content_body']) !== ''): ?>
+                                    <details>
+                                        <summary>Read notes</summary>
+                                        <div class="body-copy"><?= study_escape(trim(strip_tags((string)$content['content_body']))) ?></div>
+                                    </details>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($content['content_type'] === 'video' && $content['video_url']): ?>
+                                <a class="open" href="student_video.php?id=<?= (int)$content['id'] ?>"><i class="fa-solid fa-play"></i> Play</a>
+                                <?php elseif ($materialUrl): ?>
+                                <a class="open material" href="<?= study_escape($materialUrl) ?>" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+                                <?php endif; ?>
+                            </article>
+                            <?php endforeach; ?>
+                        </div>
+                    </details>
+                    <?php endforeach; ?>
                 </div>
-                <div class="path"><?= study_escape($content['course_name']) ?> / <?= study_escape($content['topic_name']) ?></div>
-                <h3><?= study_escape($content['title']) ?></h3>
-                <?php if ($description !== ''): ?><p class="description"><?= study_escape($description) ?></p><?php endif; ?>
-                <div class="lesson-actions">
-                    <?php if ($resourceUrl): ?>
-                    <a class="open" href="<?= study_escape($resourceUrl) ?>" target="_blank" rel="noopener">
-                        <i class="fa-solid <?= $content['video_url'] ? 'fa-play' : 'fa-arrow-up-right-from-square' ?>"></i>
-                        <?= $content['video_url'] ? 'Watch lesson' : 'Open material' ?>
-                    </a>
-                    <?php endif; ?>
-                </div>
-                <?php if (trim((string)$content['content_body']) !== ''): ?>
-                <details>
-                    <summary>Read lesson notes</summary>
-                    <div class="body-copy"><?= study_escape(trim(strip_tags((string)$content['content_body']))) ?></div>
-                </details>
-                <?php endif; ?>
-            </article>
+            </details>
             <?php endforeach; ?>
         </div>
         <div class="empty" id="noMatches" hidden><h2>No matching lessons</h2><p>Try another search or content type.</p></div>
@@ -218,6 +263,8 @@ function study_escape($value): string {
 const searchInput = document.getElementById('studySearch');
 const typeFilter = document.getElementById('typeFilter');
 const lessonCards = [...document.querySelectorAll('.lesson')];
+const topicFolders = [...document.querySelectorAll('.topic-folder')];
+const courseFolders = [...document.querySelectorAll('.course-folder')];
 const noMatches = document.getElementById('noMatches');
 
 function filterLessons() {
@@ -228,6 +275,12 @@ function filterLessons() {
         const matches = card.dataset.search.includes(query) && (!type || card.dataset.type === type);
         card.hidden = !matches;
         if (matches) visible++;
+    });
+    topicFolders.forEach(folder => {
+        folder.hidden = ![...folder.querySelectorAll('.lesson')].some(card => !card.hidden);
+    });
+    courseFolders.forEach(folder => {
+        folder.hidden = ![...folder.querySelectorAll('.lesson')].some(card => !card.hidden);
     });
     noMatches.hidden = visible > 0;
 }
