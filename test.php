@@ -113,30 +113,43 @@ $assignments = $stmt->get_result();
 
 
 /* =====================================================
-   7. STUDY MATERIALS (LAST 5 ASSIGNED TO STUDENT)
+   7. STUDY ADMIN CONTENT
 ===================================================== */
-$stmt = $conn->prepare("
-    SELECT COUNT(*) AS total_materials
-    FROM study_material_targets
-    WHERE student_id = ?
-      AND student_table = ?
-");
-$stmt->bind_param("is", $student_id, $table);
-$stmt->execute();
-$total_materials = $stmt->get_result()->fetch_assoc()['total_materials'] ?? 0;
+$total_study_contents = 0;
+$last_study_contents = [];
+if ($table === 'students26') {
+    $studyTargetJoin = "
+        FROM study_content_targets sct
+        JOIN study_contents sc ON sc.id = sct.content_id
+        JOIN study_topics t ON t.id = sc.topic_id
+        JOIN study_courses c ON c.id = t.course_id
+        LEFT JOIN students_batch sb
+            ON sct.target_type = 'batch'
+           AND sb.batch_id = sct.target_id
+           AND sb.student_table = 'students26'
+           AND sb.student_id = ?
+        WHERE sc.status = 'active'
+          AND sct.status = 'active'
+          AND ((sct.target_type = 'student' AND sct.target_id = ?) OR sb.student_id IS NOT NULL)
+    ";
+    $stmt = $conn->prepare("SELECT COUNT(DISTINCT sc.id) AS total " . $studyTargetJoin);
+    $stmt->bind_param('ii', $student_id, $student_id);
+    $stmt->execute();
+    $total_study_contents = (int)($stmt->get_result()->fetch_assoc()['total'] ?? 0);
+    $stmt->close();
 
-$stmt = $conn->prepare("
-    SELECT sm.title
-    FROM study_material_targets smt
-    JOIN study_materials sm ON sm.id = smt.material_id
-    WHERE smt.student_id = ?
-      AND smt.student_table = ?
-    ORDER BY smt.id DESC
-    LIMIT 5
-");
-$stmt->bind_param("is", $student_id, $table);
-$stmt->execute();
-$last_materials = $stmt->get_result();
+    $stmt = $conn->prepare("
+        SELECT sc.title, sc.content_type, c.course_name, t.topic_name, MAX(sct.assigned_at) AS assigned_at
+        " . $studyTargetJoin . "
+        GROUP BY sc.id, sc.title, sc.content_type, c.course_name, t.topic_name
+        ORDER BY assigned_at DESC
+        LIMIT 5
+    ");
+    $stmt->bind_param('ii', $student_id, $student_id);
+    $stmt->execute();
+    $last_study_contents = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
 
 /* =====================================================
    8. FEE STATUS
@@ -211,7 +224,7 @@ $exams = $stmt->get_result();
 $course_stats['total_courses']          = $course_stats['total_courses'] ?? 0;
 $assignment_stats['total_assignments']  = $assignment_stats['total_assignments'] ?? 0;
 $assignment_stats['submitted_assignments'] = $assignment_stats['submitted_assignments'] ?? 0;
-$total_materials = $total_materials ?? 0;
+$total_study_contents = $total_study_contents ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -1230,10 +1243,10 @@ $total_materials = $total_materials ?? 0;
                 <span>Assignments</span>
                 <span class="nav-badge"><?= $assignment_stats['total_assignments'] - $assignment_stats['submitted_assignments'] ?></span>
             </a>
-            <a href="study-center/view_materials_student.php" class="nav-item">
+            <a href="study_admin/student_dashboard.php" class="nav-item">
                 <i class="fas fa-book-open nav-icon"></i>
-                <span>Study Center</span>
-                <span class="nav-badge"><?= $total_materials ?></span>
+                <span>Study Dashboard</span>
+                <span class="nav-badge"><?= $total_study_contents ?></span>
             </a>
         </div>
 
@@ -1357,8 +1370,8 @@ $total_materials = $total_materials ?? 0;
             <div class="stat-card animate-in" style="animation-delay: 0.5s">
                 <div class="stat-content">
                     <div class="stat-text">
-                        <h3>Study Materials</h3>
-                        <div class="stat-number"><?= $total_materials ?></div>
+                        <h3>Assigned Study Content</h3>
+                        <div class="stat-number"><?= $total_study_contents ?></div>
                     </div>
                     <i class="fas fa-book stat-icon float-animation"></i>
                 </div>
@@ -1462,27 +1475,28 @@ $total_materials = $total_materials ?? 0;
                     </div>
                 </div>
 
-                <!-- Study Materials -->
+                <!-- Assigned Study Content -->
                 <div class="card animate-in" style="animation-delay: 0.4s">
                     <div class="card-header">
-                        <h2 class="card-title"><i class="fas fa-book-open"></i> Recent Materials</h2>
-                        <a href="study-center/view_materials_student.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                        <h2 class="card-title"><i class="fas fa-book-open"></i> Study Dashboard</h2>
+                        <a href="study_admin/student_dashboard.php" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-content">
-                        <?php if ($last_materials->num_rows > 0): ?>
-                            <?php while($row = $last_materials->fetch_assoc()): ?>
+                        <?php if ($last_study_contents): ?>
+                            <?php foreach($last_study_contents as $row): ?>
                             <div class="material-item">
                                 <div class="material-icon">
-                                    <i class="fas fa-file-alt"></i>
+                                    <i class="fas <?= $row['content_type'] === 'video' ? 'fa-play-circle' : 'fa-file-alt' ?>"></i>
                                 </div>
                                 <div class="material-info">
                                     <h4><?= htmlspecialchars($row['title']) ?></h4>
+                                    <p><?= htmlspecialchars($row['course_name'] . ' / ' . $row['topic_name'] . ' / ' . ucfirst($row['content_type'])) ?></p>
                                 </div>
                             </div>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <p style="color: var(--dark-gray); text-align: center; padding: 20px; font-size: 13px; background: rgba(0, 0, 0, 0.02); border-radius: 12px;">
-                                <i class="fas fa-inbox mr-2"></i> No materials assigned
+                                <i class="fas fa-inbox mr-2"></i> No study content assigned yet
                             </p>
                         <?php endif; ?>
                     </div>
@@ -1498,9 +1512,9 @@ $total_materials = $total_materials ?? 0;
                             <i class="fas fa-tasks float-animation"></i>
                             <span>Assignments</span>
                         </a>
-                        <a href="study-center/view_materials_student.php" class="action-btn">
+                        <a href="study_admin/student_dashboard.php" class="action-btn">
                             <i class="fas fa-book float-animation"></i>
-                            <span>Study Center</span>
+                            <span>Study Dashboard</span>
                         </a>
                         <a href="exam-center/student/student_dashboard.php" class="action-btn">
                             <i class="fas fa-pencil-alt float-animation"></i>
@@ -1527,7 +1541,7 @@ $total_materials = $total_materials ?? 0;
                 <i class="fas fa-tasks"></i>
                 <span>Assignments</span>
             </a>
-            <a href="study-center/view_materials_student.php" class="nav-item-mobile">
+            <a href="study_admin/student_dashboard.php" class="nav-item-mobile">
                 <i class="fas fa-book"></i>
                 <span>Study</span>
             </a>
