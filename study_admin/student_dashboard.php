@@ -37,7 +37,10 @@ if ($studentTable === 'students26') {
         SELECT
             sc.id, sc.title, sc.content_type, sc.description, sc.content_body,
             sc.file_url, sc.video_url, sc.thumbnail_url,
-            t.id AS topic_id, t.topic_name, c.id AS course_id, c.course_name,
+            t.id AS topic_id, t.topic_name, t.sort_order AS topic_sort_order,
+            c.id AS course_id, c.course_name, c.company_name, c.instructor_name,
+            c.level, c.timeline, c.details_to_know, c.specialisation,
+            c.course_timeline, c.thumbnail,
             MAX(sct.assigned_at) AS assigned_at
         FROM study_content_targets sct
         JOIN study_contents sc ON sc.id = sct.content_id
@@ -57,8 +60,10 @@ if ($studentTable === 'students26') {
         GROUP BY
             sc.id, sc.title, sc.content_type, sc.description, sc.content_body,
             sc.file_url, sc.video_url, sc.thumbnail_url,
-            t.id, t.topic_name, c.id, c.course_name
-        ORDER BY assigned_at DESC, c.course_name, t.topic_name, sc.sort_order, sc.title
+            t.id, t.topic_name, t.sort_order, c.id, c.course_name, c.company_name,
+            c.instructor_name, c.level, c.timeline, c.details_to_know,
+            c.specialisation, c.course_timeline, c.thumbnail
+        ORDER BY assigned_at DESC, c.course_name, t.sort_order, t.topic_name, sc.sort_order, sc.title
     ");
     $stmt->bind_param('ii', $studentId, $studentId);
     $stmt->execute();
@@ -74,10 +79,27 @@ foreach ($studyContents as $content) {
     $courseId = (int)$content['course_id'];
     $topicId = (int)$content['topic_id'];
     if (!isset($courseFolders[$courseId])) {
-        $courseFolders[$courseId] = ['name' => $content['course_name'], 'topics' => [], 'lessons' => 0, 'videos' => 0];
+        $courseFolders[$courseId] = [
+            'name' => $content['course_name'],
+            'company_name' => $content['company_name'],
+            'instructor_name' => $content['instructor_name'],
+            'level' => $content['level'],
+            'timeline' => $content['timeline'],
+            'details_to_know' => $content['details_to_know'],
+            'specialisation' => $content['specialisation'],
+            'course_timeline' => $content['course_timeline'],
+            'thumbnail' => $content['thumbnail'],
+            'topics' => [],
+            'lessons' => 0,
+            'videos' => 0,
+        ];
     }
     if (!isset($courseFolders[$courseId]['topics'][$topicId])) {
-        $courseFolders[$courseId]['topics'][$topicId] = ['name' => $content['topic_name'], 'contents' => []];
+        $courseFolders[$courseId]['topics'][$topicId] = [
+            'name' => $content['topic_name'],
+            'sort_order' => (int)$content['topic_sort_order'],
+            'contents' => [],
+        ];
     }
     $courseFolders[$courseId]['topics'][$topicId]['contents'][] = $content;
     $courseFolders[$courseId]['lessons']++;
@@ -132,6 +154,15 @@ function study_escape($value): string {
         .folder-label{min-width:0;flex:1}
         .folder-label strong{display:block;font-size:15px;overflow-wrap:anywhere}
         .folder-label small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+        .course-overview{display:flex;gap:18px;padding:0 19px 17px}
+        .course-thumbnail{width:150px;aspect-ratio:3/2;object-fit:cover;border-radius:6px;background:#eef2ef}
+        .course-meta{min-width:0;flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 16px;font-size:12px}
+        .course-meta strong{color:var(--ink)}
+        .course-extra{grid-column:1/-1;color:#475761;white-space:pre-line;overflow-wrap:anywhere}
+        .course-schedule{margin:0 19px 17px;border-top:1px solid var(--line);padding-top:12px}
+        .course-schedule h3{font-size:13px;margin:0 0 8px}
+        .month-row{display:grid;grid-template-columns:85px 1fr;gap:10px;padding:7px 0;border-top:1px solid #edf1ef;font-size:12px}
+        .month-row strong{color:var(--green)}
         .chevron{color:var(--muted);transition:transform .18s ease}
         details[open]>.folder-summary .chevron{transform:rotate(180deg)}
         .topic-list{padding:0 13px 13px;display:grid;gap:9px}
@@ -156,7 +187,7 @@ function study_escape($value): string {
         .empty i{font-size:26px;color:var(--green);margin-bottom:10px}
         .empty h2{font-size:18px;color:var(--ink);margin:0 0 5px}
         .empty p{margin:0}
-        @media(max-width:700px){.shell{padding:16px}.hero{padding:23px 20px}.hero-mark{font-size:32px}.toolbar{align-items:stretch;flex-direction:column}.filters{flex-basis:auto}.folder-summary{padding:14px}.topic-list{padding:0 8px 8px}.content-list{padding:0 10px 6px}.lesson{gap:9px}.open{padding:8px;font-size:11px}}
+        @media(max-width:700px){.shell{padding:16px}.hero{padding:23px 20px}.hero-mark{font-size:32px}.toolbar{align-items:stretch;flex-direction:column}.filters{flex-basis:auto}.folder-summary{padding:14px}.topic-list{padding:0 8px 8px}.content-list{padding:0 10px 6px}.lesson{gap:9px}.open{padding:8px;font-size:11px}.course-overview{padding:0 14px 14px;gap:12px}.course-thumbnail{width:112px}.course-meta{grid-template-columns:1fr}.course-schedule{margin:0 14px 14px}}
         @media(max-width:450px){.stats{gap:8px}.stat{padding:13px 10px}.stat strong{font-size:20px}.stat span{font-size:11px}.filters{flex-direction:column}.filters select{width:100%}.identity{font-size:12px}.hero h1{font-size:23px}}
     </style>
 </head>
@@ -213,6 +244,47 @@ function study_escape($value): string {
                     <span class="folder-label"><strong><?= study_escape($course['name']) ?></strong><small><?= $course['lessons'] ?> lessons · <?= $course['videos'] ?> videos</small></span>
                     <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
                 </summary>
+                <?php
+                    uasort($course['topics'], static fn($left, $right) => ($left['sort_order'] <=> $right['sort_order']) ?: strcmp($left['name'], $right['name']));
+                    $monthCount = max(1, (int)$course['timeline']);
+                    $topicCount = count($course['topics']);
+                    $schedule = [];
+                    $topicIndex = 0;
+                    foreach ($course['topics'] as $topicForSchedule) {
+                        if ($topicCount <= $monthCount && $topicCount > 1) {
+                            $month = (int)round($topicIndex * ($monthCount - 1) / ($topicCount - 1)) + 1;
+                        } else {
+                            $month = (int)floor($topicIndex * $monthCount / max(1, $topicCount)) + 1;
+                        }
+                        $schedule[$month][] = $topicForSchedule['name'];
+                        $topicIndex++;
+                    }
+                ?>
+                <?php if ($course['thumbnail'] || $course['company_name'] || $course['instructor_name'] || $course['level'] || $course['timeline'] || $course['specialisation'] || $course['details_to_know']): ?>
+                <div class="course-overview">
+                    <?php if ($course['thumbnail']): ?><img class="course-thumbnail" src="<?= study_escape($course['thumbnail']) ?>" alt="<?= study_escape($course['name']) ?> thumbnail"><?php endif; ?>
+                    <div class="course-meta">
+                        <?php if ($course['company_name']): ?><div><strong>Company:</strong> <?= study_escape($course['company_name']) ?></div><?php endif; ?>
+                        <?php if ($course['instructor_name']): ?><div><strong>Instructor:</strong> <?= study_escape($course['instructor_name']) ?></div><?php endif; ?>
+                        <?php if ($course['level']): ?><div><strong>Level:</strong> <?= study_escape($course['level']) ?></div><?php endif; ?>
+                        <?php if ($course['timeline']): ?><div><strong>Duration:</strong> <?= (int)$course['timeline'] ?> month<?= (int)$course['timeline'] === 1 ? '' : 's' ?></div><?php endif; ?>
+                        <?php if ($course['specialisation']): ?><div><strong>Specialisation:</strong> <?= study_escape($course['specialisation']) ?></div><?php endif; ?>
+                        <?php if ($course['details_to_know']): ?><div class="course-extra"><strong>Details to know:</strong><br><?= study_escape($course['details_to_know']) ?></div><?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                <?php if (trim((string)$course['course_timeline']) !== '' || $schedule): ?>
+                <section class="course-schedule">
+                    <h3>Course Timeline</h3>
+                    <?php if (trim((string)$course['course_timeline']) !== ''): ?>
+                    <div class="course-extra"><?= study_escape($course['course_timeline']) ?></div>
+                    <?php else: ?>
+                    <?php foreach ($schedule as $month => $monthTopics): ?>
+                    <div class="month-row"><strong>Month <?= (int)$month ?></strong><span><?= study_escape(implode(', ', $monthTopics)) ?></span></div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </section>
+                <?php endif; ?>
                 <div class="topic-list">
                     <?php foreach ($course['topics'] as $topic): ?>
                     <details class="topic-folder" open>

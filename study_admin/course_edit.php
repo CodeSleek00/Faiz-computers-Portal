@@ -19,21 +19,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $slug = post_string('course_slug');
     $desc = post_string('description');
     $status = post_string('status', 'active');
+    $companyName = post_string('company_name');
+    $instructorName = post_string('instructor_name');
+    $level = post_string('level');
+    $timeline = post_string('timeline');
+    $detailsToKnow = post_string('details_to_know');
+    $specialisation = post_string('specialisation');
+    $courseTimeline = post_string('course_timeline');
     $slug = $slug !== '' ? slugify($slug) : slugify($name);
 
-    $stmt = $conn->prepare("UPDATE study_courses SET course_name=?, course_slug=?, description=?, status=? WHERE id=?");
-    $stmt->bind_param('ssssi', $name, $slug, $desc, $status, $id);
-    if ($stmt->execute()) {
-        flash('success', 'Course updated.');
-        redirect('course_edit.php?id=' . $id);
+    $newThumbnail = '';
+    try {
+        if (!empty($_FILES['thumbnail']['name'])) {
+            $newThumbnail = save_upload($_FILES['thumbnail'], 'course-thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
+        }
+        $thumbnail = $newThumbnail !== '' ? $newThumbnail : (string)($row['thumbnail'] ?? '');
+        $stmt = $conn->prepare("UPDATE study_courses SET course_name=?, course_slug=?, description=?, status=?, company_name=?, instructor_name=?, level=?, timeline=?, details_to_know=?, specialisation=?, course_timeline=?, thumbnail=? WHERE id=?");
+        $stmt->bind_param('ssssssssssssi', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $id);
+        if ($stmt->execute()) {
+            $stmt->close();
+            if ($newThumbnail !== '') {
+                delete_relative_file($row['thumbnail'] ?? '');
+            }
+            flash('success', 'Course updated.');
+            redirect('course_edit.php?id=' . $id);
+        }
+        $stmt->close();
+        delete_relative_file($newThumbnail);
+        flash('error', 'Could not update course.');
+    } catch (Throwable $e) {
+        delete_relative_file($newThumbnail);
+        flash('error', 'Could not update course. Check the thumbnail and course details.');
     }
-    flash('error', 'Could not update course.');
-    $stmt->close();
     $row['course_name']=$name; $row['course_slug']=$slug; $row['description']=$desc; $row['status']=$status;
+    $row['company_name']=$companyName; $row['instructor_name']=$instructorName; $row['level']=$level;
+    $row['timeline']=$timeline; $row['details_to_know']=$detailsToKnow; $row['specialisation']=$specialisation;
+    $row['course_timeline']=$courseTimeline;
 }
 ?>
 <div class="card">
-<form method="post">
+<form method="post" enctype="multipart/form-data">
 <div class="form-grid">
 <div>
 <label>Course Name *</label>
@@ -46,6 +71,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="full">
 <label>Description</label>
 <textarea name="description"><?= e($row['description']) ?></textarea>
+</div>
+<div>
+<label>Company Name</label>
+<input name="company_name" value="<?= e($row['company_name'] ?? '') ?>">
+</div>
+<div>
+<label>Instructor Name</label>
+<input name="instructor_name" value="<?= e($row['instructor_name'] ?? '') ?>">
+</div>
+<div>
+<label>Level</label>
+<input name="level" value="<?= e($row['level'] ?? '') ?>" placeholder="Beginner, Intermediate, Advanced">
+</div>
+<div>
+<label>Duration (months)</label>
+<input type="number" name="timeline" min="1" step="1" value="<?= e($row['timeline'] ?? '') ?>">
+</div>
+<div>
+<label>Specialisation</label>
+<input name="specialisation" value="<?= e($row['specialisation'] ?? '') ?>">
+</div>
+<div>
+<label>Thumbnail</label>
+<?php if (!empty($row['thumbnail'])): ?><div><img src="<?= e($row['thumbnail']) ?>" alt="Course thumbnail" style="width:120px;height:80px;object-fit:cover"></div><?php endif; ?>
+<input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp">
+</div>
+<div class="full">
+<label>Details to Know</label>
+<textarea name="details_to_know"><?= e($row['details_to_know'] ?? '') ?></textarea>
+</div>
+<div class="full">
+<label>Course Timeline (optional)</label>
+<textarea name="course_timeline" placeholder="Leave blank to distribute course topics automatically across the duration."><?= e($row['course_timeline'] ?? '') ?></textarea>
 </div>
 <div>
 <label>Status</label>

@@ -20,6 +20,7 @@ INSTALLATION
    uploads/practical
    uploads/attachments
    uploads/thumbnails
+   uploads/course-thumbnails
 5. Open study_admin/index.php from the admin area.
 
 IMPORTANT

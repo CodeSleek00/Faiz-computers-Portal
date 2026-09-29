@@ -71,7 +71,7 @@ function slugify(string $text): string {
 }
 
 function ensure_upload_dir(string $type): string {
-    $allowed = ['videos','notes','pdf','documents','practical','attachments','thumbnails'];
+    $allowed = ['videos','notes','pdf','documents','practical','attachments','thumbnails','course-thumbnails'];
     if (!in_array($type, $allowed, true)) {
         throw new RuntimeException('Invalid upload directory.');
     }
