@@ -195,7 +195,7 @@ function study_escape($value): string {
 <main class="shell">
     <header class="topbar">
         <a class="back" href="../test.php"><i class="fa-solid fa-arrow-left"></i> Student Portal</a>
-        <div class="identity"><?= study_escape($student['name']) ?><br><?= study_escape($student['enrollment_id']) ?></div>
+        <div class="identity"><a class="back" href="student_courses.php">Browse All Courses</a><br><?= study_escape($student['name']) ?> · <?= study_escape($student['enrollment_id']) ?></div>
     </header>
 
     <section class="hero">
