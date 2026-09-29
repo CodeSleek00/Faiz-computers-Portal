@@ -1,36 +1,5 @@
 <?php
-session_start();
 require_once dirname(__DIR__) . '/database_connection/db_connect.php';
-
-if (!isset($_SESSION['enrollment_id'], $_SESSION['student_table'], $_SESSION['student_id'])) {
-    header('Location: ../login-system/login.php');
-    exit;
-}
-
-$enrollmentId = (string)$_SESSION['enrollment_id'];
-$studentTable = (string)$_SESSION['student_table'];
-$studentId = (int)$_SESSION['student_id'];
-$studentTables = ['students' => 'student_id', 'students26' => 'id'];
-
-if (!isset($studentTables[$studentTable])) {
-    session_destroy();
-    header('Location: ../login-system/login.php');
-    exit;
-}
-
-$idColumn = $studentTables[$studentTable];
-$stmt = $conn->prepare("SELECT name, enrollment_id FROM `$studentTable` WHERE `$idColumn` = ? AND enrollment_id = ? LIMIT 1");
-$stmt->bind_param('is', $studentId, $enrollmentId);
-$stmt->execute();
-$student = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
-if (!$student) {
-    session_destroy();
-    header('Location: ../login-system/login.php?error=student_not_found');
-    exit;
-}
-
 $courses = [];
 $result = $conn->query("SELECT id, course_name, description, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail FROM study_courses WHERE status='active' ORDER BY course_name");
 while ($course = $result->fetch_assoc()) {
@@ -97,8 +66,8 @@ function catalog_escape($value): string {
 <body>
 <main class="shell">
     <header class="topbar">
-        <a class="back" href="student_dashboard.php"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Study Dashboard</a>
-        <div class="identity"><?= catalog_escape($student['name']) ?><br><?= catalog_escape($student['enrollment_id']) ?></div>
+        <a class="back" href="../index.html"><i class="fa-solid fa-house" aria-hidden="true"></i> Faiz Computer Institute</a>
+        <a class="back" href="../login-system/login.php">Student Login <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
     </header>
 
     <section class="intro">
@@ -134,12 +103,12 @@ function catalog_escape($value): string {
         ?>
         <article class="course" data-search="<?= catalog_escape($searchText) ?>">
             <?php if ($course['thumbnail']): ?>
-            <img class="cover" src="<?= catalog_escape($course['thumbnail']) ?>" alt="<?= catalog_escape($course['course_name']) ?> thumbnail" loading="lazy">
+            <a href="course_detail.php?id=<?= (int)$course['id'] ?>" aria-label="View details for <?= catalog_escape($course['course_name']) ?>"><img class="cover" src="<?= catalog_escape($course['thumbnail']) ?>" alt="<?= catalog_escape($course['course_name']) ?> thumbnail" loading="lazy"></a>
             <?php else: ?>
-            <div class="cover cover-placeholder" aria-hidden="true"><i class="fa-solid fa-book-open"></i></div>
+            <a href="course_detail.php?id=<?= (int)$course['id'] ?>" aria-label="View details for <?= catalog_escape($course['course_name']) ?>"><div class="cover cover-placeholder" aria-hidden="true"><i class="fa-solid fa-book-open"></i></div></a>
             <?php endif; ?>
             <div class="course-body">
-                <h2><?= catalog_escape($course['course_name']) ?></h2>
+                <h2><a href="course_detail.php?id=<?= (int)$course['id'] ?>"><?= catalog_escape($course['course_name']) ?></a></h2>
                 <?php if (trim((string)$course['description']) !== ''): ?><p class="description"><?= catalog_escape($course['description']) ?></p><?php endif; ?>
                 <div class="meta">
                     <?php if ($course['company_name']): ?><span><i class="fa-regular fa-building"></i><?= catalog_escape($course['company_name']) ?></span><?php endif; ?>
