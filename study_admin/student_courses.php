@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/database_connection/db_connect.php';
 $courses = [];
-$result = $conn->query("SELECT id, course_name, description, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail FROM study_courses WHERE status='active' ORDER BY course_name");
+$result = $conn->query("SELECT id, course_name, description, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail, price, sale_price, discount_type, discount_value, currency, is_free FROM study_courses WHERE status='active' ORDER BY course_name");
 while ($course = $result->fetch_assoc()) {
     $course['topics'] = [];
     $courses[(int)$course['id']] = $course;
@@ -51,6 +51,10 @@ function catalog_escape($value): string {
         .meta{display:flex;flex-wrap:wrap;gap:7px 15px;color:var(--muted);font-size:12px;padding-bottom:13px;border-bottom:1px solid var(--line)}
         .meta span{display:inline-flex;align-items:center;gap:6px}
         .meta i{color:var(--green)}
+        .pricing{display:flex;align-items:baseline;gap:9px;margin-top:13px;font-weight:700}
+        .pricing-current{font-size:17px;color:var(--green)}
+        .pricing-original{font-size:13px;color:var(--muted);font-weight:400}
+        .free-label{color:var(--green);font-size:17px}
         .detail{font-size:13px;color:#475761;white-space:pre-line;overflow-wrap:anywhere;margin-top:12px}
         .detail strong,.timeline-title{color:var(--ink)}
         .timeline{margin-top:14px}
@@ -84,6 +88,15 @@ function catalog_escape($value): string {
         <?php endif; ?>
         <?php foreach ($courses as $course): ?>
         <?php
+            $price = (float)$course['price'];
+            $discountValue = (float)$course['discount_value'];
+            $displayPrice = (float)$course['sale_price'] > 0
+                ? (float)$course['sale_price']
+                : ($course['discount_type'] === 'fixed'
+                    ? max(0, $price - $discountValue)
+                    : max(0, $price * (1 - $discountValue / 100)));
+            $hasDiscount = $displayPrice < $price;
+            $currency = $course['currency'] ?: 'INR';
             $searchText = strtolower(implode(' ', [
                 $course['course_name'], $course['description'], $course['company_name'],
                 $course['instructor_name'], $course['level'], $course['specialisation'],
@@ -116,6 +129,14 @@ function catalog_escape($value): string {
                     <?php if ($course['level']): ?><span><i class="fa-solid fa-signal"></i><?= catalog_escape($course['level']) ?></span><?php endif; ?>
                     <?php if ($course['timeline']): ?><span><i class="fa-regular fa-clock"></i><?= (int)$course['timeline'] ?> month<?= (int)$course['timeline'] === 1 ? '' : 's' ?></span><?php endif; ?>
                     <?php if ($course['specialisation']): ?><span><i class="fa-solid fa-award"></i><?= catalog_escape($course['specialisation']) ?></span><?php endif; ?>
+                </div>
+                <div class="pricing" aria-label="Course price">
+                    <?php if ((int)$course['is_free'] === 1): ?>
+                    <span class="free-label">Free</span>
+                    <?php else: ?>
+                    <span class="pricing-current"><?= catalog_escape($currency) ?> <?= number_format($displayPrice, 2) ?></span>
+                    <?php if ($hasDiscount): ?><del class="pricing-original"><?= catalog_escape($currency) ?> <?= number_format($price, 2) ?></del><?php endif; ?>
+                    <?php endif; ?>
                 </div>
                 <?php if (trim((string)$course['details_to_know']) !== ''): ?><div class="detail"><strong>Details to know</strong><br><?= catalog_escape($course['details_to_know']) ?></div><?php endif; ?>
                 <?php if (trim((string)$course['course_timeline']) !== '' || $schedule): ?>

@@ -14,6 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $detailsToKnow = post_string('details_to_know');
     $specialisation = post_string('specialisation');
     $courseTimeline = post_string('course_timeline');
+    $price = max(0, (float)post_string('price', '0'));
+    $salePrice = max(0, (float)post_string('sale_price', '0'));
+    $discountType = post_string('discount_type', 'percentage');
+    if (!in_array($discountType, ['percentage', 'fixed'], true)) {
+        $discountType = 'percentage';
+    }
+    $discountValue = max(0, (float)post_string('discount_value', '0'));
+    $currency = substr(post_string('currency', 'INR'), 0, 10);
+    $currency = $currency !== '' ? strtoupper($currency) : 'INR';
+    $isFree = isset($_POST['is_free']) ? 1 : 0;
 
     if ($name === '') {
         flash('error', 'Course name is required.');
@@ -24,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($_FILES['thumbnail']['name'])) {
                 $thumbnail = save_upload($_FILES['thumbnail'], 'course-thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
             }
-            $stmt = $conn->prepare("INSERT INTO study_courses (course_name, course_slug, description, status, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-            $stmt->bind_param('ssssssssssss', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail);
+            $stmt = $conn->prepare("INSERT INTO study_courses (course_name, course_slug, description, status, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail, price, sale_price, discount_type, discount_value, currency, is_free) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            $stmt->bind_param('ssssssssssssddsdsi', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $price, $salePrice, $discountType, $discountValue, $currency, $isFree);
             if ($stmt->execute()) {
                 $id = $stmt->insert_id;
                 $stmt->close();
@@ -76,6 +86,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div>
 <label>Specialisation</label>
 <input name="specialisation">
+</div>
+<div>
+<label>Price</label>
+<input type="number" name="price" min="0" step="0.01" value="0.00">
+</div>
+<div>
+<label>Sale Price (optional)</label>
+<input type="number" name="sale_price" min="0" step="0.01" value="0.00">
+</div>
+<div>
+<label>Discount Type</label>
+<select name="discount_type"><option value="percentage">Percentage</option><option value="fixed">Fixed amount</option></select>
+</div>
+<div>
+<label>Discount Value</label>
+<input type="number" name="discount_value" min="0" step="0.01" value="0.00">
+</div>
+<div>
+<label>Currency</label>
+<input name="currency" maxlength="10" value="INR">
+</div>
+<div>
+<label><input type="checkbox" name="is_free" value="1" style="width:auto"> Free course</label>
 </div>
 <div>
 <label>Thumbnail</label>

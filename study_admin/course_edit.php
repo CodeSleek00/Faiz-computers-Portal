@@ -26,6 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $detailsToKnow = post_string('details_to_know');
     $specialisation = post_string('specialisation');
     $courseTimeline = post_string('course_timeline');
+    $price = max(0, (float)post_string('price', '0'));
+    $salePrice = max(0, (float)post_string('sale_price', '0'));
+    $discountType = post_string('discount_type', 'percentage');
+    if (!in_array($discountType, ['percentage', 'fixed'], true)) {
+        $discountType = 'percentage';
+    }
+    $discountValue = max(0, (float)post_string('discount_value', '0'));
+    $currency = substr(post_string('currency', 'INR'), 0, 10);
+    $currency = $currency !== '' ? strtoupper($currency) : 'INR';
+    $isFree = isset($_POST['is_free']) ? 1 : 0;
     $slug = $slug !== '' ? slugify($slug) : slugify($name);
 
     $newThumbnail = '';
@@ -34,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newThumbnail = save_upload($_FILES['thumbnail'], 'course-thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
         }
         $thumbnail = $newThumbnail !== '' ? $newThumbnail : (string)($row['thumbnail'] ?? '');
-        $stmt = $conn->prepare("UPDATE study_courses SET course_name=?, course_slug=?, description=?, status=?, company_name=?, instructor_name=?, level=?, timeline=?, details_to_know=?, specialisation=?, course_timeline=?, thumbnail=? WHERE id=?");
-        $stmt->bind_param('ssssssssssssi', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $id);
+        $stmt = $conn->prepare("UPDATE study_courses SET course_name=?, course_slug=?, description=?, status=?, company_name=?, instructor_name=?, level=?, timeline=?, details_to_know=?, specialisation=?, course_timeline=?, thumbnail=?, price=?, sale_price=?, discount_type=?, discount_value=?, currency=?, is_free=? WHERE id=?");
+        $stmt->bind_param('ssssssssssssddsdsii', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $price, $salePrice, $discountType, $discountValue, $currency, $isFree, $id);
         if ($stmt->execute()) {
             $stmt->close();
             if ($newThumbnail !== '') {
@@ -55,6 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $row['company_name']=$companyName; $row['instructor_name']=$instructorName; $row['level']=$level;
     $row['timeline']=$timeline; $row['details_to_know']=$detailsToKnow; $row['specialisation']=$specialisation;
     $row['course_timeline']=$courseTimeline;
+    $row['price']=$price; $row['sale_price']=$salePrice; $row['discount_type']=$discountType;
+    $row['discount_value']=$discountValue; $row['currency']=$currency; $row['is_free']=$isFree;
 }
 ?>
 <div class="card">
@@ -91,6 +103,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div>
 <label>Specialisation</label>
 <input name="specialisation" value="<?= e($row['specialisation'] ?? '') ?>">
+</div>
+<div>
+<label>Price</label>
+<input type="number" name="price" min="0" step="0.01" value="<?= e($row['price'] ?? '0.00') ?>">
+</div>
+<div>
+<label>Sale Price (optional)</label>
+<input type="number" name="sale_price" min="0" step="0.01" value="<?= e($row['sale_price'] ?? '0.00') ?>">
+</div>
+<div>
+<label>Discount Type</label>
+<select name="discount_type">
+<option value="percentage" <?= ($row['discount_type'] ?? 'percentage')==='percentage'?'selected':'' ?>>Percentage</option>
+<option value="fixed" <?= ($row['discount_type'] ?? '')==='fixed'?'selected':'' ?>>Fixed amount</option>
+</select>
+</div>
+<div>
+<label>Discount Value</label>
+<input type="number" name="discount_value" min="0" step="0.01" value="<?= e($row['discount_value'] ?? '0.00') ?>">
+</div>
+<div>
+<label>Currency</label>
+<input name="currency" maxlength="10" value="<?= e($row['currency'] ?? 'INR') ?>">
+</div>
+<div>
+<label><input type="checkbox" name="is_free" value="1" style="width:auto" <?= (int)($row['is_free'] ?? 0)===1?'checked':'' ?>> Free course</label>
 </div>
 <div>
 <label>Thumbnail</label>

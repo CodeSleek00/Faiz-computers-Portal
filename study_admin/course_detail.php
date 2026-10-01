@@ -2,7 +2,7 @@
 require_once dirname(__DIR__) . '/database_connection/db_connect.php';
 
 $courseId = (int)($_GET['id'] ?? 0);
-$stmt = $conn->prepare("SELECT id, course_name, description, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail FROM study_courses WHERE id=? AND status='active' LIMIT 1");
+$stmt = $conn->prepare("SELECT id, course_name, description, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail, price, sale_price, discount_type, discount_value, currency, is_free FROM study_courses WHERE id=? AND status='active' LIMIT 1");
 $stmt->bind_param('i', $courseId);
 $stmt->execute();
 $course = $stmt->get_result()->fetch_assoc();
@@ -10,6 +10,16 @@ $stmt->close();
 
 if (!$course) {
     http_response_code(404);
+} else {
+    $price = (float)$course['price'];
+    $discountValue = (float)$course['discount_value'];
+    $displayPrice = (float)$course['sale_price'] > 0
+        ? (float)$course['sale_price']
+        : ($course['discount_type'] === 'fixed'
+            ? max(0, $price - $discountValue)
+            : max(0, $price * (1 - $discountValue / 100)));
+    $hasDiscount = $displayPrice < $price;
+    $currency = $course['currency'] ?: 'INR';
 }
 
 $topics = [];
@@ -61,6 +71,10 @@ foreach ($topics as $topicIndex => $topicName) {
         .content{padding:26px}
         h1{font-size:30px;line-height:1.2;margin:0 0 10px;overflow-wrap:anywhere}
         .description{font-size:15px;color:#475761;white-space:pre-line;margin:0 0 20px}
+        .pricing{display:flex;align-items:baseline;gap:10px;margin:0 0 20px;font-weight:700}
+        .pricing-current{font-size:22px;color:var(--green)}
+        .pricing-original{font-size:15px;color:var(--muted);font-weight:400}
+        .free-label{color:var(--green);font-size:22px}
         .meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 20px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
         .meta div{min-width:0;font-size:14px;overflow-wrap:anywhere}
         .meta strong{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;margin-bottom:2px}
@@ -96,6 +110,14 @@ foreach ($topics as $topicIndex => $topicName) {
         <div class="content">
             <h1><?= detail_escape($course['course_name']) ?></h1>
             <?php if (trim((string)$course['description']) !== ''): ?><p class="description"><?= detail_escape($course['description']) ?></p><?php endif; ?>
+            <div class="pricing" aria-label="Course price">
+                <?php if ((int)$course['is_free'] === 1): ?>
+                <span class="free-label">Free</span>
+                <?php else: ?>
+                <span class="pricing-current"><?= detail_escape($currency) ?> <?= number_format($displayPrice, 2) ?></span>
+                <?php if ($hasDiscount): ?><del class="pricing-original"><?= detail_escape($currency) ?> <?= number_format($price, 2) ?></del><?php endif; ?>
+                <?php endif; ?>
+            </div>
 
             <section class="meta" aria-label="Course information">
                 <?php foreach ([
