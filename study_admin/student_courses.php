@@ -89,12 +89,7 @@ function catalog_escape($value): string {
         <?php foreach ($courses as $course): ?>
         <?php
             $price = (float)$course['price'];
-            $discountValue = (float)$course['discount_value'];
-            $displayPrice = (float)$course['sale_price'] > 0
-                ? (float)$course['sale_price']
-                : ($course['discount_type'] === 'fixed'
-                    ? max(0, $price - $discountValue)
-                    : max(0, $price * (1 - $discountValue / 100)));
+            $displayPrice = (float)$course['sale_price'];
             $hasDiscount = $displayPrice < $price;
             $currency = $course['currency'] ?: 'INR';
             $searchText = strtolower(implode(' ', [

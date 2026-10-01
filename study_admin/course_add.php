@@ -15,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $specialisation = post_string('specialisation');
     $courseTimeline = post_string('course_timeline');
     $price = max(0, (float)post_string('price', '0'));
-    $salePrice = max(0, (float)post_string('sale_price', '0'));
     $discountType = post_string('discount_type', 'percentage');
     if (!in_array($discountType, ['percentage', 'fixed'], true)) {
         $discountType = 'percentage';
@@ -34,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($_FILES['thumbnail']['name'])) {
                 $thumbnail = save_upload($_FILES['thumbnail'], 'course-thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
             }
-            $stmt = $conn->prepare("INSERT INTO study_courses (course_name, course_slug, description, status, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail, price, sale_price, discount_type, discount_value, currency, is_free) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            $stmt->bind_param('ssssssssssssddsdsi', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $price, $salePrice, $discountType, $discountValue, $currency, $isFree);
+            $stmt = $conn->prepare("INSERT INTO study_courses (course_name, course_slug, description, status, company_name, instructor_name, level, timeline, details_to_know, specialisation, course_timeline, thumbnail, price, discount_type, discount_value, currency, is_free) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            $stmt->bind_param('ssssssssssssdsdsi', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $price, $discountType, $discountValue, $currency, $isFree);
             if ($stmt->execute()) {
                 $id = $stmt->insert_id;
                 $stmt->close();
@@ -90,10 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div>
 <label>Price</label>
 <input type="number" name="price" min="0" step="0.01" value="0.00">
-</div>
-<div>
-<label>Sale Price (optional)</label>
-<input type="number" name="sale_price" min="0" step="0.01" value="0.00">
 </div>
 <div>
 <label>Discount Type</label>

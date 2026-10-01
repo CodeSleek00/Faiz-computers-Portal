@@ -27,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $specialisation = post_string('specialisation');
     $courseTimeline = post_string('course_timeline');
     $price = max(0, (float)post_string('price', '0'));
-    $salePrice = max(0, (float)post_string('sale_price', '0'));
     $discountType = post_string('discount_type', 'percentage');
     if (!in_array($discountType, ['percentage', 'fixed'], true)) {
         $discountType = 'percentage';
@@ -44,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newThumbnail = save_upload($_FILES['thumbnail'], 'course-thumbnails', ['jpg', 'jpeg', 'png', 'webp'], 5 * 1024 * 1024);
         }
         $thumbnail = $newThumbnail !== '' ? $newThumbnail : (string)($row['thumbnail'] ?? '');
-        $stmt = $conn->prepare("UPDATE study_courses SET course_name=?, course_slug=?, description=?, status=?, company_name=?, instructor_name=?, level=?, timeline=?, details_to_know=?, specialisation=?, course_timeline=?, thumbnail=?, price=?, sale_price=?, discount_type=?, discount_value=?, currency=?, is_free=? WHERE id=?");
-        $stmt->bind_param('ssssssssssssddsdsii', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $price, $salePrice, $discountType, $discountValue, $currency, $isFree, $id);
+        $stmt = $conn->prepare("UPDATE study_courses SET course_name=?, course_slug=?, description=?, status=?, company_name=?, instructor_name=?, level=?, timeline=?, details_to_know=?, specialisation=?, course_timeline=?, thumbnail=?, price=?, discount_type=?, discount_value=?, currency=?, is_free=? WHERE id=?");
+        $stmt->bind_param('ssssssssssssdsdsii', $name, $slug, $desc, $status, $companyName, $instructorName, $level, $timeline, $detailsToKnow, $specialisation, $courseTimeline, $thumbnail, $price, $discountType, $discountValue, $currency, $isFree, $id);
         if ($stmt->execute()) {
             $stmt->close();
             if ($newThumbnail !== '') {
@@ -65,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $row['company_name']=$companyName; $row['instructor_name']=$instructorName; $row['level']=$level;
     $row['timeline']=$timeline; $row['details_to_know']=$detailsToKnow; $row['specialisation']=$specialisation;
     $row['course_timeline']=$courseTimeline;
-    $row['price']=$price; $row['sale_price']=$salePrice; $row['discount_type']=$discountType;
+    $row['price']=$price; $row['discount_type']=$discountType;
     $row['discount_value']=$discountValue; $row['currency']=$currency; $row['is_free']=$isFree;
 }
 ?>
@@ -107,10 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div>
 <label>Price</label>
 <input type="number" name="price" min="0" step="0.01" value="<?= e($row['price'] ?? '0.00') ?>">
-</div>
-<div>
-<label>Sale Price (optional)</label>
-<input type="number" name="sale_price" min="0" step="0.01" value="<?= e($row['sale_price'] ?? '0.00') ?>">
 </div>
 <div>
 <label>Discount Type</label>
