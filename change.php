@@ -166,33 +166,6 @@ if ($table === 'students26') {
 }
 
 /* =====================================================
-   8. FEE STATUS
-===================================================== */
-$currentMonthNo   = (int) date('n');
-$currentMonthName = date('F');
-
-$stmt = $conn->prepare("
-    SELECT payment_status, fee_amount
-    FROM student_monthly_fee
-    WHERE enrollment_id = ?
-      AND fee_type = 'Monthly'
-      AND month_no = ?
-    LIMIT 1
-");
-$stmt->bind_param("si", $enrollment_id, $currentMonthNo);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $fee = $result->fetch_assoc();
-    $feeStatus = $fee['payment_status'];
-    $feeAmount = $fee['fee_amount'] ?? 0;
-} else {
-    $feeStatus = 'Pending';
-    $feeAmount = 0;
-}
-
-/* =====================================================
    9. EXAM PERFORMANCE
 ===================================================== */
 $result = $conn->query("
@@ -809,46 +782,6 @@ $total_study_contents = $total_study_contents ?? 0;
             margin-top: 16px;
         }
 
-        /* Fee Status */
-        .fee-status {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .fee-amount {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--dark);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .fee-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-paid {
-            background: rgba(52, 199, 89, 0.15);
-            color: var(--success);
-            border: 2px solid rgba(52, 199, 89, 0.3);
-        }
-
-        .badge-pending {
-            background: rgba(255, 59, 48, 0.15);
-            color: var(--danger);
-            border: 2px solid rgba(255, 59, 48, 0.3);
-        }
-
         /* Attendance */
         .attendance-stats {
             display: grid;
@@ -1375,16 +1308,6 @@ $total_study_contents = $total_study_contents ?? 0;
            
         </div>
 
-        <!-- Finance Section -->
-        <div class="sidebar-section">
-            <span class="section-label">Finance</span>
-            <a href="fee/students/my_fee_receipts.php" class="nav-item">
-                <i class="fas fa-file-invoice-dollar nav-icon"></i>
-                <span>Fee Center</span>
-                <span class="nav-badge"><?= $feeStatus ?></span>
-            </a>
-        </div>
-
         <!-- Profile Section -->
         <div class="sidebar-section">
             <span class="section-label">Profile</span>
@@ -1571,22 +1494,6 @@ $total_study_contents = $total_study_contents ?? 0;
                     </div>
                     <div class="chart-container">
                         <canvas id="attendanceChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Fee Status -->
-                <div class="card animate-in" style="animation-delay: 0.3s">
-                    <div class="card-header">
-                        <h2 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Fee Status</h2>
-                    </div>
-                    <div class="fee-status">
-                        <div>
-                            <div style="color: var(--dark-gray); font-size: 13px; font-weight: 500;"><?= $currentMonthName ?> Fee</div>
-                            <div class="fee-amount">₹<?= $feeAmount ?></div>
-                        </div>
-                        <div class="fee-badge <?= $feeStatus === 'Paid' ? 'badge-paid' : 'badge-pending' ?> float-animation">
-                            <?= $feeStatus ?>
-                        </div>
                     </div>
                 </div>
 
